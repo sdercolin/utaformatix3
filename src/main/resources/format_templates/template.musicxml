@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE score-partwise PUBLIC "-//Recordare//DTD MusicXML 2.0 Partwise//EN"
+        "http://www.musicxml.org/dtds/partwise.dtd">
+<score-partwise version="2.0">
+    <identification>
+        <encoding>
+            <software>Sinsy</software>
+        </encoding>
+    </identification>
+    <part-list>
+        <score-part id="P1">
+            <part-name>MusicXML Part</part-name>
+        </score-part>
+    </part-list>
+    <part id="P1">
+        <measure number="1">
+            <attributes>
+                <divisions>960</divisions>
+            </attributes>
+            <attributes>
+                <key>
+                    <fifths>0</fifths>
+                    <mode>major</mode>
+                </key>
+            </attributes>
+        </measure>
+    </part>
+</score-partwise>

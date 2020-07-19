@@ -1,0 +1,234 @@
+{
+  "version": {
+    "major": 5,
+    "minor": 0,
+    "revision": 0
+  },
+  "vender": "Yamaha Corporation",
+  "title": "title",
+  "masterTrack": {
+    "samplingRate": 44100,
+    "loop": {
+      "isEnabled": true,
+      "begin": 0,
+      "end": 7680
+    },
+    "tempo": {
+      "isFolded": false,
+      "height": 0.0,
+      "global": {
+        "isEnabled": false,
+        "value": 12000
+      },
+      "events": [
+        {
+          "pos": 0,
+          "value": 12000
+        }
+      ]
+    },
+    "timeSig": {
+      "isFolded": false,
+      "events": [
+        {
+          "bar": 0,
+          "numer": 4,
+          "denom": 4
+        }
+      ]
+    },
+    "volume": {
+      "isFolded": false,
+      "height": 0.0,
+      "events": [
+        {
+          "pos": 0,
+          "value": 0
+        }
+      ]
+    }
+  },
+  "voices": [
+    {
+      "compID": "BCXDC6CZLSZHZCB4",
+      "name": "VY2V3"
+    }
+  ],
+  "tracks": [
+    {
+      "type": 0,
+      "name": "1 VOCALOID",
+      "color": 0,
+      "busNo": 0,
+      "isFolded": false,
+      "height": 0.0,
+      "volume": {
+        "isFolded": true,
+        "height": 40.0,
+        "events": [
+          {
+            "pos": 0,
+            "value": 0
+          }
+        ]
+      },
+      "panpot": {
+        "isFolded": true,
+        "height": 40.0,
+        "events": [
+          {
+            "pos": 0,
+            "value": 0
+          }
+        ]
+      },
+      "isMuted": false,
+      "isSoloMode": false,
+      "parts": [
+        {
+          "pos": 0,
+          "duration": 1920,
+          "styleName": "No Effect",
+          "voice": {
+            "compID": "BCXDC6CZLSZHZCB4",
+            "langID": 0
+          },
+          "midiEffects": [
+            {
+              "id": "SingingSkill",
+              "isBypassed": true,
+              "isFolded": false,
+              "parameters": [
+                {
+                  "name": "Amount",
+                  "value": 5
+                },
+                {
+                  "name": "Name",
+                  "value": "75F04D2B-D8E4-44b8-939B-41CD101E08FD"
+                },
+                {
+                  "name": "Skill",
+                  "value": 5
+                }
+              ]
+            },
+            {
+              "id": "VoiceColor",
+              "isBypassed": true,
+              "isFolded": false,
+              "parameters": [
+                {
+                  "name": "Air",
+                  "value": 0
+                },
+                {
+                  "name": "Breathiness",
+                  "value": 0
+                },
+                {
+                  "name": "Character",
+                  "value": 0
+                },
+                {
+                  "name": "Exciter",
+                  "value": 0
+                },
+                {
+                  "name": "Growl",
+                  "value": 0
+                },
+                {
+                  "name": "Mouth",
+                  "value": 0
+                }
+              ]
+            },
+            {
+              "id": "RobotVoice",
+              "isBypassed": true,
+              "isFolded": false,
+              "parameters": [
+                {
+                  "name": "Mode",
+                  "value": 1
+                }
+              ]
+            },
+            {
+              "id": "DefaultLyric",
+              "isBypassed": true,
+              "isFolded": false,
+              "parameters": [
+                {
+                  "name": "CHS",
+                  "value": "a"
+                },
+                {
+                  "name": "ENG",
+                  "value": "Ooh"
+                },
+                {
+                  "name": "ESP",
+                  "value": "a"
+                },
+                {
+                  "name": "JPN",
+                  "value": "あ"
+                },
+                {
+                  "name": "KOR",
+                  "value": "아"
+                }
+              ]
+            },
+            {
+              "id": "Breath",
+              "isBypassed": true,
+              "isFolded": false,
+              "parameters": [
+                {
+                  "name": "Exhalation",
+                  "value": 5
+                },
+                {
+                  "name": "Mode",
+                  "value": 1
+                },
+                {
+                  "name": "Type",
+                  "value": 0
+                }
+              ]
+            }
+          ],
+          "notes": [
+            {
+              "lyric": "あ",
+              "phoneme": "a",
+              "isProtected": false,
+              "pos": 480,
+              "duration": 480,
+              "number": 54,
+              "velocity": 64,
+              "exp": {
+                "opening": 127
+              },
+              "singingSkill": {
+                "duration": 158,
+                "weight": {
+                  "pre": 64,
+                  "post": 64
+                }
+              },
+              "vibrato": {
+                "type": 0,
+                "duration": 0
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

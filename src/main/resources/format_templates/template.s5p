@@ -1,0 +1,84 @@
+{
+    "version": 7,
+    "meter": [
+        {
+            "measure": 0,
+            "beatPerMeasure": 4,
+            "beatGranularity": 4
+        }
+    ],
+    "tempo": [
+        {
+            "position": 0,
+            "beatPerMinute": 120.0
+        }
+    ],
+    "tracks": [
+        {
+            "name": "Unnamed Track",
+            "dbName": "",
+            "color": "15e879",
+            "displayOrder": 0,
+            "dbDefaults": {},
+            "notes": [
+                {
+                    "onset": 0,
+                    "duration": 705600000,
+                    "lyric": "la",
+                    "comment": "",
+                    "pitch": 60
+                }
+            ],
+            "gsEvents": null,
+            "mixer": {
+                "gainDecibel": 0.0,
+                "pan": 0.0,
+                "muted": false,
+                "solo": false,
+                "engineOn": true,
+                "display": true
+            },
+            "parameters": {
+                "interval": 5512500,
+                "pitchDelta": [
+                    0,
+                    0
+                ],
+                "vibratoEnv": [
+                    0,
+                    0
+                ],
+                "loudness": [
+                    0,
+                    0
+                ],
+                "tension": [
+                    0,
+                    0
+                ],
+                "breathiness": [
+                    0,
+                    0
+                ],
+                "voicing": [
+                    0,
+                    0
+                ],
+                "gender": [
+                    0,
+                    0
+                ]
+            }
+        }
+    ],
+    "instrumental": {
+        "filename": "",
+        "offset": 0.0
+    },
+    "mixer": {
+        "gainInstrumentalDecibel": 0.0,
+        "gainVocalMasterDecibel": 0.0,
+        "instrumentalMuted": false,
+        "vocalMasterMuted": false
+    }
+}

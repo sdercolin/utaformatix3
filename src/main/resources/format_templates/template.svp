@@ -1,0 +1,127 @@
+{
+   "version":113,
+   "time":{
+      "meter":[
+         {
+            "index":0,
+            "numerator":4,
+            "denominator":4
+         }
+      ],
+      "tempo":[
+         {
+            "position":0,
+            "bpm":120.0
+         }
+      ]
+   },
+   "library":[
+
+   ],
+   "tracks":[
+      {
+         "name":"Track",
+         "dispColor":"ff7db235",
+         "dispOrder":0,
+         "renderEnabled":false,
+         "mixer":{
+            "gainDecibel":0.0,
+            "pan":0.0,
+            "mute":false,
+            "solo":false,
+            "display":true
+         },
+         "mainGroup":{
+            "name":"main",
+            "uuid":"6d21a9d4-1f0c-4534-ba57-bf8f1033b0e9",
+            "parameters":{
+               "pitchDelta":{
+                  "mode":"cubic",
+                  "points":[
+
+                  ]
+               },
+               "vibratoEnv":{
+                  "mode":"cubic",
+                  "points":[
+
+                  ]
+               },
+               "loudness":{
+                  "mode":"cubic",
+                  "points":[
+
+                  ]
+               },
+               "tension":{
+                  "mode":"cubic",
+                  "points":[
+
+                  ]
+               },
+               "breathiness":{
+                  "mode":"cubic",
+                  "points":[
+
+                  ]
+               },
+               "voicing":{
+                  "mode":"cubic",
+                  "points":[
+
+                  ]
+               },
+               "gender":{
+                  "mode":"cubic",
+                  "points":[
+
+                  ]
+               }
+            },
+            "notes":[
+               {
+                  "onset":0,
+                  "duration":705600000,
+                  "lyrics":"la",
+                  "phonemes":"",
+                  "pitch":60,
+                  "attributes":{
+
+                  }
+               }
+            ]
+         },
+         "mainRef":{
+            "groupID":"6d21a9d4-1f0c-4534-ba57-bf8f1033b0e9",
+            "blickOffset":0,
+            "pitchOffset":0,
+            "isInstrumental":false,
+            "database":{
+               "name":"",
+               "language":"",
+               "phoneset":""
+            },
+            "audio":{
+               "filename":"",
+               "duration":0.0
+            },
+            "dictionary":"",
+            "voice":{
+
+            }
+         },
+         "groups":[
+
+         ]
+      }
+   ],
+   "renderConfig":{
+      "destination":"./",
+      "filename":"untitled",
+      "numChannels":1,
+      "aspirationFormat":"noAspiration",
+      "bitDepth":16,
+      "sampleRate":44100,
+      "exportMixDown":true
+   }
+}
