@@ -78,14 +78,21 @@ object Vpr {
     private suspend fun readContent(file: File): Project {
         val binary = file.readBinary()
         val zip = JsZip().loadAsync(binary).await()
-        val text = zip.file(JSON_PATH)!!.async("string").await()
-        return jsonSerializer.parse(Project.serializer(), text as String)
+        val vprEntry = possibleJsonPaths.let {
+            it.forEach { path ->
+                val vprFile = zip.file(path)
+                if (vprFile != null) return@let vprFile
+            }
+            null
+        }
+        val text = requireNotNull(vprEntry).async("string").await() as String
+        return jsonSerializer.parse(Project.serializer(), text)
     }
 
     suspend fun generate(project: model.Project): ExportResult {
         val jsonText = generateContent(project)
         val zip = JsZip()
-        zip.file(JSON_PATH, jsonText)
+        zip.file(possibleJsonPaths.first(), jsonText)
         val option = JsZipOption().also {
             it.type = "blob"
             it.mimeType = "application/octet-stream"
@@ -144,7 +151,10 @@ object Vpr {
     )
 
     private const val BPM_RATE = 100.0
-    private const val JSON_PATH = "Project\\sequence.json"
+    private val possibleJsonPaths = listOf(
+        "Project\\sequence.json",
+        "Project/sequence.json"
+    )
 
     @Serializable
     private data class Project(
