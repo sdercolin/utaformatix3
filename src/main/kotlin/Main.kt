@@ -7,7 +7,7 @@ import ui.strings.initializeI18n
 import kotlin.browser.document
 
 const val APP_NAME = "UtaFormatix"
-const val APP_VERSION = "3.0"
+const val APP_VERSION = "3.0.1"
 
 suspend fun main() {
     initializeI18n(Language.English)
