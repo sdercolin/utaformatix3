@@ -27,7 +27,6 @@ object Dv {
             val bpm = reader.readInt().toDouble() / 100
             tempos.add(Tempo(tickPosition, bpm))
         }
-        console.log(tempos)
         reader.skip(4)
 
         // time signature
@@ -40,7 +39,6 @@ object Dv {
             val denominator = reader.readInt()
             timeSignatures.add(TimeSignature(measurePosition, numerator, denominator))
         }
-        console.log(timeSignatures)
 
         // tracks
         val trackCount = reader.readInt()
@@ -51,7 +49,6 @@ object Dv {
             }
         }
         tracks = tracks.mapIndexed { index, track -> track.copy(id = index) }.toMutableList()
-        console.log(tracks)
 
         return Project(
             format = Format.DV,
