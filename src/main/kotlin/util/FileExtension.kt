@@ -3,6 +3,7 @@ package util
 import exception.CannotReadFileException
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import org.khronos.webgl.ArrayBuffer
 import org.w3c.dom.HTMLInputElement
 import org.w3c.files.File
 import org.w3c.files.FileList
@@ -65,6 +66,19 @@ suspend fun File.readBinary() = suspendCoroutine<Array<Byte>> { cont ->
         cont.resumeWithException(CannotReadFileException())
     }
     fileReader.readAsBinaryString(this)
+}
+
+suspend fun File.readAsArrayBuffer() = suspendCoroutine<ArrayBuffer> { cont ->
+    val fileReader = FileReader()
+    fileReader.onload = {
+        GlobalScope.launch {
+            cont.resume(fileReader.result)
+        }
+    }
+    fileReader.onerror = {
+        cont.resumeWithException(CannotReadFileException())
+    }
+    fileReader.readAsArrayBuffer(this)
 }
 
 fun FileList.toList(): List<File> = (0 until length).mapNotNull { get(it) }

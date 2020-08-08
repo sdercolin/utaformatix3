@@ -96,7 +96,7 @@ enum class Format(
         ".dv",
         multipleFile = false,
         parser = {
-            TODO("Not Implemented")
+            io.Dv.parse(it.first())
         },
         generator = {
             TODO("Not Implemented")
