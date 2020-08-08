@@ -156,6 +156,7 @@ class OutputFormatSelector : RComponent<OutputFormatSelectorProps, RState>() {
                 SVP -> SVPFormatDescription
                 S5P -> S5PFormatDescription
                 MUSIC_XML -> MusicXmlFormatDescription
+                else -> throw IllegalArgumentException()
             }
         )
 
@@ -168,6 +169,7 @@ class OutputFormatSelector : RComponent<OutputFormatSelectorProps, RState>() {
             SVP -> Resources.svpIcon
             S5P -> Resources.s5pIcon
             MUSIC_XML -> Resources.ccsIcon
+            else -> throw IllegalArgumentException()
         }
 }
 
