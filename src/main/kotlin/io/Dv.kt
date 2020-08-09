@@ -98,6 +98,7 @@ object Dv {
                     )
                 )
             }
+            skipRestOfSegment(reader)
         }
         return Track(
             id = 0,
@@ -112,6 +113,12 @@ object Dv {
         if (reader.readInt() > 0) {
             reader.skip(8)
             reader.readBytes()
+            reader.readBytes()
+        }
+    }
+
+    private fun skipRestOfSegment(reader: ArrayBufferReader) {
+        repeat(7) {
             reader.readBytes()
         }
     }
