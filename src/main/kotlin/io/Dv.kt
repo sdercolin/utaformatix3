@@ -1,9 +1,11 @@
 package io
 
 import model.Format
+import model.ImportWarning
 import model.Note
 import model.Project
 import model.Tempo
+import model.TickCounter
 import model.TimeSignature
 import model.Track
 import org.w3c.files.File
@@ -15,13 +17,14 @@ object Dv {
 
     suspend fun parse(file: File): Project {
         val reader = ArrayBufferReader(file.readAsArrayBuffer())
+        val warnings = mutableListOf<ImportWarning>()
 
         // header
         reader.skip(48)
 
         // tempo
         val tempoCount = reader.readInt()
-        val tempos = mutableListOf<Tempo>()
+        var tempos = mutableListOf<Tempo>()
         repeat(tempoCount) {
             val tickPosition = reader.readInt().toLong()
             val bpm = reader.readInt().toDouble() / 100
@@ -31,20 +34,22 @@ object Dv {
 
         // time signature
         val timeSignatureCount = reader.readInt()
-        val timeSignatures = mutableListOf<TimeSignature>()
+        var timeSignatures = mutableListOf<TimeSignature>()
         repeat(timeSignatureCount) {
-            // TODO: handle pre-measures, measure starting from -3
             val measurePosition = reader.readInt()
             val numerator = reader.readInt()
             val denominator = reader.readInt()
             timeSignatures.add(TimeSignature(measurePosition, numerator, denominator))
         }
+        val tickPrefix = getTickPrefix(timeSignatures)
+        tempos = tempos.cleanup(tickPrefix, warnings).toMutableList()
+        timeSignatures = timeSignatures.cleanup(warnings).toMutableList()
 
         // tracks
         val trackCount = reader.readInt()
         var tracks = mutableListOf<Track>()
         repeat(trackCount) {
-            parseTrack(reader)?.let { track ->
+            parseTrack(tickPrefix, reader)?.let { track ->
                 tracks.add(track.validateNotes())
             }
         }
@@ -57,12 +62,12 @@ object Dv {
             tracks = tracks,
             timeSignatures = timeSignatures,
             tempos = tempos,
-            measurePrefix = 0,
+            measurePrefix = FIXED_MEASURE_PREFIX,
             importWarnings = listOf()
         )
     }
 
-    private fun parseTrack(reader: ArrayBufferReader): Track? {
+    private fun parseTrack(tickPrefix: Long, reader: ArrayBufferReader): Track? {
         val trackType = reader.readInt()
         if (trackType != 0) {
             skipRestOfInstTrack(reader)
@@ -93,8 +98,8 @@ object Dv {
                         id = 0,
                         key = noteKey,
                         lyric = lyric,
-                        tickOn = (segmentStart + noteStart).toLong(),
-                        tickOff = (segmentStart + noteStart + noteLength).toLong()
+                        tickOn = segmentStart + noteStart - tickPrefix,
+                        tickOff = segmentStart + noteStart - tickPrefix + noteLength
                     )
                 )
             }
@@ -131,4 +136,54 @@ object Dv {
         reader.readBytes()
         reader.skip(4)
     }
+
+    private fun getTickPrefix(timeSignatures: List<TimeSignature>): Long {
+        val counter = TickCounter()
+        timeSignatures
+            .map { it.copy(measurePosition = it.measurePosition - STARTING_MEASURE_POSITION) }
+            .filter { it.measurePosition < FIXED_MEASURE_PREFIX }
+            .forEach { counter.goToMeasure(it) }
+        counter.goToMeasure(FIXED_MEASURE_PREFIX)
+        return counter.tick
+    }
+
+    private fun List<TimeSignature>.cleanup(warnings: MutableList<ImportWarning>): List<TimeSignature> {
+        console.log(this.toList())
+        val results = this
+            .map { it.copy(measurePosition = it.measurePosition - STARTING_MEASURE_POSITION - FIXED_MEASURE_PREFIX) }
+            .toMutableList()
+
+        console.log(results.toList())
+        // Delete all time signatures inside prefix, add apply the last as the first
+        val firstTimeSignatureIndex = results
+            .last { it.measurePosition <= 0 }
+            .let { results.indexOf(it) }
+        repeat(firstTimeSignatureIndex) {
+            val removed = results.removeAt(0)
+            warnings.add(ImportWarning.TimeSignatureIgnoredInPreMeasure(removed))
+        }
+        console.log(results.toList())
+        results[0] = results[0].copy(measurePosition = 0)
+        return results
+    }
+
+    private fun List<Tempo>.cleanup(tickPrefix: Long, warnings: MutableList<ImportWarning>): List<Tempo> {
+        val results = this
+            .map { it.copy(tickPosition = it.tickPosition - tickPrefix) }
+            .toMutableList()
+
+        // Delete all tempo tags inside prefix, add apply the last as the first
+        val firstTempoIndex = results
+            .last { it.tickPosition <= 0 }
+            .let { results.indexOf(it) }
+        repeat(firstTempoIndex) {
+            val removed = results.removeAt(0)
+            warnings.add(ImportWarning.TempoIgnoredInPreMeasure(removed))
+        }
+        results[0] = results[0].copy(tickPosition = 0)
+        return results
+    }
+
+    private const val STARTING_MEASURE_POSITION = -3
+    private const val FIXED_MEASURE_PREFIX = 4
 }
