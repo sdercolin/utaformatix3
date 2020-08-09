@@ -63,7 +63,7 @@ object Dv {
             timeSignatures = timeSignatures,
             tempos = tempos,
             measurePrefix = FIXED_MEASURE_PREFIX,
-            importWarnings = listOf()
+            importWarnings = warnings
         )
     }
 
