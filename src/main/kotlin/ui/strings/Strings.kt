@@ -206,6 +206,11 @@ enum class Strings(val en: String, val ja: String, val zhCN: String) {
         ja = "MusicXML $MUSIC_XML_VERSION （CeVIO基準に準じる）",
         zhCN = "MusicXML $MUSIC_XML_VERSION（参照CeVIO标准）"
     ),
+    DVFormatDescription(
+        en = "Project for DeepVocal",
+        ja = "DeepVocal プロジェクト",
+        zhCN = "DeepVocal 工程"
+    ),
     DownloadButton(
         en = "Download",
         ja = "ダウンロード",
