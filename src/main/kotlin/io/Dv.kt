@@ -24,6 +24,9 @@ import util.nameWithoutExtension
 import util.readAsArrayBuffer
 import kotlin.math.max
 
+/**
+ * References: https://pypi.org/project/dvfile/
+ */
 object Dv {
 
     suspend fun parse(file: File): Project {
