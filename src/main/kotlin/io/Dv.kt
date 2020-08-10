@@ -148,12 +148,10 @@ object Dv {
     }
 
     private fun List<TimeSignature>.cleanup(warnings: MutableList<ImportWarning>): List<TimeSignature> {
-        console.log(this.toList())
         val results = this
             .map { it.copy(measurePosition = it.measurePosition - STARTING_MEASURE_POSITION - FIXED_MEASURE_PREFIX) }
             .toMutableList()
 
-        console.log(results.toList())
         // Delete all time signatures inside prefix, add apply the last as the first
         val firstTimeSignatureIndex = results
             .last { it.measurePosition <= 0 }
@@ -162,7 +160,6 @@ object Dv {
             val removed = results.removeAt(0)
             warnings.add(ImportWarning.TimeSignatureIgnoredInPreMeasure(removed))
         }
-        console.log(results.toList())
         results[0] = results[0].copy(measurePosition = 0)
         return results
     }
