@@ -117,9 +117,9 @@ object Vsqx {
             .toMutableList()
 
         // Delete all time signatures inside prefix, add apply the last as the first
-        val firstTimeSignatureIndex = rawTimeSignatures
+        val firstTimeSignatureIndex = timeSignatures
             .last { it.measurePosition <= 0 }
-            .let { rawTimeSignatures.indexOf(it) }
+            .let { timeSignatures.indexOf(it) }
         repeat(firstTimeSignatureIndex) {
             val removed = timeSignatures.removeAt(0)
             warnings.add(ImportWarning.TimeSignatureIgnoredInPreMeasure(removed))
