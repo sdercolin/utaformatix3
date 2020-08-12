@@ -91,11 +91,23 @@ enum class Format(
         },
         possibleLyricsTypes = listOf(ROMAJI_CV, KANA_CV),
         suggestedLyricType = KANA_CV
+    ),
+    DV(
+        ".dv",
+        multipleFile = false,
+        parser = {
+            io.Dv.parse(it.first())
+        },
+        generator = {
+            io.Dv.generate(it)
+        },
+        possibleLyricsTypes = listOf(ROMAJI_CV, KANA_CV),
+        suggestedLyricType = ROMAJI_CV
     );
 
     companion object {
-        val importable get() = listOf(VSQX, VPR, UST, CCS, SVP, S5P)
-        val exportable get() = listOf(VSQX, VPR, UST, CCS, MUSIC_XML, SVP, S5P)
+        val importable get() = listOf(VSQX, VPR, UST, CCS, SVP, S5P, DV)
+        val exportable get() = listOf(VSQX, VPR, UST, CCS, MUSIC_XML, SVP, S5P, DV)
     }
 }
 

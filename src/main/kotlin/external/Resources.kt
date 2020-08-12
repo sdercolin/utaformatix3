@@ -36,4 +36,7 @@ object Resources {
 
     val s5pIcon: String
         get() = require("images/svr1.png").default as String
+
+    val dvIcon: String
+        get() = require("images/dv.png").default as String
 }

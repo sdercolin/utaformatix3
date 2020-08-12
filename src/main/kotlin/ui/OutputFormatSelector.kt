@@ -5,6 +5,7 @@ import kotlinx.css.LinearDimension
 import kotlinx.css.marginLeft
 import model.Format
 import model.Format.CCS
+import model.Format.DV
 import model.Format.MUSIC_XML
 import model.Format.S5P
 import model.Format.SVP
@@ -31,6 +32,7 @@ import ui.external.materialui.listItem
 import ui.external.materialui.listItemText
 import ui.external.materialui.typography
 import ui.strings.Strings.CCSFormatDescription
+import ui.strings.Strings.DVFormatDescription
 import ui.strings.Strings.ImportWarningTempoIgnoredInFile
 import ui.strings.Strings.ImportWarningTempoIgnoredInPreMeasure
 import ui.strings.Strings.ImportWarningTempoIgnoredInTrack
@@ -156,6 +158,7 @@ class OutputFormatSelector : RComponent<OutputFormatSelectorProps, RState>() {
                 SVP -> SVPFormatDescription
                 S5P -> S5PFormatDescription
                 MUSIC_XML -> MusicXmlFormatDescription
+                DV -> DVFormatDescription
             }
         )
 
@@ -168,6 +171,7 @@ class OutputFormatSelector : RComponent<OutputFormatSelectorProps, RState>() {
             SVP -> Resources.svpIcon
             S5P -> Resources.s5pIcon
             MUSIC_XML -> Resources.ccsIcon
+            DV -> Resources.dvIcon
         }
 }
 
