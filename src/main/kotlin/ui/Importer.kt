@@ -48,7 +48,7 @@ class Importer : RComponent<ImporterProps, ImporterState>() {
             attrs {
                 onClickFunction = {
                     GlobalScope.launch {
-                        val accept = Format.values().joinToString(",") { it.extension }
+                        val accept = props.formats.joinToString(",") { it.extension }
                         val files = waitFileSelection(accept = accept, multiple = true)
                         checkFilesToImport(files)
                     }
@@ -151,12 +151,10 @@ class Importer : RComponent<ImporterProps, ImporterState>() {
     }
 
     private fun getFileFormat(files: List<File>): Format? {
-        val extensions = files.map { it -> it.extensionName }.distinct()
+        val extensions = files.map { it.extensionName }.distinct()
 
-        return if (extensions.count() > 1)
-            null
-        else
-            Format.values().find { it.extension == ".${extensions.first()}" }
+        return if (extensions.count() > 1) null
+        else props.formats.find { it.extension == ".${extensions.first()}" }
     }
 
     private fun closeMessageBar() {
