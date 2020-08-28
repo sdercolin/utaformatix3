@@ -18,3 +18,17 @@ fun Track.validateNotes() =
             }
             .mapIndexed { index, note -> note.copy(id = index) }
     )
+
+fun Track.fillRests(excludedMaxLength: Long) =
+    if (notes.isEmpty()) this
+    else this.copy(
+        notes = notes.let {
+            it.zipWithNext()
+                .map { (note, nextNote) ->
+                    if (nextNote.tickOn - note.tickOff < excludedMaxLength)
+                        note.copy(tickOff = nextNote.tickOn)
+                    else note
+                }
+                .plus(it.last())
+        }
+    )
