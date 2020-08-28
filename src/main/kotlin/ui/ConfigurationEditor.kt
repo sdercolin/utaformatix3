@@ -17,6 +17,7 @@ import model.LyricsType.UNKNOWN
 import model.Project
 import org.w3c.dom.HTMLInputElement
 import process.RESTS_FILLING_MAX_LENGTH_DEFAULT
+import process.fillRests
 import process.lyrics.convert
 import react.RBuilder
 import react.RComponent
@@ -329,10 +330,25 @@ class ConfigurationEditor(props: ConfigurationEditorProps) :
                 val lyricsConversionState = state.lyricsConversion
                 val fromType = lyricsConversionState.fromType
                 val toType = lyricsConversionState.toType
-                val project =
-                    if (lyricsConversionState.isOn && fromType != null && toType != null)
-                        convert(props.project.copy(lyricsType = fromType), toType)
-                    else props.project
+
+                val slightRestsFillingState = state.slightRestsFilling
+                val excludedMaxLength = slightRestsFillingState.excludedMaxLength
+
+
+                val project = props.project
+                    .let {
+                        if (lyricsConversionState.isOn && fromType != null && toType != null)
+                            convert(it.copy(lyricsType = fromType), toType)
+                        else it
+                    }
+                    .let {
+                        if (slightRestsFillingState.isOn && excludedMaxLength != null)
+                            it.copy(
+                                tracks = it.tracks.map { track -> track.fillRests(excludedMaxLength) }
+                            )
+                        else it
+                    }
+
                 val format = props.outputFormat
                 val result = format.generator.invoke(project)
                 console.log(result.blob)
