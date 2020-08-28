@@ -50,7 +50,9 @@ class ConfigurationEditor(props: ConfigurationEditorProps) :
     override fun ConfigurationEditorState.init(props: ConfigurationEditorProps) {
         isProcessing = false
         val analysedType = props.project.lyricsType
-        doLyricsConversion = analysedType != UNKNOWN
+        val doLyricsConversion = analysedType != UNKNOWN
+        val fromLyricsType: LyricsType?
+        val toLyricsType: LyricsType?
         if (doLyricsConversion) {
             fromLyricsType = analysedType
             toLyricsType = analysedType.findBestConversionTargetIn(props.outputFormat)
@@ -58,6 +60,11 @@ class ConfigurationEditor(props: ConfigurationEditorProps) :
             fromLyricsType = null
             toLyricsType = null
         }
+        lyricsConversion = LyricsConversionState(
+            doLyricsConversion,
+            fromLyricsType,
+            toLyricsType
+        )
         dialogError = DialogErrorState()
     }
 
@@ -85,11 +92,13 @@ class ConfigurationEditor(props: ConfigurationEditorProps) :
                     label = string(Strings.JapaneseLyricsConversionSwitchLabel)
                     control = switch {
                         attrs {
-                            checked = state.doLyricsConversion
+                            checked = state.lyricsConversion.isOn
                             onChange = {
                                 val checked = (it.target as HTMLInputElement).checked
                                 setState {
-                                    doLyricsConversion = checked
+                                    lyricsConversion = lyricsConversion.copy(
+                                        isOn = checked
+                                    )
                                 }
                             }
                         }
@@ -99,7 +108,7 @@ class ConfigurationEditor(props: ConfigurationEditorProps) :
             }
         }
 
-        if (state.doLyricsConversion) {
+        if (state.lyricsConversion.isOn) {
             buildLyricsDetail()
         }
     }
@@ -142,11 +151,13 @@ class ConfigurationEditor(props: ConfigurationEditorProps) :
             radioGroup {
                 attrs {
                     row = true
-                    value = state.fromLyricsType?.name.orEmpty()
+                    value = state.lyricsConversion.fromType?.name.orEmpty()
                     onChange = {
                         val value = (it.target as HTMLInputElement).value
                         setState {
-                            fromLyricsType = LyricsType.valueOf(value)
+                            lyricsConversion = lyricsConversion.copy(
+                                fromType = LyricsType.valueOf(value)
+                            )
                         }
                     }
                 }
@@ -181,11 +192,13 @@ class ConfigurationEditor(props: ConfigurationEditorProps) :
             radioGroup {
                 attrs {
                     row = true
-                    value = state.toLyricsType?.name.orEmpty()
+                    value = state.lyricsConversion.toType?.name.orEmpty()
                     onChange = {
                         val value = (it.target as HTMLInputElement).value
                         setState {
-                            toLyricsType = LyricsType.valueOf(value)
+                            lyricsConversion = lyricsConversion.copy(
+                                toType = LyricsType.valueOf(value)
+                            )
                         }
                     }
                 }
@@ -232,10 +245,11 @@ class ConfigurationEditor(props: ConfigurationEditorProps) :
         }
         GlobalScope.launch {
             try {
-                val fromType = state.fromLyricsType
-                val toType = state.toLyricsType
+                val lyricsConversionState = state.lyricsConversion
+                val fromType = lyricsConversionState.fromType
+                val toType = lyricsConversionState.toType
                 val project =
-                    if (state.doLyricsConversion && fromType != null && toType != null)
+                    if (lyricsConversionState.isOn && fromType != null && toType != null)
                         convert(props.project.copy(lyricsType = fromType), toType)
                     else props.project
                 val format = props.outputFormat
@@ -257,9 +271,7 @@ class ConfigurationEditor(props: ConfigurationEditorProps) :
     }
 
     private val ConfigurationEditorState.canGoNext: Boolean
-        get() =
-            if (doLyricsConversion) fromLyricsType != null && toLyricsType != null
-            else true
+        get() = lyricsConversion.isReady
 
     private fun closeErrorDialog() {
         setState {
@@ -276,8 +288,16 @@ external interface ConfigurationEditorProps : RProps {
 
 external interface ConfigurationEditorState : RState {
     var isProcessing: Boolean
-    var doLyricsConversion: Boolean
-    var fromLyricsType: LyricsType?
-    var toLyricsType: LyricsType?
+    var lyricsConversion: LyricsConversionState
     var dialogError: DialogErrorState
+}
+
+data class LyricsConversionState(
+    val isOn: Boolean,
+    val fromType: LyricsType?,
+    val toType: LyricsType?
+) {
+    val isReady =
+        if (isOn) fromType != null && toType != null
+        else true
 }
