@@ -78,7 +78,7 @@ class ConfigurationEditor(props: ConfigurationEditorProps) :
     }
 
     override fun RBuilder.render() {
-        title(Strings.ConfigureLyricsCaption)
+        title(Strings.ConfigurationEditorCaption)
         buildLyricsBlock()
         buildRestsFillingBlock()
         buildNextButton()

@@ -21,10 +21,10 @@ enum class Strings(val en: String, val ja: String, val zhCN: String) {
         ja = "出力形式を選ぶ",
         zhCN = "选择输出格式"
     ),
-    ConfigureLyricsCaption(
-        en = "Configure Lyrics",
-        ja = "歌詞設定",
-        zhCN = "设置歌词"
+    ConfigurationEditorCaption(
+        en = "Configuration",
+        ja = "設定",
+        zhCN = "设置"
     ),
     ExportCaption(
         en = "Export",
