@@ -1,6 +1,5 @@
 package process
 
-import model.TICKS_IN_FULL_NOTE
 import model.Track
 import kotlin.math.min
 
@@ -34,4 +33,5 @@ fun Track.fillRests(excludedMaxLength: Long) =
         }
     )
 
-const val RESTS_FILLING_MAX_LENGTH_DEFAULT = (TICKS_IN_FULL_NOTE / 64).toLong()
+const val RESTS_FILLING_MAX_LENGTH_DENOMINATOR_DEFAULT = 64
+val restsFillingMaxLengthDenominatorOptions = listOf(8, 16, 32, 64, 128)

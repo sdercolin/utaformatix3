@@ -13,9 +13,10 @@ object Icons {
     val language = iconModule.Language.unsafeCast<RClass<IconProps>>()
     val feedback = iconModule.Feedback.unsafeCast<RClass<IconProps>>()
     val arrowBack = iconModule.ArrowBack.unsafeCast<RClass<IconProps>>()
+    val help = iconModule.HelpOutline.unsafeCast<RClass<IconProps>>()
 }
 
 external interface IconProps : RProps {
     var color: String
-    var fontSize: String
+    var style: Style
 }

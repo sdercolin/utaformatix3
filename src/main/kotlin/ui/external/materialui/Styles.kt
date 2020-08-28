@@ -1,5 +1,6 @@
 package ui.external.materialui
 
+import kotlinx.css.VerticalAlign
 import react.RBuilder
 import react.RClass
 import react.RHandler
@@ -47,12 +48,15 @@ data class PaletteColorOptions(
 
 data class Style(
     var width: String? = undefined,
+    var minWidth: String? = undefined,
     var height: String? = undefined,
+    var minHeight: String? = undefined,
     var marginLeft: String? = undefined,
     var marginRight: String? = undefined,
     var marginBottom: String? = undefined,
     var marginTop: String? = undefined,
     var padding: String? = undefined,
+    var fontSize: String? = undefined,
     var fontWeight: String? = undefined,
     var borderRadius: String? = undefined,
     var backgroundColor: String? = undefined,
@@ -61,5 +65,6 @@ data class Style(
     var left: String? = undefined,
     var right: String? = undefined,
     var top: String? = undefined,
-    var bottom: String? = undefined
+    var bottom: String? = undefined,
+    var verticalAlign: VerticalAlign? = undefined
 )
