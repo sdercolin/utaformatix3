@@ -244,6 +244,21 @@ enum class Strings(val en: String, val ja: String, val zhCN: String) {
         en = "Could not convert time signatures to the target format.",
         ja = "拍子記号を出力することができませんでした。",
         zhCN = "未能将节拍记号导出到目标格式。"
+    ),
+    SlightRestsFillingSwitchLabel(
+        en = "Fill short rests",
+        ja = "短い休符を埋める",
+        zhCN = "填充短休止符"
+    ),
+    SlightRestsFillingThresholdLabel(
+        en = "Max length (exclusive)",
+        ja = "最大長さ（含まない）",
+        zhCN = "最大长度（不含）"
+    ),
+    SlightRestsFillingThresholdLabelSuffix(
+        en = "ticks",
+        ja = "ticks",
+        zhCN = "ticks"
     );
 
     fun get(language: Language): String = when (language) {

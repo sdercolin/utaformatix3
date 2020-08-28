@@ -16,6 +16,7 @@ import model.LyricsType.ROMAJI_VCV
 import model.LyricsType.UNKNOWN
 import model.Project
 import org.w3c.dom.HTMLInputElement
+import process.RESTS_FILLING_MAX_LENGTH_DEFAULT
 import process.lyrics.convert
 import react.RBuilder
 import react.RComponent
@@ -28,16 +29,20 @@ import ui.external.materialui.ButtonVariant
 import ui.external.materialui.Color
 import ui.external.materialui.FormControlMargin
 import ui.external.materialui.LabelPlacement
+import ui.external.materialui.Style
+import ui.external.materialui.TextFieldInputProps
 import ui.external.materialui.TypographyVariant
 import ui.external.materialui.button
 import ui.external.materialui.formControl
 import ui.external.materialui.formControlLabel
 import ui.external.materialui.formGroup
 import ui.external.materialui.formLabel
+import ui.external.materialui.inputAdornment
 import ui.external.materialui.paper
 import ui.external.materialui.radio
 import ui.external.materialui.radioGroup
 import ui.external.materialui.switch
+import ui.external.materialui.textField
 import ui.external.materialui.typography
 import ui.strings.Strings
 import ui.strings.Strings.NextButton
@@ -65,12 +70,17 @@ class ConfigurationEditor(props: ConfigurationEditorProps) :
             fromLyricsType,
             toLyricsType
         )
+        slightRestsFilling = SlightRestsFillingState(
+            true,
+            RESTS_FILLING_MAX_LENGTH_DEFAULT.toString()
+        )
         dialogError = DialogErrorState()
     }
 
     override fun RBuilder.render() {
         title(Strings.ConfigureLyricsCaption)
         buildLyricsBlock()
+        buildRestsFillingBlock()
         buildNextButton()
 
         errorDialog(
@@ -220,6 +230,77 @@ class ConfigurationEditor(props: ConfigurationEditorProps) :
         }
     }
 
+    private fun RBuilder.buildRestsFillingBlock() {
+        formGroup {
+            formControlLabel {
+                attrs {
+                    label = string(Strings.SlightRestsFillingSwitchLabel)
+                    control = switch {
+                        attrs {
+                            checked = state.slightRestsFilling.isOn
+                            onChange = {
+                                val checked = (it.target as HTMLInputElement).checked
+                                setState {
+                                    slightRestsFilling = slightRestsFilling.copy(
+                                        isOn = checked
+                                    )
+                                }
+                            }
+                        }
+                    }
+                    labelPlacement = LabelPlacement.end
+                }
+            }
+        }
+
+        if (state.slightRestsFilling.isOn) {
+            buildRestsFillingDetail()
+        }
+    }
+
+    private fun RBuilder.buildRestsFillingDetail() {
+        styledDiv {
+            css {
+                margin(horizontal = LinearDimension("40px"))
+                width = LinearDimension.maxContent
+            }
+            formControl {
+                attrs {
+                    margin = FormControlMargin.normal
+                }
+                textField {
+                    attrs {
+                        focused = false
+                        label = string(Strings.SlightRestsFillingThresholdLabel)
+                        variant = "filled"
+                        InputProps = TextFieldInputProps(
+                            value = state.slightRestsFilling.excludedMaxLengthInput,
+                            endAdornment = inputAdornment {
+                                attrs {
+                                    style = Style(marginTop = "1.25em")
+                                    position = "end"
+                                }
+                                +(string(Strings.SlightRestsFillingThresholdLabelSuffix))
+                            }
+                        )
+                        onChange = { event ->
+                            val value = (event.target as HTMLInputElement).value
+                            val maxLength = if (value.isEmpty()) 0
+                            else value.toLongOrNull()
+                            maxLength?.takeIf { it >= 0 }?.let {
+                                setState {
+                                    slightRestsFilling = slightRestsFilling.copy(
+                                        excludedMaxLengthInput = it.toString()
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     private fun RBuilder.buildNextButton() {
         styledDiv {
             css {
@@ -289,6 +370,7 @@ external interface ConfigurationEditorProps : RProps {
 external interface ConfigurationEditorState : RState {
     var isProcessing: Boolean
     var lyricsConversion: LyricsConversionState
+    var slightRestsFilling: SlightRestsFillingState
     var dialogError: DialogErrorState
 }
 
@@ -300,4 +382,12 @@ data class LyricsConversionState(
     val isReady =
         if (isOn) fromType != null && toType != null
         else true
+}
+
+data class SlightRestsFillingState(
+    val isOn: Boolean,
+    val excludedMaxLengthInput: String
+) {
+    val excludedMaxLength
+        get() = excludedMaxLengthInput.toLongOrNull()
 }
