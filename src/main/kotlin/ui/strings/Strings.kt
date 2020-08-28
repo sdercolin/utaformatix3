@@ -251,9 +251,9 @@ enum class Strings(val en: String, val ja: String, val zhCN: String) {
         zhCN = "填充短休止符"
     ),
     SlightRestsFillingThresholdLabel(
-        en = "Max length (exclusive)",
-        ja = "最大長さ（含まない）",
-        zhCN = "最大长度（不含）"
+        en = "Max length to be processed (exclusive)",
+        ja = "長さが入力値未満の場合処理",
+        zhCN = "适用该处理的最大长度（不含）"
     ),
     SlightRestsFillingThresholdLabelSuffix(
         en = "ticks",
