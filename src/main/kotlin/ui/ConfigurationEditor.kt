@@ -6,7 +6,6 @@ import kotlinx.css.LinearDimension
 import kotlinx.css.margin
 import kotlinx.css.marginTop
 import kotlinx.css.width
-import lyrics.convert
 import model.ExportResult
 import model.Format
 import model.LyricsType
@@ -17,6 +16,7 @@ import model.LyricsType.ROMAJI_VCV
 import model.LyricsType.UNKNOWN
 import model.Project
 import org.w3c.dom.HTMLInputElement
+import process.lyrics.convert
 import react.RBuilder
 import react.RComponent
 import react.RProps

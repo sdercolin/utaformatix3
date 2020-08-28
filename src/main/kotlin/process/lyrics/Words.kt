@@ -1,4 +1,4 @@
-package lyrics
+package process.lyrics
 
 val String.isKana get() = findKanaIndex(this) != null
 val String.isRomaji get() = findRomajiIndex(this) != null

@@ -16,6 +16,7 @@ import model.TickCounter
 import model.TimeSignature
 import org.w3c.files.Blob
 import org.w3c.files.File
+import process.validateNotes
 import util.nameWithoutExtension
 import util.readBinary
 
