@@ -1,4 +1,4 @@
-package lyrics
+package process.lyrics
 
 import model.LyricsType
 import model.Note

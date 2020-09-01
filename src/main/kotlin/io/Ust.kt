@@ -18,6 +18,7 @@ import model.Track
 import org.khronos.webgl.Uint8Array
 import org.w3c.files.Blob
 import org.w3c.files.File
+import process.validateNotes
 import util.getSafeFileName
 import util.nameWithoutExtension
 import util.padStartZero

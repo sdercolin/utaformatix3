@@ -1,7 +1,7 @@
 package model
 
-import lyrics.analyseLyricsTypeForProject
 import org.w3c.files.File
+import process.lyrics.analyseLyricsTypeForProject
 
 data class Project(
     val format: Format,

@@ -21,10 +21,10 @@ enum class Strings(val en: String, val ja: String, val zhCN: String) {
         ja = "出力形式を選ぶ",
         zhCN = "选择输出格式"
     ),
-    ConfigureLyricsCaption(
-        en = "Configure Lyrics",
-        ja = "歌詞設定",
-        zhCN = "设置歌词"
+    ConfigurationEditorCaption(
+        en = "Configuration",
+        ja = "設定",
+        zhCN = "设置"
     ),
     ExportCaption(
         en = "Export",
@@ -244,6 +244,26 @@ enum class Strings(val en: String, val ja: String, val zhCN: String) {
         en = "Could not convert time signatures to the target format.",
         ja = "拍子記号を出力することができませんでした。",
         zhCN = "未能将节拍记号导出到目标格式。"
+    ),
+    SlightRestsFillingSwitchLabel(
+        en = "Fill short rests",
+        ja = "短い休符を埋める",
+        zhCN = "填充短休止符"
+    ),
+    SlightRestsFillingDescription(
+        en = "Entend note to fill the short rest between it and its next note",
+        ja = "ノート同士の間に短い休符が挟まっている場合、前のノートを伸ばして隙間を埋めます",
+        zhCN = "当音符之间存在较短的休止符时，将前一个音符延长来填充休止符"
+    ),
+    SlightRestsFillingThresholdLabel(
+        en = "Max length to be processed (exclusive)",
+        ja = "長さが入力値未満の場合処理",
+        zhCN = "适用该处理的最大长度（不含）"
+    ),
+    SlightRestsFillingThresholdItem(
+        en = "1/{{denominator}} note",
+        ja = "{{denominator}}分音符",
+        zhCN = "{{denominator}}分音符"
     );
 
     fun get(language: Language): String = when (language) {
