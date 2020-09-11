@@ -103,11 +103,22 @@ enum class Format(
         },
         possibleLyricsTypes = listOf(ROMAJI_CV, KANA_CV),
         suggestedLyricType = ROMAJI_CV
+    ),
+    VSQ(
+        ".vsq",
+        multipleFile = false,
+        parser = {
+            TODO("Not Implemented")
+        },
+        generator = {
+            TODO("Not Implemented")
+        },
+        possibleLyricsTypes = listOf(ROMAJI_CV, KANA_CV)
     );
 
     companion object {
-        val importable get() = listOf(VSQX, VPR, UST, CCS, SVP, S5P, DV)
-        val exportable get() = listOf(VSQX, VPR, UST, CCS, MUSIC_XML, SVP, S5P, DV)
+        val importable get() = listOf(VSQX, VPR, VSQ, UST, CCS, SVP, S5P, DV)
+        val exportable get() = listOf(VSQX, VPR, VSQ, UST, CCS, MUSIC_XML, SVP, S5P, DV)
     }
 }
 
