@@ -118,7 +118,7 @@ enum class Format(
 
     companion object {
         val importable get() = listOf(VSQX, VPR, VSQ, UST, CCS, SVP, S5P, DV)
-        val exportable get() = listOf(VSQX, VPR, VSQ, UST, CCS, MUSIC_XML, SVP, S5P, DV)
+        val exportable get() = listOf(VSQX, VPR, UST, CCS, MUSIC_XML, SVP, S5P, DV)
     }
 }
 
