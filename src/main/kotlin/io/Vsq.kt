@@ -1,20 +1,27 @@
+@file:Suppress("SpellCheckingInspection")
+
 package io
 
 import external.require
+import model.DEFAULT_LYRIC
 import model.Format
 import model.ImportWarning
+import model.Note
 import model.Project
 import model.Tempo
 import model.TickCounter
 import model.TimeSignature
+import model.Track
 import org.khronos.webgl.Uint8Array
 import org.w3c.files.File
+import process.validateNotes
 import util.MidiUtil
 import util.asByteTypedArray
 import util.decode
 import util.linesNotBlank
 import util.nameWithoutExtension
 import util.readAsArrayBuffer
+import util.splitFirst
 
 object Vsq {
     suspend fun parse(file: File): Project {
@@ -38,15 +45,19 @@ object Vsq {
             warnings
         )
 
+        val tracks = tracksAsText.mapIndexed { index, trackText ->
+            parseTrack(trackText, index, tickPrefix)
+        }
+
         return Project(
             format = Format.VSQ,
             inputFiles = listOf(file),
             name = file.nameWithoutExtension,
-            tracks = listOf(),
+            tracks = tracks,
             timeSignatures = timeSignatures,
             tempos = tempos,
             measurePrefix = measurePrefix,
-            importWarnings = listOf()
+            importWarnings = warnings
         )
     }
 
@@ -160,5 +171,48 @@ object Vsq {
             timeSignatures,
             tickPrefix
         )
+    }
+
+    private fun parseTrack(trackAsText: String, trackId: Int, tickPrefix: Long): Track {
+        val lines = trackAsText.linesNotBlank()
+        val titleWithIndexes = lines.mapIndexed { index, line ->
+            if (line.matches("\\[.*\\]")) line.drop(1).dropLast(1) to index
+            else null
+        }.filterNotNull()
+        val sectionMap = titleWithIndexes.zipWithNext().map { (current, next) ->
+            current.first to lines.subList(current.second + 1, next.second)
+        }.plus(titleWithIndexes.last().let { last ->
+            last.first to lines.subList(last.second, lines.count())
+        }).map { pair ->
+            pair.first to pair.second.map { it.splitFirst("=") }.toMap()
+        }.toMap()
+
+        val name = sectionMap["Common"]?.let { section ->
+            section["Name"] ?: ""
+        } ?: "Track ${trackId + 1}"
+
+        val eventList = sectionMap["EventList"] ?: return Track(trackId, name, listOf())
+        val notes = eventList.entries
+            .map { (it.key.toLong() - tickPrefix) to sectionMap[it.value] }
+            .map { (tickPosition, section) ->
+                section ?: return@map null
+                if (section["Type"] != "Anote") return@map null
+                val length = section["Length"]?.toLongOrNull() ?: return@map null
+                val key = section["Note#"]?.toIntOrNull() ?: return@map null
+                val lyric = section["LyricHandle"]?.let { lyricHandleKey ->
+                    sectionMap[lyricHandleKey]?.let { lyricHandle ->
+                        lyricHandle["L0"]?.split(',')?.firstOrNull()?.trim('"')
+                    }
+                } ?: DEFAULT_LYRIC
+                Note(
+                    id = 0,
+                    key = key,
+                    lyric = lyric,
+                    tickOn = tickPosition,
+                    tickOff = tickPosition + length
+                )
+            }
+            .filterNotNull()
+        return Track(trackId, name, notes).validateNotes()
     }
 }
