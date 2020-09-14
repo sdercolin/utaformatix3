@@ -379,7 +379,7 @@ class ConfigurationEditor(props: ConfigurationEditorProps) :
                 val toType = lyricsConversionState.toType
 
                 val slightRestsFillingState = state.slightRestsFilling
-                
+
                 val project = props.project
                     .let {
                         if (lyricsConversionState.isOn && fromType != null && toType != null)

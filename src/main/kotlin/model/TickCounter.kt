@@ -23,7 +23,6 @@ class TickCounter(
 
     fun goToTick(newTick: Long, newNumerator: Int? = null, newDenominator: Int? = null) {
         val normalizedNewTick = newTick / tickRate
-        val ticksInMeasure = ticksInFullNote * numerator / denominator
         val tickDiff = normalizedNewTick - tick
         val measureDiff = tickDiff / ticksInMeasure
         measure += measureDiff.toInt()
@@ -36,7 +35,6 @@ class TickCounter(
         goToMeasure(timeSignature.measurePosition, timeSignature.numerator, timeSignature.denominator)
 
     fun goToMeasure(newMeasure: Int, newNumerator: Int? = null, newDenominator: Int? = null) {
-        val ticksInMeasure = ticksInFullNote * numerator / denominator
         val measureDiff = newMeasure - measure
         val tickDiff = measureDiff * ticksInMeasure
         tick += tickDiff

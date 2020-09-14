@@ -108,7 +108,7 @@ enum class Format(
         ".vsq",
         multipleFile = false,
         parser = {
-            TODO("Not Implemented")
+            io.Vsq.parse(it.first())
         },
         generator = {
             TODO("Not Implemented")
