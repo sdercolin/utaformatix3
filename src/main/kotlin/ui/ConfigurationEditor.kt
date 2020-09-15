@@ -379,7 +379,6 @@ class ConfigurationEditor(props: ConfigurationEditorProps) :
                 val toType = lyricsConversionState.toType
 
                 val slightRestsFillingState = state.slightRestsFilling
-                val excludedMaxLength = slightRestsFillingState.excludedMaxLength
 
                 val project = props.project
                     .let {
@@ -388,9 +387,11 @@ class ConfigurationEditor(props: ConfigurationEditorProps) :
                         else it
                     }
                     .let {
-                        if (slightRestsFillingState.isOn && excludedMaxLength != null)
+                        if (slightRestsFillingState.isOn)
                             it.copy(
-                                tracks = it.tracks.map { track -> track.fillRests(excludedMaxLength) }
+                                tracks = it.tracks.map { track ->
+                                    track.fillRests(slightRestsFillingState.excludedMaxLength)
+                                }
                             )
                         else it
                     }

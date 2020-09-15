@@ -5,7 +5,7 @@ package external
 external class Encoding {
 
     companion object {
-        fun convert(data: Array<Byte>, to: String): Array<Byte>
+        fun convert(data: Array<Byte>, to: String, from: String = definedExternally): Array<Byte>
         fun detect(data: Array<Byte>): String
     }
 }

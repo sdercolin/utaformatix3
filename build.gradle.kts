@@ -45,6 +45,7 @@ dependencies {
     implementation(npm("file-loader"))
     implementation(npm("encoding-japanese"))
     implementation(npm("uuid"))
+    implementation(npm("midi-parser-js"))
 
     // Testing
     testImplementation(kotlin("test-js"))
