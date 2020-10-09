@@ -105,6 +105,7 @@ object S5p {
     private fun generateTrack(track: model.Track, emptyTrack: Track): Track {
         return emptyTrack.copy(
             name = track.name,
+            displayOrder = track.id,
             notes = track.notes.map {
                 Note(
                     onset = it.tickOn * TICK_RATE,
