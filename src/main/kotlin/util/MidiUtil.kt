@@ -18,7 +18,7 @@ object MidiUtil {
     }
 
     fun convertMidiTempoToBpm(midiTempo: Int) =
-        1000 * 1000 * 60 / midiTempo.toDouble()
+        ((1000 * 1000 * 60 / midiTempo.toDouble()) * 100).toInt().toDouble() / 100
 
     fun convertBpmToMidiTempo(bpm: Double) =
         (1000 * 1000 * 60 / bpm).toInt()
