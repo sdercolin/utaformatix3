@@ -11,5 +11,6 @@ external val circularProgress: RClass<CircularProgressProps>
 
 external interface CircularProgressProps : RProps {
     var color: String
+    var disableShrink: Boolean
 }
 
