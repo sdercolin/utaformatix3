@@ -41,16 +41,11 @@ object Vsq {
         val bytes = file.readAsArrayBuffer()
         val midiParser = require("midi-parser-js")
         val midi = midiParser.parse(Uint8Array(bytes))
-        console.log(midi)
 
         val warnings = mutableListOf<ImportWarning>()
 
         val midiTracks = (midi.track as Array<dynamic>)
         val tracksAsText = extractTextsFromMetaEvents(midiTracks)
-        tracksAsText.forEach {
-            console.log(it)
-        }
-
         val measurePrefix = getMeasurePrefix(tracksAsText.first())
         val (tempos, timeSignatures, tickPrefix) = parseMasterTrack(
             midiTracks.first(),
