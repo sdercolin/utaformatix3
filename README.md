@@ -6,8 +6,8 @@ The current version `3.x` is built with [Kotlin for JavaScript](https://kotlinla
 
 ## Features
 
-- Supported importing formats: `.vsqx(3/4)`, `.vpr`, `.ust`, `.ccs`, `.svp`, `.s5p`, `.dv`
-- Supported exporting formats: `.vsqx(4)`, `.vpr`, `.ust`, `.ccs`, `.xml(MusicXML)`, `.svp`, `.s5p`, `.dv`
+- Supported importing formats: `.vsqx(3/4)`, `.vpr`, `.vsq`, `.ust`, `.ccs`, `.svp`, `.s5p`, `.dv`
+- Supported exporting formats: `.vsqx(4)`, `.vpr`, `.vsq`, `.ust`, `.ccs`, `.xml(MusicXML)`, `.svp`, `.s5p`, `.dv`
 - Keep information including: tracks, notes, tempo labels, time signatures
 - Detect and convert Japanese lyrics types
   - between CV and VCV

@@ -1,6 +1,7 @@
 package ui
 
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.css.LinearDimension
 import kotlinx.css.VerticalAlign
@@ -397,9 +398,10 @@ class ConfigurationEditor(props: ConfigurationEditorProps) :
                     }
 
                 val format = props.outputFormat
+                delay(100)
                 val result = format.generator.invoke(project)
                 console.log(result.blob)
-                props.onFinished(result, format)
+                props.onFinished.invoke(result, format)
             } catch (t: Throwable) {
                 console.log(t)
                 setState {

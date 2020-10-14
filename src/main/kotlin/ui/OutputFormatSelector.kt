@@ -175,7 +175,7 @@ class OutputFormatSelector : RComponent<OutputFormatSelectorProps, RState>() {
             S5P -> Resources.s5pIcon
             MUSIC_XML -> Resources.ccsIcon
             DV -> Resources.dvIcon
-            VSQ -> Resources.vsqxIcon // TODO: replace icon
+            VSQ -> Resources.vsqIcon
         }
 }
 

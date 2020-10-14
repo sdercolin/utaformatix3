@@ -15,6 +15,7 @@ fun RBuilder.progress(progressColor: String = Color.inherit) {
         circularProgress {
             attrs {
                 color = progressColor
+                disableShrink = true
             }
         }
     }

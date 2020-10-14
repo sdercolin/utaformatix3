@@ -226,6 +226,11 @@ enum class Strings(val en: String, val ja: String, val zhCN: String) {
         ja = "ファイルのインポート画面に戻る",
         zhCN = "回到初始页面"
     ),
+    ExportNotificationPhonemeResetRequiredVSQ(
+        en = "Phonemes of all notes were set to \"a\". Please reset them to make it sound correctly.",
+        ja = "全てのノートの発音記号が\"a\"に設定されました。正確に発音させるには発音記号をリセットしてください。",
+        zhCN = "所有音符的音素都被设为了\"a\"。请重置音素以使其正确发音。"
+    ),
     ExportNotificationPhonemeResetRequiredV4(
         en = "Phonemes of all notes were set to \"a\"." +
                 " Please use \"Lyrics\" -> \"Convert Phonemes\" in the menu of VOCALOID4 to reset them.",
