@@ -274,6 +274,11 @@ enum class Strings(val en: String, val ja: String, val zhCN: String) {
         en = "1/{{denominator}} note",
         ja = "{{denominator}}分音符",
         zhCN = "{{denominator}}分音符"
+    ),
+    ProcessingOverlay(
+        en = "Processing…",
+        ja = "処理中…",
+        zhCN = "正在处理…"
     );
 
     fun get(language: Language): String = when (language) {
