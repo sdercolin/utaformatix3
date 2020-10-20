@@ -18,7 +18,10 @@ import model.Track
 import org.khronos.webgl.Uint8Array
 import org.w3c.files.Blob
 import org.w3c.files.File
+import process.validateNotes
+import util.encode
 import util.getSafeFileName
+import util.linesNotBlank
 import util.nameWithoutExtension
 import util.padStartZero
 import util.readBinary
@@ -75,10 +78,7 @@ object Ust {
     }
 
     private suspend fun parseFile(file: File): FileParseResult {
-        val lines = readFileContent(file)
-            .split('\n')
-            .map { it.trim('\r') }
-            .filter { it.isNotBlank() }
+        val lines = readFileContent(file).linesNotBlank()
         var projectName: String? = null
         val notes = mutableListOf<Note>()
         val tempos = mutableListOf<Tempo>()
@@ -163,8 +163,7 @@ object Ust {
         val zip = JsZip()
         for (track in project.tracks) {
             val content = generateTrackContent(project, track)
-            val contentArray = content.indices.map { i -> content.asDynamic().charCodeAt(i) as Byte }.toTypedArray()
-            val contentEncodedArray = Encoding.convert(contentArray, "SJIS")
+            val contentEncodedArray = content.encode("SJIS")
             val trackNameUrlSafe = getSafeFileName(track.name)
             val trackFileName = "${project.name}_${track.id + 1}_$trackNameUrlSafe${Format.UST.extension}"
             zip.file(trackFileName, Uint8Array(contentEncodedArray))

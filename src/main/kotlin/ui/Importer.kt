@@ -1,6 +1,7 @@
 package ui
 
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.css.LinearDimension
 import kotlinx.css.marginTop
@@ -126,11 +127,12 @@ class Importer : RComponent<ImporterProps, ImporterState>() {
     }
 
     private fun import(files: List<File>, format: Format) {
+        setState {
+            isLoading = true
+        }
         GlobalScope.launch {
             try {
-                setState {
-                    isLoading = true
-                }
+                delay(100)
                 val parseFunction = format.parser
                 val project = parseFunction(files).lyricsTypeAnalysed()
                 console.log("Project was imported successfully.")

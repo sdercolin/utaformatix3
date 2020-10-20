@@ -13,6 +13,7 @@ import model.TimeSignature
 import org.w3c.files.Blob
 import org.w3c.files.BlobPropertyBag
 import org.w3c.files.File
+import process.validateNotes
 import util.nameWithoutExtension
 import util.readText
 

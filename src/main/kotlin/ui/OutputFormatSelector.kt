@@ -11,6 +11,7 @@ import model.Format.S5P
 import model.Format.SVP
 import model.Format.UST
 import model.Format.VPR
+import model.Format.VSQ
 import model.Format.VSQX
 import model.ImportWarning
 import model.Project
@@ -47,6 +48,7 @@ import ui.strings.Strings.SVPFormatDescription
 import ui.strings.Strings.SelectOutputFormatCaption
 import ui.strings.Strings.USTFormatDescription
 import ui.strings.Strings.VPRFormatDescription
+import ui.strings.Strings.VSQFormatDescription
 import ui.strings.Strings.VSQXFormatDescription
 import ui.strings.string
 
@@ -159,6 +161,7 @@ class OutputFormatSelector : RComponent<OutputFormatSelectorProps, RState>() {
                 S5P -> S5PFormatDescription
                 MUSIC_XML -> MusicXmlFormatDescription
                 DV -> DVFormatDescription
+                VSQ -> VSQFormatDescription
             }
         )
 
@@ -172,6 +175,7 @@ class OutputFormatSelector : RComponent<OutputFormatSelectorProps, RState>() {
             S5P -> Resources.s5pIcon
             MUSIC_XML -> Resources.ccsIcon
             DV -> Resources.dvIcon
+            VSQ -> Resources.vsqIcon
         }
 }
 

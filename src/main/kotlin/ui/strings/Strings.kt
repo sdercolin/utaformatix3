@@ -21,10 +21,10 @@ enum class Strings(val en: String, val ja: String, val zhCN: String) {
         ja = "出力形式を選ぶ",
         zhCN = "选择输出格式"
     ),
-    ConfigureLyricsCaption(
-        en = "Configure Lyrics",
-        ja = "歌詞設定",
-        zhCN = "设置歌词"
+    ConfigurationEditorCaption(
+        en = "Configuration",
+        ja = "設定",
+        zhCN = "设置"
     ),
     ExportCaption(
         en = "Export",
@@ -97,9 +97,9 @@ enum class Strings(val en: String, val ja: String, val zhCN: String) {
         zhCN = "拖放文件或点击导入"
     ),
     ImportFileSubDescription(
-        en = "Supported file types: VSQX, VPR, USTs, CCS, SVP, S5P, DV",
-        ja = "サポートされているファイル形式：VSQX、VPR、UST（複数可）、CCS、SVP、S5P、DV",
-        zhCN = "支持的文件类型：VSQX、VPR、UST（允许复数个）、CCS、SVP、S5P、DV"
+        en = "Supported file types: VSQX, VPR, VSQ, USTs, CCS, SVP, S5P, DV",
+        ja = "サポートされているファイル形式：VSQX、VPR、VSQ、UST（複数可）、CCS、SVP、S5P、DV",
+        zhCN = "支持的文件类型：VSQX、VPR、VSQ、UST（允许复数个）、CCS、SVP、S5P、DV"
     ),
     UnsupportedFileTypeImportError(
         en = "Unsupported file type",
@@ -211,6 +211,11 @@ enum class Strings(val en: String, val ja: String, val zhCN: String) {
         ja = "DeepVocal プロジェクト",
         zhCN = "DeepVocal 工程"
     ),
+    VSQFormatDescription(
+        en = "Project for VOCALOID2",
+        ja = "VOCALOID2 プロジェクト",
+        zhCN = "VOCALOID2 工程"
+    ),
     DownloadButton(
         en = "Download",
         ja = "ダウンロード",
@@ -220,6 +225,11 @@ enum class Strings(val en: String, val ja: String, val zhCN: String) {
         en = "Back to the beginning",
         ja = "ファイルのインポート画面に戻る",
         zhCN = "回到初始页面"
+    ),
+    ExportNotificationPhonemeResetRequiredVSQ(
+        en = "Phonemes of all notes were set to \"a\". Please reset them to make it sound correctly.",
+        ja = "全てのノートの発音記号が\"a\"に設定されました。正確に発音させるには発音記号をリセットしてください。",
+        zhCN = "所有音符的音素都被设为了\"a\"。请重置音素以使其正确发音。"
     ),
     ExportNotificationPhonemeResetRequiredV4(
         en = "Phonemes of all notes were set to \"a\"." +
@@ -244,6 +254,31 @@ enum class Strings(val en: String, val ja: String, val zhCN: String) {
         en = "Could not convert time signatures to the target format.",
         ja = "拍子記号を出力することができませんでした。",
         zhCN = "未能将节拍记号导出到目标格式。"
+    ),
+    SlightRestsFillingSwitchLabel(
+        en = "Fill short rests",
+        ja = "短い休符を埋める",
+        zhCN = "填充短休止符"
+    ),
+    SlightRestsFillingDescription(
+        en = "Entend note to fill the short rest between it and its next note",
+        ja = "ノート同士の間に短い休符が挟まっている場合、前のノートを伸ばして隙間を埋めます",
+        zhCN = "当音符之间存在较短的休止符时，将前一个音符延长来填充休止符"
+    ),
+    SlightRestsFillingThresholdLabel(
+        en = "Max length to be processed (exclusive)",
+        ja = "長さが入力値未満の場合処理",
+        zhCN = "适用该处理的最大长度（不含）"
+    ),
+    SlightRestsFillingThresholdItem(
+        en = "1/{{denominator}} note",
+        ja = "{{denominator}}分音符",
+        zhCN = "{{denominator}}分音符"
+    ),
+    ProcessingOverlay(
+        en = "Processing…",
+        ja = "処理中…",
+        zhCN = "正在处理…"
     );
 
     fun get(language: Language): String = when (language) {

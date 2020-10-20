@@ -1,7 +1,7 @@
 package model
 
-import lyrics.analyseLyricsTypeForProject
 import org.w3c.files.File
+import process.lyrics.analyseLyricsTypeForProject
 
 data class Project(
     val format: Format,
@@ -21,4 +21,10 @@ data class Project(
                 .takeIf { format.possibleLyricsTypes.contains(it) }
                 ?: LyricsType.UNKNOWN
         )
+
+    fun withoutEmptyTracks() =
+        copy(
+            tracks = tracks.filter { it.notes.isNotEmpty() }
+                .mapIndexed { index, track -> track.copy(id = index) }
+        ).takeIf { it.tracks.isNotEmpty() }
 }

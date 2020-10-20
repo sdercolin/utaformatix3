@@ -25,6 +25,7 @@ import ui.external.materialui.button
 import ui.strings.Strings.DownloadButton
 import ui.strings.Strings.ExportNotificationPhonemeResetRequiredV4
 import ui.strings.Strings.ExportNotificationPhonemeResetRequiredV5
+import ui.strings.Strings.ExportNotificationPhonemeResetRequiredVSQ
 import ui.strings.Strings.ExportNotificationTempoChangeIgnored
 import ui.strings.Strings.ExportNotificationTimeSignatureIgnored
 import ui.strings.Strings.ExporterTitleSuccess
@@ -102,6 +103,7 @@ class Exporter : RComponent<ExporterProps, RState>() {
     private val ExportNotification.text: String
         get() = string(
             when (this) {
+                ExportNotification.PhonemeResetRequiredVSQ -> ExportNotificationPhonemeResetRequiredVSQ
                 ExportNotification.PhonemeResetRequiredV4 -> ExportNotificationPhonemeResetRequiredV4
                 ExportNotification.PhonemeResetRequiredV5 -> ExportNotificationPhonemeResetRequiredV5
                 ExportNotification.TempoChangeIgnored -> ExportNotificationTimeSignatureIgnored
