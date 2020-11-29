@@ -6,27 +6,94 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonConfiguration
+import model.DEFAULT_LYRIC
 import model.Format
 import model.ImportWarning
+import model.Tempo
+import model.TimeSignature
 import org.w3c.files.File
+import process.validateNotes
 import util.nameWithoutExtension
 import util.readBinary
 
 object Ppsf {
     suspend fun parse(file: File): model.Project {
         val content = readContent(file)
-        console.log(content)
         val warnings = mutableListOf<ImportWarning>()
+
+        val name = content.ppsf.project.name?.takeIf { it.isNotBlank() } ?: file.nameWithoutExtension
+
+        val timeSignatures = content.ppsf.project.meter.let { meter ->
+            val first = TimeSignature(
+                measurePosition = 0,
+                numerator = meter.const.nume,
+                denominator = meter.const.denomi
+            )
+            if (!meter.useSequence) listOf(first)
+            else {
+                val sequence = meter.sequence.orEmpty().map { event ->
+                    TimeSignature(
+                        measurePosition = event.measure,
+                        numerator = event.nume,
+                        denominator = event.denomi
+                    )
+                }
+                if (sequence.none { it.measurePosition == 0 }) listOf(first) + sequence
+                else sequence
+            }
+        }.takeIf { it.isNotEmpty() } ?: listOf(TimeSignature.default).also {
+            warnings.add(ImportWarning.TimeSignatureNotFound)
+        }
+
+        val tempos = content.ppsf.project.tempo.let { tempos: Tempo ->
+            val first = Tempo(
+                tickPosition = 0,
+                bpm = tempos.const.toDouble() / BPM_RATE
+            )
+            if (!tempos.useSequence) listOf(first) else {
+                val sequence = tempos.sequence.orEmpty().map { event ->
+                    Tempo(
+                        tickPosition = event.tick.toLong(),
+                        bpm = event.value.toDouble() / BPM_RATE
+                    )
+                }
+                if (sequence.none { it.tickPosition == 0L }) listOf(first) + sequence
+                else sequence
+            }
+        }.takeIf { it.isNotEmpty() } ?: listOf(model.Tempo.default).also {
+            warnings.add(ImportWarning.TempoNotFound)
+        }
+
+        val tracks = content.ppsf.project.dvlTrack.mapIndexed { i, track -> parseTrack(i, track) }
+
         return model.Project(
             format = Format.PPSF,
             inputFiles = listOf(file),
-            name = file.nameWithoutExtension,
-            tracks = listOf(),
-            timeSignatures = listOf(),
-            tempos = listOf(),
+            name = name,
+            tracks = tracks,
+            timeSignatures = timeSignatures,
+            tempos = tempos,
             measurePrefix = 0,
             importWarnings = warnings
         )
+    }
+
+    private fun parseTrack(index: Int, dvlTrack: DvlTrack): model.Track {
+        val name = dvlTrack.name ?: "Track ${index + 1}"
+        val notes = dvlTrack.events.filter { it.enabled != false }.map {
+            model.Note(
+                id = 0,
+                key = it.noteNumber,
+                lyric = it.lyric?.takeUnless { lyric -> lyric.isBlank() } ?: DEFAULT_LYRIC,
+                tickOn = it.pos.toLong(),
+                tickOff = it.pos.toLong() + it.length.toLong()
+            )
+        }
+        return model.Track(
+            id = index,
+            name = name,
+            notes = notes
+        ).validateNotes()
     }
 
     private suspend fun readContent(file: File): Project {
@@ -44,6 +111,7 @@ object Ppsf {
         )
     )
 
+    private const val BPM_RATE = 10000.0
     private const val jsonPath = "ppsf.json"
 
     @Serializable
@@ -75,7 +143,7 @@ object Ppsf {
         @SerialName("loop_point") val loopPoint: LoopPoint? = null,
         @SerialName("meter") val meter: Meter,
         @SerialName("metronome") val metronome: Metronome? = null,
-        @SerialName("name") val name: String,
+        @SerialName("name") val name: String? = null,
         @SerialName("sampling_rate") val samplingRate: Int,
         @SerialName("singer_table") val singerTable: List<String> = listOf(), // unknown
         @SerialName("tempo") val tempo: Tempo,
@@ -104,17 +172,17 @@ object Ppsf {
         @SerialName("mute-solo") val muteSolo: Int? = null,
         @SerialName("notes") val notes: List<Note> = listOf(),
         @SerialName("regions") val regions: List<Region> = listOf(),
-        @SerialName("sub-tracks") val subTracks: List<String> = listOf(), // unknown
+        @SerialName("sub-tracks") val subTracks: List<SubTrack> = listOf(),
         @SerialName("total-height") val totalHeight: Int? = null,
         @SerialName("track-type") val trackType: Int? = null,
-        @SerialName("vertical-scale") val verticalScale: Int? = null,
+        @SerialName("vertical-scale") val verticalScale: Double? = null,
         @SerialName("vertical-scroll") val verticalScroll: Int? = null
     )
 
     @Serializable
     private data class TempoTrack(
         @SerialName("height") val height: Int? = null,
-        @SerialName("vertical-scale") val verticalScale: Int? = null,
+        @SerialName("vertical-scale") val verticalScale: Double? = null,
         @SerialName("vertical-scroll") val verticalScroll: Int? = null
     )
 
@@ -195,8 +263,9 @@ object Ppsf {
 
     @Serializable
     private data class Meter(
-        @SerialName("const") val event: MeterValue? = null,
-        @SerialName("use_sequence") val useSequence: Boolean? = null
+        @SerialName("const") val const: MeterConstValue,
+        @SerialName("sequence") val sequence: List<MeterSequenceEvent>? = null,
+        @SerialName("use_sequence") val useSequence: Boolean
     )
 
     @Serializable
@@ -207,8 +276,9 @@ object Ppsf {
 
     @Serializable
     private data class Tempo(
-        @SerialName("const") val value: Int,
-        @SerialName("use_sequence") val useSequence: Boolean? = null
+        @SerialName("const") val const: Int,
+        @SerialName("sequence") val sequence: List<TempoSequenceEvent>? = null,
+        @SerialName("use_sequence") val useSequence: Boolean
     )
 
     @Serializable
@@ -218,14 +288,14 @@ object Ppsf {
         @SerialName("consonant_rate") val consonantRate: Int? = null,
         @SerialName("consonant_speed_rate") val consonantSpeedRate: Int? = null,
         @SerialName("enabled") val enabled: Boolean? = null,
-        @SerialName("length") val length: Int? = null,
+        @SerialName("length") val length: Int,
         @SerialName("lyric") val lyric: String? = null,
-        @SerialName("note_number") val noteNumber: Int? = null,
+        @SerialName("note_number") val noteNumber: Int,
         @SerialName("note_off_pit_envelope") val noteOffPitEnvelope: NoteOffPitEnvelope? = null,
         @SerialName("note_on_pit_envelope") val noteOnPitEnvelope: NoteOnPitEnvelope? = null,
         @SerialName("portamento_envelope") val portamentoEnvelope: PortamentoEnvelope? = null,
         @SerialName("portamento_type") val portamentoType: Int? = null,
-        @SerialName("pos") val pos: Int? = null,
+        @SerialName("pos") val pos: Int,
         @SerialName("protected") val isProtected: Boolean? = null,
         @SerialName("release_speed_rate") val releaseSpeedRate: Int? = null,
         @SerialName("symbols") val symbols: String? = null,
@@ -241,8 +311,9 @@ object Ppsf {
 
     @Serializable
     private data class DvlParameter(
-        @SerialName("base-sequence") val baseSequence: BaseSequence? = null,
-        @SerialName("layers") val layers: List<String> = listOf() // not implemented in PPS yet
+        @SerialName("base-sequence") val baseSequence: BaseSequence? = null
+        // not implemented in PPS yet
+        // @SerialName("layers") val layers: List<String> = listOf()
     )
 
     @Serializable
@@ -265,7 +336,8 @@ object Ppsf {
     private data class NoteOffPitEnvelope(
         @SerialName("length") val length: Int? = null,
         @SerialName("offset") val offset: Int? = null,
-        @SerialName("points") val points: List<String> = listOf(), // unknown
+        // unknown
+        // @SerialName("points") val points: List<String> = listOf(),
         @SerialName("use_length") val useLength: Boolean? = null
     )
 
@@ -273,7 +345,8 @@ object Ppsf {
     private data class NoteOnPitEnvelope(
         @SerialName("length") val length: Int? = null,
         @SerialName("offset") val offset: Int? = null,
-        @SerialName("points") val points: List<String> = listOf(), // unknown
+        // unknown
+        // @SerialName("points") val points: List<String> = listOf(),
         @SerialName("use_length") val useLength: Boolean? = null
     )
 
@@ -281,20 +354,23 @@ object Ppsf {
     private data class PortamentoEnvelope(
         @SerialName("length") val length: Int? = null,
         @SerialName("offset") val offset: Int? = null,
-        @SerialName("points") val points: List<String> = listOf(), // unknown
+        // unknown
+        // @SerialName("points") val points: List<String> = listOf(),
         @SerialName("use_length") val useLength: Boolean? = null
     )
 
     @Serializable
     private data class Gain(
-        @SerialName("base-sequence") val baseSequence: BaseSequence? = null,
-        @SerialName("layers") val layers: List<String> = listOf() // not implemented in PPS yet
+        @SerialName("base-sequence") val baseSequence: BaseSequence? = null
+        // not implemented in PPS yet
+        // @SerialName("layers") val layers: List<String> = listOf()
     )
 
     @Serializable
     private data class Panpot(
-        @SerialName("base-sequence") val baseSequence: BaseSequence? = null,
-        @SerialName("layers") val layers: List<String> = listOf() // not implemented in PPS yet
+        @SerialName("base-sequence") val baseSequence: BaseSequence? = null
+        // not implemented in PPS yet
+        // @SerialName("layers") val layers: List<String> = listOf()
     )
 
     @Serializable
@@ -306,9 +382,30 @@ object Ppsf {
     )
 
     @Serializable
-    private data class MeterValue(
+    private data class MeterConstValue(
         @SerialName("denomi") val denomi: Int,
         @SerialName("nume") val nume: Int
+    )
+
+    @Serializable
+    private data class MeterSequenceEvent(
+        @SerialName("denomi") val denomi: Int,
+        @SerialName("nume") val nume: Int,
+        @SerialName("measure") val measure: Int
+    )
+
+    @Serializable
+    private data class TempoSequenceEvent(
+        @SerialName("curve_type") val curveType: Int? = null,
+        @SerialName("tick") val tick: Int,
+        @SerialName("value") val value: Int
+    )
+
+    @Serializable
+    private data class SubTrack(
+        @SerialName("height") val height: Int? = null,
+        @SerialName("sub-track-category") val subTrackCategory: Int? = null,
+        @SerialName("sub-track-id") val subTrackId: Int? = null
     )
 
     @Serializable
