@@ -114,10 +114,21 @@ enum class Format(
             io.Vsq.generate(it)
         },
         possibleLyricsTypes = listOf(ROMAJI_CV, KANA_CV)
-    );
+    ),
+    PPSF(
+        ".ppsf",
+        multipleFile = false,
+        parser = {
+            io.Ppsf.parse(it.first())
+        },
+        generator = {
+            TODO("Not Implemented")
+        },
+        possibleLyricsTypes = listOf(ROMAJI_CV, KANA_CV)
+    ), ;
 
     companion object {
-        val importable get() = listOf(VSQX, VPR, VSQ, UST, CCS, SVP, S5P, DV)
+        val importable get() = listOf(VSQX, VPR, VSQ, UST, CCS, SVP, S5P, DV, PPSF)
         val exportable get() = listOf(VSQX, VPR, VSQ, UST, CCS, MUSIC_XML, SVP, S5P, DV)
     }
 }
