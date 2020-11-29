@@ -7,6 +7,7 @@ import model.Format
 import model.Format.CCS
 import model.Format.DV
 import model.Format.MUSIC_XML
+import model.Format.PPSF
 import model.Format.S5P
 import model.Format.SVP
 import model.Format.UST
@@ -91,7 +92,7 @@ class OutputFormatSelector : RComponent<OutputFormatSelectorProps, RState>() {
                     avatar {
                         attrs {
                             style = Style(width = "96px", height = "96px")
-                            src = format.iconPath
+                            src = format.iconPath.orEmpty()
                         }
                     }
                     styledDiv {
@@ -150,8 +151,8 @@ class OutputFormatSelector : RComponent<OutputFormatSelectorProps, RState>() {
             )
         }
 
-    private val Format.description: String
-        get() = string(
+    private val Format.description: String?
+        get() =
             when (this) {
                 VSQX -> VSQXFormatDescription
                 VPR -> VPRFormatDescription
@@ -162,21 +163,23 @@ class OutputFormatSelector : RComponent<OutputFormatSelectorProps, RState>() {
                 MUSIC_XML -> MusicXmlFormatDescription
                 DV -> DVFormatDescription
                 VSQ -> VSQFormatDescription
-            }
-        )
+                PPSF -> null
+            }?.let { string(it) }
 
-    private val Format.iconPath: String
-        get() = when (this) {
-            VSQX -> Resources.vsqxIcon
-            VPR -> Resources.vprIcon
-            UST -> Resources.ustIcon
-            CCS -> Resources.ccsIcon
-            SVP -> Resources.svpIcon
-            S5P -> Resources.s5pIcon
-            MUSIC_XML -> Resources.ccsIcon
-            DV -> Resources.dvIcon
-            VSQ -> Resources.vsqIcon
-        }
+    private val Format.iconPath: String?
+        get() =
+            when (this) {
+                VSQX -> Resources.vsqxIcon
+                VPR -> Resources.vprIcon
+                UST -> Resources.ustIcon
+                CCS -> Resources.ccsIcon
+                SVP -> Resources.svpIcon
+                S5P -> Resources.s5pIcon
+                MUSIC_XML -> Resources.ccsIcon
+                DV -> Resources.dvIcon
+                VSQ -> Resources.vsqIcon
+                PPSF -> null
+            }
 }
 
 external interface OutputFormatSelectorProps : RProps {
