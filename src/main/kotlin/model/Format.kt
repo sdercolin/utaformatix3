@@ -1,5 +1,6 @@
 package model
 
+import model.Feature.CONVERT_PITCH
 import model.LyricsType.KANA_CV
 import model.LyricsType.KANA_VCV
 import model.LyricsType.ROMAJI_CV
@@ -10,9 +11,10 @@ enum class Format(
     val extension: String,
     val multipleFile: Boolean,
     val parser: suspend (files: List<File>) -> Project,
-    val generator: suspend (project: Project) -> ExportResult,
+    val generator: suspend (project: Project, _: List<Feature>) -> ExportResult,
     val possibleLyricsTypes: List<LyricsType>,
-    val suggestedLyricType: LyricsType? = null
+    val suggestedLyricType: LyricsType? = null,
+    val availableFeaturesForGeneration: List<Feature> = listOf()
 ) {
     VSQX(
         ".vsqx",
@@ -20,8 +22,8 @@ enum class Format(
         parser = {
             io.Vsqx.parse(it.first())
         },
-        generator = {
-            io.Vsqx.generate(it)
+        generator = { project, _ ->
+            io.Vsqx.generate(project)
         },
         possibleLyricsTypes = listOf(ROMAJI_CV, KANA_CV)
     ),
@@ -31,10 +33,11 @@ enum class Format(
         parser = {
             io.Vpr.parse(it.first())
         },
-        generator = {
-            io.Vpr.generate(it)
+        generator = { project, features ->
+            io.Vpr.generate(project, features)
         },
-        possibleLyricsTypes = listOf(ROMAJI_CV, KANA_CV)
+        possibleLyricsTypes = listOf(ROMAJI_CV, KANA_CV),
+        availableFeaturesForGeneration = listOf(CONVERT_PITCH)
     ),
     UST(
         ".ust",
@@ -42,8 +45,8 @@ enum class Format(
         parser = {
             io.Ust.parse(it)
         },
-        generator = {
-            io.Ust.generate(it)
+        generator = { project, _ ->
+            io.Ust.generate(project)
         },
         possibleLyricsTypes = listOf(ROMAJI_CV, ROMAJI_VCV, KANA_CV, KANA_VCV)
     ),
@@ -53,8 +56,8 @@ enum class Format(
         parser = {
             io.Ccs.parse(it.first())
         },
-        generator = {
-            io.Ccs.generate(it)
+        generator = { project, _ ->
+            io.Ccs.generate(project)
         },
         possibleLyricsTypes = listOf(KANA_CV)
     ),
@@ -64,8 +67,8 @@ enum class Format(
         parser = {
             io.Svp.parse(it.first())
         },
-        generator = {
-            io.Svp.generate(it)
+        generator = { project, _ ->
+            io.Svp.generate(project)
         },
         possibleLyricsTypes = listOf(ROMAJI_CV, KANA_CV)
     ),
@@ -75,8 +78,8 @@ enum class Format(
         parser = {
             io.S5p.parse(it.first())
         },
-        generator = {
-            io.S5p.generate(it)
+        generator = { project, _ ->
+            io.S5p.generate(project)
         },
         possibleLyricsTypes = listOf(ROMAJI_CV, KANA_CV)
     ),
@@ -86,8 +89,8 @@ enum class Format(
         parser = {
             TODO("Not Implemented")
         },
-        generator = {
-            io.MusicXml.generate(it)
+        generator = { project, _ ->
+            io.MusicXml.generate(project)
         },
         possibleLyricsTypes = listOf(ROMAJI_CV, KANA_CV),
         suggestedLyricType = KANA_CV
@@ -98,8 +101,8 @@ enum class Format(
         parser = {
             io.Dv.parse(it.first())
         },
-        generator = {
-            io.Dv.generate(it)
+        generator = { project, _ ->
+            io.Dv.generate(project)
         },
         possibleLyricsTypes = listOf(ROMAJI_CV, KANA_CV),
         suggestedLyricType = ROMAJI_CV
@@ -110,8 +113,8 @@ enum class Format(
         parser = {
             io.Vsq.parse(it.first())
         },
-        generator = {
-            io.Vsq.generate(it)
+        generator = { project, _ ->
+            io.Vsq.generate(project)
         },
         possibleLyricsTypes = listOf(ROMAJI_CV, KANA_CV)
     ),
@@ -121,7 +124,7 @@ enum class Format(
         parser = {
             io.Ppsf.parse(it.first())
         },
-        generator = {
+        generator = { _, _ ->
             TODO("Not Implemented")
         },
         possibleLyricsTypes = listOf(ROMAJI_CV, KANA_CV)

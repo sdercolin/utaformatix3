@@ -10,6 +10,7 @@ import kotlinx.serialization.json.JsonConfiguration
 import model.DEFAULT_LYRIC
 import model.ExportNotification
 import model.ExportResult
+import model.Feature
 import model.Format
 import model.ImportWarning
 import model.TickCounter
@@ -138,8 +139,8 @@ object Vpr {
         return jsonSerializer.parse(Project.serializer(), text)
     }
 
-    suspend fun generate(project: model.Project): ExportResult {
-        val jsonText = generateContent(project)
+    suspend fun generate(project: model.Project, features: List<Feature>): ExportResult {
+        val jsonText = generateContent(project, features)
         val zip = JsZip()
         zip.file(possibleJsonPaths.first(), jsonText)
         val option = JsZipOption().also {
@@ -151,7 +152,7 @@ object Vpr {
         return ExportResult(blob, name, listOf(ExportNotification.PhonemeResetRequiredV5))
     }
 
-    private fun generateContent(project: model.Project): String {
+    private fun generateContent(project: model.Project, features: List<Feature>): String {
         val template = Resources.vprTemplate
         val vpr = jsonSerializer.parse(Project.serializer(), template)
         var endTick = 0L
@@ -180,7 +181,7 @@ object Vpr {
                 )
             }
             val duration = track.notes.lastOrNull()?.tickOff
-            val controllers = generatePitchData(track)
+            val controllers = if (features.contains(Feature.CONVERT_PITCH)) generatePitchData(track) else null
             val part = duration?.let {
                 emptyTrack.parts.first().copy(
                     duration = it,
