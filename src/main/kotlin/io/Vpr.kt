@@ -19,6 +19,9 @@ import org.w3c.files.File
 import process.validateNotes
 import util.nameWithoutExtension
 import util.readBinary
+import kotlin.math.abs
+import kotlin.math.ceil
+import kotlin.math.roundToLong
 
 object Vpr {
     suspend fun parse(file: File): model.Project {
@@ -68,12 +71,57 @@ object Vpr {
                     key = note.number
                 )
             }
-
+        val pitchData = parsePitchData(track)
         return model.Track(
             id = trackIndex,
             name = track.name ?: "Track ${trackIndex + 1}",
-            notes = notes
+            notes = notes,
+            pitchData = pitchData
         ).validateNotes()
+    }
+
+    private fun parsePitchData(track: Track): List<Pair<Long, Double>> {
+        val pitchRawDataByPart = track.parts.map { part ->
+            val pit = part.getControllerEvents(PITCH_BEND_NAME)
+            val pbs = part.getControllerEvents(PITCH_BEND_SENSITIVITY_NAME)
+            val pitMultipliedByPbs = mutableMapOf<Long, Long>()
+            var pitIndex = 0
+            var pbsCurrentValue = DEFAULT_PITCH_BEND_SENSITIVITY
+            for (pbsEvent in pbs) {
+                for (i in pitIndex..pit.lastIndex) {
+                    val pitEvent = pit[i]
+                    if (pitEvent.pos < pbsEvent.pos) {
+                        pitMultipliedByPbs[pitEvent.pos] = pitEvent.value * pbsCurrentValue
+                        if (i == pit.lastIndex) pitIndex = i
+                    } else {
+                        pitIndex = i
+                        break
+                    }
+                }
+                pbsCurrentValue = pbsEvent.value.toInt()
+            }
+            if (pitIndex < pit.lastIndex) {
+                for (i in pitIndex..pit.lastIndex) {
+                    val pitEvent = pit[i]
+                    pitMultipliedByPbs[pitEvent.pos] = pitEvent.value * pbsCurrentValue
+                }
+            }
+            pitMultipliedByPbs.mapKeys { it.key + part.pos }
+        }
+        val pitchRawData = pitchRawDataByPart.map { it.toList() }
+            .fold(listOf<Pair<Long, Long>>()) { accumulator, element ->
+                val firstPos = element.firstOrNull()?.first
+                if (firstPos == null) accumulator
+                else {
+                    val firstInvalidIndexInPrevious =
+                        accumulator.indexOfFirst { it.first >= firstPos }.takeIf { it >= 0 }
+                    if (firstInvalidIndexInPrevious == null) accumulator + element
+                    else accumulator.take(firstInvalidIndexInPrevious) + element
+                }
+            }
+        return pitchRawData.map { (pos, value) ->
+            pos to value.toDouble() / PITCH_MAX_VALUE
+        }
     }
 
     private suspend fun readContent(file: File): Project {
@@ -132,7 +180,14 @@ object Vpr {
                 )
             }
             val duration = track.notes.lastOrNull()?.tickOff
-            val part = duration?.let { emptyTrack.parts.first().copy(duration = it, notes = notes) }
+            val controllers = generatePitchData(track)
+            val part = duration?.let {
+                emptyTrack.parts.first().copy(
+                    duration = it,
+                    notes = notes,
+                    controllers = controllers
+                )
+            }
             emptyTrack.copy(
                 name = track.name,
                 parts = listOfNotNull(part)
@@ -142,6 +197,62 @@ object Vpr {
         endTick = endTick.coerceAtLeast(tracks.map { it.parts.firstOrNull()?.duration ?: 0 }.max() ?: 0)
         vpr.masterTrack!!.loop!!.end = endTick
         return jsonSerializer.stringify(Project.serializer(), vpr)
+    }
+
+    private fun generatePitchData(track: model.Track): List<Controller>? {
+        val pitchData = track.pitchData ?: return null
+        val pitchDataSectioned = mutableListOf<MutableList<Pair<Long, Double>>>()
+        var currentPos = 0L
+        for (pitchEvent in pitchData) {
+            when {
+                pitchDataSectioned.isEmpty() -> pitchDataSectioned.add(mutableListOf(pitchEvent))
+                pitchEvent.first - currentPos >= MIN_BREAK_LENGTH_BETWEEN_PITCH_SECTIONS -> {
+                    pitchDataSectioned.add(mutableListOf(pitchEvent))
+                }
+                else -> {
+                    pitchDataSectioned.last().add(pitchEvent)
+                }
+            }
+            currentPos = pitchEvent.first
+        }
+        val pit = mutableMapOf<Long, Long>()
+        val pbs = mutableMapOf<Long, Int>()
+        for (section in pitchDataSectioned) {
+            val maxAbsValue = section.map { abs(it.second) }.max() ?: 0.0
+            var pbsForThisSection = ceil(abs(maxAbsValue)).toInt()
+            if (pbsForThisSection > DEFAULT_PITCH_BEND_SENSITIVITY) {
+                pbs[section.first().first] = pbsForThisSection
+                pbs[section.last().first + MIN_BREAK_LENGTH_BETWEEN_PITCH_SECTIONS / 2] = DEFAULT_PITCH_BEND_SENSITIVITY
+            } else {
+                pbsForThisSection = DEFAULT_PITCH_BEND_SENSITIVITY
+            }
+            section.forEach { (pitchPos, pitchValue) ->
+                pit[pitchPos] = (pitchValue * PITCH_MAX_VALUE / pbsForThisSection).roundToLong()
+            }
+        }
+        val controllers = mutableListOf<Controller>()
+        if (pbs.isNotEmpty()) {
+            controllers.add(
+                Controller(
+                    name = PITCH_BEND_SENSITIVITY_NAME,
+                    events = pbs.map { ControllerEvent(pos = it.key, value = it.value.toLong()) }
+                )
+            )
+        }
+        if (pit.isNotEmpty()) {
+            controllers.add(
+                Controller(
+                    name = PITCH_BEND_NAME,
+                    events = pit.map {
+                        ControllerEvent(
+                            pos = it.key,
+                            value = it.value.coerceIn(-PITCH_MAX_VALUE.toLong(), PITCH_MAX_VALUE.toLong())
+                        )
+                    }
+                )
+            )
+        }
+        return controllers.takeIf { it.isNotEmpty() }
     }
 
     private val jsonSerializer = Json(
@@ -156,6 +267,12 @@ object Vpr {
         "Project\\sequence.json",
         "Project/sequence.json"
     )
+
+    private const val PITCH_MAX_VALUE = 8191
+    private const val DEFAULT_PITCH_BEND_SENSITIVITY = 2
+    private const val MIN_BREAK_LENGTH_BETWEEN_PITCH_SECTIONS = 480L
+    private const val PITCH_BEND_NAME = "pitchBend"
+    private const val PITCH_BEND_SENSITIVITY_NAME = "pitchBendSens"
 
     @Serializable
     private data class Project(
@@ -277,7 +394,22 @@ object Vpr {
         var notes: List<Note> = listOf(),
         var pos: Long,
         var styleName: String? = null,
-        var voice: PartVoice? = null
+        var voice: PartVoice? = null,
+        var controllers: List<Controller>? = null
+    ) {
+        fun getControllerEvents(name: String) = controllers?.find { it.name == name }?.events.orEmpty()
+    }
+
+    @Serializable
+    private data class Controller(
+        var name: String,
+        var events: List<ControllerEvent> = listOf()
+    )
+
+    @Serializable
+    private data class ControllerEvent(
+        var pos: Long,
+        var value: Long
     )
 
     @Serializable
