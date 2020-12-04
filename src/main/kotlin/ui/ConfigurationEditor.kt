@@ -11,6 +11,7 @@ import kotlinx.css.minWidth
 import kotlinx.css.paddingBottom
 import kotlinx.css.width
 import model.ExportResult
+import model.Feature
 import model.Format
 import model.LyricsType
 import model.LyricsType.KANA_CV
@@ -399,7 +400,12 @@ class ConfigurationEditor(props: ConfigurationEditorProps) :
 
                 val format = props.outputFormat
                 delay(100)
-                val result = format.generator.invoke(project)
+                val availableFeatures = Feature.values().filter {
+                    it.isAvailable.invoke(project) &&
+                            format.availableFeaturesForGeneration.contains(it)
+                }
+                // TODO: Add UI for users to select features
+                val result = format.generator.invoke(project, availableFeatures)
                 console.log(result.blob)
                 props.onFinished.invoke(result, format)
             } catch (t: Throwable) {
