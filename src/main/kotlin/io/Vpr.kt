@@ -13,16 +13,15 @@ import model.ExportResult
 import model.Feature
 import model.Format
 import model.ImportWarning
+import model.PitchData
 import model.TickCounter
 import model.TimeSignature
+import model.VocaloidPitchConvertor
 import org.w3c.files.Blob
 import org.w3c.files.File
 import process.validateNotes
 import util.nameWithoutExtension
 import util.readBinary
-import kotlin.math.abs
-import kotlin.math.ceil
-import kotlin.math.roundToLong
 
 object Vpr {
     suspend fun parse(file: File): model.Project {
@@ -82,48 +81,17 @@ object Vpr {
         ).validateNotes()
     }
 
-    private fun parsePitchData(track: Track): List<Pair<Long, Double>> {
-        val pitchRawDataByPart = track.parts.map { part ->
-            val pit = part.getControllerEvents(PITCH_BEND_NAME)
-            val pbs = part.getControllerEvents(PITCH_BEND_SENSITIVITY_NAME)
-            val pitMultipliedByPbs = mutableMapOf<Long, Long>()
-            var pitIndex = 0
-            var pbsCurrentValue = DEFAULT_PITCH_BEND_SENSITIVITY
-            for (pbsEvent in pbs) {
-                for (i in pitIndex..pit.lastIndex) {
-                    val pitEvent = pit[i]
-                    if (pitEvent.pos < pbsEvent.pos) {
-                        pitMultipliedByPbs[pitEvent.pos] = pitEvent.value * pbsCurrentValue
-                        if (i == pit.lastIndex) pitIndex = i
-                    } else {
-                        pitIndex = i
-                        break
-                    }
-                }
-                pbsCurrentValue = pbsEvent.value.toInt()
-            }
-            if (pitIndex < pit.lastIndex) {
-                for (i in pitIndex..pit.lastIndex) {
-                    val pitEvent = pit[i]
-                    pitMultipliedByPbs[pitEvent.pos] = pitEvent.value * pbsCurrentValue
-                }
-            }
-            pitMultipliedByPbs.mapKeys { it.key + part.pos }
+    private fun parsePitchData(track: Track): PitchData {
+        val dataByParts = track.parts.map { part ->
+            VocaloidPitchConvertor.DataInPart(
+                startPos = part.pos,
+                pit = part.getControllerEvents(PITCH_BEND_NAME)
+                    .map { VocaloidPitchConvertor.Event.fromPair(it.pos to it.value.toInt()) },
+                pbs = part.getControllerEvents(PITCH_BEND_SENSITIVITY_NAME)
+                    .map { VocaloidPitchConvertor.Event.fromPair(it.pos to it.value.toInt()) }
+            )
         }
-        val pitchRawData = pitchRawDataByPart.map { it.toList() }
-            .fold(listOf<Pair<Long, Long>>()) { accumulator, element ->
-                val firstPos = element.firstOrNull()?.first
-                if (firstPos == null) accumulator
-                else {
-                    val firstInvalidIndexInPrevious =
-                        accumulator.indexOfFirst { it.first >= firstPos }.takeIf { it >= 0 }
-                    if (firstInvalidIndexInPrevious == null) accumulator + element
-                    else accumulator.take(firstInvalidIndexInPrevious) + element
-                }
-            }
-        return pitchRawData.map { (pos, value) ->
-            pos to value.toDouble() / PITCH_MAX_VALUE
-        }
+        return VocaloidPitchConvertor.parse(dataByParts)
     }
 
     private suspend fun readContent(file: File): Project {
@@ -209,54 +177,22 @@ object Vpr {
     }
 
     private fun generatePitchData(track: model.Track): List<Controller>? {
-        val pitchData = track.pitchData ?: return null
-        val pitchDataSectioned = mutableListOf<MutableList<Pair<Long, Double>>>()
-        var currentPos = 0L
-        for (pitchEvent in pitchData) {
-            when {
-                pitchDataSectioned.isEmpty() -> pitchDataSectioned.add(mutableListOf(pitchEvent))
-                pitchEvent.first - currentPos >= MIN_BREAK_LENGTH_BETWEEN_PITCH_SECTIONS -> {
-                    pitchDataSectioned.add(mutableListOf(pitchEvent))
-                }
-                else -> {
-                    pitchDataSectioned.last().add(pitchEvent)
-                }
-            }
-            currentPos = pitchEvent.first
-        }
-        val pit = mutableMapOf<Long, Long>()
-        val pbs = mutableMapOf<Long, Int>()
-        for (section in pitchDataSectioned) {
-            val maxAbsValue = section.map { abs(it.second) }.max() ?: 0.0
-            var pbsForThisSection = ceil(abs(maxAbsValue)).toInt()
-            if (pbsForThisSection > DEFAULT_PITCH_BEND_SENSITIVITY) {
-                pbs[section.first().first] = pbsForThisSection
-                pbs[section.last().first + MIN_BREAK_LENGTH_BETWEEN_PITCH_SECTIONS / 2] = DEFAULT_PITCH_BEND_SENSITIVITY
-            } else {
-                pbsForThisSection = DEFAULT_PITCH_BEND_SENSITIVITY
-            }
-            section.forEach { (pitchPos, pitchValue) ->
-                pit[pitchPos] = (pitchValue * PITCH_MAX_VALUE / pbsForThisSection).roundToLong()
-            }
-        }
+        val pitchData = track.pitchData?.let { VocaloidPitchConvertor.generate(it) } ?: return null
         val controllers = mutableListOf<Controller>()
-        if (pbs.isNotEmpty()) {
+        if (pitchData.pbs.isNotEmpty()) {
             controllers.add(
                 Controller(
                     name = PITCH_BEND_SENSITIVITY_NAME,
-                    events = pbs.map { ControllerEvent(pos = it.key, value = it.value.toLong()) }
+                    events = pitchData.pbs.map { ControllerEvent(pos = it.pos, value = it.value.toLong()) }
                 )
             )
         }
-        if (pit.isNotEmpty()) {
+        if (pitchData.pit.isNotEmpty()) {
             controllers.add(
                 Controller(
                     name = PITCH_BEND_NAME,
-                    events = pit.map {
-                        ControllerEvent(
-                            pos = it.key,
-                            value = it.value.coerceIn(-PITCH_MAX_VALUE.toLong(), PITCH_MAX_VALUE.toLong())
-                        )
+                    events = pitchData.pit.map {
+                        ControllerEvent(pos = it.pos, value = it.value.toLong())
                     }
                 )
             )
@@ -277,9 +213,6 @@ object Vpr {
         "Project/sequence.json"
     )
 
-    private const val PITCH_MAX_VALUE = 8191
-    private const val DEFAULT_PITCH_BEND_SENSITIVITY = 2
-    private const val MIN_BREAK_LENGTH_BETWEEN_PITCH_SECTIONS = 480L
     private const val PITCH_BEND_NAME = "pitchBend"
     private const val PITCH_BEND_SENSITIVITY_NAME = "pitchBendSens"
 
