@@ -215,7 +215,13 @@ object Vsqx {
         val content = serializer.serializeToString(document)
         val blob = Blob(arrayOf(content), BlobPropertyBag("application/octet-stream"))
         val name = project.name + Format.VSQX.extension
-        return ExportResult(blob, name, listOf(ExportNotification.PhonemeResetRequiredV4))
+        return ExportResult(
+            blob,
+            name,
+            listOfNotNull(
+                if (project.hasXSampaData) null else ExportNotification.PhonemeResetRequiredV4
+            )
+        )
     }
 
     private fun generateContent(project: Project): Document {
@@ -349,6 +355,13 @@ object Vsqx {
             it.clear()
             val lyricCData = document.createCDATASection(model.lyric)
             it.appendChild(lyricCData)
+        }
+        if (model.xSampa != null) {
+            newNote.getSingleElementByTagName(tagNames.xSampa).also {
+                it.clear()
+                val xSampaCData = document.createCDATASection(model.xSampa)
+                it.appendChild(xSampaCData)
+            }
         }
         return newNote
     }
