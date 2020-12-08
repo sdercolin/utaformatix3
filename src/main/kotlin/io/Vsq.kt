@@ -207,17 +207,21 @@ object Vsq {
                 if (section["Type"] != "Anote") return@map null
                 val length = section["Length"]?.toLongOrNull() ?: return@map null
                 val key = section["Note#"]?.toIntOrNull() ?: return@map null
-                val lyric = section["LyricHandle"]?.let { lyricHandleKey ->
+                val lyricsInfo = section["LyricHandle"]?.let { lyricHandleKey ->
                     sectionMap[lyricHandleKey]?.let { lyricHandle ->
-                        lyricHandle["L0"]?.split(',')?.firstOrNull()?.trim('"')
+                        lyricHandle["L0"]?.split(',')
                     }
-                } ?: DEFAULT_LYRIC
+                }
+                val (lyric, xSampa) = lyricsInfo?.let {
+                    it[0].trim('"') to it[1].trim('"')
+                } ?: DEFAULT_LYRIC to null
                 Note(
                     id = 0,
                     key = key,
                     lyric = lyric,
                     tickOn = tickPosition,
-                    tickOff = tickPosition + length
+                    tickOff = tickPosition + length,
+                    xSampa = xSampa
                 )
             }
             .filterNotNull()

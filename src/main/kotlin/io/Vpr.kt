@@ -65,7 +65,8 @@ object Vpr {
                     tickOn = tickOffset + note.pos,
                     tickOff = tickOffset + note.pos + note.duration,
                     lyric = note.lyric.takeUnless { it.isNullOrBlank() } ?: DEFAULT_LYRIC,
-                    key = note.number
+                    key = note.number,
+                    xSampa = note.phoneme
                 )
             }
 

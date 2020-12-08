@@ -192,12 +192,14 @@ object Vsqx {
                 val tickOn = noteNode.getSingleElementByTagName(tagNames.posTick).innerValue.toLong()
                 val length = noteNode.getSingleElementByTagName(tagNames.duration).innerValue.toLong()
                 val lyric = noteNode.getSingleElementByTagNameOrNull(tagNames.lyric)?.innerValueOrNull ?: DEFAULT_LYRIC
+                val xSampa = noteNode.getSingleElementByTagNameOrNull(tagNames.xSampa)?.innerValueOrNull
                 Note(
                     id = index,
                     key = key,
                     tickOn = tickOn + tickOffset,
                     tickOff = tickOn + tickOffset + length,
-                    lyric = lyric
+                    lyric = lyric,
+                    xSampa = xSampa
                 )
             }
         return Track(
@@ -371,6 +373,7 @@ object Vsqx {
         val duration: String = "durTick",
         val noteNum: String = "noteNum",
         val lyric: String = "lyric",
+        val xSampa: String = "phnms",
         val mixer: String = "mixer",
         val vsUnit: String = "vsUnit",
         val trackNum: String = "vsTrackNo",
@@ -388,7 +391,8 @@ object Vsqx {
             duration = "dur",
             noteNum = "n",
             lyric = "y",
-            trackNum = "tNo"
+            trackNum = "tNo",
+            xSampa = "p"
         )
     }
 }
