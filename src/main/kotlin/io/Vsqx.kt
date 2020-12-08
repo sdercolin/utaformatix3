@@ -13,6 +13,7 @@ import model.Tempo
 import model.TickCounter
 import model.TimeSignature
 import model.Track
+import model.VocaloidPitchConvertor
 import org.w3c.dom.Document
 import org.w3c.dom.Element
 import org.w3c.dom.XMLDocument
@@ -181,7 +182,8 @@ object Vsqx {
     private fun parseTrack(trackNode: Element, id: Int, tagNames: TagNames, tickPrefix: Long): Track {
         val trackName = trackNode.getSingleElementByTagNameOrNull(tagNames.trackName)?.innerValueOrNull
             ?: "Track ${id + 1}"
-        val notes = trackNode.getElementListByTagName(tagNames.musicalPart)
+        val partNodes = trackNode.getElementListByTagName(tagNames.musicalPart)
+        val notes = partNodes
             .flatMap { partNode ->
                 val tickOffset =
                     partNode.getSingleElementByTagName(tagNames.posTick).innerValue.toLong() - tickPrefix
@@ -202,10 +204,38 @@ object Vsqx {
                     xSampa = xSampa
                 )
             }
+        val pitchDataByParts = partNodes
+            .map { partNode ->
+                val tickOffset =
+                    partNode.getSingleElementByTagName(tagNames.posTick).innerValue.toLong() - tickPrefix
+                val controlNodes = partNode.getElementListByTagName(tagNames.mCtrl)
+                val pbs = controlNodes.filter {
+                    it.getSingleElementByTagName(tagNames.attr).getAttribute(tagNames.id) == tagNames.pbsName
+                }.map {
+                    VocaloidPitchConvertor.Event(
+                        pos = it.getSingleElementByTagName(tagNames.posTick).innerValue.toLong(),
+                        value = it.getSingleElementByTagName(tagNames.attr).innerValue.toInt()
+                    )
+                }
+                val pit = controlNodes.filter {
+                    it.getSingleElementByTagName(tagNames.attr).getAttribute(tagNames.id) == tagNames.pitName
+                }.map {
+                    VocaloidPitchConvertor.Event(
+                        pos = it.getSingleElementByTagName(tagNames.posTick).innerValue.toLong(),
+                        value = it.getSingleElementByTagName(tagNames.attr).innerValue.toInt()
+                    )
+                }
+                VocaloidPitchConvertor.DataInPart(
+                    startPos = tickOffset,
+                    pit = pit,
+                    pbs = pbs
+                )
+            }
         return Track(
             id = id,
             name = trackName,
-            notes = notes
+            notes = notes,
+            pitchData = VocaloidPitchConvertor.parse(pitchDataByParts)
         ).validateNotes()
     }
 
@@ -390,7 +420,12 @@ object Vsqx {
         val mixer: String = "mixer",
         val vsUnit: String = "vsUnit",
         val trackNum: String = "vsTrackNo",
-        val playTime: String = "playTime"
+        val playTime: String = "playTime",
+        val mCtrl: String = "mCtrl",
+        val attr: String = "attr",
+        val id: String = "id",
+        val pbsName: String = "PBS",
+        val pitName: String = "PIT"
     ) {
         VSQ3,
         VSQ4(
@@ -405,7 +440,11 @@ object Vsqx {
             noteNum = "n",
             lyric = "y",
             trackNum = "tNo",
-            xSampa = "p"
+            xSampa = "p",
+            mCtrl = "cc",
+            attr = "v",
+            pbsName = "S",
+            pitName = "P"
         )
     }
 }
