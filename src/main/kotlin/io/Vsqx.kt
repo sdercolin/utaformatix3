@@ -5,9 +5,11 @@ import external.Resources
 import model.DEFAULT_LYRIC
 import model.ExportNotification
 import model.ExportResult
+import model.Feature
 import model.Format
 import model.ImportWarning
 import model.Note
+import model.PitchData
 import model.Project
 import model.Tempo
 import model.TickCounter
@@ -239,10 +241,10 @@ object Vsqx {
         ).validateNotes()
     }
 
-    fun generate(project: Project): ExportResult {
-        val document = generateContent(project)
+    fun generate(project: Project, features: List<Feature>): ExportResult {
+        val document = generateContent(project, features)
         val serializer = XMLSerializer()
-        val content = serializer.serializeToString(document)
+        val content = serializer.serializeToString(document).cleanEmptyXmlns()
         val blob = Blob(arrayOf(content), BlobPropertyBag("application/octet-stream"))
         val name = project.name + Format.VSQX.extension
         return ExportResult(
@@ -254,7 +256,9 @@ object Vsqx {
         )
     }
 
-    private fun generateContent(project: Project): Document {
+    private fun String.cleanEmptyXmlns() = replace(" xmlns=\"\"", "")
+
+    private fun generateContent(project: Project, features: List<Feature>): Document {
         val text = Resources.vsqxTemplate
         val tagNames = TagNames.VSQ4
         val parser = DOMParser()
@@ -276,7 +280,8 @@ object Vsqx {
         var track = emptyTrack
         var unit = emptyUnit
         for (trackIndex in project.tracks.indices) {
-            val newTrack = generateNewTrackNode(emptyTrack, tagNames, trackIndex, project, tickPrefix, document)
+            val newTrack =
+                generateNewTrackNode(emptyTrack, tagNames, trackIndex, project, tickPrefix, document, features)
             track.insertAfterThis(newTrack)
             track = newTrack
 
@@ -343,7 +348,8 @@ object Vsqx {
         trackIndex: Int,
         project: Project,
         tickPrefix: Long,
-        document: XMLDocument
+        document: XMLDocument,
+        features: List<Feature>
     ): Element {
         val trackModel = project.tracks[trackIndex]
 
@@ -354,6 +360,10 @@ object Vsqx {
         val part = newTrack.getSingleElementByTagName(tagNames.musicalPart)
         part.setSingleChildValue(tagNames.posTick, tickPrefix)
         part.setSingleChildValue(tagNames.playTime, trackModel.notes.lastOrNull()?.tickOff ?: 0)
+
+        if (features.contains(Feature.CONVERT_PITCH) && trackModel.pitchData != null) {
+            setupPitchControllingNodes(part, trackModel.pitchData, tagNames)
+        }
 
         val emptyNote = part.getSingleElementByTagName(tagNames.note)
         var note = emptyNote
@@ -394,6 +404,28 @@ object Vsqx {
             }
         }
         return newNote
+    }
+
+    private fun setupPitchControllingNodes(
+        part: Element,
+        pitchData: PitchData,
+        tagNames: TagNames
+    ) {
+        val emptyControl = part.getSingleElementByTagName(tagNames.mCtrl)
+        var currentElement = emptyControl
+        val pitchDataInPart = VocaloidPitchConvertor.generate(pitchData)
+        val eventsWithName =
+            pitchDataInPart.pbs.map { it to tagNames.pbsName } + pitchDataInPart.pit.map { it to tagNames.pitName }
+                .sortedBy { it.first.pos }
+        for (eventWithName in eventsWithName) {
+            val newControlNode = emptyControl.clone()
+            newControlNode.setSingleChildValue(tagNames.posTick, eventWithName.first.pos)
+            newControlNode.getSingleElementByTagName(tagNames.attr).setAttribute(tagNames.id, eventWithName.second)
+            newControlNode.setSingleChildValue(tagNames.attr, eventWithName.first.value)
+            currentElement.insertAfterThis(newControlNode)
+            currentElement = newControlNode
+        }
+        part.removeChild(emptyControl)
     }
 
     private const val BPM_RATE = 100.0

@@ -22,10 +22,11 @@ enum class Format(
         parser = {
             io.Vsqx.parse(it.first())
         },
-        generator = { project, _ ->
-            io.Vsqx.generate(project)
+        generator = { project, features ->
+            io.Vsqx.generate(project, features)
         },
-        possibleLyricsTypes = listOf(ROMAJI_CV, KANA_CV)
+        possibleLyricsTypes = listOf(ROMAJI_CV, KANA_CV),
+        availableFeaturesForGeneration = listOf(CONVERT_PITCH)
     ),
     VPR(
         ".vpr",
