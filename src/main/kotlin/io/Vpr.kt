@@ -69,7 +69,8 @@ object Vpr {
                     tickOn = tickOffset + note.pos,
                     tickOff = tickOffset + note.pos + note.duration,
                     lyric = note.lyric.takeUnless { it.isNullOrBlank() } ?: DEFAULT_LYRIC,
-                    key = note.number
+                    key = note.number,
+                    xSampa = note.phoneme
                 )
             }
         val pitchData = parsePitchData(track)
@@ -149,7 +150,13 @@ object Vpr {
         }
         val blob = zip.generateAsync(option).await() as Blob
         val name = project.name + Format.VPR.extension
-        return ExportResult(blob, name, listOf(ExportNotification.PhonemeResetRequiredV5))
+        return ExportResult(
+            blob,
+            name,
+            listOfNotNull(
+                if (project.hasXSampaData) null else ExportNotification.PhonemeResetRequiredV5
+            )
+        )
     }
 
     private fun generateContent(project: model.Project, features: List<Feature>): String {
@@ -177,7 +184,8 @@ object Vpr {
                     pos = it.tickOn,
                     duration = it.length,
                     number = it.key,
-                    lyric = it.lyric
+                    lyric = it.lyric,
+                    phoneme = it.xSampa ?: emptyNote.phoneme
                 )
             }
             val duration = track.notes.lastOrNull()?.tickOff

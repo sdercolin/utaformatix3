@@ -207,17 +207,21 @@ object Vsq {
                 if (section["Type"] != "Anote") return@map null
                 val length = section["Length"]?.toLongOrNull() ?: return@map null
                 val key = section["Note#"]?.toIntOrNull() ?: return@map null
-                val lyric = section["LyricHandle"]?.let { lyricHandleKey ->
+                val lyricsInfo = section["LyricHandle"]?.let { lyricHandleKey ->
                     sectionMap[lyricHandleKey]?.let { lyricHandle ->
-                        lyricHandle["L0"]?.split(',')?.firstOrNull()?.trim('"')
+                        lyricHandle["L0"]?.split(',')
                     }
-                } ?: DEFAULT_LYRIC
+                }
+                val (lyric, xSampa) = lyricsInfo?.let {
+                    it[0].trim('"') to it[1].trim('"')
+                } ?: DEFAULT_LYRIC to null
                 Note(
                     id = 0,
                     key = key,
                     lyric = lyric,
                     tickOn = tickPosition,
-                    tickOff = tickPosition + length
+                    tickOff = tickPosition + length,
+                    xSampa = xSampa
                 )
             }
             .filterNotNull()
@@ -228,7 +232,13 @@ object Vsq {
         val content = project.withoutEmptyTracks()?.let { generateContent(it) } ?: throw EmptyProjectException()
         val blob = Blob(arrayOf(content), BlobPropertyBag("application/octet-stream"))
         val name = project.name + Format.VSQ.extension
-        return ExportResult(blob, name, listOf(ExportNotification.PhonemeResetRequiredVSQ))
+        return ExportResult(
+            blob,
+            name,
+            listOfNotNull(
+                if (project.hasXSampaData) null else ExportNotification.PhonemeResetRequiredVSQ
+            )
+        )
     }
 
     private fun generateContent(project: Project): Uint8Array {
@@ -365,7 +375,7 @@ object Vsq {
             }
             lyricsLines.apply {
                 add("[h#${number.padStartZero(4)}]")
-                add("L0=\"${note.lyric}\",\"a\",0.000000,64,0,0")
+                add("L0=\"${note.lyric}\",\"${note.xSampa ?: "a"}\",0.000000,64,0,0")
             }
         }
 

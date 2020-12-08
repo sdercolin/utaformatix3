@@ -192,12 +192,14 @@ object Vsqx {
                 val tickOn = noteNode.getSingleElementByTagName(tagNames.posTick).innerValue.toLong()
                 val length = noteNode.getSingleElementByTagName(tagNames.duration).innerValue.toLong()
                 val lyric = noteNode.getSingleElementByTagNameOrNull(tagNames.lyric)?.innerValueOrNull ?: DEFAULT_LYRIC
+                val xSampa = noteNode.getSingleElementByTagNameOrNull(tagNames.xSampa)?.innerValueOrNull
                 Note(
                     id = index,
                     key = key,
                     tickOn = tickOn + tickOffset,
                     tickOff = tickOn + tickOffset + length,
-                    lyric = lyric
+                    lyric = lyric,
+                    xSampa = xSampa
                 )
             }
         return Track(
@@ -213,7 +215,13 @@ object Vsqx {
         val content = serializer.serializeToString(document)
         val blob = Blob(arrayOf(content), BlobPropertyBag("application/octet-stream"))
         val name = project.name + Format.VSQX.extension
-        return ExportResult(blob, name, listOf(ExportNotification.PhonemeResetRequiredV4))
+        return ExportResult(
+            blob,
+            name,
+            listOfNotNull(
+                if (project.hasXSampaData) null else ExportNotification.PhonemeResetRequiredV4
+            )
+        )
     }
 
     private fun generateContent(project: Project): Document {
@@ -348,6 +356,13 @@ object Vsqx {
             val lyricCData = document.createCDATASection(model.lyric)
             it.appendChild(lyricCData)
         }
+        if (model.xSampa != null) {
+            newNote.getSingleElementByTagName(tagNames.xSampa).also {
+                it.clear()
+                val xSampaCData = document.createCDATASection(model.xSampa)
+                it.appendChild(xSampaCData)
+            }
+        }
         return newNote
     }
 
@@ -371,6 +386,7 @@ object Vsqx {
         val duration: String = "durTick",
         val noteNum: String = "noteNum",
         val lyric: String = "lyric",
+        val xSampa: String = "phnms",
         val mixer: String = "mixer",
         val vsUnit: String = "vsUnit",
         val trackNum: String = "vsTrackNo",
@@ -388,7 +404,8 @@ object Vsqx {
             duration = "dur",
             noteNum = "n",
             lyric = "y",
-            trackNum = "tNo"
+            trackNum = "tNo",
+            xSampa = "p"
         )
     }
 }

@@ -27,4 +27,6 @@ data class Project(
             tracks = tracks.filter { it.notes.isNotEmpty() }
                 .mapIndexed { index, track -> track.copy(id = index) }
         ).takeIf { it.tracks.isNotEmpty() }
+
+    val hasXSampaData get() = tracks.any { track -> track.notes.any { it.xSampa != null } }
 }
