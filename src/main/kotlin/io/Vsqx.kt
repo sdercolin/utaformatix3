@@ -5,9 +5,11 @@ import external.Resources
 import model.DEFAULT_LYRIC
 import model.ExportNotification
 import model.ExportResult
+import model.Feature
 import model.Format
 import model.ImportWarning
 import model.Note
+import model.Pitch
 import model.Project
 import model.Tempo
 import model.TickCounter
@@ -21,6 +23,7 @@ import org.w3c.dom.parsing.XMLSerializer
 import org.w3c.files.Blob
 import org.w3c.files.BlobPropertyBag
 import org.w3c.files.File
+import process.pitch.VocaloidPitchConvertor
 import process.validateNotes
 import util.clone
 import util.getElementListByTagName
@@ -181,7 +184,8 @@ object Vsqx {
     private fun parseTrack(trackNode: Element, id: Int, tagNames: TagNames, tickPrefix: Long): Track {
         val trackName = trackNode.getSingleElementByTagNameOrNull(tagNames.trackName)?.innerValueOrNull
             ?: "Track ${id + 1}"
-        val notes = trackNode.getElementListByTagName(tagNames.musicalPart)
+        val partNodes = trackNode.getElementListByTagName(tagNames.musicalPart)
+        val notes = partNodes
             .flatMap { partNode ->
                 val tickOffset =
                     partNode.getSingleElementByTagName(tagNames.posTick).innerValue.toLong() - tickPrefix
@@ -202,17 +206,45 @@ object Vsqx {
                     xSampa = xSampa
                 )
             }
+        val pitchByParts = partNodes
+            .map { partNode ->
+                val tickOffset =
+                    partNode.getSingleElementByTagName(tagNames.posTick).innerValue.toLong() - tickPrefix
+                val controlNodes = partNode.getElementListByTagName(tagNames.mCtrl)
+                val pbs = controlNodes.filter {
+                    it.getSingleElementByTagName(tagNames.attr).getAttribute(tagNames.id) == tagNames.pbsName
+                }.map {
+                    VocaloidPitchConvertor.Event(
+                        pos = it.getSingleElementByTagName(tagNames.posTick).innerValue.toLong(),
+                        value = it.getSingleElementByTagName(tagNames.attr).innerValue.toInt()
+                    )
+                }
+                val pit = controlNodes.filter {
+                    it.getSingleElementByTagName(tagNames.attr).getAttribute(tagNames.id) == tagNames.pitName
+                }.map {
+                    VocaloidPitchConvertor.Event(
+                        pos = it.getSingleElementByTagName(tagNames.posTick).innerValue.toLong(),
+                        value = it.getSingleElementByTagName(tagNames.attr).innerValue.toInt()
+                    )
+                }
+                VocaloidPitchConvertor.PitchRawData(
+                    startPos = tickOffset,
+                    pit = pit,
+                    pbs = pbs
+                )
+            }
         return Track(
             id = id,
             name = trackName,
-            notes = notes
+            notes = notes,
+            pitch = VocaloidPitchConvertor.parse(pitchByParts)
         ).validateNotes()
     }
 
-    fun generate(project: Project): ExportResult {
-        val document = generateContent(project)
+    fun generate(project: Project, features: List<Feature>): ExportResult {
+        val document = generateContent(project, features)
         val serializer = XMLSerializer()
-        val content = serializer.serializeToString(document)
+        val content = serializer.serializeToString(document).cleanEmptyXmlns()
         val blob = Blob(arrayOf(content), BlobPropertyBag("application/octet-stream"))
         val name = project.name + Format.VSQX.extension
         return ExportResult(
@@ -224,7 +256,9 @@ object Vsqx {
         )
     }
 
-    private fun generateContent(project: Project): Document {
+    private fun String.cleanEmptyXmlns() = replace(" xmlns=\"\"", "")
+
+    private fun generateContent(project: Project, features: List<Feature>): Document {
         val text = Resources.vsqxTemplate
         val tagNames = TagNames.VSQ4
         val parser = DOMParser()
@@ -246,7 +280,8 @@ object Vsqx {
         var track = emptyTrack
         var unit = emptyUnit
         for (trackIndex in project.tracks.indices) {
-            val newTrack = generateNewTrackNode(emptyTrack, tagNames, trackIndex, project, tickPrefix, document)
+            val newTrack =
+                generateNewTrackNode(emptyTrack, tagNames, trackIndex, project, tickPrefix, document, features)
             track.insertAfterThis(newTrack)
             track = newTrack
 
@@ -313,7 +348,8 @@ object Vsqx {
         trackIndex: Int,
         project: Project,
         tickPrefix: Long,
-        document: XMLDocument
+        document: XMLDocument,
+        features: List<Feature>
     ): Element {
         val trackModel = project.tracks[trackIndex]
 
@@ -324,6 +360,10 @@ object Vsqx {
         val part = newTrack.getSingleElementByTagName(tagNames.musicalPart)
         part.setSingleChildValue(tagNames.posTick, tickPrefix)
         part.setSingleChildValue(tagNames.playTime, trackModel.notes.lastOrNull()?.tickOff ?: 0)
+
+        if (features.contains(Feature.CONVERT_PITCH) && trackModel.pitch != null) {
+            setupPitchControllingNodes(part, trackModel.pitch, tagNames)
+        }
 
         val emptyNote = part.getSingleElementByTagName(tagNames.note)
         var note = emptyNote
@@ -366,6 +406,28 @@ object Vsqx {
         return newNote
     }
 
+    private fun setupPitchControllingNodes(
+        part: Element,
+        pitch: Pitch,
+        tagNames: TagNames
+    ) {
+        val emptyControl = part.getSingleElementByTagName(tagNames.mCtrl)
+        var currentElement = emptyControl
+        val pitchRawData = VocaloidPitchConvertor.generate(pitch)
+        val eventsWithName =
+            pitchRawData.pbs.map { it to tagNames.pbsName } + pitchRawData.pit.map { it to tagNames.pitName }
+                .sortedBy { it.first.pos }
+        for (eventWithName in eventsWithName) {
+            val newControlNode = emptyControl.clone()
+            newControlNode.setSingleChildValue(tagNames.posTick, eventWithName.first.pos)
+            newControlNode.getSingleElementByTagName(tagNames.attr).setAttribute(tagNames.id, eventWithName.second)
+            newControlNode.setSingleChildValue(tagNames.attr, eventWithName.first.value)
+            currentElement.insertAfterThis(newControlNode)
+            currentElement = newControlNode
+        }
+        part.removeChild(emptyControl)
+    }
+
     private const val BPM_RATE = 100.0
     private const val MIN_MEASURE_OFFSET = 1
 
@@ -390,7 +452,12 @@ object Vsqx {
         val mixer: String = "mixer",
         val vsUnit: String = "vsUnit",
         val trackNum: String = "vsTrackNo",
-        val playTime: String = "playTime"
+        val playTime: String = "playTime",
+        val mCtrl: String = "mCtrl",
+        val attr: String = "attr",
+        val id: String = "id",
+        val pbsName: String = "PBS",
+        val pitName: String = "PIT"
     ) {
         VSQ3,
         VSQ4(
@@ -405,7 +472,11 @@ object Vsqx {
             noteNum = "n",
             lyric = "y",
             trackNum = "tNo",
-            xSampa = "p"
+            xSampa = "p",
+            mCtrl = "cc",
+            attr = "v",
+            pbsName = "S",
+            pitName = "P"
         )
     }
 }
