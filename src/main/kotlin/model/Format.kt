@@ -114,10 +114,11 @@ enum class Format(
         parser = {
             io.Vsq.parse(it.first())
         },
-        generator = { project, _ ->
-            io.Vsq.generate(project)
+        generator = { project, features ->
+            io.Vsq.generate(project, features)
         },
-        possibleLyricsTypes = listOf(ROMAJI_CV, KANA_CV)
+        possibleLyricsTypes = listOf(ROMAJI_CV, KANA_CV),
+        availableFeaturesForGeneration = listOf(CONVERT_PITCH)
     ),
     PPSF(
         ".ppsf",
