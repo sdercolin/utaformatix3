@@ -13,12 +13,12 @@ import model.ExportResult
 import model.Feature
 import model.Format
 import model.ImportWarning
-import model.PitchData
+import model.Pitch
 import model.TickCounter
 import model.TimeSignature
-import model.VocaloidPitchConvertor
 import org.w3c.files.Blob
 import org.w3c.files.File
+import process.pitch.VocaloidPitchConvertor
 import process.validateNotes
 import util.nameWithoutExtension
 import util.readBinary
@@ -72,18 +72,18 @@ object Vpr {
                     xSampa = note.phoneme
                 )
             }
-        val pitchData = parsePitchData(track)
+        val pitch = parsePitchData(track)
         return model.Track(
             id = trackIndex,
             name = track.name ?: "Track ${trackIndex + 1}",
             notes = notes,
-            pitchData = pitchData
+            pitch = pitch
         ).validateNotes()
     }
 
-    private fun parsePitchData(track: Track): PitchData {
+    private fun parsePitchData(track: Track): Pitch {
         val dataByParts = track.parts.map { part ->
-            VocaloidPitchConvertor.DataInPart(
+            VocaloidPitchConvertor.PitchRawData(
                 startPos = part.pos,
                 pit = part.getControllerEvents(PITCH_BEND_NAME)
                     .map { VocaloidPitchConvertor.Event.fromPair(it.pos to it.value.toInt()) },
@@ -177,21 +177,21 @@ object Vpr {
     }
 
     private fun generatePitchData(track: model.Track): List<Controller>? {
-        val pitchData = track.pitchData?.let { VocaloidPitchConvertor.generate(it) } ?: return null
+        val pitchRawData = track.pitch?.let { VocaloidPitchConvertor.generate(it) } ?: return null
         val controllers = mutableListOf<Controller>()
-        if (pitchData.pbs.isNotEmpty()) {
+        if (pitchRawData.pbs.isNotEmpty()) {
             controllers.add(
                 Controller(
                     name = PITCH_BEND_SENSITIVITY_NAME,
-                    events = pitchData.pbs.map { ControllerEvent(pos = it.pos, value = it.value.toLong()) }
+                    events = pitchRawData.pbs.map { ControllerEvent(pos = it.pos, value = it.value.toLong()) }
                 )
             )
         }
-        if (pitchData.pit.isNotEmpty()) {
+        if (pitchRawData.pit.isNotEmpty()) {
             controllers.add(
                 Controller(
                     name = PITCH_BEND_NAME,
-                    events = pitchData.pit.map {
+                    events = pitchRawData.pit.map {
                         ControllerEvent(pos = it.pos, value = it.value.toLong())
                     }
                 )

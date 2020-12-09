@@ -1,12 +1,13 @@
-package model
+package process.pitch
 
+import model.Pitch
 import kotlin.math.abs
 import kotlin.math.ceil
 import kotlin.math.roundToInt
 
 object VocaloidPitchConvertor {
 
-    data class DataInPart(
+    data class PitchRawData(
         val startPos: Long,
         val pit: List<Event>,
         val pbs: List<Event>
@@ -25,7 +26,7 @@ object VocaloidPitchConvertor {
     private const val DEFAULT_PITCH_BEND_SENSITIVITY = 2
     private const val MIN_BREAK_LENGTH_BETWEEN_PITCH_SECTIONS = 480L
 
-    fun parse(dataByParts: List<DataInPart>): PitchData {
+    fun parse(dataByParts: List<PitchRawData>): Pitch {
         val pitchRawDataByPart = dataByParts.map { part ->
             val pit = part.pit
             val pbs = part.pbs
@@ -69,24 +70,24 @@ object VocaloidPitchConvertor {
         }
     }
 
-    fun generate(pitchData: PitchData): DataInPart {
-        val pitchDataSectioned = mutableListOf<MutableList<Pair<Long, Double>>>()
+    fun generate(pitch: Pitch): PitchRawData {
+        val pitchSectioned = mutableListOf<MutableList<Pair<Long, Double>>>()
         var currentPos = 0L
-        for (pitchEvent in pitchData) {
+        for (pitchEvent in pitch) {
             when {
-                pitchDataSectioned.isEmpty() -> pitchDataSectioned.add(mutableListOf(pitchEvent))
+                pitchSectioned.isEmpty() -> pitchSectioned.add(mutableListOf(pitchEvent))
                 pitchEvent.first - currentPos >= MIN_BREAK_LENGTH_BETWEEN_PITCH_SECTIONS -> {
-                    pitchDataSectioned.add(mutableListOf(pitchEvent))
+                    pitchSectioned.add(mutableListOf(pitchEvent))
                 }
                 else -> {
-                    pitchDataSectioned.last().add(pitchEvent)
+                    pitchSectioned.last().add(pitchEvent)
                 }
             }
             currentPos = pitchEvent.first
         }
         val pit = mutableListOf<Event>()
         val pbs = mutableListOf<Event>()
-        for (section in pitchDataSectioned) {
+        for (section in pitchSectioned) {
             val maxAbsValue = section.map { abs(it.second) }.max() ?: 0.0
             var pbsForThisSection = ceil(abs(maxAbsValue)).toInt()
             if (pbsForThisSection > DEFAULT_PITCH_BEND_SENSITIVITY) {
@@ -110,7 +111,7 @@ object VocaloidPitchConvertor {
                 )
             }
         }
-        return DataInPart(
+        return PitchRawData(
             startPos = 0,
             pit = pit,
             pbs = pbs

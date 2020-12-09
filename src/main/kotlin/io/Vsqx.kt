@@ -9,13 +9,12 @@ import model.Feature
 import model.Format
 import model.ImportWarning
 import model.Note
-import model.PitchData
+import model.Pitch
 import model.Project
 import model.Tempo
 import model.TickCounter
 import model.TimeSignature
 import model.Track
-import model.VocaloidPitchConvertor
 import org.w3c.dom.Document
 import org.w3c.dom.Element
 import org.w3c.dom.XMLDocument
@@ -24,6 +23,7 @@ import org.w3c.dom.parsing.XMLSerializer
 import org.w3c.files.Blob
 import org.w3c.files.BlobPropertyBag
 import org.w3c.files.File
+import process.pitch.VocaloidPitchConvertor
 import process.validateNotes
 import util.clone
 import util.getElementListByTagName
@@ -206,7 +206,7 @@ object Vsqx {
                     xSampa = xSampa
                 )
             }
-        val pitchDataByParts = partNodes
+        val pitchByParts = partNodes
             .map { partNode ->
                 val tickOffset =
                     partNode.getSingleElementByTagName(tagNames.posTick).innerValue.toLong() - tickPrefix
@@ -227,7 +227,7 @@ object Vsqx {
                         value = it.getSingleElementByTagName(tagNames.attr).innerValue.toInt()
                     )
                 }
-                VocaloidPitchConvertor.DataInPart(
+                VocaloidPitchConvertor.PitchRawData(
                     startPos = tickOffset,
                     pit = pit,
                     pbs = pbs
@@ -237,7 +237,7 @@ object Vsqx {
             id = id,
             name = trackName,
             notes = notes,
-            pitchData = VocaloidPitchConvertor.parse(pitchDataByParts)
+            pitch = VocaloidPitchConvertor.parse(pitchByParts)
         ).validateNotes()
     }
 
@@ -361,8 +361,8 @@ object Vsqx {
         part.setSingleChildValue(tagNames.posTick, tickPrefix)
         part.setSingleChildValue(tagNames.playTime, trackModel.notes.lastOrNull()?.tickOff ?: 0)
 
-        if (features.contains(Feature.CONVERT_PITCH) && trackModel.pitchData != null) {
-            setupPitchControllingNodes(part, trackModel.pitchData, tagNames)
+        if (features.contains(Feature.CONVERT_PITCH) && trackModel.pitch != null) {
+            setupPitchControllingNodes(part, trackModel.pitch, tagNames)
         }
 
         val emptyNote = part.getSingleElementByTagName(tagNames.note)
@@ -408,14 +408,14 @@ object Vsqx {
 
     private fun setupPitchControllingNodes(
         part: Element,
-        pitchData: PitchData,
+        pitch: Pitch,
         tagNames: TagNames
     ) {
         val emptyControl = part.getSingleElementByTagName(tagNames.mCtrl)
         var currentElement = emptyControl
-        val pitchDataInPart = VocaloidPitchConvertor.generate(pitchData)
+        val pitchRawData = VocaloidPitchConvertor.generate(pitch)
         val eventsWithName =
-            pitchDataInPart.pbs.map { it to tagNames.pbsName } + pitchDataInPart.pit.map { it to tagNames.pitName }
+            pitchRawData.pbs.map { it to tagNames.pbsName } + pitchRawData.pit.map { it to tagNames.pitName }
                 .sortedBy { it.first.pos }
         for (eventWithName in eventsWithName) {
             val newControlNode = emptyControl.clone()
