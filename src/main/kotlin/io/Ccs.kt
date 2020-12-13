@@ -24,6 +24,7 @@ import org.w3c.files.BlobPropertyBag
 import org.w3c.files.File
 import process.pitch.CevioTrackPitchData
 import process.pitch.generateForCevio
+import process.pitch.getLength
 import process.pitch.pitchFromCevioTrack
 import process.validateNotes
 import util.appendNewChildTo
@@ -280,7 +281,7 @@ object Ccs {
             setupNotes(document, newUnit, model.notes, tickPrefix)
 
             if (features.contains(Feature.CONVERT_PITCH)) {
-                setupPitchData(document, newUnit, model, tickPrefix)
+                setupPitchData(document, newUnit, model, project.tempos, tickPrefix)
             }
 
             unitsNodes.appendChild(newUnit)
@@ -351,22 +352,25 @@ object Ccs {
         document: Document,
         unitNode: Element,
         trackModel: Track,
+        tempos: List<Tempo>,
         tickPrefix: Long
     ) {
-        val dataNodes = trackModel.pitch
-            ?.generateForCevio(trackModel.notes, (tickPrefix / TICK_RATE).toLong())
-            ?.events?.map {
-                val newDataNode = document.createElement("Data")
-                if (it.index != null) newDataNode.setAttribute("Index", it.index.toString())
-                if (it.repeat != null) newDataNode.setAttribute("Repeat", it.repeat.toString())
-                newDataNode.appendText(it.value.toString())
-                newDataNode
-            } ?: return
-        val songNode = unitNode.getSingleElementByTagName("Song")
-        val logF0Node = document.appendNewChildTo(songNode, "Parameter") { parameterNode ->
-            document.appendNewChildTo(parameterNode, "LogF0") {}
+        val data = trackModel.pitch
+            ?.generateForCevio(trackModel.notes, tempos, (tickPrefix / TICK_RATE).toLong()) ?: return
+        val dataNodes = data.events.map {
+            val newDataNode = document.createElement("Data")
+            if (it.index != null) newDataNode.setAttribute("Index", it.index.toString())
+            if (it.repeat != null) newDataNode.setAttribute("Repeat", it.repeat.toString())
+            newDataNode.appendText(it.value.toString())
+            newDataNode
         }
-        dataNodes.forEach { logF0Node.appendChild(it) }
+        val songNode = unitNode.getSingleElementByTagName("Song")
+        document.appendNewChildTo(songNode, "Parameter") { parameterNode ->
+            document.appendNewChildTo(parameterNode, "LogF0") { logF0Node ->
+                logF0Node.setAttribute("Length", data.getLength().toString())
+                dataNodes.forEach { logF0Node.appendChild(it) }
+            }
+        }
     }
 
     private const val TICK_RATE = 2.0
