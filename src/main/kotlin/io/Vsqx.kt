@@ -23,7 +23,9 @@ import org.w3c.dom.parsing.XMLSerializer
 import org.w3c.files.Blob
 import org.w3c.files.BlobPropertyBag
 import org.w3c.files.File
-import process.pitch.VocaloidPitchConvertor
+import process.pitch.VocaloidPartPitchData
+import process.pitch.generateForVocaloid
+import process.pitch.pitchFromVocaloidParts
 import process.validateNotes
 import util.clone
 import util.getElementListByTagName
@@ -214,7 +216,7 @@ object Vsqx {
                 val pbs = controlNodes.filter {
                     it.getSingleElementByTagName(tagNames.attr).getAttribute(tagNames.id) == tagNames.pbsName
                 }.map {
-                    VocaloidPitchConvertor.Event(
+                    VocaloidPartPitchData.Event(
                         pos = it.getSingleElementByTagName(tagNames.posTick).innerValue.toLong(),
                         value = it.getSingleElementByTagName(tagNames.attr).innerValue.toInt()
                     )
@@ -222,12 +224,12 @@ object Vsqx {
                 val pit = controlNodes.filter {
                     it.getSingleElementByTagName(tagNames.attr).getAttribute(tagNames.id) == tagNames.pitName
                 }.map {
-                    VocaloidPitchConvertor.Event(
+                    VocaloidPartPitchData.Event(
                         pos = it.getSingleElementByTagName(tagNames.posTick).innerValue.toLong(),
                         value = it.getSingleElementByTagName(tagNames.attr).innerValue.toInt()
                     )
                 }
-                VocaloidPitchConvertor.PitchRawData(
+                VocaloidPartPitchData(
                     startPos = tickOffset,
                     pit = pit,
                     pbs = pbs
@@ -237,7 +239,7 @@ object Vsqx {
             id = id,
             name = trackName,
             notes = notes,
-            pitch = VocaloidPitchConvertor.parse(pitchByParts)
+            pitch = pitchFromVocaloidParts(pitchByParts)
         ).validateNotes()
     }
 
@@ -413,7 +415,7 @@ object Vsqx {
     ) {
         val emptyControl = part.getSingleElementByTagName(tagNames.mCtrl)
         var currentElement = emptyControl
-        val pitchRawData = VocaloidPitchConvertor.generate(pitch)
+        val pitchRawData = pitch.generateForVocaloid()
         val eventsWithName =
             pitchRawData.pbs.map { it to tagNames.pbsName } + pitchRawData.pit.map { it to tagNames.pitName }
                 .sortedBy { it.first.pos }

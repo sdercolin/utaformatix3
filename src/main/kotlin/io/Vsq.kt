@@ -21,7 +21,9 @@ import org.khronos.webgl.Uint8Array
 import org.w3c.files.Blob
 import org.w3c.files.BlobPropertyBag
 import org.w3c.files.File
-import process.pitch.VocaloidPitchConvertor
+import process.pitch.VocaloidPartPitchData
+import process.pitch.generateForVocaloid
+import process.pitch.pitchFromVocaloidParts
 import process.validateNotes
 import util.MidiUtil
 import util.MidiUtil.MetaType
@@ -236,16 +238,16 @@ object Vsq {
         val pit = sectionMap["PitchBendBPList"]?.entries?.mapNotNull {
             val pos = it.key.toLongOrNull() ?: return@mapNotNull null
             val value = it.value.toIntOrNull() ?: return@mapNotNull null
-            VocaloidPitchConvertor.Event(pos - tickPrefix, value = value)
+            VocaloidPartPitchData.Event(pos - tickPrefix, value = value)
         } ?: listOf()
         val pbs = sectionMap["PitchBendSensBPList"]?.entries?.mapNotNull {
             val pos = it.key.toLongOrNull() ?: return@mapNotNull null
             val value = it.value.toIntOrNull() ?: return@mapNotNull null
-            VocaloidPitchConvertor.Event(pos - tickPrefix, value = value)
+            VocaloidPartPitchData.Event(pos - tickPrefix, value = value)
         } ?: listOf()
-        return VocaloidPitchConvertor.parse(
+        return pitchFromVocaloidParts(
             listOf(
-                VocaloidPitchConvertor.PitchRawData(
+                VocaloidPartPitchData(
                     startPos = 0,
                     pit = pit,
                     pbs = pbs
@@ -468,7 +470,7 @@ object Vsq {
 
     private fun generatePitchTexts(pitch: Pitch, tickPrefix: Int): List<String> =
         mutableListOf<String>().apply {
-            val pitchRawData = VocaloidPitchConvertor.generate(pitch)
+            val pitchRawData = pitch.generateForVocaloid()
             if (pitchRawData.pit.isNotEmpty()) {
                 add("[PitchBendBPList]")
                 pitchRawData.pit.forEach {
