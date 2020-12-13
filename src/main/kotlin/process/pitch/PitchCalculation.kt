@@ -50,7 +50,7 @@ private fun List<Note>.getBorders(): List<Long> {
         }
         when {
             pos == note.tickOn -> borders.add(pos)
-            pos < note.tickOn -> borders.add((note.tickOn - pos) / 2)
+            pos < note.tickOn -> borders.add((note.tickOn + pos) / 2)
             else -> throw NotesOverlappingException()
         }
         pos = note.tickOff

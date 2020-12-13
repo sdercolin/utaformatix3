@@ -34,6 +34,7 @@ import util.getRequiredAttributeAsInteger
 import util.getRequiredAttributeAsLong
 import util.getSingleElementByTagName
 import util.getSingleElementByTagNameOrNull
+import util.innerValueOrNull
 import util.insertAfterThis
 import util.nameWithoutExtension
 import util.readText
@@ -198,8 +199,8 @@ object Ccs {
             ?.getSingleElementByTagNameOrNull("Parameter")
             ?.getSingleElementByTagNameOrNull("LogF0")
             ?.getElementListByTagName("Data").orEmpty()
-            .mapNotNull { parsePitchData(it, tickPrefix) }
-            .let { CevioTrackPitchData(it) }
+            .mapNotNull { parsePitchData(it) }
+            .let { CevioTrackPitchData(it, tempos, tickPrefix) }
             .let { pitchFromCevioTrack(it) }
 
         val trackName = name ?: "Track ${index + 1}"
@@ -208,12 +209,10 @@ object Ccs {
         return TrackParseResult(track, tempos, timeSignatures)
     }
 
-    private fun parsePitchData(dataElement: Element, tickPrefix: Long): CevioTrackPitchData.Event? {
-        val index = dataElement.getAttribute("Index")?.toLongOrNull()?.let {
-            it - (tickPrefix * TICK_RATE).toLong()
-        }
+    private fun parsePitchData(dataElement: Element): CevioTrackPitchData.Event? {
+        val index = dataElement.getAttribute("Index")?.toLongOrNull()
         val repeat = dataElement.getAttribute("Repeat")?.toLongOrNull()
-        val value = dataElement.textContent?.toDoubleOrNull() ?: return null
+        val value = dataElement.innerValueOrNull?.toDoubleOrNull() ?: return null
         return CevioTrackPitchData.Event(index, repeat, value)
     }
 
@@ -354,13 +353,15 @@ object Ccs {
         trackModel: Track,
         tickPrefix: Long
     ) {
-        val dataNodes = trackModel.pitch?.generateForCevio(trackModel.notes)?.events?.map {
-            val newDataNode = document.createElement("Data")
-            if (it.index != null) newDataNode.setAttribute("Index", (it.index + tickPrefix).toString())
-            if (it.repeat != null) newDataNode.setAttribute("Repeat", it.repeat.toString())
-            newDataNode.appendText(it.value.toString())
-            newDataNode
-        } ?: return
+        val dataNodes = trackModel.pitch
+            ?.generateForCevio(trackModel.notes, (tickPrefix / TICK_RATE).toLong())
+            ?.events?.map {
+                val newDataNode = document.createElement("Data")
+                if (it.index != null) newDataNode.setAttribute("Index", it.index.toString())
+                if (it.repeat != null) newDataNode.setAttribute("Repeat", it.repeat.toString())
+                newDataNode.appendText(it.value.toString())
+                newDataNode
+            } ?: return
         val songNode = unitNode.getSingleElementByTagName("Song")
         val logF0Node = document.appendNewChildTo(songNode, "Parameter") { parameterNode ->
             document.appendNewChildTo(parameterNode, "LogF0") {}
