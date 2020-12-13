@@ -1,5 +1,6 @@
 package process.pitch
 
+import model.Note
 import model.Pitch
 import process.pitch.VocaloidPartPitchData.Event
 import kotlin.math.abs
@@ -26,7 +27,7 @@ private const val PITCH_MAX_VALUE = 8191
 private const val DEFAULT_PITCH_BEND_SENSITIVITY = 2
 private const val MIN_BREAK_LENGTH_BETWEEN_PITCH_SECTIONS = 480L
 
-fun pitchFromVocaloidParts(dataByParts: List<VocaloidPartPitchData>): Pitch {
+fun pitchFromVocaloidParts(dataByParts: List<VocaloidPartPitchData>): Pitch? {
     val pitchRawDataByPart = dataByParts.map { part ->
         val pit = part.pit
         val pbs = part.pbs
@@ -65,15 +66,17 @@ fun pitchFromVocaloidParts(dataByParts: List<VocaloidPartPitchData>): Pitch {
                 else accumulator.take(firstInvalidIndexInPrevious) + element
             }
         }
-    return pitchRawData.map { (pos, value) ->
+    val data = pitchRawData.map { (pos, value) ->
         pos to value.toDouble() / PITCH_MAX_VALUE
     }
+    return Pitch(data, isAbsolute = false).takeIf { it.data.isNotEmpty() }
 }
 
-fun Pitch.generateForVocaloid(): VocaloidPartPitchData {
+fun Pitch.generateForVocaloid(notes: List<Note>): VocaloidPartPitchData? {
+    val data = this.getRelativeData(notes) ?: return null
     val pitchSectioned = mutableListOf<MutableList<Pair<Long, Double>>>()
     var currentPos = 0L
-    for (pitchEvent in this) {
+    for (pitchEvent in data) {
         when {
             pitchSectioned.isEmpty() -> pitchSectioned.add(mutableListOf(pitchEvent))
             pitchEvent.first - currentPos >= MIN_BREAK_LENGTH_BETWEEN_PITCH_SECTIONS -> {

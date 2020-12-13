@@ -83,7 +83,7 @@ object Vpr {
         ).validateNotes()
     }
 
-    private fun parsePitchData(track: Track): Pitch {
+    private fun parsePitchData(track: Track): Pitch? {
         val dataByParts = track.parts.map { part ->
             VocaloidPartPitchData(
                 startPos = part.pos,
@@ -179,7 +179,7 @@ object Vpr {
     }
 
     private fun generatePitchData(track: model.Track): List<Controller>? {
-        val pitchRawData = track.pitch?.generateForVocaloid() ?: return null
+        val pitchRawData = track.pitch?.generateForVocaloid(track.notes) ?: return null
         val controllers = mutableListOf<Controller>()
         if (pitchRawData.pbs.isNotEmpty()) {
             controllers.add(

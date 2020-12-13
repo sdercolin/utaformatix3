@@ -234,7 +234,7 @@ object Vsq {
         return Track(trackId, name, notes, pitch).validateNotes()
     }
 
-    private fun parsePitchData(sectionMap: Map<String, Map<String, String>>, tickPrefix: Long): Pitch {
+    private fun parsePitchData(sectionMap: Map<String, Map<String, String>>, tickPrefix: Long): Pitch? {
         val pit = sectionMap["PitchBendBPList"]?.entries?.mapNotNull {
             val pos = it.key.toLongOrNull() ?: return@mapNotNull null
             val value = it.value.toIntOrNull() ?: return@mapNotNull null
@@ -463,14 +463,14 @@ object Vsq {
             add("Program=0")
             addAll(lyricsLines)
             if (features.contains(Feature.CONVERT_PITCH) && track.pitch != null) {
-                addAll(generatePitchTexts(track.pitch, tickPrefix))
+                addAll(generatePitchTexts(track.pitch, tickPrefix, track.notes))
             }
         }.joinToString("\n")
     }
 
-    private fun generatePitchTexts(pitch: Pitch, tickPrefix: Int): List<String> =
+    private fun generatePitchTexts(pitch: Pitch, tickPrefix: Int, notes: List<Note>): List<String> =
         mutableListOf<String>().apply {
-            val pitchRawData = pitch.generateForVocaloid()
+            val pitchRawData = pitch.generateForVocaloid(notes) ?: return@apply
             if (pitchRawData.pit.isNotEmpty()) {
                 add("[PitchBendBPList]")
                 pitchRawData.pit.forEach {

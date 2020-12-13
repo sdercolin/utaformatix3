@@ -7,5 +7,3 @@ data class Track(
     val pitch: Pitch? = null
 )
 
-// X - Tick; Y - Offset in semitone; Only contains changing point
-typealias Pitch = List<Pair<Long, Double>>

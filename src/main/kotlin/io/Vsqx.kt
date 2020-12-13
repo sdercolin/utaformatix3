@@ -9,7 +9,6 @@ import model.Feature
 import model.Format
 import model.ImportWarning
 import model.Note
-import model.Pitch
 import model.Project
 import model.Tempo
 import model.TickCounter
@@ -363,9 +362,12 @@ object Vsqx {
         part.setSingleChildValue(tagNames.posTick, tickPrefix)
         part.setSingleChildValue(tagNames.playTime, trackModel.notes.lastOrNull()?.tickOff ?: 0)
 
-        if (features.contains(Feature.CONVERT_PITCH) && trackModel.pitch != null) {
-            setupPitchControllingNodes(part, trackModel.pitch, tagNames)
-        }
+        setupPitchControllingNodes(
+            features.contains(Feature.CONVERT_PITCH),
+            part,
+            trackModel,
+            tagNames
+        )
 
         val emptyNote = part.getSingleElementByTagName(tagNames.note)
         var note = emptyNote
@@ -409,13 +411,18 @@ object Vsqx {
     }
 
     private fun setupPitchControllingNodes(
+        convert: Boolean,
         part: Element,
-        pitch: Pitch,
+        trackModel: Track,
         tagNames: TagNames
     ) {
         val emptyControl = part.getSingleElementByTagName(tagNames.mCtrl)
+        val pitchRawData = trackModel.pitch?.generateForVocaloid(trackModel.notes)
+        if (!convert || pitchRawData == null) {
+            part.removeChild(emptyControl)
+            return
+        }
         var currentElement = emptyControl
-        val pitchRawData = pitch.generateForVocaloid()
         val eventsWithName =
             pitchRawData.pbs.map { it to tagNames.pbsName } + pitchRawData.pit.map { it to tagNames.pitName }
                 .sortedBy { it.first.pos }
