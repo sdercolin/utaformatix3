@@ -4,6 +4,7 @@ import exception.IllegalFileException
 import external.Resources
 import external.generateUUID
 import model.ExportResult
+import model.Feature
 import model.Format
 import model.ImportWarning
 import model.KEY_IN_OCTAVE
@@ -21,7 +22,12 @@ import org.w3c.dom.parsing.XMLSerializer
 import org.w3c.files.Blob
 import org.w3c.files.BlobPropertyBag
 import org.w3c.files.File
+import process.pitch.CevioTrackPitchData
+import process.pitch.generateForCevio
+import process.pitch.getLength
+import process.pitch.pitchFromCevioTrack
 import process.validateNotes
+import util.appendNewChildTo
 import util.clone
 import util.getElementListByTagName
 import util.getRequiredAttribute
@@ -29,10 +35,12 @@ import util.getRequiredAttributeAsInteger
 import util.getRequiredAttributeAsLong
 import util.getSingleElementByTagName
 import util.getSingleElementByTagNameOrNull
+import util.innerValueOrNull
 import util.insertAfterThis
 import util.nameWithoutExtension
 import util.readText
 import util.toFixed
+import kotlin.dom.appendText
 
 object Ccs {
     suspend fun parse(file: File): Project {
@@ -187,10 +195,26 @@ object Ccs {
                 Note(noteIndex, key, lyric, tickOn, tickOff)
             }
 
+        val pitch = unitNode
+            .getSingleElementByTagNameOrNull("Song")
+            ?.getSingleElementByTagNameOrNull("Parameter")
+            ?.getSingleElementByTagNameOrNull("LogF0")
+            ?.getElementListByTagName("Data").orEmpty()
+            .mapNotNull { parsePitchData(it) }
+            .let { CevioTrackPitchData(it, tempos, tickPrefix) }
+            .let { pitchFromCevioTrack(it) }
+
         val trackName = name ?: "Track ${index + 1}"
-        val track = Track(index, trackName, notes).validateNotes()
+        val track = Track(index, trackName, notes, pitch).validateNotes()
 
         return TrackParseResult(track, tempos, timeSignatures)
+    }
+
+    private fun parsePitchData(dataElement: Element): CevioTrackPitchData.Event? {
+        val index = dataElement.getAttribute("Index")?.toLongOrNull()
+        val repeat = dataElement.getAttribute("Repeat")?.toLongOrNull()
+        val value = dataElement.innerValueOrNull?.toDoubleOrNull() ?: return null
+        return CevioTrackPitchData.Event(index, repeat, value)
     }
 
     private fun getTickPrefix(timeSignatures: List<TimeSignature>, measurePrefix: Int): Long {
@@ -208,8 +232,8 @@ object Ccs {
         val timeSignatures: List<TimeSignature>
     )
 
-    fun generate(project: Project): ExportResult {
-        val document = generateContent(project)
+    fun generate(project: Project, features: List<Feature>): ExportResult {
+        val document = generateContent(project, features)
         val serializer = XMLSerializer()
         val content = serializer.serializeToString(document)
         val blob = Blob(arrayOf(content), BlobPropertyBag("application/octet-stream"))
@@ -217,7 +241,7 @@ object Ccs {
         return ExportResult(blob, name, listOf())
     }
 
-    private fun generateContent(project: Project): Document {
+    private fun generateContent(project: Project, features: List<Feature>): Document {
         val text = Resources.ccsTemplate
         val parser = DOMParser()
         val document = parser.parseFromString(text, "text/xml") as XMLDocument
@@ -255,6 +279,10 @@ object Ccs {
             newGroup.setAttribute("Id", id)
             newGroup.setAttribute("Name", model.name)
             setupNotes(document, newUnit, model.notes, tickPrefix)
+
+            if (features.contains(Feature.CONVERT_PITCH)) {
+                setupPitchData(document, newUnit, model, project.tempos, tickPrefix)
+            }
 
             unitsNodes.appendChild(newUnit)
             groupsNode.appendChild(newGroup)
@@ -317,6 +345,31 @@ object Ccs {
             newNote.setAttribute("Duration", (it.length * TICK_RATE).toLong().toString())
             newNote.setAttribute("Lyric", it.lyric)
             score.appendChild(newNote)
+        }
+    }
+
+    private fun setupPitchData(
+        document: Document,
+        unitNode: Element,
+        trackModel: Track,
+        tempos: List<Tempo>,
+        tickPrefix: Long
+    ) {
+        val data = trackModel.pitch
+            ?.generateForCevio(trackModel.notes, tempos, (tickPrefix / TICK_RATE).toLong()) ?: return
+        val dataNodes = data.events.map {
+            val newDataNode = document.createElement("Data")
+            if (it.index != null) newDataNode.setAttribute("Index", it.index.toString())
+            if (it.repeat != null) newDataNode.setAttribute("Repeat", it.repeat.toString())
+            newDataNode.appendText(it.value.toString())
+            newDataNode
+        }
+        val songNode = unitNode.getSingleElementByTagName("Song")
+        document.appendNewChildTo(songNode, "Parameter") { parameterNode ->
+            document.appendNewChildTo(parameterNode, "LogF0") { logF0Node ->
+                logF0Node.setAttribute("Length", data.getLength().toString())
+                dataNodes.forEach { logF0Node.appendChild(it) }
+            }
         }
     }
 

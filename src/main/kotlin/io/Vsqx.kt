@@ -9,7 +9,6 @@ import model.Feature
 import model.Format
 import model.ImportWarning
 import model.Note
-import model.Pitch
 import model.Project
 import model.Tempo
 import model.TickCounter
@@ -23,7 +22,9 @@ import org.w3c.dom.parsing.XMLSerializer
 import org.w3c.files.Blob
 import org.w3c.files.BlobPropertyBag
 import org.w3c.files.File
-import process.pitch.VocaloidPitchConvertor
+import process.pitch.VocaloidPartPitchData
+import process.pitch.generateForVocaloid
+import process.pitch.pitchFromVocaloidParts
 import process.validateNotes
 import util.clone
 import util.getElementListByTagName
@@ -214,7 +215,7 @@ object Vsqx {
                 val pbs = controlNodes.filter {
                     it.getSingleElementByTagName(tagNames.attr).getAttribute(tagNames.id) == tagNames.pbsName
                 }.map {
-                    VocaloidPitchConvertor.Event(
+                    VocaloidPartPitchData.Event(
                         pos = it.getSingleElementByTagName(tagNames.posTick).innerValue.toLong(),
                         value = it.getSingleElementByTagName(tagNames.attr).innerValue.toInt()
                     )
@@ -222,12 +223,12 @@ object Vsqx {
                 val pit = controlNodes.filter {
                     it.getSingleElementByTagName(tagNames.attr).getAttribute(tagNames.id) == tagNames.pitName
                 }.map {
-                    VocaloidPitchConvertor.Event(
+                    VocaloidPartPitchData.Event(
                         pos = it.getSingleElementByTagName(tagNames.posTick).innerValue.toLong(),
                         value = it.getSingleElementByTagName(tagNames.attr).innerValue.toInt()
                     )
                 }
-                VocaloidPitchConvertor.PitchRawData(
+                VocaloidPartPitchData(
                     startPos = tickOffset,
                     pit = pit,
                     pbs = pbs
@@ -237,7 +238,7 @@ object Vsqx {
             id = id,
             name = trackName,
             notes = notes,
-            pitch = VocaloidPitchConvertor.parse(pitchByParts)
+            pitch = pitchFromVocaloidParts(pitchByParts)
         ).validateNotes()
     }
 
@@ -361,9 +362,12 @@ object Vsqx {
         part.setSingleChildValue(tagNames.posTick, tickPrefix)
         part.setSingleChildValue(tagNames.playTime, trackModel.notes.lastOrNull()?.tickOff ?: 0)
 
-        if (features.contains(Feature.CONVERT_PITCH) && trackModel.pitch != null) {
-            setupPitchControllingNodes(part, trackModel.pitch, tagNames)
-        }
+        setupPitchControllingNodes(
+            features.contains(Feature.CONVERT_PITCH),
+            part,
+            trackModel,
+            tagNames
+        )
 
         val emptyNote = part.getSingleElementByTagName(tagNames.note)
         var note = emptyNote
@@ -407,13 +411,18 @@ object Vsqx {
     }
 
     private fun setupPitchControllingNodes(
+        convert: Boolean,
         part: Element,
-        pitch: Pitch,
+        trackModel: Track,
         tagNames: TagNames
     ) {
         val emptyControl = part.getSingleElementByTagName(tagNames.mCtrl)
+        val pitchRawData = trackModel.pitch?.generateForVocaloid(trackModel.notes)
+        if (!convert || pitchRawData == null) {
+            part.removeChild(emptyControl)
+            return
+        }
         var currentElement = emptyControl
-        val pitchRawData = VocaloidPitchConvertor.generate(pitch)
         val eventsWithName =
             pitchRawData.pbs.map { it to tagNames.pbsName } + pitchRawData.pit.map { it to tagNames.pitName }
                 .sortedBy { it.first.pos }

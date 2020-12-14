@@ -18,7 +18,9 @@ import model.TickCounter
 import model.TimeSignature
 import org.w3c.files.Blob
 import org.w3c.files.File
-import process.pitch.VocaloidPitchConvertor
+import process.pitch.VocaloidPartPitchData
+import process.pitch.generateForVocaloid
+import process.pitch.pitchFromVocaloidParts
 import process.validateNotes
 import util.nameWithoutExtension
 import util.readBinary
@@ -81,17 +83,17 @@ object Vpr {
         ).validateNotes()
     }
 
-    private fun parsePitchData(track: Track): Pitch {
+    private fun parsePitchData(track: Track): Pitch? {
         val dataByParts = track.parts.map { part ->
-            VocaloidPitchConvertor.PitchRawData(
+            VocaloidPartPitchData(
                 startPos = part.pos,
                 pit = part.getControllerEvents(PITCH_BEND_NAME)
-                    .map { VocaloidPitchConvertor.Event.fromPair(it.pos to it.value.toInt()) },
+                    .map { VocaloidPartPitchData.Event.fromPair(it.pos to it.value.toInt()) },
                 pbs = part.getControllerEvents(PITCH_BEND_SENSITIVITY_NAME)
-                    .map { VocaloidPitchConvertor.Event.fromPair(it.pos to it.value.toInt()) }
+                    .map { VocaloidPartPitchData.Event.fromPair(it.pos to it.value.toInt()) }
             )
         }
-        return VocaloidPitchConvertor.parse(dataByParts)
+        return pitchFromVocaloidParts(dataByParts)
     }
 
     private suspend fun readContent(file: File): Project {
@@ -177,7 +179,7 @@ object Vpr {
     }
 
     private fun generatePitchData(track: model.Track): List<Controller>? {
-        val pitchRawData = track.pitch?.let { VocaloidPitchConvertor.generate(it) } ?: return null
+        val pitchRawData = track.pitch?.generateForVocaloid(track.notes) ?: return null
         val controllers = mutableListOf<Controller>()
         if (pitchRawData.pbs.isNotEmpty()) {
             controllers.add(

@@ -57,10 +57,11 @@ enum class Format(
         parser = {
             io.Ccs.parse(it.first())
         },
-        generator = { project, _ ->
-            io.Ccs.generate(project)
+        generator = { project, features ->
+            io.Ccs.generate(project, features)
         },
-        possibleLyricsTypes = listOf(KANA_CV)
+        possibleLyricsTypes = listOf(KANA_CV),
+        availableFeaturesForGeneration = listOf(CONVERT_PITCH)
     ),
     SVP(
         ".svp",
