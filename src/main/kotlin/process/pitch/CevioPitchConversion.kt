@@ -100,7 +100,6 @@ private fun appendEndingPoints(data: CevioTrackPitchData): CevioTrackPitchData {
     if (nextPos != null) {
         result.add(Event(nextPos, null, TEMP_VALUE_AS_NULL))
     }
-    console.log(result)
     return data.copy(events = result)
 }
 
