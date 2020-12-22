@@ -20,34 +20,57 @@ data class CevioTrackPitchData(
     )
 }
 
+/**
+ * Container of {CevioTrackPitchData.Event} with double values
+ * Used during calculation
+ */
+private data class EventDouble(
+    val index: Double?,
+    val repeat: Double?,
+    val value: Double?
+) {
+    fun round() =
+        if (this.value == null) null
+        else Event(
+            index = this.index?.roundToLong(),
+            repeat = this.repeat?.roundToLong(),
+            value = this.value
+        )
+
+    companion object {
+        fun from(event: Event) = EventDouble(
+            index = event.index?.toDouble(),
+            repeat = event.repeat?.toDouble(),
+            value = event.value
+        )
+    }
+}
+
 private const val TIME_UNIT_AS_TICKS_PER_BPM = 4.8 / 120
 private const val MIN_DATA_LENGTH = 500
+private const val TEMP_VALUE_AS_NULL = -1.0
 
 fun pitchFromCevioTrack(data: CevioTrackPitchData): Pitch? {
-    val convertedPoints = mutableListOf<Pair<Long, Double?>>()
+    val convertedPoints = mutableListOf<Pair<Double, Double?>>()
     var currentValue: Double? = null
 
     val eventsNormalized = data
+        .let(::appendEndingPoints)
         .let(::normalizeToTick)
         .let(::shapeEvents)
 
-    var nextPos: Long? = null
+    var nextPos: Double? = null
     for (event in eventsNormalized) {
         val pos = event.index!! - data.tickPrefix
         val length = event.repeat!!
-        val value = event.value.loggedFrequencyToKey()
+        val value = event.value?.loggedFrequencyToKey()
         if (value != currentValue || nextPos != pos) {
-            if (nextPos != null && nextPos < pos) {
-                convertedPoints.add(nextPos to null)
-            }
             convertedPoints.add(pos to value)
             currentValue = value
         }
         nextPos = pos + length
     }
-    if (nextPos != null) {
-        convertedPoints.add(nextPos to null)
-    }
+
     val lastMinusPosPoint = convertedPoints.lastOrNull { it.first < 0 && it.second != null }
     if (lastMinusPosPoint != null) {
         repeat(convertedPoints.indexOf(lastMinusPosPoint) + 1) {
@@ -55,21 +78,41 @@ fun pitchFromCevioTrack(data: CevioTrackPitchData): Pitch? {
         }
         val firstPositivePosPoint = convertedPoints.firstOrNull()
         if (firstPositivePosPoint != null && firstPositivePosPoint.first > 0) {
-            convertedPoints.add(0L to lastMinusPosPoint.second)
+            convertedPoints.add(0.0 to lastMinusPosPoint.second)
         }
     }
-    return Pitch(convertedPoints, isAbsolute = true).takeIf { it.data.isNotEmpty() }
+    return Pitch(convertedPoints.map { it.first.roundToLong() to it.second }, isAbsolute = true)
+        .takeIf { it.data.isNotEmpty() }
 }
 
-private fun normalizeToTick(data: CevioTrackPitchData): List<Event> {
+private fun appendEndingPoints(data: CevioTrackPitchData): CevioTrackPitchData {
+    val result = mutableListOf<Event>()
+    var nextPos: Long? = null
+    for (event in data.events) {
+        val pos = requireNotNull(event.index ?: nextPos)
+        val length = event.repeat ?: 1
+        if (nextPos != null && nextPos < pos) {
+            result.add(Event(nextPos, null, TEMP_VALUE_AS_NULL))
+        }
+        result.add(Event(pos, length, event.value))
+        nextPos = pos + length
+    }
+    if (nextPos != null) {
+        result.add(Event(nextPos, null, TEMP_VALUE_AS_NULL))
+    }
+    return data.copy(events = result)
+}
+
+private fun normalizeToTick(data: CevioTrackPitchData): List<EventDouble> {
     val tempos = data.tempos
         .map { it.copy(tickPosition = it.tickPosition + data.tickPrefix) }
         .expand()
-    val eventsNormalized = mutableListOf<Event>()
+    val events = data.events.map { EventDouble.from(it) }
+    val eventsNormalized = mutableListOf<EventDouble>()
     var currentTempoIndex = 0
-    var nextPos = 0L
-    var nextTickPos = 0L
-    for (event in data.events) {
+    var nextPos = 0.0
+    var nextTickPos = 0.0
+    for (event in events) {
         val pos = event.index ?: nextPos
         val tickPos = if (event.index == null) nextTickPos
         else {
@@ -77,36 +120,37 @@ private fun normalizeToTick(data: CevioTrackPitchData): List<Event> {
                 currentTempoIndex++
             }
             val ticksInTimeUnit = TIME_UNIT_AS_TICKS_PER_BPM * tempos[currentTempoIndex].third
-            tempos[currentTempoIndex].second +
-                    ((event.index - tempos[currentTempoIndex].first) * ticksInTimeUnit).toLong()
+            tempos[currentTempoIndex].second + (event.index - tempos[currentTempoIndex].first) * ticksInTimeUnit
         }
-        val repeat = event.repeat ?: 1
+        val repeat = event.repeat ?: 1.0
         var remainingRepeat = repeat
-        var repeatInTicks = 0L
+        var repeatInTicks = 0.0
         while (tempos.getOrNull(currentTempoIndex + 1)?.let { it.first < pos + repeat } == true) {
             repeatInTicks += tempos[currentTempoIndex + 1].second - max(tempos[currentTempoIndex].second, tickPos)
             remainingRepeat -= tempos[currentTempoIndex + 1].first - max(tempos[currentTempoIndex].first, pos)
             currentTempoIndex++
         }
-        repeatInTicks += (remainingRepeat * TIME_UNIT_AS_TICKS_PER_BPM * tempos[currentTempoIndex].third).toLong()
+        repeatInTicks += remainingRepeat * TIME_UNIT_AS_TICKS_PER_BPM * tempos[currentTempoIndex].third
         nextPos = pos + repeat
         nextTickPos = tickPos + repeatInTicks
-        eventsNormalized.add(Event(index = tickPos, repeat = repeatInTicks, value = event.value))
+        eventsNormalized.add(EventDouble(index = tickPos, repeat = repeatInTicks, value = event.value))
     }
-    return eventsNormalized
+    return eventsNormalized.map {
+        it.copy(value = if (it.value == TEMP_VALUE_AS_NULL) null else it.value)
+    }
 }
 
-private fun List<Tempo>.expand() = fold(listOf<Triple<Long, Long, Double>>()) { accumulator, element ->
-    if (accumulator.isEmpty()) listOf(Triple(0L, 0L, element.bpm))
+private fun List<Tempo>.expand() = fold(listOf<Triple<Double, Double, Double>>()) { accumulator, element ->
+    if (accumulator.isEmpty()) listOf(Triple(0.0, 0.0, element.bpm))
     else {
         val (lastPos, lastTickPos, lastBpm) = accumulator.last()
         val ticksInTimeUnit = TIME_UNIT_AS_TICKS_PER_BPM * lastBpm
-        val newPos = lastPos + ((element.tickPosition - lastTickPos).toDouble() / ticksInTimeUnit).toLong()
-        accumulator + Triple(newPos, element.tickPosition, element.bpm)
+        val newPos = lastPos + (element.tickPosition - lastTickPos) / ticksInTimeUnit
+        accumulator + Triple(newPos, element.tickPosition.toDouble(), element.bpm)
     }
 }
 
-private fun shapeEvents(eventsWithFullParams: List<Event>): List<Event> {
+private fun shapeEvents(eventsWithFullParams: List<EventDouble>): List<EventDouble> {
     return eventsWithFullParams.filter { it.repeat!! > 0 }
         .fold(listOf()) { accumulator, event ->
             val last = accumulator.lastOrNull()
@@ -124,7 +168,7 @@ fun Pitch.generateForCevio(notes: List<Note>, tempos: List<Tempo>, tickPrefix: L
         ?.takeIf { it.isNotEmpty() }
         ?: return null
     var nextIndex: Long? = null
-    val eventsWithFullParams = mutableListOf<Event>()
+    val eventsWithFullParams = mutableListOf<EventDouble>()
     for ((thisPoint, nextPoint) in data.zipWithNext() + (data.last() to null)) {
         val index = thisPoint.first
         if (nextIndex != null && nextIndex > index) {
@@ -143,7 +187,7 @@ fun Pitch.generateForCevio(notes: List<Note>, tempos: List<Tempo>, tickPrefix: L
         }.coerceAtLeast(1)
         nextIndex = index + repeat
         val value = thisPoint.second?.keyToLoggedFrequency() ?: continue
-        eventsWithFullParams.add(Event(index, repeat, value)) // in ticks temporarily
+        eventsWithFullParams.add(EventDouble(index.toDouble(), repeat.toDouble(), value)) // in ticks temporarily
     }
     return CevioTrackPitchData(
         denormalizeFromTick(eventsWithFullParams, tempos, tickPrefix)
@@ -159,13 +203,13 @@ fun CevioTrackPitchData.getLength(): Long {
     val lastEventWithIndex = this.events.findLast { it.index != null }!!
     var length = lastEventWithIndex.index!!
     for (index in this.events.indexOf(lastEventWithIndex)..this.events.lastIndex) {
-        length += this.events[index].repeat ?: 1
+        length += this.events[index].repeat ?: 1L
     }
     return length + MIN_DATA_LENGTH
 }
 
 private fun denormalizeFromTick(
-    eventsWithFullParams: List<Event>,
+    eventsWithFullParams: List<EventDouble>,
     temposInTicks: List<Tempo>,
     tickPrefix: Long
 ): List<Event> {
@@ -173,19 +217,19 @@ private fun denormalizeFromTick(
         .map { if (it.tickPosition == 0L) it else it.copy(tickPosition = it.tickPosition + tickPrefix) }
         .expand()
     val events = eventsWithFullParams.map { it.copy(index = it.index?.plus(tickPrefix)) }
-    val result = mutableListOf<Event>()
+
     var currentTempoIndex = 0
-    for (event in events) {
+    return events.mapNotNull { event ->
         val tickPos = event.index!!
         while (tempos.getOrNull(currentTempoIndex + 1)?.let { it.second <= tickPos } == true) {
             currentTempoIndex++
         }
         val ticksInTimeUnit = TIME_UNIT_AS_TICKS_PER_BPM * tempos[currentTempoIndex].third
         val pos =
-            tempos[currentTempoIndex].first + ((tickPos - tempos[currentTempoIndex].second) / ticksInTimeUnit).roundToLong()
+            tempos[currentTempoIndex].first + ((tickPos - tempos[currentTempoIndex].second) / ticksInTimeUnit)
         val repeatInTicks = event.repeat!!
         var remainingRepeatInTicks = repeatInTicks
-        var repeat = 0L
+        var repeat = 0.0
         while (tempos.getOrNull(currentTempoIndex + 1)?.let { it.second < tickPos + repeatInTicks } == true) {
             repeat += tempos[currentTempoIndex + 1].first - max(tempos[currentTempoIndex].first, pos)
             remainingRepeatInTicks -= tempos[currentTempoIndex + 1].second - max(
@@ -194,10 +238,13 @@ private fun denormalizeFromTick(
             )
             currentTempoIndex++
         }
-        repeat += (remainingRepeatInTicks / (TIME_UNIT_AS_TICKS_PER_BPM * tempos[currentTempoIndex].third)).roundToLong()
-        result.add(Event(index = pos, repeat = repeat.coerceAtLeast(1), value = event.value))
-    }
-    return result
+        repeat += (remainingRepeatInTicks / (TIME_UNIT_AS_TICKS_PER_BPM * tempos[currentTempoIndex].third))
+        EventDouble(
+            index = pos,
+            repeat = repeat.coerceAtLeast(1.0),
+            value = event.value
+        ).round()
+    }.also { console.log(it) }
 }
 
 private fun mergeEventsIfPossible(eventsWithFullParams: List<Event>) =
@@ -206,9 +253,9 @@ private fun mergeEventsIfPossible(eventsWithFullParams: List<Event>) =
         val areOverlapped = lastEvent.index!! + lastEvent.repeat!! > thisEvent.index!!
         if (areOverlapped) {
             val lastEventAsPoints = (lastEvent.index until (lastEvent.index + lastEvent.repeat))
-                .map { it to lastEvent.value }
+                .map { it to requireNotNull(lastEvent.value) }
             val thisEventAsPoints = (thisEvent.index until (thisEvent.index + thisEvent.repeat!!))
-                .map { it to thisEvent.value }
+                .map { it to requireNotNull(thisEvent.value) }
             val mergedPoints = (lastEventAsPoints + thisEventAsPoints)
                 .groupBy { it.first }
                 .map { (key, value) ->
