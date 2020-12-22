@@ -26,6 +26,7 @@ data class VocaloidPartPitchData(
 private const val PITCH_MAX_VALUE = 8191
 private const val DEFAULT_PITCH_BEND_SENSITIVITY = 2
 private const val MIN_BREAK_LENGTH_BETWEEN_PITCH_SECTIONS = 480L
+private const val BORDER_APPEND_RADIUS = 5L
 
 fun pitchFromVocaloidParts(dataByParts: List<VocaloidPartPitchData>): Pitch? {
     val pitchRawDataByPart = dataByParts.map { part ->
@@ -73,7 +74,7 @@ fun pitchFromVocaloidParts(dataByParts: List<VocaloidPartPitchData>): Pitch? {
 }
 
 fun Pitch.generateForVocaloid(notes: List<Note>): VocaloidPartPitchData? {
-    val data = this.getRelativeData(notes) ?: return null
+    val data = this.getRelativeData(notes, borderAppendRadius = BORDER_APPEND_RADIUS) ?: return null
     val pitchSectioned = mutableListOf<MutableList<Pair<Long, Double>>>()
     var currentPos = 0L
     for (pitchEvent in data) {
