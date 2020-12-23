@@ -9,13 +9,16 @@ import model.DEFAULT_LYRIC
 import model.ExportResult
 import model.Format
 import model.ImportWarning
+import model.Pitch
 import model.TimeSignature
 import org.w3c.files.Blob
 import org.w3c.files.BlobPropertyBag
 import org.w3c.files.File
+import process.pitch.processSvpInputPitchData
 import process.validateNotes
 import util.nameWithoutExtension
 import util.readText
+import kotlin.math.roundToLong
 
 object Svp {
     suspend fun parse(file: File): model.Project {
@@ -59,24 +62,25 @@ object Svp {
         model.Track(
             id = index,
             name = track.name ?: "Track ${index + 1}",
-            notes = parseNotes(track, project)
+            notes = parseNotes(track, project),
+            pitch = parsePitch(track, project)
         ).validateNotes()
     }
 
     private fun parseNotes(track: Track, project: Project): List<model.Note> {
         val mainNotes = track.mainGroup?.let { group ->
             val ref = track.mainRef ?: return@let null
-            parseExtraNotesFromGroup(ref, group)
+            parseNotesFromGroup(ref, group)
         }.orEmpty()
         val extraNotes = track.groups?.flatMap { ref ->
             project.library.find { it.uuid == ref.groupID }
-                ?.let { group -> parseExtraNotesFromGroup(ref, group) }
+                ?.let { group -> parseNotesFromGroup(ref, group) }
                 .orEmpty()
         }.orEmpty()
         return mainNotes + extraNotes
     }
 
-    private fun parseExtraNotesFromGroup(ref: Ref, group: Group): List<model.Note> = group.notes.map { note ->
+    private fun parseNotesFromGroup(ref: Ref, group: Group): List<model.Note> = group.notes.map { note ->
         val tickOn = (note.onset + ref.blickOffset) / TICK_RATE
         model.Note(
             id = 0,
@@ -85,6 +89,40 @@ object Svp {
             tickOff = tickOn + note.duration / TICK_RATE,
             lyric = note.lyrics.takeUnless { it.isNullOrBlank() } ?: DEFAULT_LYRIC
         )
+    }
+
+    private fun parsePitch(track: Track, project: Project): Pitch? {
+        val main = track.mainGroup?.let { group ->
+            val ref = track.mainRef ?: return@let null
+            parsePitchFromGroup(ref, group)
+        }.orEmpty()
+        val extras = track.groups?.flatMap { ref ->
+            project.library.find { it.uuid == ref.groupID }
+                ?.let { group -> parsePitchFromGroup(ref, group) }
+                .orEmpty()
+        }.orEmpty()
+        val all = (main + extras).sortedBy { it.first }
+        return Pitch(all, isAbsolute = false).takeIf { it.data.isNotEmpty() }
+    }
+
+    private fun parsePitchFromGroup(ref: Ref, group: Group): List<Pair<Long, Double>> {
+        val pitchDelta = group.parameters?.pitchDelta ?: return emptyList()
+        val mode = pitchDelta.mode ?: return emptyList()
+        val points = pitchDelta.points ?: return emptyList()
+        val convertedPoints = points.asSequence()
+            .withIndex()
+            .groupBy { it.index / 2 }
+            .map { it.value }
+            .map { it.map { indexedValue -> indexedValue.value } }
+            .mapNotNull {
+                val rawTick = it.getOrNull(0) ?: return@mapNotNull null
+                val centValue = it.getOrNull(1) ?: return@mapNotNull null
+                val tick = (rawTick + ref.blickOffset) / TICK_RATE
+                val value = centValue / 100
+                tick.roundToLong() to value
+            }
+            .toList()
+        return processSvpInputPitchData(convertedPoints, mode)
     }
 
     fun generate(project: model.Project): ExportResult {
@@ -273,7 +311,7 @@ object Svp {
     @Serializable
     private data class PitchDelta(
         var mode: String? = null,
-        var points: List<String>? = null
+        var points: List<Double>? = null
     )
 
     @Serializable
