@@ -69,10 +69,11 @@ enum class Format(
         parser = {
             io.Svp.parse(it.first())
         },
-        generator = { project, _ ->
-            io.Svp.generate(project)
+        generator = { project, features ->
+            io.Svp.generate(project, features)
         },
-        possibleLyricsTypes = listOf(ROMAJI_CV, KANA_CV)
+        possibleLyricsTypes = listOf(ROMAJI_CV, KANA_CV),
+        availableFeaturesForGeneration = listOf(CONVERT_PITCH)
     ),
     S5P(
         ".s5p",
