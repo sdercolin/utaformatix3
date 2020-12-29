@@ -170,12 +170,12 @@ class App : RComponent<RProps, AppState>() {
                             formats = Format.exportable
                             project = info.project
                             onSelected = {
-                                goNextStage(StageInfo.ConvertLyrics(info.project, it))
+                                goNextStage(StageInfo.ConvertLyricsAndPitch(info.project, it))
                             }
                         }
                     }
                 }
-                is StageInfo.ConvertLyrics -> {
+                is StageInfo.ConvertLyricsAndPitch -> {
                     child(ConfigurationEditor::class) {
                         attrs {
                             project = info.project

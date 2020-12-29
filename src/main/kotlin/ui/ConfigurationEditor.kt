@@ -70,6 +70,11 @@ class ConfigurationEditor(props: ConfigurationEditorProps) :
         val doLyricsConversion = analysedType != UNKNOWN
         val fromLyricsType: LyricsType?
         val toLyricsType: LyricsType?
+        val isPitchReadable =
+            Feature.CONVERT_PITCH.isAvailable(props.project)
+        val isPitchConversionAvailable =
+            props.outputFormat.availableFeaturesForGeneration.contains(Feature.CONVERT_PITCH)
+
         if (doLyricsConversion) {
             fromLyricsType = analysedType
             toLyricsType = analysedType.findBestConversionTargetIn(props.outputFormat)
@@ -86,6 +91,10 @@ class ConfigurationEditor(props: ConfigurationEditorProps) :
             true,
             RESTS_FILLING_MAX_LENGTH_DENOMINATOR_DEFAULT
         )
+        pitchConversion = PitchConversionState(
+            isAvailable = isPitchReadable && isPitchConversionAvailable,
+            isOn = isPitchReadable && isPitchConversionAvailable
+        )
         dialogError = DialogErrorState()
     }
 
@@ -93,6 +102,9 @@ class ConfigurationEditor(props: ConfigurationEditorProps) :
         title(Strings.ConfigurationEditorCaption)
         buildLyricsBlock()
         buildRestsFillingBlock()
+        if (state.pitchConversion.isAvailable) {
+            buildPitchConversion()
+        }
         buildNextButton()
 
         errorDialog(
@@ -351,6 +363,32 @@ class ConfigurationEditor(props: ConfigurationEditorProps) :
         }
     }
 
+    private fun RBuilder.buildPitchConversion() {
+        formGroup {
+            div {
+                formControlLabel {
+                    attrs {
+                        label = string(Strings.ConvertPitchData)
+                        control = switch {
+                            attrs {
+                                checked = state.pitchConversion.isOn
+                                onChange = {
+                                    val checked = (it.target as HTMLInputElement).checked
+                                    setState {
+                                        pitchConversion = pitchConversion.copy(
+                                            isOn = checked
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                        labelPlacement = LabelPlacement.end
+                    }
+                }
+            }
+        }
+    }
+
     private fun RBuilder.buildNextButton() {
         styledDiv {
             css {
@@ -400,11 +438,13 @@ class ConfigurationEditor(props: ConfigurationEditorProps) :
 
                 val format = props.outputFormat
                 delay(100)
-                val availableFeatures = Feature.values().filter {
+                var availableFeatures = Feature.values().filter {
                     it.isAvailable.invoke(project) &&
                             format.availableFeaturesForGeneration.contains(it)
                 }
-                // TODO: Add UI for users to select features
+
+                availableFeatures = removeUncheckedFeatures(availableFeatures)
+
                 val result = format.generator.invoke(project, availableFeatures)
                 console.log(result.blob)
                 props.onFinished.invoke(result, format)
@@ -419,6 +459,12 @@ class ConfigurationEditor(props: ConfigurationEditorProps) :
                     )
                 }
             }
+        }
+    }
+
+    private fun removeUncheckedFeatures(featureList : List<Feature>): List<Feature> {
+        return featureList.filter {
+            when (it) { Feature.CONVERT_PITCH -> state.pitchConversion.isOn}
         }
     }
 
@@ -444,6 +490,7 @@ external interface ConfigurationEditorState : RState {
     var isProcessing: Boolean
     var lyricsConversion: LyricsConversionState
     var slightRestsFilling: SlightRestsFillingState
+    var pitchConversion: PitchConversionState
     var dialogError: DialogErrorState
 }
 
@@ -465,3 +512,8 @@ data class SlightRestsFillingState(
     val excludedMaxLength
         get() = (TICKS_IN_FULL_NOTE / excludedMaxLengthDenominator).toLong()
 }
+
+data class PitchConversionState(
+    val isAvailable: Boolean,
+    val isOn: Boolean
+)

@@ -12,10 +12,10 @@ sealed class StageInfo(
         val project: Project
     ) : StageInfo(Stage.SelectOutputFormat)
 
-    data class ConvertLyrics(
+    data class ConvertLyricsAndPitch(
         val project: Project,
         val outputFormat: Format
-    ) : StageInfo(Stage.ConfigureLyrics)
+    ) : StageInfo(Stage.ConfigureLyricsAndPitch)
 
     data class Export(
         val project: Project,
