@@ -77,7 +77,7 @@ enum class Strings(val en: String, val ja: String, val zhCN: String) {
         zhCN = "目标歌词类型"
     ),
     ConvertPitchData(
-        en = "Convert Pitch Data",
+        en = "Convert pitch data",
         ja = "ピッチデータを変換",
         zhCN = "转换音高数据"
     ),

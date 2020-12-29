@@ -438,12 +438,12 @@ class ConfigurationEditor(props: ConfigurationEditorProps) :
 
                 val format = props.outputFormat
                 delay(100)
-                var availableFeatures = Feature.values().filter {
+                val availableFeatures = Feature.values().filter {
                     it.isAvailable.invoke(project) &&
                             format.availableFeaturesForGeneration.contains(it)
+                }.let {
+                    removeUncheckedFeatures(it)
                 }
-
-                availableFeatures = removeUncheckedFeatures(availableFeatures)
 
                 val result = format.generator.invoke(project, availableFeatures)
                 console.log(result.blob)
@@ -462,9 +462,11 @@ class ConfigurationEditor(props: ConfigurationEditorProps) :
         }
     }
 
-    private fun removeUncheckedFeatures(featureList : List<Feature>): List<Feature> {
+    private fun removeUncheckedFeatures(featureList: List<Feature>): List<Feature> {
         return featureList.filter {
-            when (it) { Feature.CONVERT_PITCH -> state.pitchConversion.isOn}
+            when (it) {
+                Feature.CONVERT_PITCH -> state.pitchConversion.isOn
+            }
         }
     }
 
