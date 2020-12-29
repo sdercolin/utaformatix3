@@ -93,7 +93,7 @@ class ConfigurationEditor(props: ConfigurationEditorProps) :
         )
         pitchConversion = PitchConversionState(
             isAvailable = isPitchReadable && isPitchConversionAvailable,
-            isOn = isPitchReadable && isPitchConversionAvailable
+            isOn = false
         )
         dialogError = DialogErrorState()
     }
@@ -383,6 +383,21 @@ class ConfigurationEditor(props: ConfigurationEditorProps) :
                             }
                         }
                         labelPlacement = LabelPlacement.end
+                    }
+                }
+                tooltip {
+                    attrs {
+                        title = string(Strings.ConvertPitchDataDescription)
+                        placement = "right"
+                        interactive = true
+                    }
+                    Icons.warning {
+                        attrs {
+                            style = Style(
+                                fontSize = FontSize.initial,
+                                verticalAlign = VerticalAlign.middle
+                            )
+                        }
                     }
                 }
             }

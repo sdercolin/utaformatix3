@@ -14,6 +14,7 @@ object Icons {
     val feedback = iconModule.Feedback.unsafeCast<RClass<IconProps>>()
     val arrowBack = iconModule.ArrowBack.unsafeCast<RClass<IconProps>>()
     val help = iconModule.HelpOutline.unsafeCast<RClass<IconProps>>()
+    val warning = iconModule.Warning.unsafeCast<RClass<IconProps>>()
 }
 
 external interface IconProps : RProps {
