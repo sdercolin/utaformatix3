@@ -81,6 +81,11 @@ enum class Strings(val en: String, val ja: String, val zhCN: String) {
         ja = "ピッチデータを変換",
         zhCN = "转换音高数据"
     ),
+    ConvertPitchDataDescription(
+        en = "Convert pitch data from source project. It may takes more time to process the pitch conversion.",
+        ja = "変換先のファイルからピッチデータ読み込んで変換する。処理により時間がかかることがあります。",
+        zhCN = "从源文件中读取并转换音高数据。可能需要更多时间。"
+    ),
     NextButton(
         en = "Next",
         ja = "次へ",
