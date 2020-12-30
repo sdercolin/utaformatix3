@@ -77,14 +77,14 @@ enum class Strings(val en: String, val ja: String, val zhCN: String) {
         zhCN = "目标歌词类型"
     ),
     ConvertPitchData(
-        en = "Convert pitch data",
-        ja = "ピッチデータを変換",
-        zhCN = "转换音高数据"
+        en = "Convert pitch parameters",
+        ja = "ピッチパラメータを変換",
+        zhCN = "转换音高参数"
     ),
     ConvertPitchDataDescription(
-        en = "Convert pitch data from source project. It may takes more time to process the pitch conversion.",
-        ja = "変換先のファイルからピッチデータ読み込んで変換する。処理により時間がかかることがあります。",
-        zhCN = "从源文件中读取并转换音高数据。可能需要更多时间。"
+        en = "It may take some time to process with this option.",
+        ja = "処理に時間がかかることがあります。",
+        zhCN = "该选项可能会增加处理时间。"
     ),
     NextButton(
         en = "Next",
