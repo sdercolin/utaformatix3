@@ -47,7 +47,6 @@ fun List<Pair<Long, Double>>.interpolateCosineEaseOut(samplingIntervalTick: Long
         val aFreq = kotlin.math.PI / (x1 - x0) / 2
         val amp = y0 - y1
         val phase = kotlin.math.PI / 2
-        console.log("start=$start, end=$end, afr=$aFreq, amp=$amp")
         indexes.map { x ->
             val y = amp * kotlin.math.cos(aFreq * (x - xOffset) + phase) + yOffset
             x to y
