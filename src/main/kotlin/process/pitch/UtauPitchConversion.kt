@@ -47,8 +47,12 @@ fun pitchFromUtauTrack(pitchData: UtauTrackPitchData?, notes: List<Note>): Pitch
                 tickPos += tickFromMilliSec(width, bpm)
                 val thisPoint = tickPos to (shift / 10)
                 val lastPoint = points.last()
-                val interpolatedPointList = interpolate(lastPoint, thisPoint, curveType)
-                points.addAll(interpolatedPointList.drop(1))
+                if (thisPoint.second != lastPoint.second) {
+                    val interpolatedPointList = interpolate(lastPoint, thisPoint, curveType)
+                    points.addAll(interpolatedPointList.drop(1))
+                } else {
+                    points.add(thisPoint)
+                }
             }
         }
         pitchPoints.addAll(pendingPitchPoints.filter { it.first < points.firstOrNull()?.first ?: Long.MAX_VALUE })
