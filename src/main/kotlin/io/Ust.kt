@@ -188,7 +188,6 @@ object Ust {
             }
         }
         val pitchData = notePitchDataList.ifEmpty { null }?.let { UtauTrackPitchData(it) }
-        console.log(pitchData)
         return FileParseResult(file, projectName, notes, tempos, pitchData)
     }
 
