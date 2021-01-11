@@ -49,7 +49,10 @@ fun pitchFromUtauTrack(pitchData: UtauTrackPitchData?, notes: List<Note>): Pitch
             }
         }
         pitchPoints.addAll(pendingPitchPoints.filter { it.first < points.firstOrNull()?.first ?: Long.MAX_VALUE })
-        pendingPitchPoints = points.fixPointsAtLastNote(note, lastNote).shape()
+        pendingPitchPoints = points
+            .fixPointsAtLastNote(note, lastNote)
+            .addPointsContinuingLastNote(note, lastNote)
+            .shape()
         lastNote = note
     }
     pitchPoints.addAll(pendingPitchPoints)
@@ -65,6 +68,14 @@ private fun List<Pair<Long, Double>>.fixPointsAtLastNote(thisNote: Note, lastNot
         val lastPoint = fixed.lastOrNull()
         if (lastPoint != null && lastPoint.first < thisNote.tickOn) fixed + (thisNote.tickOn to 0.0)
         else fixed
+    }
+
+private fun List<Pair<Long, Double>>.addPointsContinuingLastNote(thisNote: Note, lastNote: Note?) =
+    if (lastNote == null) this
+    else {
+        val firstPoint = this.firstOrNull()
+        if (firstPoint != null && firstPoint.first > thisNote.tickOn) this + (thisNote.tickOn to firstPoint.second)
+        else this
     }
 
 private fun List<Pair<Long, Double>>.shape() =
