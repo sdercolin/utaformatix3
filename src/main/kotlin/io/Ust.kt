@@ -18,6 +18,8 @@ import model.Track
 import org.khronos.webgl.Uint8Array
 import org.w3c.files.Blob
 import org.w3c.files.File
+import process.pitch.UtauNotePitchData
+import process.pitch.UtauTrackPitchData
 import process.validateNotes
 import util.encode
 import util.getSafeFileName
@@ -81,6 +83,7 @@ object Ust {
         val lines = readFileContent(file).linesNotBlank()
         var projectName: String? = null
         val notes = mutableListOf<Note>()
+        val notePitchDataList = mutableListOf<UtauNotePitchData>()
         val tempos = mutableListOf<Tempo>()
         var isHeader = true
         var time = 0L
@@ -89,6 +92,10 @@ object Ust {
         var pendingNoteTickOn: Long? = null
         var pendingNoteTickOff: Long? = null
         var pendingBpm: Double? = null
+        var pendingPBS: Pair<Double, Double>? = null
+        var pendingPBW: List<Double>? = null
+        var pendingPBY: List<Double>? = null
+        var pendingPBM: List<String>? = null
         for (line in lines) {
             line.tryGetValue("ProjectName")?.let {
                 projectName = it
@@ -124,11 +131,27 @@ object Ust {
                             tickOff = pendingNoteTickOff
                         )
                     )
+                    if (pendingPBS != null && pendingPBW != null) {
+                        notePitchDataList.add(
+                            UtauNotePitchData(
+                                bpm = pendingBpm,
+                                start = pendingPBS.first,
+                                startShift = pendingPBS.second,
+                                widths = pendingPBW,
+                                shifts = pendingPBY.orEmpty(),
+                                types = pendingPBM.orEmpty()
+                            )
+                        )
+                    }
                 }
                 pendingNoteKey = null
                 pendingNoteLyric = null
                 pendingNoteTickOn = null
                 pendingNoteTickOff = null
+                pendingPBS = null
+                pendingPBW = null
+                pendingPBY = null
+                pendingPBM = null
             }
             line.tryGetValue("Length")?.let {
                 val length = it.toLongOrNull() ?: return@let
@@ -148,15 +171,32 @@ object Ust {
                 val key = it.toIntOrNull() ?: return@let
                 pendingNoteKey = key
             }
+            line.tryGetValue("PBS")?.let {
+                val cells = it.split(';')
+                val start = cells[0].toDoubleOrNull() ?: return@let
+                val startShift = cells.getOrNull(1)?.toDoubleOrNull() ?: 0.0
+                pendingPBS = start to startShift
+            }
+            line.tryGetValue("PBW")?.let {
+                pendingPBW = it.split(',').map { width -> width.toDoubleOrNull() ?: 0.0 }
+            }
+            line.tryGetValue("PBY")?.let {
+                pendingPBY = it.split(',').map { shift -> shift.toDoubleOrNull() ?: 0.0 }
+            }
+            line.tryGetValue("PBM")?.let {
+                pendingPBM = it.split(',')
+            }
         }
-        return FileParseResult(file, projectName, notes, tempos)
+        val pitchData = notePitchDataList.takeIf { it.isNotEmpty() }?.let { UtauTrackPitchData(it) }
+        return FileParseResult(file, projectName, notes, tempos, pitchData)
     }
 
     private data class FileParseResult(
         val file: File,
         val projectName: String?,
         val notes: List<Note>,
-        val tempos: List<Tempo>
+        val tempos: List<Tempo>,
+        val pitchData: UtauTrackPitchData?
     )
 
     suspend fun generate(project: Project): ExportResult {
