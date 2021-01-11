@@ -3,6 +3,9 @@ package process.pitch
 import model.Note
 import model.Pitch
 import model.TICKS_IN_FULL_NOTE
+import process.interpolateCosineEaseIn
+import process.interpolateCosineEaseInOut
+import process.interpolateCosineEaseOut
 import process.interpolateLinear
 import kotlin.math.roundToLong
 
@@ -83,9 +86,9 @@ private fun interpolate(
     val input = listOf(lastPoint, thisPoint)
     val output = when (curveType) {
         "s" -> input.interpolateLinear(SAMPLING_INTERVAL_TICK)
-        "j" -> input.interpolateLinear(SAMPLING_INTERVAL_TICK) // TODO: J curve?
-        "r" -> input.interpolateLinear(SAMPLING_INTERVAL_TICK) // TODO: R curve?
-        else -> input.interpolateLinear(SAMPLING_INTERVAL_TICK) // TODO: cosine?
+        "j" -> input.interpolateCosineEaseIn(SAMPLING_INTERVAL_TICK)
+        "r" -> input.interpolateCosineEaseOut(SAMPLING_INTERVAL_TICK)
+        else -> input.interpolateCosineEaseInOut(SAMPLING_INTERVAL_TICK)
     }
     return output.orEmpty()
 }

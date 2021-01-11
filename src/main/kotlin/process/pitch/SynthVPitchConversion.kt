@@ -1,5 +1,6 @@
 package process.pitch
 
+import process.interpolateCosineEaseInOut
 import process.interpolateLinear
 
 private const val SAMPLING_INTERVAL_TICK = 4L
@@ -14,9 +15,9 @@ private fun List<Pair<Long, Double>>.merge() = groupBy { it.first }
 
 private fun List<Pair<Long, Double>>.interpolate(mode: String) = when (mode) {
     "linear" -> this.interpolateLinear(SAMPLING_INTERVAL_TICK)
-    "cosine" -> this.interpolateLinear(SAMPLING_INTERVAL_TICK) // TODO: interpolateCosine
-    "cubic" -> this.interpolateLinear(SAMPLING_INTERVAL_TICK) // TODO: interpolateCubic
-    else -> this.interpolateLinear(SAMPLING_INTERVAL_TICK)
+    "cosine" -> this.interpolateCosineEaseInOut(SAMPLING_INTERVAL_TICK)
+    "cubic" -> this.interpolateCosineEaseInOut(SAMPLING_INTERVAL_TICK) // TODO: interpolateCubic
+    else -> this.interpolateCosineEaseInOut(SAMPLING_INTERVAL_TICK)
 }
 
 fun appendPitchPointsForSvpOutput(points: List<Pair<Long, Double>>) =
