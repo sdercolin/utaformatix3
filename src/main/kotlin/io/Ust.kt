@@ -20,6 +20,7 @@ import org.w3c.files.Blob
 import org.w3c.files.File
 import process.pitch.UtauNotePitchData
 import process.pitch.UtauTrackPitchData
+import process.pitch.pitchFromUtauTrack
 import process.validateNotes
 import util.encode
 import util.getSafeFileName
@@ -43,7 +44,8 @@ object Ust {
             Track(
                 id = index,
                 name = result.file.nameWithoutExtension,
-                notes = result.notes
+                notes = result.notes,
+                pitch = pitchFromUtauTrack(result.pitchData, result.notes)
             ).validateNotes()
         }
         val warnings = mutableListOf<ImportWarning>()
@@ -131,18 +133,16 @@ object Ust {
                             tickOff = pendingNoteTickOff
                         )
                     )
-                    if (pendingPBS != null && pendingPBW != null) {
-                        notePitchDataList.add(
-                            UtauNotePitchData(
-                                bpm = pendingBpm,
-                                start = pendingPBS.first,
-                                startShift = pendingPBS.second,
-                                widths = pendingPBW,
-                                shifts = pendingPBY.orEmpty(),
-                                types = pendingPBM.orEmpty()
-                            )
+                    notePitchDataList.add(
+                        UtauNotePitchData(
+                            bpm = tempos.last().bpm,
+                            start = pendingPBS?.first ?: 0.0,
+                            startShift = pendingPBS?.second ?: 0.0,
+                            widths = pendingPBW.orEmpty(),
+                            shifts = pendingPBY.orEmpty(),
+                            curveTypes = pendingPBM.orEmpty()
                         )
-                    }
+                    )
                 }
                 pendingNoteKey = null
                 pendingNoteLyric = null
@@ -187,7 +187,8 @@ object Ust {
                 pendingPBM = it.split(',')
             }
         }
-        val pitchData = notePitchDataList.takeIf { it.isNotEmpty() }?.let { UtauTrackPitchData(it) }
+        val pitchData = notePitchDataList.ifEmpty { null }?.let { UtauTrackPitchData(it) }
+        console.log(pitchData)
         return FileParseResult(file, projectName, notes, tempos, pitchData)
     }
 
