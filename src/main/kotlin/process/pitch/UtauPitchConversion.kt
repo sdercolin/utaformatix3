@@ -67,7 +67,7 @@ fun pitchFromUtauTrack(pitchData: UtauTrackPitchData?, notes: List<Note>): Pitch
 }
 
 private fun List<Pair<Long, Double>>.fixPointsAtLastNote(thisNote: Note, lastNote: Note?) =
-    if (lastNote == null) this
+    if (lastNote == null || lastNote.tickOff != thisNote.tickOn) this
     else {
         val fixed = this.map {
             if (it.first < thisNote.tickOn) it.first to (it.second + thisNote.key - lastNote.key) else it
