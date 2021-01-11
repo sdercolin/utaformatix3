@@ -91,5 +91,5 @@ private fun interpolate(
 }
 
 private fun tickFromMilliSec(msec: Double, bpm: Double): Long {
-    return (msec * 60000 / bpm / (TICKS_IN_FULL_NOTE / 4)).roundToLong()
+    return (msec * bpm * (TICKS_IN_FULL_NOTE / 4) / 60000).roundToLong()
 }
