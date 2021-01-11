@@ -190,7 +190,7 @@ object Svp {
             ?.let(::appendPitchPointsForSvpOutput)
             ?.map { (it.first * TICK_RATE) to (it.second * 100) }
             ?: return null
-        return PitchDelta(mode = "cubic", points = data.flatMap { listOf(it.first.toDouble(), it.second) })
+        return PitchDelta(mode = "cosine", points = data.flatMap { listOf(it.first.toDouble(), it.second) })
     }
 
     private const val TICK_RATE = 1470000L
