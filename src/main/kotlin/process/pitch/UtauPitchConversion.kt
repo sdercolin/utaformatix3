@@ -36,7 +36,10 @@ fun pitchFromUtauTrack(pitchData: UtauTrackPitchData?, notes: List<Note>): Pitch
         if (notePitch?.bpm != null) bpm = notePitch.bpm
         if (notePitch != null) {
             var tickPos = note.tickOn + tickFromMilliSec(notePitch.start, bpm)
-            points.add(tickPos to notePitch.startShift / 10)
+            val startShift =
+                if (note.tickOn == lastNote?.tickOff) (lastNote.key - note.key).toDouble()
+                else notePitch.startShift / 10
+            points.add(tickPos to startShift)
             for (index in notePitch.widths.indices) {
                 val width = notePitch.widths[index]
                 val shift = notePitch.shifts.getOrNull(index) ?: 0.0
@@ -44,12 +47,19 @@ fun pitchFromUtauTrack(pitchData: UtauTrackPitchData?, notes: List<Note>): Pitch
                 tickPos += tickFromMilliSec(width, bpm)
                 val thisPoint = tickPos to (shift / 10)
                 val lastPoint = points.last()
-                val interpolatedPointList = interpolate(lastPoint, thisPoint, curveType)
-                points.addAll(interpolatedPointList.drop(1))
+                if (thisPoint.second != lastPoint.second) {
+                    val interpolatedPointList = interpolate(lastPoint, thisPoint, curveType)
+                    points.addAll(interpolatedPointList.drop(1))
+                } else {
+                    points.add(thisPoint)
+                }
             }
         }
         pitchPoints.addAll(pendingPitchPoints.filter { it.first < points.firstOrNull()?.first ?: Long.MAX_VALUE })
-        pendingPitchPoints = points.fixPointsAtLastNote(note, lastNote).shape()
+        pendingPitchPoints = points
+            .fixPointsAtLastNote(note, lastNote)
+            .addPointsContinuingLastNote(note, lastNote)
+            .shape()
         lastNote = note
     }
     pitchPoints.addAll(pendingPitchPoints)
@@ -57,7 +67,7 @@ fun pitchFromUtauTrack(pitchData: UtauTrackPitchData?, notes: List<Note>): Pitch
 }
 
 private fun List<Pair<Long, Double>>.fixPointsAtLastNote(thisNote: Note, lastNote: Note?) =
-    if (lastNote == null) this
+    if (lastNote == null || lastNote.tickOff != thisNote.tickOn) this
     else {
         val fixed = this.map {
             if (it.first < thisNote.tickOn) it.first to (it.second + thisNote.key - lastNote.key) else it
@@ -65,6 +75,14 @@ private fun List<Pair<Long, Double>>.fixPointsAtLastNote(thisNote: Note, lastNot
         val lastPoint = fixed.lastOrNull()
         if (lastPoint != null && lastPoint.first < thisNote.tickOn) fixed + (thisNote.tickOn to 0.0)
         else fixed
+    }
+
+private fun List<Pair<Long, Double>>.addPointsContinuingLastNote(thisNote: Note, lastNote: Note?) =
+    if (lastNote == null) this
+    else {
+        val firstPoint = this.firstOrNull()
+        if (firstPoint != null && firstPoint.first > thisNote.tickOn) this + (thisNote.tickOn to firstPoint.second)
+        else this
     }
 
 private fun List<Pair<Long, Double>>.shape() =
