@@ -6,6 +6,7 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonConfiguration
 import model.DEFAULT_LYRIC
 import model.ExportResult
+import model.Feature
 import model.Format
 import model.ImportWarning
 import model.Pitch
@@ -13,6 +14,7 @@ import model.TimeSignature
 import org.w3c.files.Blob
 import org.w3c.files.BlobPropertyBag
 import org.w3c.files.File
+import process.pitch.getRelativeData
 import process.pitch.processSvpInputPitchData
 import process.validateNotes
 import util.nameWithoutExtension
@@ -97,14 +99,14 @@ object S5p {
         )
     }
 
-    fun generate(project: model.Project): ExportResult {
-        val jsonText = generateContent(project)
+    fun generate(project: model.Project, features: List<Feature>): ExportResult {
+        val jsonText = generateContent(project, features)
         val blob = Blob(arrayOf(jsonText), BlobPropertyBag("application/octet-stream"))
         val name = project.name + Format.S5P.extension
         return ExportResult(blob, name, listOf())
     }
 
-    private fun generateContent(project: model.Project): String {
+    private fun generateContent(project: model.Project, features: List<Feature>): String {
         val template = Resources.s5pTemplate
         val s5p = jsonSerializer.parse(Project.serializer(), template)
         s5p.meter = project.timeSignatures.map {
@@ -122,12 +124,12 @@ object S5p {
         }
         val emptyTrack = s5p.tracks.first()
         s5p.tracks = project.tracks.map {
-            generateTrack(it, emptyTrack)
+            generateTrack(it, emptyTrack, features)
         }
         return jsonSerializer.stringify(Project.serializer(), s5p)
     }
 
-    private fun generateTrack(track: model.Track, emptyTrack: Track): Track {
+    private fun generateTrack(track: model.Track, emptyTrack: Track, features: List<Feature>): Track {
         return emptyTrack.copy(
             name = track.name,
             displayOrder = track.id,
@@ -138,8 +140,19 @@ object S5p {
                     lyric = it.lyric,
                     pitch = it.key
                 )
-            }
+            },
+            parameters = emptyTrack.parameters!!.copy(
+                pitchDelta = generatePitchData(track, features)
+            )
         )
+    }
+
+    private fun generatePitchData(track: model.Track, features: List<Feature>) : List<Double> {
+        if (!features.contains(Feature.CONVERT_PITCH)) return emptyList()
+        val data = track.pitch?.getRelativeData(track.notes)
+            ?.map { (it.first / 3.75) to (it.second * 100) }
+            ?: return emptyList()
+        return data.flatMap { listOf(it.first, it.second) }
     }
 
     private const val TICK_RATE = 1470000L

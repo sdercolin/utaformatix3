@@ -81,10 +81,11 @@ enum class Format(
         parser = {
             io.S5p.parse(it.first())
         },
-        generator = { project, _ ->
-            io.S5p.generate(project)
+        generator = { project, features ->
+            io.S5p.generate(project, features)
         },
-        possibleLyricsTypes = listOf(ROMAJI_CV, KANA_CV)
+        possibleLyricsTypes = listOf(ROMAJI_CV, KANA_CV),
+        availableFeaturesForGeneration = listOf(CONVERT_PITCH)
     ),
     MUSIC_XML(
         ".xml",
