@@ -8,13 +8,16 @@ import model.DEFAULT_LYRIC
 import model.ExportResult
 import model.Format
 import model.ImportWarning
+import model.Pitch
 import model.TimeSignature
 import org.w3c.files.Blob
 import org.w3c.files.BlobPropertyBag
 import org.w3c.files.File
+import process.pitch.processSvpInputPitchData
 import process.validateNotes
 import util.nameWithoutExtension
 import util.readText
+import kotlin.math.roundToLong
 
 object S5p {
     suspend fun parse(file: File): model.Project {
@@ -58,8 +61,29 @@ object S5p {
         model.Track(
             id = index,
             name = track.name ?: "Track ${index + 1}",
-            notes = parseNotes(track)
+            notes = parseNotes(track),
+            pitch = parsePitch(track)
         ).validateNotes()
+    }
+
+    private fun parsePitch(track: Track): Pitch? {
+        val pitchDelta = track.parameters?.pitchDelta ?: return Pitch(emptyList(), isAbsolute = false)
+        val convertedPoints = pitchDelta.asSequence()
+            .withIndex()
+            .groupBy { it.index / 2 }
+            .map { it.value }
+            .map { it.map { indexedValue -> indexedValue.value } }
+            .mapNotNull {
+                val rawTick = it.getOrNull(0) ?: return@mapNotNull null
+                val centValue = it.getOrNull(1) ?: return@mapNotNull null
+
+                val tick = rawTick * 3.75
+                val value = centValue / 100
+
+                tick.roundToLong() to value
+            }
+            .toList()
+        return Pitch(convertedPoints, isAbsolute = false).takeIf { it.data.isNotEmpty() }
     }
 
     private fun parseNotes(track: Track): List<model.Note> = track.notes.map { note ->
@@ -203,11 +227,17 @@ object S5p {
     private data class Parameters(
         var breathiness: List<Double>? = null,
         var gender: List<Double>? = null,
-        var intervar: Long? = null,
+        var interval: Long? = null,
         var loudness: List<Double>? = null,
         var pitchDelta: List<Double>? = null,
         var tension: List<Double>? = null,
         var vibratoEnv: List<Double>? = null,
         var voicing: List<Double>? = null
+    )
+
+    @Serializable
+    private data class PitchDelta(
+        var interval: Long? = null,
+        var points: List<Double>? = null
     )
 }
