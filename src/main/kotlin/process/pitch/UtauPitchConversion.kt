@@ -27,7 +27,6 @@ data class UtauNotePitchData(
 
 fun pitchFromUtauTrack(pitchData: UtauTrackPitchData?, notes: List<Note>): Pitch? {
     pitchData ?: return null
-    console.log(pitchData)
     val notePitches = notes.zip(pitchData.notes)
     var bpm = notePitches.firstOrNull { it.second?.bpm != null }?.second?.bpm ?: return null
     val pitchPoints = mutableListOf<Pair<Long, Double>>()
@@ -115,7 +114,6 @@ private fun List<Pair<Long, Double>>.appendVibrato(
             val easeOutFactor = ((noteLength - t) / easeOutLength).coerceIn(0.0..1.0)
             val x = 2 * kotlin.math.PI * (frequency * (t - start) - phase)
             val output = depth * easeInFactor * easeOutFactor * kotlin.math.sin(x) + shift
-            console.log("easeInFactor=$easeInFactor, easeOutFactor=$easeOutFactor, x=$x, $t to $output")
             output
         }
     }
