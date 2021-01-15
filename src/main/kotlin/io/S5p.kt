@@ -6,17 +6,24 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonConfiguration
 import model.DEFAULT_LYRIC
 import model.ExportResult
+import model.Feature
 import model.Format
 import model.ImportWarning
+import model.Pitch
 import model.TimeSignature
 import org.w3c.files.Blob
 import org.w3c.files.BlobPropertyBag
 import org.w3c.files.File
+import process.pitch.getRelativeData
 import process.validateNotes
 import util.nameWithoutExtension
 import util.readText
+import kotlin.math.roundToLong
 
 object S5p {
+    private const val TICK_RATE = 1470000L
+    private const val DEFAULT_INTERVAL = 5512500L
+
     suspend fun parse(file: File): model.Project {
         val text = file.readText().let {
             val index = it.lastIndexOf('}')
@@ -58,8 +65,29 @@ object S5p {
         model.Track(
             id = index,
             name = track.name ?: "Track ${index + 1}",
-            notes = parseNotes(track)
+            notes = parseNotes(track),
+            pitch = parsePitch(track)
         ).validateNotes()
+    }
+
+    private fun parsePitch(track: Track): Pitch? {
+        val pitchDelta = track.parameters?.pitchDelta ?: return Pitch(emptyList(), isAbsolute = false)
+        val convertedPoints = pitchDelta.asSequence()
+            .withIndex()
+            .groupBy { it.index / 2 }
+            .map { it.value }
+            .map { it.map { indexedValue -> indexedValue.value } }
+            .mapNotNull {
+                val rawTick = it.getOrNull(0) ?: return@mapNotNull null
+                val centValue = it.getOrNull(1) ?: return@mapNotNull null
+
+                val tick = rawTick * (track.parameters?.interval!!.toDouble().div(TICK_RATE))
+                val value = centValue / 100
+
+                tick.roundToLong() to value
+            }
+            .toList()
+        return Pitch(convertedPoints, isAbsolute = false).takeIf { it.data.isNotEmpty() }
     }
 
     private fun parseNotes(track: Track): List<model.Note> = track.notes.map { note ->
@@ -73,14 +101,14 @@ object S5p {
         )
     }
 
-    fun generate(project: model.Project): ExportResult {
-        val jsonText = generateContent(project)
+    fun generate(project: model.Project, features: List<Feature>): ExportResult {
+        val jsonText = generateContent(project, features)
         val blob = Blob(arrayOf(jsonText), BlobPropertyBag("application/octet-stream"))
         val name = project.name + Format.S5P.extension
         return ExportResult(blob, name, listOf())
     }
 
-    private fun generateContent(project: model.Project): String {
+    private fun generateContent(project: model.Project, features: List<Feature>): String {
         val template = Resources.s5pTemplate
         val s5p = jsonSerializer.parse(Project.serializer(), template)
         s5p.meter = project.timeSignatures.map {
@@ -98,12 +126,12 @@ object S5p {
         }
         val emptyTrack = s5p.tracks.first()
         s5p.tracks = project.tracks.map {
-            generateTrack(it, emptyTrack)
+            generateTrack(it, emptyTrack, features)
         }
         return jsonSerializer.stringify(Project.serializer(), s5p)
     }
 
-    private fun generateTrack(track: model.Track, emptyTrack: Track): Track {
+    private fun generateTrack(track: model.Track, emptyTrack: Track, features: List<Feature>): Track {
         return emptyTrack.copy(
             name = track.name,
             displayOrder = track.id,
@@ -114,11 +142,21 @@ object S5p {
                     lyric = it.lyric,
                     pitch = it.key
                 )
-            }
+            },
+            parameters = emptyTrack.parameters!!.copy(
+                interval = DEFAULT_INTERVAL,
+                pitchDelta = generatePitchData(track, features, DEFAULT_INTERVAL)
+            )
         )
     }
 
-    private const val TICK_RATE = 1470000L
+    private fun generatePitchData(track: model.Track, features: List<Feature>, interval: Long): List<Double> {
+        if (!features.contains(Feature.CONVERT_PITCH)) return emptyList()
+        val data = track.pitch?.getRelativeData(track.notes)
+            ?.map { (it.first / (interval.toDouble().div(TICK_RATE)) to (it.second * 100)) }
+            ?: return emptyList()
+        return data.flatMap { listOf(it.first, it.second) }
+    }
 
     private val jsonSerializer = Json(
         JsonConfiguration.Stable.copy(
@@ -203,7 +241,7 @@ object S5p {
     private data class Parameters(
         var breathiness: List<Double>? = null,
         var gender: List<Double>? = null,
-        var intervar: Long? = null,
+        var interval: Long? = null,
         var loudness: List<Double>? = null,
         var pitchDelta: List<Double>? = null,
         var tension: List<Double>? = null,
