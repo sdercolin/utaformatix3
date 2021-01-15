@@ -3,6 +3,7 @@ package io
 import exception.IllegalFileException
 import external.Resources
 import external.generateUUID
+import model.ExportNotification
 import model.ExportResult
 import model.Feature
 import model.Format
@@ -238,7 +239,13 @@ object Ccs {
         val content = serializer.serializeToString(document)
         val blob = Blob(arrayOf(content), BlobPropertyBag("application/octet-stream"))
         val name = project.name + Format.CCS.extension
-        return ExportResult(blob, name, listOf())
+        return ExportResult(
+            blob,
+            name,
+            listOfNotNull(
+                if (features.contains(Feature.CONVERT_PITCH)) ExportNotification.PitchDataExported else null
+            )
+        )
     }
 
     private fun generateContent(project: Project, features: List<Feature>): Document {

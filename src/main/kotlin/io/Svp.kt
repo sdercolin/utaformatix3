@@ -6,6 +6,7 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonConfiguration
 import model.DEFAULT_LYRIC
+import model.ExportNotification
 import model.ExportResult
 import model.Feature
 import model.Format
@@ -132,7 +133,13 @@ object Svp {
         val jsonText = generateContent(project, features)
         val blob = Blob(arrayOf(jsonText), BlobPropertyBag("application/octet-stream"))
         val name = project.name + Format.SVP.extension
-        return ExportResult(blob, name, listOf())
+        return ExportResult(
+            blob,
+            name,
+            listOfNotNull(
+                if (features.contains(Feature.CONVERT_PITCH)) ExportNotification.PitchDataExported else null
+            )
+        )
     }
 
     private fun generateContent(project: model.Project, features: List<Feature>): String {
