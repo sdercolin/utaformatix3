@@ -15,13 +15,15 @@ import org.w3c.files.Blob
 import org.w3c.files.BlobPropertyBag
 import org.w3c.files.File
 import process.pitch.getRelativeData
-import process.pitch.processSvpInputPitchData
 import process.validateNotes
 import util.nameWithoutExtension
 import util.readText
 import kotlin.math.roundToLong
 
 object S5p {
+    private const val TICK_RATE = 1470000L
+    private const val DEFAULT_INTERVAL = 5512500L
+
     suspend fun parse(file: File): model.Project {
         val text = file.readText().let {
             val index = it.lastIndexOf('}')
@@ -79,7 +81,7 @@ object S5p {
                 val rawTick = it.getOrNull(0) ?: return@mapNotNull null
                 val centValue = it.getOrNull(1) ?: return@mapNotNull null
 
-                val tick = rawTick * 3.75
+                val tick = rawTick * (track.parameters?.interval?.toDouble()?.div(TICK_RATE)!!)
                 val value = centValue / 100
 
                 tick.roundToLong() to value
@@ -142,20 +144,19 @@ object S5p {
                 )
             },
             parameters = emptyTrack.parameters!!.copy(
-                pitchDelta = generatePitchData(track, features)
+                interval = DEFAULT_INTERVAL,
+                pitchDelta = generatePitchData(track, features, DEFAULT_INTERVAL)
             )
         )
     }
 
-    private fun generatePitchData(track: model.Track, features: List<Feature>) : List<Double> {
+    private fun generatePitchData(track: model.Track, features: List<Feature>, interval: Long): List<Double> {
         if (!features.contains(Feature.CONVERT_PITCH)) return emptyList()
         val data = track.pitch?.getRelativeData(track.notes)
-            ?.map { (it.first / 3.75) to (it.second * 100) }
+            ?.map { (it.first / (interval.toDouble().div(TICK_RATE)) to (it.second * 100)) }
             ?: return emptyList()
         return data.flatMap { listOf(it.first, it.second) }
     }
-
-    private const val TICK_RATE = 1470000L
 
     private val jsonSerializer = Json(
         JsonConfiguration.Stable.copy(
@@ -246,11 +247,5 @@ object S5p {
         var tension: List<Double>? = null,
         var vibratoEnv: List<Double>? = null,
         var voicing: List<Double>? = null
-    )
-
-    @Serializable
-    private data class PitchDelta(
-        var interval: Long? = null,
-        var points: List<Double>? = null
     )
 }
