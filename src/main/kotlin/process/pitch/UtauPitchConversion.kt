@@ -105,8 +105,6 @@ private fun List<Pair<Long, Double>>.appendVibrato(
     val shift = depth * vibratoParams[6] / 100
 
     val start = noteLength - vibratoLength
-
-    console.log("$noteLength, $vibratoLength, $depth")
     val vibrato = { t: Double ->
         if (t < start) 0.0
         else {
