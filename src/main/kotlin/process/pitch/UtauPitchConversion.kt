@@ -125,15 +125,16 @@ private fun List<Pair<Long, Double>>.appendVibrato(
         .plus(if (needAppendEndingPoint) (thisNote.tickOff to (this.lastOrNull()?.second ?: 0.0)) else null)
         .filterNotNull()
         .map { (it.first - thisNote.tickOn) to it.second }
-        .fold(listOf<Pair<Long, Double>>()) { acc, point ->
+        .fold(listOf<Pair<Long, Double>>()) { acc, inputPoint ->
             val lastPoint = acc.lastOrNull()
+            val newPoint = inputPoint.let { it.first to (it.second + vibrato(it.first.toDouble())) }
             if (lastPoint == null) {
-                acc + point.let { it.first to (it.second + vibrato(it.first.toDouble())) }
+                acc + newPoint
             } else {
-                val interpolatedIndexes = ((lastPoint.first + 1) until point.first)
+                val interpolatedIndexes = ((lastPoint.first + 1) until inputPoint.first)
                     .filter { (it - lastPoint.first) % SAMPLING_INTERVAL_TICK == 0L }
                 val interpolatedPoints = interpolatedIndexes.map { it to (lastPoint.second + vibrato(it.toDouble())) }
-                acc + interpolatedPoints + point.let { it.first to (it.second + vibrato(it.first.toDouble())) }
+                acc + interpolatedPoints + newPoint
             }
         }
         .map { (it.first + thisNote.tickOn) to it.second }
