@@ -81,7 +81,7 @@ object S5p {
                 val rawTick = it.getOrNull(0) ?: return@mapNotNull null
                 val centValue = it.getOrNull(1) ?: return@mapNotNull null
 
-                val tick = rawTick * (track.parameters?.interval?.toDouble()?.div(TICK_RATE)!!)
+                val tick = rawTick * (track.parameters?.interval!!.toDouble().div(TICK_RATE))
                 val value = centValue / 100
 
                 tick.roundToLong() to value
