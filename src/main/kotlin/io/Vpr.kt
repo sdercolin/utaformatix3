@@ -10,12 +10,17 @@ import kotlinx.serialization.json.JsonConfiguration
 import model.DEFAULT_LYRIC
 import model.ExportNotification
 import model.ExportResult
+import model.Feature
 import model.Format
 import model.ImportWarning
+import model.Pitch
 import model.TickCounter
 import model.TimeSignature
 import org.w3c.files.Blob
 import org.w3c.files.File
+import process.pitch.VocaloidPartPitchData
+import process.pitch.generateForVocaloid
+import process.pitch.pitchFromVocaloidParts
 import process.validateNotes
 import util.nameWithoutExtension
 import util.readBinary
@@ -69,12 +74,26 @@ object Vpr {
                     xSampa = note.phoneme
                 )
             }
-
+        val pitch = parsePitchData(track)
         return model.Track(
             id = trackIndex,
             name = track.name ?: "Track ${trackIndex + 1}",
-            notes = notes
+            notes = notes,
+            pitch = pitch
         ).validateNotes()
+    }
+
+    private fun parsePitchData(track: Track): Pitch? {
+        val dataByParts = track.parts.map { part ->
+            VocaloidPartPitchData(
+                startPos = part.pos,
+                pit = part.getControllerEvents(PITCH_BEND_NAME)
+                    .map { VocaloidPartPitchData.Event.fromPair(it.pos to it.value.toInt()) },
+                pbs = part.getControllerEvents(PITCH_BEND_SENSITIVITY_NAME)
+                    .map { VocaloidPartPitchData.Event.fromPair(it.pos to it.value.toInt()) }
+            )
+        }
+        return pitchFromVocaloidParts(dataByParts)
     }
 
     private suspend fun readContent(file: File): Project {
@@ -91,8 +110,8 @@ object Vpr {
         return jsonSerializer.parse(Project.serializer(), text)
     }
 
-    suspend fun generate(project: model.Project): ExportResult {
-        val jsonText = generateContent(project)
+    suspend fun generate(project: model.Project, features: List<Feature>): ExportResult {
+        val jsonText = generateContent(project, features)
         val zip = JsZip()
         zip.file(possibleJsonPaths.first(), jsonText)
         val option = JsZipOption().also {
@@ -105,12 +124,13 @@ object Vpr {
             blob,
             name,
             listOfNotNull(
-                if (project.hasXSampaData) null else ExportNotification.PhonemeResetRequiredV5
+                if (project.hasXSampaData) null else ExportNotification.PhonemeResetRequiredV5,
+                if (features.contains(Feature.CONVERT_PITCH)) ExportNotification.PitchDataExported else null
             )
         )
     }
 
-    private fun generateContent(project: model.Project): String {
+    private fun generateContent(project: model.Project, features: List<Feature>): String {
         val template = Resources.vprTemplate
         val vpr = jsonSerializer.parse(Project.serializer(), template)
         var endTick = 0L
@@ -140,7 +160,14 @@ object Vpr {
                 )
             }
             val duration = track.notes.lastOrNull()?.tickOff
-            val part = duration?.let { emptyTrack.parts.first().copy(duration = it, notes = notes) }
+            val controllers = if (features.contains(Feature.CONVERT_PITCH)) generatePitchData(track) else null
+            val part = duration?.let {
+                emptyTrack.parts.first().copy(
+                    duration = it,
+                    notes = notes,
+                    controllers = controllers
+                )
+            }
             emptyTrack.copy(
                 name = track.name,
                 parts = listOfNotNull(part)
@@ -150,6 +177,30 @@ object Vpr {
         endTick = endTick.coerceAtLeast(tracks.map { it.parts.firstOrNull()?.duration ?: 0 }.max() ?: 0)
         vpr.masterTrack!!.loop!!.end = endTick
         return jsonSerializer.stringify(Project.serializer(), vpr)
+    }
+
+    private fun generatePitchData(track: model.Track): List<Controller>? {
+        val pitchRawData = track.pitch?.generateForVocaloid(track.notes) ?: return null
+        val controllers = mutableListOf<Controller>()
+        if (pitchRawData.pbs.isNotEmpty()) {
+            controllers.add(
+                Controller(
+                    name = PITCH_BEND_SENSITIVITY_NAME,
+                    events = pitchRawData.pbs.map { ControllerEvent(pos = it.pos, value = it.value.toLong()) }
+                )
+            )
+        }
+        if (pitchRawData.pit.isNotEmpty()) {
+            controllers.add(
+                Controller(
+                    name = PITCH_BEND_NAME,
+                    events = pitchRawData.pit.map {
+                        ControllerEvent(pos = it.pos, value = it.value.toLong())
+                    }
+                )
+            )
+        }
+        return controllers.takeIf { it.isNotEmpty() }
     }
 
     private val jsonSerializer = Json(
@@ -164,6 +215,9 @@ object Vpr {
         "Project\\sequence.json",
         "Project/sequence.json"
     )
+
+    private const val PITCH_BEND_NAME = "pitchBend"
+    private const val PITCH_BEND_SENSITIVITY_NAME = "pitchBendSens"
 
     @Serializable
     private data class Project(
@@ -285,7 +339,22 @@ object Vpr {
         var notes: List<Note> = listOf(),
         var pos: Long,
         var styleName: String? = null,
-        var voice: PartVoice? = null
+        var voice: PartVoice? = null,
+        var controllers: List<Controller>? = null
+    ) {
+        fun getControllerEvents(name: String) = controllers?.find { it.name == name }?.events.orEmpty()
+    }
+
+    @Serializable
+    private data class Controller(
+        var name: String,
+        var events: List<ControllerEvent> = listOf()
+    )
+
+    @Serializable
+    private data class ControllerEvent(
+        var pos: Long,
+        var value: Long
     )
 
     @Serializable

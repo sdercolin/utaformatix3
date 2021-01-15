@@ -26,6 +26,7 @@ import ui.strings.Strings.DownloadButton
 import ui.strings.Strings.ExportNotificationPhonemeResetRequiredV4
 import ui.strings.Strings.ExportNotificationPhonemeResetRequiredV5
 import ui.strings.Strings.ExportNotificationPhonemeResetRequiredVSQ
+import ui.strings.Strings.ExportNotificationPitchDataExported
 import ui.strings.Strings.ExportNotificationTempoChangeIgnored
 import ui.strings.Strings.ExportNotificationTimeSignatureIgnored
 import ui.strings.Strings.ExporterTitleSuccess
@@ -108,6 +109,7 @@ class Exporter : RComponent<ExporterProps, RState>() {
                 ExportNotification.PhonemeResetRequiredV5 -> ExportNotificationPhonemeResetRequiredV5
                 ExportNotification.TempoChangeIgnored -> ExportNotificationTimeSignatureIgnored
                 ExportNotification.TimeSignatureIgnored -> ExportNotificationTempoChangeIgnored
+                ExportNotification.PitchDataExported -> ExportNotificationPitchDataExported
             }
         )
 }

@@ -6,16 +6,23 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonConfiguration
 import model.DEFAULT_LYRIC
+import model.ExportNotification
 import model.ExportResult
+import model.Feature
 import model.Format
 import model.ImportWarning
+import model.Pitch
 import model.TimeSignature
 import org.w3c.files.Blob
 import org.w3c.files.BlobPropertyBag
 import org.w3c.files.File
+import process.pitch.appendPitchPointsForSvpOutput
+import process.pitch.getRelativeData
+import process.pitch.processSvpInputPitchData
 import process.validateNotes
 import util.nameWithoutExtension
 import util.readText
+import kotlin.math.roundToLong
 
 object Svp {
     suspend fun parse(file: File): model.Project {
@@ -59,24 +66,25 @@ object Svp {
         model.Track(
             id = index,
             name = track.name ?: "Track ${index + 1}",
-            notes = parseNotes(track, project)
+            notes = parseNotes(track, project),
+            pitch = parsePitch(track, project)
         ).validateNotes()
     }
 
     private fun parseNotes(track: Track, project: Project): List<model.Note> {
         val mainNotes = track.mainGroup?.let { group ->
             val ref = track.mainRef ?: return@let null
-            parseExtraNotesFromGroup(ref, group)
+            parseNotesFromGroup(ref, group)
         }.orEmpty()
         val extraNotes = track.groups?.flatMap { ref ->
             project.library.find { it.uuid == ref.groupID }
-                ?.let { group -> parseExtraNotesFromGroup(ref, group) }
+                ?.let { group -> parseNotesFromGroup(ref, group) }
                 .orEmpty()
         }.orEmpty()
         return mainNotes + extraNotes
     }
 
-    private fun parseExtraNotesFromGroup(ref: Ref, group: Group): List<model.Note> = group.notes.map { note ->
+    private fun parseNotesFromGroup(ref: Ref, group: Group): List<model.Note> = group.notes.map { note ->
         val tickOn = (note.onset + ref.blickOffset) / TICK_RATE
         model.Note(
             id = 0,
@@ -87,14 +95,54 @@ object Svp {
         )
     }
 
-    fun generate(project: model.Project): ExportResult {
-        val jsonText = generateContent(project)
-        val blob = Blob(arrayOf(jsonText), BlobPropertyBag("application/octet-stream"))
-        val name = project.name + Format.SVP.extension
-        return ExportResult(blob, name, listOf())
+    private fun parsePitch(track: Track, project: Project): Pitch? {
+        val main = track.mainGroup?.let { group ->
+            val ref = track.mainRef ?: return@let null
+            parsePitchFromGroup(ref, group)
+        }.orEmpty()
+        val extras = track.groups?.flatMap { ref ->
+            project.library.find { it.uuid == ref.groupID }
+                ?.let { group -> parsePitchFromGroup(ref, group) }
+                .orEmpty()
+        }.orEmpty()
+        val all = (main + extras).sortedBy { it.first }
+        return Pitch(all, isAbsolute = false).takeIf { it.data.isNotEmpty() }
     }
 
-    private fun generateContent(project: model.Project): String {
+    private fun parsePitchFromGroup(ref: Ref, group: Group): List<Pair<Long, Double>> {
+        val pitchDelta = group.parameters?.pitchDelta ?: return emptyList()
+        val mode = pitchDelta.mode ?: return emptyList()
+        val points = pitchDelta.points ?: return emptyList()
+        val convertedPoints = points.asSequence()
+            .withIndex()
+            .groupBy { it.index / 2 }
+            .map { it.value }
+            .map { it.map { indexedValue -> indexedValue.value } }
+            .mapNotNull {
+                val rawTick = it.getOrNull(0) ?: return@mapNotNull null
+                val centValue = it.getOrNull(1) ?: return@mapNotNull null
+                val tick = (rawTick + ref.blickOffset) / TICK_RATE
+                val value = centValue / 100
+                tick.roundToLong() to value
+            }
+            .toList()
+        return processSvpInputPitchData(convertedPoints, mode)
+    }
+
+    fun generate(project: model.Project, features: List<Feature>): ExportResult {
+        val jsonText = generateContent(project, features)
+        val blob = Blob(arrayOf(jsonText), BlobPropertyBag("application/octet-stream"))
+        val name = project.name + Format.SVP.extension
+        return ExportResult(
+            blob,
+            name,
+            listOfNotNull(
+                if (features.contains(Feature.CONVERT_PITCH)) ExportNotification.PitchDataExported else null
+            )
+        )
+    }
+
+    private fun generateContent(project: model.Project, features: List<Feature>): String {
         val template = Resources.svpTemplate
         val svp = jsonSerializer.parse(Project.serializer(), template)
         svp.time.meter = project.timeSignatures.map {
@@ -112,12 +160,12 @@ object Svp {
         }
         val emptyTrack = svp.tracks.first()
         svp.tracks = project.tracks.map {
-            generateTrack(it, emptyTrack)
+            generateTrack(it, emptyTrack, features)
         }
         return jsonSerializer.stringify(Project.serializer(), svp)
     }
 
-    private fun generateTrack(track: model.Track, emptyTrack: Track): Track {
+    private fun generateTrack(track: model.Track, emptyTrack: Track, features: List<Feature>): Track {
         val uuid = generateUUID()
         return emptyTrack.copy(
             name = track.name,
@@ -132,12 +180,24 @@ object Svp {
                         pitch = it.key,
                         attributes = Attributes()
                     )
-                }
+                },
+                parameters = emptyTrack.mainGroup!!.parameters!!.copy(
+                    pitchDelta = generatePitchData(track, features) ?: emptyTrack.mainGroup!!.parameters!!.pitchDelta
+                )
             ),
             mainRef = emptyTrack.mainRef!!.copy(
                 groupID = uuid
             )
         )
+    }
+
+    private fun generatePitchData(track: model.Track, features: List<Feature>): PitchDelta? {
+        if (!features.contains(Feature.CONVERT_PITCH)) return null
+        val data = track.pitch?.getRelativeData(track.notes)
+            ?.let(::appendPitchPointsForSvpOutput)
+            ?.map { (it.first * TICK_RATE) to (it.second * 100) }
+            ?: return null
+        return PitchDelta(mode = "cosine", points = data.flatMap { listOf(it.first.toDouble(), it.second) })
     }
 
     private const val TICK_RATE = 1470000L
@@ -273,7 +333,7 @@ object Svp {
     @Serializable
     private data class PitchDelta(
         var mode: String? = null,
-        var points: List<String>? = null
+        var points: List<Double>? = null
     )
 
     @Serializable

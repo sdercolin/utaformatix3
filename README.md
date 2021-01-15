@@ -12,6 +12,15 @@ The current version `3.x` is built with [Kotlin for JavaScript](https://kotlinla
 - Detect and convert Japanese lyrics types
   - between CV and VCV
   - between Kana and Romaji
+- Convert pitch for the following supported formats
+  
+  |    Format    | Pitch import | Vibrato import | Pitch export | 
+  | ------------ | ------------ | -------------- | ------------ |
+  | VSQ/VSQX/VPR |       ✓      |                |       ✓      |
+  |  UST(mode2)  |       ✓      |        ✓       |              |
+  |     CCS      |       ✓      |                |       ✓      |
+  |     SVP      |       ✓      |                |       ✓      |
+  |     S5P      |       ✓      |                |       ✓      |
   
 ## Contributors
 

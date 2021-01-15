@@ -93,6 +93,10 @@
                 <bs>0</bs>
                 <pc>0</pc>
             </singer>
+            <cc>
+                <t>0</t>
+                <v id="P">0</v>
+            </cc>
             <note>
                 <t>240</t>
                 <dur>480</dur>

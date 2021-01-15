@@ -7,9 +7,11 @@ import external.require
 import model.DEFAULT_LYRIC
 import model.ExportNotification
 import model.ExportResult
+import model.Feature
 import model.Format
 import model.ImportWarning
 import model.Note
+import model.Pitch
 import model.Project
 import model.Tempo
 import model.TickCounter
@@ -19,6 +21,9 @@ import org.khronos.webgl.Uint8Array
 import org.w3c.files.Blob
 import org.w3c.files.BlobPropertyBag
 import org.w3c.files.File
+import process.pitch.VocaloidPartPitchData
+import process.pitch.generateForVocaloid
+import process.pitch.pitchFromVocaloidParts
 import process.validateNotes
 import util.MidiUtil
 import util.MidiUtil.MetaType
@@ -225,23 +230,48 @@ object Vsq {
                 )
             }
             .filterNotNull()
-        return Track(trackId, name, notes).validateNotes()
+        val pitch = parsePitchData(sectionMap, tickPrefix)
+        return Track(trackId, name, notes, pitch).validateNotes()
     }
 
-    fun generate(project: Project): ExportResult {
-        val content = project.withoutEmptyTracks()?.let { generateContent(it) } ?: throw EmptyProjectException()
+    private fun parsePitchData(sectionMap: Map<String, Map<String, String>>, tickPrefix: Long): Pitch? {
+        val pit = sectionMap["PitchBendBPList"]?.entries?.mapNotNull {
+            val pos = it.key.toLongOrNull() ?: return@mapNotNull null
+            val value = it.value.toIntOrNull() ?: return@mapNotNull null
+            VocaloidPartPitchData.Event(pos - tickPrefix, value = value)
+        } ?: listOf()
+        val pbs = sectionMap["PitchBendSensBPList"]?.entries?.mapNotNull {
+            val pos = it.key.toLongOrNull() ?: return@mapNotNull null
+            val value = it.value.toIntOrNull() ?: return@mapNotNull null
+            VocaloidPartPitchData.Event(pos - tickPrefix, value = value)
+        } ?: listOf()
+        return pitchFromVocaloidParts(
+            listOf(
+                VocaloidPartPitchData(
+                    startPos = 0,
+                    pit = pit,
+                    pbs = pbs
+                )
+            )
+        )
+    }
+
+    fun generate(project: Project, features: List<Feature>): ExportResult {
+        val content =
+            project.withoutEmptyTracks()?.let { generateContent(it, features) } ?: throw EmptyProjectException()
         val blob = Blob(arrayOf(content), BlobPropertyBag("application/octet-stream"))
         val name = project.name + Format.VSQ.extension
         return ExportResult(
             blob,
             name,
             listOfNotNull(
-                if (project.hasXSampaData) null else ExportNotification.PhonemeResetRequiredVSQ
+                if (project.hasXSampaData) null else ExportNotification.PhonemeResetRequiredVSQ,
+                if (features.contains(Feature.CONVERT_PITCH)) ExportNotification.PitchDataExported else null
             )
         )
     }
 
-    private fun generateContent(project: Project): Uint8Array {
+    private fun generateContent(project: Project, features: List<Feature>): Uint8Array {
         val bytes = mutableListOf<Byte>()
         bytes.addAll(headerLabel)
         bytes.addInt(6, IS_LITTLE_ENDIAN)
@@ -264,7 +294,7 @@ object Vsq {
         project.tracks.forEach {
             bytes.addAll(trackLabel)
             bytes.addBlock(
-                generateTrack(it, tickPrefix, measurePrefix, project),
+                generateTrack(it, tickPrefix, measurePrefix, project, features),
                 IS_LITTLE_ENDIAN,
                 lengthInVariableLength = false
             )
@@ -325,12 +355,18 @@ object Vsq {
         return bytes
     }
 
-    private fun generateTrack(track: Track, tickPrefix: Int, measurePrefix: Int, project: Project): List<Byte> {
+    private fun generateTrack(
+        track: Track,
+        tickPrefix: Int,
+        measurePrefix: Int,
+        project: Project,
+        features: List<Feature>
+    ): List<Byte> {
         val bytes = mutableListOf<Byte>()
         bytes.add(0x00)
         bytes.addAll(MetaType.TRACK_NAME.eventHeaderBytes)
         bytes.addString(track.name, IS_LITTLE_ENDIAN, lengthInVariableLength = true)
-        var textBytes = generateTrackText(track, tickPrefix, measurePrefix, project)
+        var textBytes = generateTrackText(track, tickPrefix, measurePrefix, project, features)
             .encode("SJIS")
             .toList()
         val textEvents = mutableListOf<List<Byte>>()
@@ -354,7 +390,13 @@ object Vsq {
         return bytes
     }
 
-    private fun generateTrackText(track: Track, tickPrefix: Int, measurePrefix: Int, project: Project): String {
+    private fun generateTrackText(
+        track: Track,
+        tickPrefix: Int,
+        measurePrefix: Int,
+        project: Project,
+        features: List<Feature>
+    ): String {
         val notesLines = mutableListOf<String>()
         val lyricsLines = mutableListOf<String>()
         val tickLists = track.notes.map { it.tickOn + tickPrefix }
@@ -421,8 +463,30 @@ object Vsq {
             add("Language=0")
             add("Program=0")
             addAll(lyricsLines)
+            if (features.contains(Feature.CONVERT_PITCH) && track.pitch != null) {
+                addAll(generatePitchTexts(track.pitch, tickPrefix, track.notes))
+            }
         }.joinToString("\n")
     }
+
+    private fun generatePitchTexts(pitch: Pitch, tickPrefix: Int, notes: List<Note>): List<String> =
+        mutableListOf<String>().apply {
+            val pitchRawData = pitch.generateForVocaloid(notes) ?: return@apply
+            if (pitchRawData.pit.isNotEmpty()) {
+                add("[PitchBendBPList]")
+                pitchRawData.pit.forEach {
+                    val pos = it.pos + tickPrefix
+                    add("$pos=${it.value}")
+                }
+            }
+            if (pitchRawData.pbs.isNotEmpty()) {
+                add("[PitchBendSensBPList]")
+                pitchRawData.pbs.forEach {
+                    val pos = it.pos + tickPrefix
+                    add("$pos=${it.value}")
+                }
+            }
+        }
 
     private val headerLabel = listOf(0x4d, 0x54, 0x68, 0x64).map { it.toByte() }
     private val timeDivisions = listOf(0x01, 0xe0).map { it.toByte() }

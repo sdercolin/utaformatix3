@@ -11,6 +11,7 @@ import kotlinx.css.minWidth
 import kotlinx.css.paddingBottom
 import kotlinx.css.width
 import model.ExportResult
+import model.Feature
 import model.Format
 import model.LyricsType
 import model.LyricsType.KANA_CV
@@ -69,6 +70,11 @@ class ConfigurationEditor(props: ConfigurationEditorProps) :
         val doLyricsConversion = analysedType != UNKNOWN
         val fromLyricsType: LyricsType?
         val toLyricsType: LyricsType?
+        val isPitchReadable =
+            Feature.CONVERT_PITCH.isAvailable(props.project)
+        val isPitchConversionAvailable =
+            props.outputFormat.availableFeaturesForGeneration.contains(Feature.CONVERT_PITCH)
+
         if (doLyricsConversion) {
             fromLyricsType = analysedType
             toLyricsType = analysedType.findBestConversionTargetIn(props.outputFormat)
@@ -85,6 +91,10 @@ class ConfigurationEditor(props: ConfigurationEditorProps) :
             true,
             RESTS_FILLING_MAX_LENGTH_DENOMINATOR_DEFAULT
         )
+        pitchConversion = PitchConversionState(
+            isAvailable = isPitchReadable && isPitchConversionAvailable,
+            isOn = false
+        )
         dialogError = DialogErrorState()
     }
 
@@ -92,6 +102,9 @@ class ConfigurationEditor(props: ConfigurationEditorProps) :
         title(Strings.ConfigurationEditorCaption)
         buildLyricsBlock()
         buildRestsFillingBlock()
+        if (state.pitchConversion.isAvailable) {
+            buildPitchConversion()
+        }
         buildNextButton()
 
         errorDialog(
@@ -350,6 +363,47 @@ class ConfigurationEditor(props: ConfigurationEditorProps) :
         }
     }
 
+    private fun RBuilder.buildPitchConversion() {
+        formGroup {
+            div {
+                formControlLabel {
+                    attrs {
+                        label = string(Strings.ConvertPitchData)
+                        control = switch {
+                            attrs {
+                                checked = state.pitchConversion.isOn
+                                onChange = {
+                                    val checked = (it.target as HTMLInputElement).checked
+                                    setState {
+                                        pitchConversion = pitchConversion.copy(
+                                            isOn = checked
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                        labelPlacement = LabelPlacement.end
+                    }
+                }
+                tooltip {
+                    attrs {
+                        title = string(Strings.ConvertPitchDataDescription)
+                        placement = "right"
+                        interactive = true
+                    }
+                    Icons.warning {
+                        attrs {
+                            style = Style(
+                                fontSize = FontSize.initial,
+                                verticalAlign = VerticalAlign.middle
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     private fun RBuilder.buildNextButton() {
         styledDiv {
             css {
@@ -399,7 +453,14 @@ class ConfigurationEditor(props: ConfigurationEditorProps) :
 
                 val format = props.outputFormat
                 delay(100)
-                val result = format.generator.invoke(project)
+                val availableFeatures = Feature.values().filter {
+                    it.isAvailable.invoke(project) &&
+                            format.availableFeaturesForGeneration.contains(it)
+                }.let {
+                    removeUncheckedFeatures(it)
+                }
+
+                val result = format.generator.invoke(project, availableFeatures)
                 console.log(result.blob)
                 props.onFinished.invoke(result, format)
             } catch (t: Throwable) {
@@ -412,6 +473,14 @@ class ConfigurationEditor(props: ConfigurationEditorProps) :
                         message = t.message ?: t.toString()
                     )
                 }
+            }
+        }
+    }
+
+    private fun removeUncheckedFeatures(featureList: List<Feature>): List<Feature> {
+        return featureList.filter {
+            when (it) {
+                Feature.CONVERT_PITCH -> state.pitchConversion.isOn
             }
         }
     }
@@ -438,6 +507,7 @@ external interface ConfigurationEditorState : RState {
     var isProcessing: Boolean
     var lyricsConversion: LyricsConversionState
     var slightRestsFilling: SlightRestsFillingState
+    var pitchConversion: PitchConversionState
     var dialogError: DialogErrorState
 }
 
@@ -459,3 +529,8 @@ data class SlightRestsFillingState(
     val excludedMaxLength
         get() = (TICKS_IN_FULL_NOTE / excludedMaxLengthDenominator).toLong()
 }
+
+data class PitchConversionState(
+    val isAvailable: Boolean,
+    val isOn: Boolean
+)

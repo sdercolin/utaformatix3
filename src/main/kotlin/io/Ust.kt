@@ -18,6 +18,9 @@ import model.Track
 import org.khronos.webgl.Uint8Array
 import org.w3c.files.Blob
 import org.w3c.files.File
+import process.pitch.UtauNotePitchData
+import process.pitch.UtauTrackPitchData
+import process.pitch.pitchFromUtauTrack
 import process.validateNotes
 import util.encode
 import util.getSafeFileName
@@ -41,7 +44,8 @@ object Ust {
             Track(
                 id = index,
                 name = result.file.nameWithoutExtension,
-                notes = result.notes
+                notes = result.notes,
+                pitch = pitchFromUtauTrack(result.pitchData, result.notes)
             ).validateNotes()
         }
         val warnings = mutableListOf<ImportWarning>()
@@ -81,6 +85,7 @@ object Ust {
         val lines = readFileContent(file).linesNotBlank()
         var projectName: String? = null
         val notes = mutableListOf<Note>()
+        val notePitchDataList = mutableListOf<UtauNotePitchData>()
         val tempos = mutableListOf<Tempo>()
         var isHeader = true
         var time = 0L
@@ -89,6 +94,11 @@ object Ust {
         var pendingNoteTickOn: Long? = null
         var pendingNoteTickOff: Long? = null
         var pendingBpm: Double? = null
+        var pendingPBS: Pair<Double, Double>? = null
+        var pendingPBW: List<Double>? = null
+        var pendingPBY: List<Double>? = null
+        var pendingPBM: List<String>? = null
+        var pendingVBR: List<Double>? = null
         for (line in lines) {
             line.tryGetValue("ProjectName")?.let {
                 projectName = it
@@ -124,11 +134,27 @@ object Ust {
                             tickOff = pendingNoteTickOff
                         )
                     )
+                    notePitchDataList.add(
+                        UtauNotePitchData(
+                            bpm = tempos.last().bpm,
+                            start = pendingPBS?.first ?: 0.0,
+                            startShift = pendingPBS?.second ?: 0.0,
+                            widths = pendingPBW.orEmpty(),
+                            shifts = pendingPBY.orEmpty(),
+                            curveTypes = pendingPBM.orEmpty(),
+                            vibratoParams = pendingVBR
+                        )
+                    )
                 }
                 pendingNoteKey = null
                 pendingNoteLyric = null
                 pendingNoteTickOn = null
                 pendingNoteTickOff = null
+                pendingPBS = null
+                pendingPBW = null
+                pendingPBY = null
+                pendingPBM = null
+                pendingVBR = null
             }
             line.tryGetValue("Length")?.let {
                 val length = it.toLongOrNull() ?: return@let
@@ -148,15 +174,35 @@ object Ust {
                 val key = it.toIntOrNull() ?: return@let
                 pendingNoteKey = key
             }
+            line.tryGetValue("PBS")?.let {
+                val cells = it.split(';')
+                val start = cells[0].toDoubleOrNull() ?: return@let
+                val startShift = cells.getOrNull(1)?.toDoubleOrNull() ?: 0.0
+                pendingPBS = start to startShift
+            }
+            line.tryGetValue("PBW")?.let {
+                pendingPBW = it.split(',').map { width -> width.toDoubleOrNull() ?: 0.0 }
+            }
+            line.tryGetValue("PBY")?.let {
+                pendingPBY = it.split(',').map { shift -> shift.toDoubleOrNull() ?: 0.0 }
+            }
+            line.tryGetValue("PBM")?.let {
+                pendingPBM = it.split(',')
+            }
+            line.tryGetValue("VBR")?.let {
+                pendingVBR = it.split(',').mapNotNull { cell -> cell.toDoubleOrNull() }
+            }
         }
-        return FileParseResult(file, projectName, notes, tempos)
+        val pitchData = notePitchDataList.ifEmpty { null }?.let { UtauTrackPitchData(it) }
+        return FileParseResult(file, projectName, notes, tempos, pitchData)
     }
 
     private data class FileParseResult(
         val file: File,
         val projectName: String?,
         val notes: List<Note>,
-        val tempos: List<Tempo>
+        val tempos: List<Tempo>,
+        val pitchData: UtauTrackPitchData?
     )
 
     suspend fun generate(project: Project): ExportResult {
