@@ -124,7 +124,8 @@ object Vpr {
             blob,
             name,
             listOfNotNull(
-                if (project.hasXSampaData) null else ExportNotification.PhonemeResetRequiredV5
+                if (project.hasXSampaData) null else ExportNotification.PhonemeResetRequiredV5,
+                if (features.contains(Feature.CONVERT_PITCH)) ExportNotification.PitchDataExported else null
             )
         )
     }
