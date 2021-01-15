@@ -265,6 +265,11 @@ enum class Strings(val en: String, val ja: String, val zhCN: String) {
         ja = "拍子記号を出力することができませんでした。",
         zhCN = "未能将节拍记号导出到目标格式。"
     ),
+    ExportNotificationPitchDataExported(
+        en = "Some pitch parameters were exported. For a higher reproduction accuracy, you may need to turn off pitch transition and vibrato settings in the target editor.",
+        ja = "ピッチパラメータが出力されました。出力側のエディターでピッチ推移やビブラートなどの設定を削除することで、より高い精度でピッチを再現できる場合があります。",
+        zhCN = "生成的文件中带有音高参数。您可能需要在对象编辑器中关闭音高平滑设置及颤音设置以达到更高的重现精度。"
+    ),
     SlightRestsFillingSwitchLabel(
         en = "Fill short rests",
         ja = "短い休符を埋める",

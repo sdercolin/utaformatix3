@@ -265,7 +265,8 @@ object Vsq {
             blob,
             name,
             listOfNotNull(
-                if (project.hasXSampaData) null else ExportNotification.PhonemeResetRequiredVSQ
+                if (project.hasXSampaData) null else ExportNotification.PhonemeResetRequiredVSQ,
+                if (features.contains(Feature.CONVERT_PITCH)) ExportNotification.PitchDataExported else null
             )
         )
     }

@@ -98,6 +98,7 @@ object Ust {
         var pendingPBW: List<Double>? = null
         var pendingPBY: List<Double>? = null
         var pendingPBM: List<String>? = null
+        var pendingVBR: List<Double>? = null
         for (line in lines) {
             line.tryGetValue("ProjectName")?.let {
                 projectName = it
@@ -140,7 +141,8 @@ object Ust {
                             startShift = pendingPBS?.second ?: 0.0,
                             widths = pendingPBW.orEmpty(),
                             shifts = pendingPBY.orEmpty(),
-                            curveTypes = pendingPBM.orEmpty()
+                            curveTypes = pendingPBM.orEmpty(),
+                            vibratoParams = pendingVBR
                         )
                     )
                 }
@@ -152,6 +154,7 @@ object Ust {
                 pendingPBW = null
                 pendingPBY = null
                 pendingPBM = null
+                pendingVBR = null
             }
             line.tryGetValue("Length")?.let {
                 val length = it.toLongOrNull() ?: return@let
@@ -185,6 +188,9 @@ object Ust {
             }
             line.tryGetValue("PBM")?.let {
                 pendingPBM = it.split(',')
+            }
+            line.tryGetValue("VBR")?.let {
+                pendingVBR = it.split(',').mapNotNull { cell -> cell.toDoubleOrNull() }
             }
         }
         val pitchData = notePitchDataList.ifEmpty { null }?.let { UtauTrackPitchData(it) }
