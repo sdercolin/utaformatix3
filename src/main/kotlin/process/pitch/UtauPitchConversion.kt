@@ -83,7 +83,8 @@ private fun List<Pair<Long, Double>>.addPointsContinuingLastNote(thisNote: Note,
     if (lastNote == null) this
     else {
         val firstPoint = this.firstOrNull()
-        if (firstPoint != null && firstPoint.first > thisNote.tickOn) this + (thisNote.tickOn to firstPoint.second)
+        if (firstPoint != null && firstPoint.first > thisNote.tickOn)
+            listOf(thisNote.tickOn to firstPoint.second) + this
         else this
     }
 
