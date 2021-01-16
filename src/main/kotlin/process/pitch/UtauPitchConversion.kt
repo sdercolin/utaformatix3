@@ -110,10 +110,11 @@ private fun List<Pair<Long, Double>>.appendVibrato(
         if (t < start) 0.0
         else {
             val easeInFactor = ((t - start) / easeInLength).coerceIn(0.0..1.0)
+                .takeIf { !it.isNaN() } ?: 1.0
             val easeOutFactor = ((noteLength - t) / easeOutLength).coerceIn(0.0..1.0)
+                .takeIf { !it.isNaN() } ?: 1.0
             val x = 2 * kotlin.math.PI * (frequency * (t - start) - phase)
-            val output = depth * easeInFactor * easeOutFactor * kotlin.math.sin(x) + shift
-            output
+            depth * easeInFactor * easeOutFactor * kotlin.math.sin(x) + shift
         }
     }
 
