@@ -65,7 +65,7 @@ fun pitchFromUtauTrack(pitchData: UtauTrackPitchData?, notes: List<Note>): Pitch
         lastNote = note
     }
     pitchPoints.addAll(pendingPitchPoints)
-    return Pitch(pitchPoints, isAbsolute = false)
+    return Pitch(pitchPoints, false)
 }
 
 private fun List<Pair<Long, Double>>.fixPointsAtLastNote(thisNote: Note, lastNote: Note?) =

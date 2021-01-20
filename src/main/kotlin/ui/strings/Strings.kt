@@ -196,6 +196,11 @@ enum class Strings(val en: String, val ja: String, val zhCN: String) {
         ja = "UTAU プロジェクト",
         zhCN = "UTAU 工程"
     ),
+    USTLegacyFormatDescription(
+        en = "Project for UTAU (Mode1)",
+        ja = "UTAU プロジェクト(Mode1)",
+        zhCN = "UTAU 工程（Mode1）"
+    ),
     CCSFormatDescription(
         en = "Project for CeVIO Creative Studio",
         ja = "CeVIO Creative Studio プロジェクト",
