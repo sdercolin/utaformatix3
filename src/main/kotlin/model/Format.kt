@@ -51,14 +51,14 @@ enum class Format(
         },
         possibleLyricsTypes = listOf(ROMAJI_CV, ROMAJI_VCV, KANA_CV, KANA_VCV)
     ),
-    USTLegacy(
-        ".ustl",
+    UST_Mode1(
+        ".ust",
         multipleFile = true,
         parser = {
-            io.UstLegacy.parse(it)
+            TODO("Same as UST, pass in purpose")
         },
         generator = { project, features ->
-            io.UstLegacy.generate(project, features)
+            io.UstMode1.generate(project, features)
         },
         possibleLyricsTypes = listOf(ROMAJI_CV, ROMAJI_VCV, KANA_CV, KANA_VCV),
         availableFeaturesForGeneration = listOf(CONVERT_PITCH)
@@ -148,8 +148,8 @@ enum class Format(
     ), ;
 
     companion object {
-        val importable get() = listOf(VSQX, VPR, VSQ, UST, USTLegacy, CCS, SVP, S5P, DV, PPSF)
-        val exportable get() = listOf(VSQX, VPR, VSQ, UST, USTLegacy, CCS, MUSIC_XML, SVP, S5P, DV)
+        val importable get() = listOf(VSQX, VPR, VSQ, UST, UST_Mode1, CCS, SVP, S5P, DV, PPSF)
+        val exportable get() = listOf(VSQX, VPR, VSQ, UST, UST_Mode1, CCS, MUSIC_XML, SVP, S5P, DV)
     }
 }
 

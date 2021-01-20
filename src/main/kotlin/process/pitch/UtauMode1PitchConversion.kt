@@ -1,12 +1,12 @@
 package process.pitch
 
-import io.UstLegacy
+import io.UstMode1
 import model.Note
 import model.Pitch
 import process.interpolateLinear
 
-data class UtauLegacyTrackPitchData(
-    val notes: List<UtauLegacyNotePitchData?>
+data class UtauMode1TrackPitchData(
+    val notes: List<UtauMode1NotePitchData?>
 )
 
 /** This class contains Utau Pitch Data in Mode1.
@@ -22,11 +22,11 @@ data class UtauLegacyTrackPitchData(
  *
  * Please notice that UTAU save its pitch data by cent, not semitone. This class will keep this behaviour.
  */
-data class UtauLegacyNotePitchData(
+data class UtauMode1NotePitchData(
     val pitchData: Pitch?
 )
 
-fun pitchFromUtauTrack(pitchData: UtauLegacyTrackPitchData?, notes: List<Note>): Pitch? {
+fun pitchFromUtauMode1Track(pitchData: UtauMode1TrackPitchData?, notes: List<Note>): Pitch? {
     pitchData ?: return null
     val notePitches = notes.zip(pitchData.notes)
     val pitchPoints = mutableListOf<Pair<Long, Double>>()
@@ -40,22 +40,29 @@ fun pitchFromUtauTrack(pitchData: UtauLegacyTrackPitchData?, notes: List<Note>):
     return Pitch(pitchPoints, false).getAbsoluteData(notes)?.let { Pitch(it, true) }
 }
 
-fun pitchToUtauLegacyTrack(pitch: Pitch?, notes: List<Note>): UtauLegacyTrackPitchData? {
+// some value gained by some not precise experiments. Used as a "allowance" when cut pitches into separate note.
+private const val boundaryExtendLevel = 10
+fun pitchToUtauMode1Track(pitch: Pitch?, notes: List<Note>): UtauMode1TrackPitchData? {
     pitch ?: return null
     val pitchDataProcessed =
-        pitch.getRelativeData(notes)?.map { Pair(it.first, it.second) }?.interpolateLinear(UstLegacy.PITCH_TICK) ?: return null
-    val notePitches = mutableListOf<UtauLegacyNotePitchData>()
+        pitch.getRelativeData(notes)?.map { Pair(it.first, it.second) }?.interpolateLinear(UstMode1.PITCH_TICK)
+            ?: return null
+    val notePitches = mutableListOf<UtauMode1NotePitchData>()
     for (note in notes) {
-        val notePitchPoints = pitchDataProcessed.filter { it.first >= note.tickOn && it.first <= note.tickOff }.let {
-                Pitch(it, false).data.map{Pair(it.first, it.second ?: 0.0)}.interpolateLinear(UstLegacy.PITCH_TICK)
-            }
-        notePitches.add(UtauLegacyNotePitchData(notePitchPoints?.let { it ->
-            Pitch(it, true).data.map{Pair(it.first, (it.second?:0.0) * 100)}.let { relativeData ->
+        var notePitchPoints =
+            pitchDataProcessed.filter { (tick, _) -> tick >= (note.tickOn + boundaryExtendLevel) && tick <= (note.tickOff + boundaryExtendLevel) }
+                .let {
+                    Pitch(it, false).data.map { Pair(it.first, it.second ?: 0.0) }
+                        .interpolateLinear(UstMode1.PITCH_TICK)
+                }
+        notePitchPoints = notePitchPoints?.subList(0, minOf((note.length / UstMode1.PITCH_TICK).toInt(), notePitchPoints.count() - 1))
+        notePitches.add(UtauMode1NotePitchData(notePitchPoints?.let { it ->
+            Pitch(it, true).data.map { (tick, value) -> Pair(tick, (value ?: 0.0) * 100) }.let { relativeData ->
                 Pitch(
                     relativeData, false
                 )
             }
         }))
     }
-    return UtauLegacyTrackPitchData(notePitches)
+    return UtauMode1TrackPitchData(notePitches)
 }

@@ -11,6 +11,7 @@ import model.ExportResult
 import model.Format
 import model.ImportWarning
 import model.Note
+import model.Pitch
 import model.Project
 import model.Tempo
 import model.TimeSignature
@@ -18,9 +19,12 @@ import model.Track
 import org.khronos.webgl.Uint8Array
 import org.w3c.files.Blob
 import org.w3c.files.File
-import process.pitch.UtauNotePitchData
-import process.pitch.UtauTrackPitchData
-import process.pitch.pitchFromUtauTrack
+import process.pitch.UtauMode1NotePitchData
+import process.pitch.UtauMode1TrackPitchData
+import process.pitch.UtauMode2NotePitchData
+import process.pitch.UtauMode2TrackPitchData
+import process.pitch.pitchFromUtauMode1Track
+import process.pitch.pitchFromUtauMode2Track
 import process.validateNotes
 import util.encode
 import util.getSafeFileName
@@ -45,7 +49,15 @@ object Ust {
                 id = index,
                 name = result.file.nameWithoutExtension,
                 notes = result.notes,
-                pitch = pitchFromUtauTrack(result.pitchData, result.notes)
+                // Since Ust object read pitch data in both modes if exists,
+                // provide a option to control use which data can be a possible user experience optimization.
+                // But, Utaformatix's importer design (would be completed without asking user) make it hard to implement,
+                // or with a bunch of refactoring work, and there are few users will need this feature in the real world,
+                // so this will not be implemented, or in very low priority.
+                pitch = if (result.isMode2) pitchFromUtauMode2Track(
+                    result.pitchDataMode2,
+                    result.notes
+                ) else pitchFromUtauMode1Track(result.pitchDataMode1, result.notes)
             ).validateNotes()
         }
         val warnings = mutableListOf<ImportWarning>()
@@ -85,7 +97,8 @@ object Ust {
         val lines = readFileContent(file).linesNotBlank()
         var projectName: String? = null
         val notes = mutableListOf<Note>()
-        val notePitchDataList = mutableListOf<UtauNotePitchData>()
+        val notePitchDataListMode1 = mutableListOf<UtauMode1NotePitchData>()
+        val notePitchDataListMode2 = mutableListOf<UtauMode2NotePitchData>()
         val tempos = mutableListOf<Tempo>()
         var isHeader = true
         var time = 0L
@@ -93,7 +106,11 @@ object Ust {
         var pendingNoteLyric: String? = null
         var pendingNoteTickOn: Long? = null
         var pendingNoteTickOff: Long? = null
+        var isMode2 = false
         var pendingBpm: Double? = null
+        //Pitch field for Mode1
+        var pendingNotePitches: List<Pair<Long, Double>>? = null
+        //Pitch field for Mode2
         var pendingPBS: Pair<Double, Double>? = null
         var pendingPBW: List<Double>? = null
         var pendingPBY: List<Double>? = null
@@ -116,6 +133,10 @@ object Ust {
                     }
                 }
             }
+            if (line.contains("Mode2=True"))
+            {
+                isMode2 = true
+            }
             if (line.contains("[#0000]")) {
                 isHeader = false
             }
@@ -134,8 +155,8 @@ object Ust {
                             tickOff = pendingNoteTickOff
                         )
                     )
-                    notePitchDataList.add(
-                        UtauNotePitchData(
+                    notePitchDataListMode2.add(
+                        UtauMode2NotePitchData(
                             bpm = tempos.last().bpm,
                             start = pendingPBS?.first ?: 0.0,
                             startShift = pendingPBS?.second ?: 0.0,
@@ -143,6 +164,11 @@ object Ust {
                             shifts = pendingPBY.orEmpty(),
                             curveTypes = pendingPBM.orEmpty(),
                             vibratoParams = pendingVBR
+                        )
+                    )
+                    notePitchDataListMode1.add(
+                        UtauMode1NotePitchData(
+                            Pitch(pendingNotePitches.orEmpty(), false)
                         )
                     )
                 }
@@ -155,6 +181,7 @@ object Ust {
                 pendingPBY = null
                 pendingPBM = null
                 pendingVBR = null
+                pendingNotePitches = null
             }
             line.tryGetValue("Length")?.let {
                 val length = it.toLongOrNull() ?: return@let
@@ -192,9 +219,36 @@ object Ust {
             line.tryGetValue("VBR")?.let {
                 pendingVBR = it.split(',').mapNotNull { cell -> cell.toDoubleOrNull() }
             }
+            line.tryGetValue("Piches")?.let {
+                if (pendingNotePitches != null)
+                    return@let
+                pendingNotePitches = parseMode1PitchData(it)
+            }
+            line.tryGetValue("Pitches")?.let {
+                if (pendingNotePitches != null)
+                    return@let
+                pendingNotePitches = parseMode1PitchData(it)
+            }
+            line.tryGetValue("PitchBend")?.let {
+                if (pendingNotePitches != null)
+                    return@let
+                pendingNotePitches = parseMode1PitchData(it)
+            }
         }
-        val pitchData = notePitchDataList.ifEmpty { null }?.let { UtauTrackPitchData(it) }
-        return FileParseResult(file, projectName, notes, tempos, pitchData)
+        val pitchDataMode1 = UtauMode1TrackPitchData(notePitchDataListMode1)
+        val pitchDataMode2 = notePitchDataListMode2.ifEmpty { null }?.let { UtauMode2TrackPitchData(it) }
+        return FileParseResult(file, projectName, notes, tempos, isMode2, pitchDataMode1, pitchDataMode2)
+    }
+
+    private fun parseMode1PitchData(
+        pitchString: String
+    ): List<Pair<Long, Double>> {
+        return pitchString.split(",").mapIndexed { index, pitchPointString ->
+            Pair(
+                index * UstMode1.PITCH_TICK,
+                pitchPointString.toDoubleOrNull() ?: 0.0
+            )
+        }
     }
 
     private data class FileParseResult(
@@ -202,7 +256,9 @@ object Ust {
         val projectName: String?,
         val notes: List<Note>,
         val tempos: List<Tempo>,
-        val pitchData: UtauTrackPitchData?
+        val isMode2: Boolean,
+        val pitchDataMode1: UtauMode1TrackPitchData?,
+        val pitchDataMode2: UtauMode2TrackPitchData?
     )
 
     suspend fun generate(project: Project): ExportResult {
@@ -276,3 +332,4 @@ object Ust {
 
     private const val LINE_SEPARATOR = "\r\n"
 }
+
