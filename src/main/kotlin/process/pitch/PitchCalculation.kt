@@ -78,14 +78,12 @@ private fun List<Pair<Long, Double?>>.appendPointsAtBorders(
             val firstPointAtThisNoteIndex =
                 result.indexOfFirst { it.first >= thisNote.tickOn }.takeIf { it >= 0 } ?: return@forEach
             val firstPointAtThisNote = result[firstPointAtThisNoteIndex]
-            console.log("firstPointAtThisNote = $firstPointAtThisNote")
             if (firstPointAtThisNote.first == thisNote.tickOn ||
                 firstPointAtThisNote.first - thisNote.tickOn > radius
             ) return@forEach
             val postValue = firstPointAtThisNote.second ?: return@forEach
             val newPointTick = thisNote.tickOn - radius
             val newPoint = newPointTick to postValue
-            console.log("newPoint = $newPoint")
             result.add(firstPointAtThisNoteIndex, newPoint)
             result.removeAll { it.first in newPointTick until thisNote.tickOn && it != newPoint }
         }
