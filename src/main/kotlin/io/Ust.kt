@@ -175,7 +175,7 @@ object Ust {
                 pendingNoteKey = key
             }
             line.tryGetValue("PBS")?.let {
-                val cells = it.split(';')
+                val cells = it.split(';', ',')
                 val start = cells[0].toDoubleOrNull() ?: return@let
                 val startShift = cells.getOrNull(1)?.toDoubleOrNull() ?: 0.0
                 pendingPBS = start to startShift
