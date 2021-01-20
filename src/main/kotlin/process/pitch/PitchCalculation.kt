@@ -38,7 +38,7 @@ private fun Pitch.convertRelativity(
                 val convertedValue =
                     if (value != null) {
                         if (isAbsolute) value - currentNoteKey
-                        else value.takeUnless { it == 0.0 }?.let { it + currentNoteKey }
+                        else value.takeUnless { it == 0.0 }?.let { it + currentNoteKey } ?: 0.0
                     } else 0.0
                 pos to convertedValue
             }.let {
