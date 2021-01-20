@@ -261,7 +261,7 @@ object Ust {
             builder.appendLine("Length=${note.length}")
             builder.appendLine("Lyric=${note.lyric}")
             builder.appendLine("NoteNum=${note.key}")
-            builder.appendLine("PreUtterance=60")
+            builder.appendLine("PreUtterance=")
             tickPos = note.tickOff
         }
         builder.appendLine("[#TRACKEND]")
