@@ -244,7 +244,7 @@ private fun denormalizeFromTick(
             repeat = repeat.coerceAtLeast(1.0),
             value = event.value
         ).round()
-    }.also { console.log(it) }
+    }
 }
 
 private fun mergeEventsIfPossible(eventsWithFullParams: List<Event>) =
