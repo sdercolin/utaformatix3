@@ -108,9 +108,9 @@ object Ust {
         var pendingNoteTickOff: Long? = null
         var isMode2 = false
         var pendingBpm: Double? = null
-        //Pitch field for Mode1
+        // Pitch field for Mode1
         var pendingNotePitches: List<Pair<Long, Double>>? = null
-        //Pitch field for Mode2
+        // Pitch field for Mode2
         var pendingPBS: Pair<Double, Double>? = null
         var pendingPBW: List<Double>? = null
         var pendingPBY: List<Double>? = null
@@ -133,8 +133,7 @@ object Ust {
                     }
                 }
             }
-            if (line.contains("Mode2=True"))
-            {
+            if (line.contains("Mode2=True")) {
                 isMode2 = true
             }
             if (line.contains("[#0000]")) {
@@ -235,7 +234,7 @@ object Ust {
                 pendingNotePitches = parseMode1PitchData(it)
             }
         }
-        val pitchDataMode1 = UtauMode1TrackPitchData(notePitchDataListMode1)
+        val pitchDataMode1 = notePitchDataListMode1.ifEmpty { null }?.let { UtauMode1TrackPitchData(it) }
         val pitchDataMode2 = notePitchDataListMode2.ifEmpty { null }?.let { UtauMode2TrackPitchData(it) }
         return FileParseResult(file, projectName, notes, tempos, isMode2, pitchDataMode1, pitchDataMode2)
     }
