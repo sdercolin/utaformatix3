@@ -48,11 +48,6 @@ object Ust {
                 id = index,
                 name = result.file.nameWithoutExtension,
                 notes = result.notes,
-                // Since Ust object read pitch data in both modes if exists,
-                // provide a option to control use which data can be a possible user experience optimization.
-                // But, Utaformatix's importer design (would be completed without asking user) make it hard to implement,
-                // or with a bunch of refactoring work, and there are few users will need this feature in the real world,
-                // so this will not be implemented, or in very low priority.
                 pitch = if (result.isMode2) pitchFromUtauMode2Track(
                     result.pitchDataMode2,
                     result.notes
