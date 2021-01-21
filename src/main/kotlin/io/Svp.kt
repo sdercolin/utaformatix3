@@ -132,10 +132,9 @@ object Svp {
             .toList()
         val notesWithVibrato = group.notes.map { note ->
             SvpNoteWithVibrato(
-                noteStart = (note.onset + ref.blickOffset) / TICK_RATE,
-                noteLength = note.duration / TICK_RATE,
-                noteKey = note.pitch + ref.pitchOffset,
-                start = note.attributes?.tF0VbrStart,
+                noteStartTick = (note.onset + ref.blickOffset) / TICK_RATE,
+                noteLengthTick = note.duration / TICK_RATE,
+                vibratoStart = note.attributes?.tF0VbrStart,
                 easeInLength = note.attributes?.tF0VbrLeft,
                 easeOutLength = note.attributes?.tF0VbrRight,
                 depth = note.attributes?.dF0Vbr,
