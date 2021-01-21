@@ -18,9 +18,12 @@ import model.Track
 import org.khronos.webgl.Uint8Array
 import org.w3c.files.Blob
 import org.w3c.files.File
-import process.pitch.UtauNotePitchData
-import process.pitch.UtauTrackPitchData
-import process.pitch.pitchFromUtauTrack
+import process.pitch.UtauMode1NotePitchData
+import process.pitch.UtauMode1TrackPitchData
+import process.pitch.UtauMode2NotePitchData
+import process.pitch.UtauMode2TrackPitchData
+import process.pitch.pitchFromUtauMode1Track
+import process.pitch.pitchFromUtauMode2Track
 import process.validateNotes
 import util.encode
 import util.getSafeFileName
@@ -45,7 +48,10 @@ object Ust {
                 id = index,
                 name = result.file.nameWithoutExtension,
                 notes = result.notes,
-                pitch = pitchFromUtauTrack(result.pitchData, result.notes)
+                pitch = if (result.isMode2) pitchFromUtauMode2Track(
+                    result.pitchDataMode2,
+                    result.notes
+                ) else pitchFromUtauMode1Track(result.pitchDataMode1, result.notes)
             ).validateNotes()
         }
         val warnings = mutableListOf<ImportWarning>()
@@ -85,7 +91,8 @@ object Ust {
         val lines = readFileContent(file).linesNotBlank()
         var projectName: String? = null
         val notes = mutableListOf<Note>()
-        val notePitchDataList = mutableListOf<UtauNotePitchData>()
+        val notePitchDataListMode1 = mutableListOf<UtauMode1NotePitchData>()
+        val notePitchDataListMode2 = mutableListOf<UtauMode2NotePitchData>()
         val tempos = mutableListOf<Tempo>()
         var isHeader = true
         var time = 0L
@@ -93,7 +100,11 @@ object Ust {
         var pendingNoteLyric: String? = null
         var pendingNoteTickOn: Long? = null
         var pendingNoteTickOff: Long? = null
+        var isMode2 = false
         var pendingBpm: Double? = null
+        // Pitch field for Mode1
+        var pendingPitchBend: List<Double>? = null
+        // Pitch field for Mode2
         var pendingPBS: Pair<Double, Double>? = null
         var pendingPBW: List<Double>? = null
         var pendingPBY: List<Double>? = null
@@ -116,6 +127,9 @@ object Ust {
                     }
                 }
             }
+            if (line.contains("Mode2=True")) {
+                isMode2 = true
+            }
             if (line.contains("[#0000]")) {
                 isHeader = false
             }
@@ -134,8 +148,8 @@ object Ust {
                             tickOff = pendingNoteTickOff
                         )
                     )
-                    notePitchDataList.add(
-                        UtauNotePitchData(
+                    notePitchDataListMode2.add(
+                        UtauMode2NotePitchData(
                             bpm = tempos.last().bpm,
                             start = pendingPBS?.first ?: 0.0,
                             startShift = pendingPBS?.second ?: 0.0,
@@ -143,6 +157,11 @@ object Ust {
                             shifts = pendingPBY.orEmpty(),
                             curveTypes = pendingPBM.orEmpty(),
                             vibratoParams = pendingVBR
+                        )
+                    )
+                    notePitchDataListMode1.add(
+                        UtauMode1NotePitchData(
+                            pendingPitchBend
                         )
                     )
                 }
@@ -155,6 +174,7 @@ object Ust {
                 pendingPBY = null
                 pendingPBM = null
                 pendingVBR = null
+                pendingPitchBend = null
             }
             line.tryGetValue("Length")?.let {
                 val length = it.toLongOrNull() ?: return@let
@@ -174,27 +194,56 @@ object Ust {
                 val key = it.toIntOrNull() ?: return@let
                 pendingNoteKey = key
             }
-            line.tryGetValue("PBS")?.let {
-                val cells = it.split(';', ',')
-                val start = cells[0].toDoubleOrNull() ?: return@let
-                val startShift = cells.getOrNull(1)?.toDoubleOrNull() ?: 0.0
-                pendingPBS = start to startShift
-            }
-            line.tryGetValue("PBW")?.let {
-                pendingPBW = it.split(',').map { width -> width.toDoubleOrNull() ?: 0.0 }
-            }
-            line.tryGetValue("PBY")?.let {
-                pendingPBY = it.split(',').map { shift -> shift.toDoubleOrNull() ?: 0.0 }
-            }
-            line.tryGetValue("PBM")?.let {
-                pendingPBM = it.split(',')
-            }
-            line.tryGetValue("VBR")?.let {
-                pendingVBR = it.split(',').mapNotNull { cell -> cell.toDoubleOrNull() }
+            if (isMode2) {
+                line.tryGetValue("PBS")?.let {
+                    val cells = it.split(';', ',')
+                    val start = cells[0].toDoubleOrNull() ?: return@let
+                    val startShift = cells.getOrNull(1)?.toDoubleOrNull() ?: 0.0
+                    pendingPBS = start to startShift
+                }
+                line.tryGetValue("PBW")?.let {
+                    pendingPBW = it.split(',').map { width -> width.toDoubleOrNull() ?: 0.0 }
+                }
+                line.tryGetValue("PBY")?.let {
+                    pendingPBY = it.split(',').map { shift -> shift.toDoubleOrNull() ?: 0.0 }
+                }
+                line.tryGetValue("PBM")?.let {
+                    pendingPBM = it.split(',')
+                }
+                line.tryGetValue("VBR")?.let {
+                    pendingVBR = it.split(',').mapNotNull { cell -> cell.toDoubleOrNull() }
+                }
+            } else {
+                // Parse Mode1 pitch data. As these fields would contain same data, if pendingNotePitches is not null,
+                // which means one field has been parsed, we will skip other fields.
+                line.tryGetValue("Piches")?.let {
+                    if (pendingPitchBend != null)
+                        return@let
+                    pendingPitchBend = parseMode1PitchData(it)
+                }
+                line.tryGetValue("Pitches")?.let {
+                    if (pendingPitchBend != null)
+                        return@let
+                    pendingPitchBend = parseMode1PitchData(it)
+                }
+                line.tryGetValue("PitchBend")?.let {
+                    if (pendingPitchBend != null)
+                        return@let
+                    pendingPitchBend = parseMode1PitchData(it)
+                }
             }
         }
-        val pitchData = notePitchDataList.ifEmpty { null }?.let { UtauTrackPitchData(it) }
-        return FileParseResult(file, projectName, notes, tempos, pitchData)
+        val pitchDataMode1 = notePitchDataListMode1.ifEmpty { null }?.let { UtauMode1TrackPitchData(it) }
+        val pitchDataMode2 = notePitchDataListMode2.ifEmpty { null }?.let { UtauMode2TrackPitchData(it) }
+        return FileParseResult(file, projectName, notes, tempos, isMode2, pitchDataMode1, pitchDataMode2)
+    }
+
+    private fun parseMode1PitchData(
+        pitchString: String
+    ): List<Double> {
+        return pitchString.split(",").map { pitchPointString ->
+            pitchPointString.toDoubleOrNull() ?: 0.0
+        }
     }
 
     private data class FileParseResult(
@@ -202,7 +251,9 @@ object Ust {
         val projectName: String?,
         val notes: List<Note>,
         val tempos: List<Tempo>,
-        val pitchData: UtauTrackPitchData?
+        val isMode2: Boolean,
+        val pitchDataMode1: UtauMode1TrackPitchData?,
+        val pitchDataMode2: UtauMode2TrackPitchData?
     )
 
     suspend fun generate(project: Project): ExportResult {
@@ -274,5 +325,7 @@ object Ust {
         return substring(index + 1).takeIf { it.isNotBlank() }
     }
 
+    const val MODE1_PITCH_SAMPLING_INTERVAL_TICK = 5L
     private const val LINE_SEPARATOR = "\r\n"
 }
+
