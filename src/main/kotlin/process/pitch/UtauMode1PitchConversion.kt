@@ -41,21 +41,21 @@ fun pitchFromUtauMode1Track(pitchData: UtauMode1TrackPitchData?, notes: List<Not
 }
 
 // some value gained by some not precise experiments. Used as a "allowance" when cut pitches into separate note.
-private const val boundaryExtendLevel = 10
+private const val BOUNDARY_EXTEND_LEVEL = 10
 fun pitchToUtauMode1Track(pitch: Pitch?, notes: List<Note>): UtauMode1TrackPitchData? {
     pitch ?: return null
     val pitchDataProcessed =
-        pitch.getRelativeData(notes)?.map { Pair(it.first, it.second) }?.interpolateLinear(UstMode1.PITCH_TICK)
+        pitch.getRelativeData(notes)?.map { Pair(it.first, it.second) }?.interpolateLinear(UstMode1.PITCH_SAMPLING_INTERVAL_TICK)
             ?: return null
     val notePitches = mutableListOf<UtauMode1NotePitchData>()
     for (note in notes) {
         var notePitchPoints =
-            pitchDataProcessed.filter { (tick, _) -> tick >= (note.tickOn + boundaryExtendLevel) && tick <= (note.tickOff + boundaryExtendLevel) }
+            pitchDataProcessed.filter { (tick, _) -> tick >= (note.tickOn + BOUNDARY_EXTEND_LEVEL) && tick <= (note.tickOff + BOUNDARY_EXTEND_LEVEL) }
                 .let {
                     Pitch(it, false).data.map { Pair(it.first, it.second ?: 0.0) }
-                        .interpolateLinear(UstMode1.PITCH_TICK)
+                        .interpolateLinear(UstMode1.PITCH_SAMPLING_INTERVAL_TICK)
                 }
-        notePitchPoints = notePitchPoints?.subList(0, minOf((note.length / UstMode1.PITCH_TICK).toInt(), notePitchPoints.count() - 1))
+        notePitchPoints = notePitchPoints?.subList(0, minOf((note.length / UstMode1.PITCH_SAMPLING_INTERVAL_TICK).toInt(), notePitchPoints.count() - 1))
         notePitches.add(UtauMode1NotePitchData(notePitchPoints?.let { it ->
             Pitch(it, true).data.map { (tick, value) -> Pair(tick, (value ?: 0.0) * 100) }.let { relativeData ->
                 Pitch(

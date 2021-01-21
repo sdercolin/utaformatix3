@@ -244,7 +244,7 @@ object Ust {
     ): List<Pair<Long, Double>> {
         return pitchString.split(",").mapIndexed { index, pitchPointString ->
             Pair(
-                index * UstMode1.PITCH_TICK,
+                index * UstMode1.PITCH_SAMPLING_INTERVAL_TICK,
                 pitchPointString.toDoubleOrNull() ?: 0.0
             )
         }

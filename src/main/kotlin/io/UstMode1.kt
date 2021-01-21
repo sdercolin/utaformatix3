@@ -107,5 +107,5 @@ object UstMode1 {
     }
 
     private const val LINE_SEPARATOR = "\r\n"
-    const val PITCH_TICK = 5L
+    const val PITCH_SAMPLING_INTERVAL_TICK = 5L
 }

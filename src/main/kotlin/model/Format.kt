@@ -51,7 +51,7 @@ enum class Format(
         },
         possibleLyricsTypes = listOf(ROMAJI_CV, ROMAJI_VCV, KANA_CV, KANA_VCV)
     ),
-    UST_Mode1(
+    UST_MODE1(
         ".ust",
         multipleFile = true,
         parser = {
@@ -148,8 +148,8 @@ enum class Format(
     ), ;
 
     companion object {
-        val importable get() = listOf(VSQX, VPR, VSQ, UST, UST_Mode1, CCS, SVP, S5P, DV, PPSF)
-        val exportable get() = listOf(VSQX, VPR, VSQ, UST, UST_Mode1, CCS, MUSIC_XML, SVP, S5P, DV)
+        val importable get() = listOf(VSQX, VPR, VSQ, UST, UST_MODE1, CCS, SVP, S5P, DV, PPSF)
+        val exportable get() = listOf(VSQX, VPR, VSQ, UST, UST_MODE1, CCS, MUSIC_XML, SVP, S5P, DV)
     }
 }
 
