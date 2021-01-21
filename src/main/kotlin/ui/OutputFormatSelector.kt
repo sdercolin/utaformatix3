@@ -11,7 +11,6 @@ import model.Format.PPSF
 import model.Format.S5P
 import model.Format.SVP
 import model.Format.UST
-import model.Format.UST_MODE1
 import model.Format.VPR
 import model.Format.VSQ
 import model.Format.VSQX
@@ -49,7 +48,6 @@ import ui.strings.Strings.S5PFormatDescription
 import ui.strings.Strings.SVPFormatDescription
 import ui.strings.Strings.SelectOutputFormatCaption
 import ui.strings.Strings.USTFormatDescription
-import ui.strings.Strings.USTMODE1FormatDescription
 import ui.strings.Strings.VPRFormatDescription
 import ui.strings.Strings.VSQFormatDescription
 import ui.strings.Strings.VSQXFormatDescription
@@ -159,7 +157,6 @@ class OutputFormatSelector : RComponent<OutputFormatSelectorProps, RState>() {
                 VSQX -> VSQXFormatDescription
                 VPR -> VPRFormatDescription
                 UST -> USTFormatDescription
-                UST_MODE1 -> USTMODE1FormatDescription
                 CCS -> CCSFormatDescription
                 SVP -> SVPFormatDescription
                 S5P -> S5PFormatDescription
@@ -175,7 +172,6 @@ class OutputFormatSelector : RComponent<OutputFormatSelectorProps, RState>() {
                 VSQX -> Resources.vsqxIcon
                 VPR -> Resources.vprIcon
                 UST -> Resources.ustIcon
-                UST_MODE1 -> Resources.ustIcon
                 CCS -> Resources.ccsIcon
                 SVP -> Resources.svpIcon
                 S5P -> Resources.s5pIcon

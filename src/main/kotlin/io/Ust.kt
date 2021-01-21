@@ -244,7 +244,7 @@ object Ust {
     ): List<Pair<Long, Double>> {
         return pitchString.split(",").mapIndexed { index, pitchPointString ->
             Pair(
-                index * UstMode1.PITCH_SAMPLING_INTERVAL_TICK,
+                index * MODE1_PITCH_SAMPLING_INTERVAL_TICK,
                 pitchPointString.toDoubleOrNull() ?: 0.0
             )
         }
@@ -329,6 +329,7 @@ object Ust {
         return substring(index + 1).takeIf { it.isNotBlank() }
     }
 
+    const val MODE1_PITCH_SAMPLING_INTERVAL_TICK = 5L
     private const val LINE_SEPARATOR = "\r\n"
 }
 
