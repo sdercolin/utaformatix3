@@ -167,7 +167,7 @@ object Ust {
                     )
                     notePitchDataListMode1.add(
                         UtauMode1NotePitchData(
-                            Pitch(pendingNotePitches.orEmpty(), false)
+                            pendingNotePitches.orEmpty()
                         )
                     )
                 }
@@ -329,7 +329,7 @@ object Ust {
         return substring(index + 1).takeIf { it.isNotBlank() }
     }
 
-    const val MODE1_PITCH_SAMPLING_INTERVAL_TICK = 5L
+    private const val MODE1_PITCH_SAMPLING_INTERVAL_TICK = 5L
     private const val LINE_SEPARATOR = "\r\n"
 }
 
