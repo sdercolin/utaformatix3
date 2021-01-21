@@ -200,38 +200,43 @@ object Ust {
                 val key = it.toIntOrNull() ?: return@let
                 pendingNoteKey = key
             }
-            line.tryGetValue("PBS")?.let {
-                val cells = it.split(';', ',')
-                val start = cells[0].toDoubleOrNull() ?: return@let
-                val startShift = cells.getOrNull(1)?.toDoubleOrNull() ?: 0.0
-                pendingPBS = start to startShift
-            }
-            line.tryGetValue("PBW")?.let {
-                pendingPBW = it.split(',').map { width -> width.toDoubleOrNull() ?: 0.0 }
-            }
-            line.tryGetValue("PBY")?.let {
-                pendingPBY = it.split(',').map { shift -> shift.toDoubleOrNull() ?: 0.0 }
-            }
-            line.tryGetValue("PBM")?.let {
-                pendingPBM = it.split(',')
-            }
-            line.tryGetValue("VBR")?.let {
-                pendingVBR = it.split(',').mapNotNull { cell -> cell.toDoubleOrNull() }
-            }
-            line.tryGetValue("Piches")?.let {
-                if (pendingNotePitches != null)
-                    return@let
-                pendingNotePitches = parseMode1PitchData(it)
-            }
-            line.tryGetValue("Pitches")?.let {
-                if (pendingNotePitches != null)
-                    return@let
-                pendingNotePitches = parseMode1PitchData(it)
-            }
-            line.tryGetValue("PitchBend")?.let {
-                if (pendingNotePitches != null)
-                    return@let
-                pendingNotePitches = parseMode1PitchData(it)
+            if (isMode2) {
+                line.tryGetValue("PBS")?.let {
+                    val cells = it.split(';', ',')
+                    val start = cells[0].toDoubleOrNull() ?: return@let
+                    val startShift = cells.getOrNull(1)?.toDoubleOrNull() ?: 0.0
+                    pendingPBS = start to startShift
+                }
+                line.tryGetValue("PBW")?.let {
+                    pendingPBW = it.split(',').map { width -> width.toDoubleOrNull() ?: 0.0 }
+                }
+                line.tryGetValue("PBY")?.let {
+                    pendingPBY = it.split(',').map { shift -> shift.toDoubleOrNull() ?: 0.0 }
+                }
+                line.tryGetValue("PBM")?.let {
+                    pendingPBM = it.split(',')
+                }
+                line.tryGetValue("VBR")?.let {
+                    pendingVBR = it.split(',').mapNotNull { cell -> cell.toDoubleOrNull() }
+                }
+            } else {
+                // Parse Mode1 pitch data. As these fields would contain same data, if pendingNotePitches is not null,
+                // which means one field has been parsed, we will skip other fields.
+                line.tryGetValue("Piches")?.let {
+                    if (pendingNotePitches != null)
+                        return@let
+                    pendingNotePitches = parseMode1PitchData(it)
+                }
+                line.tryGetValue("Pitches")?.let {
+                    if (pendingNotePitches != null)
+                        return@let
+                    pendingNotePitches = parseMode1PitchData(it)
+                }
+                line.tryGetValue("PitchBend")?.let {
+                    if (pendingNotePitches != null)
+                        return@let
+                    pendingNotePitches = parseMode1PitchData(it)
+                }
             }
         }
         val pitchDataMode1 = notePitchDataListMode1.ifEmpty { null }?.let { UtauMode1TrackPitchData(it) }
