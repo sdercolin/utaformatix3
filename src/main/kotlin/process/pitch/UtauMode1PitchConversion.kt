@@ -1,5 +1,6 @@
 package process.pitch
 
+import io.Ust
 import model.Note
 import model.Pitch
 
@@ -21,7 +22,7 @@ data class UtauMode1TrackPitchData(
  * Please notice that UTAU save its pitch data by cent, not semitone. This class will keep this behaviour.
  */
 data class UtauMode1NotePitchData(
-    val pitchData: List<Pair<Long, Double?>>?
+    val pitchData: List<Double>?
 )
 
 fun pitchFromUtauMode1Track(pitchData: UtauMode1TrackPitchData?, notes: List<Note>): Pitch? {
@@ -30,8 +31,8 @@ fun pitchFromUtauMode1Track(pitchData: UtauMode1TrackPitchData?, notes: List<Not
     val pitchPoints = mutableListOf<Pair<Long, Double>>()
     for ((note, notePitch) in notePitches) {
         notePitch?.pitchData?.let { data ->
-            pitchPoints.addAll(data.map {
-                Pair(note.tickOn + it.first, it.second?.div(100) ?: return null)
+            pitchPoints.addAll(data.mapIndexed { index, value ->
+                Pair(note.tickOn + index * Ust.MODE1_PITCH_SAMPLING_INTERVAL_TICK, value / 100)
             })
         }
     }

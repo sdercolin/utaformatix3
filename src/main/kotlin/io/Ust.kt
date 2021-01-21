@@ -11,7 +11,6 @@ import model.ExportResult
 import model.Format
 import model.ImportWarning
 import model.Note
-import model.Pitch
 import model.Project
 import model.Tempo
 import model.TimeSignature
@@ -109,7 +108,7 @@ object Ust {
         var isMode2 = false
         var pendingBpm: Double? = null
         // Pitch field for Mode1
-        var pendingNotePitches: List<Pair<Long, Double>>? = null
+        var pendingPitchBend: List<Double>? = null
         // Pitch field for Mode2
         var pendingPBS: Pair<Double, Double>? = null
         var pendingPBW: List<Double>? = null
@@ -167,7 +166,7 @@ object Ust {
                     )
                     notePitchDataListMode1.add(
                         UtauMode1NotePitchData(
-                            pendingNotePitches.orEmpty()
+                            pendingPitchBend
                         )
                     )
                 }
@@ -180,7 +179,7 @@ object Ust {
                 pendingPBY = null
                 pendingPBM = null
                 pendingVBR = null
-                pendingNotePitches = null
+                pendingPitchBend = null
             }
             line.tryGetValue("Length")?.let {
                 val length = it.toLongOrNull() ?: return@let
@@ -223,19 +222,19 @@ object Ust {
                 // Parse Mode1 pitch data. As these fields would contain same data, if pendingNotePitches is not null,
                 // which means one field has been parsed, we will skip other fields.
                 line.tryGetValue("Piches")?.let {
-                    if (pendingNotePitches != null)
+                    if (pendingPitchBend != null)
                         return@let
-                    pendingNotePitches = parseMode1PitchData(it)
+                    pendingPitchBend = parseMode1PitchData(it)
                 }
                 line.tryGetValue("Pitches")?.let {
-                    if (pendingNotePitches != null)
+                    if (pendingPitchBend != null)
                         return@let
-                    pendingNotePitches = parseMode1PitchData(it)
+                    pendingPitchBend = parseMode1PitchData(it)
                 }
                 line.tryGetValue("PitchBend")?.let {
-                    if (pendingNotePitches != null)
+                    if (pendingPitchBend != null)
                         return@let
-                    pendingNotePitches = parseMode1PitchData(it)
+                    pendingPitchBend = parseMode1PitchData(it)
                 }
             }
         }
@@ -246,12 +245,9 @@ object Ust {
 
     private fun parseMode1PitchData(
         pitchString: String
-    ): List<Pair<Long, Double>> {
-        return pitchString.split(",").mapIndexed { index, pitchPointString ->
-            Pair(
-                index * MODE1_PITCH_SAMPLING_INTERVAL_TICK,
-                pitchPointString.toDoubleOrNull() ?: 0.0
-            )
+    ): List<Double> {
+        return pitchString.split(",").map { pitchPointString ->
+            pitchPointString.toDoubleOrNull() ?: 0.0
         }
     }
 
@@ -334,7 +330,7 @@ object Ust {
         return substring(index + 1).takeIf { it.isNotBlank() }
     }
 
-    private const val MODE1_PITCH_SAMPLING_INTERVAL_TICK = 5L
+    const val MODE1_PITCH_SAMPLING_INTERVAL_TICK = 5L
     private const val LINE_SEPARATOR = "\r\n"
 }
 
