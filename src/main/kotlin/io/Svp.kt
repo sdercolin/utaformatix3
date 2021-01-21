@@ -16,6 +16,7 @@ import model.TimeSignature
 import org.w3c.files.Blob
 import org.w3c.files.BlobPropertyBag
 import org.w3c.files.File
+import process.pitch.SvpNoteWithVibrato
 import process.pitch.appendPitchPointsForSvpOutput
 import process.pitch.getRelativeData
 import process.pitch.processSvpInputPitchData
@@ -49,7 +50,7 @@ object Svp {
         }?.takeIf { it.isNotEmpty() } ?: listOf(model.Tempo.default).also {
             warnings.add(ImportWarning.TempoNotFound)
         }
-        val tracks = parseTracks(project)
+        val tracks = parseTracks(project, tempos)
         return model.Project(
             format = Format.SVP,
             inputFiles = listOf(file),
@@ -62,12 +63,15 @@ object Svp {
         )
     }
 
-    private fun parseTracks(project: Project): List<model.Track> = project.tracks.mapIndexed { index, track ->
+    private fun parseTracks(
+        project: Project,
+        tempos: List<model.Tempo>
+    ): List<model.Track> = project.tracks.mapIndexed { index, track ->
         model.Track(
             id = index,
             name = track.name ?: "Track ${index + 1}",
             notes = parseNotes(track, project),
-            pitch = parsePitch(track, project)
+            pitch = parsePitch(track, project, tempos)
         ).validateNotes()
     }
 
@@ -95,21 +99,21 @@ object Svp {
         )
     }
 
-    private fun parsePitch(track: Track, project: Project): Pitch? {
+    private fun parsePitch(track: Track, project: Project, tempos: List<model.Tempo>): Pitch? {
         val main = track.mainGroup?.let { group ->
             val ref = track.mainRef ?: return@let null
-            parsePitchFromGroup(ref, group)
+            parsePitchFromGroup(ref, group, tempos)
         }.orEmpty()
         val extras = track.groups?.flatMap { ref ->
             project.library.find { it.uuid == ref.groupID }
-                ?.let { group -> parsePitchFromGroup(ref, group) }
+                ?.let { group -> parsePitchFromGroup(ref, group, tempos) }
                 .orEmpty()
         }.orEmpty()
         val all = (main + extras).sortedBy { it.first }
         return Pitch(all, isAbsolute = false).takeIf { it.data.isNotEmpty() }
     }
 
-    private fun parsePitchFromGroup(ref: Ref, group: Group): List<Pair<Long, Double>> {
+    private fun parsePitchFromGroup(ref: Ref, group: Group, tempos: List<model.Tempo>): List<Pair<Long, Double>> {
         val pitchDelta = group.parameters?.pitchDelta ?: return emptyList()
         val mode = pitchDelta.mode ?: return emptyList()
         val points = pitchDelta.points ?: return emptyList()
@@ -126,7 +130,20 @@ object Svp {
                 tick.roundToLong() to value
             }
             .toList()
-        return processSvpInputPitchData(convertedPoints, mode)
+        val notesWithVibrato = group.notes.map { note ->
+            SvpNoteWithVibrato(
+                noteStart = (note.onset + ref.blickOffset) / TICK_RATE,
+                noteLength = note.duration / TICK_RATE,
+                noteKey = note.pitch + ref.pitchOffset,
+                start = note.attributes?.tF0VbrStart,
+                easeInLength = note.attributes?.tF0VbrLeft,
+                easeOutLength = note.attributes?.tF0VbrRight,
+                depth = note.attributes?.dF0Vbr,
+                phase = note.attributes?.pF0Vbr,
+                frequency = note.attributes?.fF0Vbr
+            )
+        }
+        return processSvpInputPitchData(convertedPoints, mode, notesWithVibrato, tempos)
     }
 
     fun generate(project: model.Project, features: List<Feature>): ExportResult {
@@ -310,7 +327,14 @@ object Svp {
     )
 
     @Serializable
-    private class Attributes
+    private data class Attributes(
+        var tF0VbrStart: Double? = null,
+        var tF0VbrLeft: Double? = null,
+        var tF0VbrRight: Double? = null,
+        var dF0Vbr: Double? = null,
+        var pF0Vbr: Double? = null,
+        var fF0Vbr: Double? = null
+    )
 
     @Serializable
     private data class Breathiness(

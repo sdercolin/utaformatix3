@@ -1,12 +1,32 @@
 package process.pitch
 
+import model.Tempo
 import process.interpolateCosineEaseInOut
 import process.interpolateLinear
 
 private const val SAMPLING_INTERVAL_TICK = 4L
 
-fun processSvpInputPitchData(points: List<Pair<Long, Double>>, mode: String) =
-    points.merge().interpolate(mode).orEmpty()
+data class SvpNoteWithVibrato(
+    val noteStart: Long, // tick
+    val noteLength: Long, // tick
+    val noteKey: Int, // semitone
+    val start: Double?, // sec
+    val easeInLength: Double?, // sec
+    val easeOutLength: Double?, // sec
+    val depth: Double?, // semitone
+    val frequency: Double?, // Hz
+    val phase: Double? // rad/sec
+)
+
+fun processSvpInputPitchData(
+    points: List<Pair<Long, Double>>,
+    mode: String,
+    notesWithVibrato: List<SvpNoteWithVibrato>,
+    tempos: List<Tempo>
+) = points
+    .merge()
+    .interpolate(mode)
+    .orEmpty()
 
 private fun List<Pair<Long, Double>>.merge() = groupBy { it.first }
     .mapValues { it.value.sumByDouble { (_, value) -> value } / it.value.count() }
