@@ -28,14 +28,20 @@ data class SvpNoteWithVibrato(
 
 fun processSvpInputPitchData(
     points: List<Pair<Long, Double>>,
-    mode: String,
+    mode: String?,
     notesWithVibrato: List<SvpNoteWithVibrato>,
-    tempos: List<Tempo>
+    tempos: List<Tempo>,
+    vibratoEnvPoints: List<Pair<Long, Double>>,
+    vibratoEnvMode: String?
 ) = points
     .merge()
     .interpolate(mode)
     .orEmpty()
-    .appendVibrato(notesWithVibrato, tempos)
+    .appendVibrato(
+        notesWithVibrato,
+        tempos,
+        vibratoEnvPoints.merge().interpolate(vibratoEnvMode).orEmpty().extendEveryTick()
+    )
     .removeRedundantPoints()
 
 private fun List<Pair<Long, Double>>.merge() = groupBy { it.first }
@@ -43,16 +49,28 @@ private fun List<Pair<Long, Double>>.merge() = groupBy { it.first }
     .toList()
     .sortedBy { it.first }
 
-private fun List<Pair<Long, Double>>.interpolate(mode: String) = when (mode) {
+private fun List<Pair<Long, Double>>.interpolate(mode: String?) = when (mode) {
     "linear" -> this.interpolateLinear(SAMPLING_INTERVAL_TICK)
     "cosine" -> this.interpolateCosineEaseInOut(SAMPLING_INTERVAL_TICK)
     "cubic" -> this.interpolateCosineEaseInOut(SAMPLING_INTERVAL_TICK) // TODO: interpolateCubic
     else -> this.interpolateCosineEaseInOut(SAMPLING_INTERVAL_TICK)
 }
 
+private fun List<Pair<Long, Double>>.extendEveryTick() =
+    fold(listOf<Pair<Long, Double>>()) { acc, point ->
+        val lastPoint = acc.lastOrNull()
+        if (lastPoint == null || lastPoint.second == 1.0) acc + point
+        else {
+            val inserted = (lastPoint.first until point.first)
+                .map { it to lastPoint.second }
+            acc + inserted + point
+        }
+    }.toMap()
+
 private fun List<Pair<Long, Double>>.appendVibrato(
     notes: List<SvpNoteWithVibrato>,
-    tempos: List<Tempo>
+    tempos: List<Tempo>,
+    vibratoEnv: Map<Long, Double>
 ): List<Pair<Long, Double>> {
 
     // a piecewise linear transformation from tick to sec
@@ -100,7 +118,7 @@ private fun List<Pair<Long, Double>>.appendVibrato(
         .let { it + ((it.lastOrNull()?.first?.last ?: 0L) until Long.MAX_VALUE to null) }
         .flatMap { (range, note) ->
             this.filter { (tick, _) -> tick in range }
-                .appendVibratoInNote(note, tickToSecTransformation, secToTickTransformation, tempos)
+                .appendVibratoInNote(note, tickToSecTransformation, secToTickTransformation, tempos, vibratoEnv)
         }
 }
 
@@ -108,7 +126,8 @@ private fun List<Pair<Long, Double>>.appendVibratoInNote(
     note: SvpNoteWithVibrato?,
     tickToSecTransformation: (Long) -> Double,
     secToTickTransformation: (Double) -> Long,
-    tempos: List<Tempo>
+    tempos: List<Tempo>,
+    vibratoEnv: Map<Long, Double>
 ): List<Pair<Long, Double>> {
     note ?: return this
 
@@ -119,7 +138,7 @@ private fun List<Pair<Long, Double>>.appendVibratoInNote(
     val vibratoStartTick = secToTickTransformation(vibratoStart)
     val easeInLength = note.easeInLength ?: SVP_VIBRATO_DEFAULT_EASE_IN_SEC
     val easeOutLength = note.easeOutLength ?: SVP_VIBRATO_DEFAULT_EASE_OUT_SEC
-    val depth = note.depth ?: SVP_VIBRATO_DEFAULT_DEPTH_SEMITONE
+    val depth = (note.depth ?: SVP_VIBRATO_DEFAULT_DEPTH_SEMITONE) * 0.5
     if (depth == 0.0) return this
     val phase = note.phase ?: SVP_VIBRATO_DEFAULT_PHASE_RAD
     val frequency = note.frequency ?: SVP_VIBRATO_DEFAULT_FREQUENCY_HZ
@@ -135,7 +154,8 @@ private fun List<Pair<Long, Double>>.appendVibratoInNote(
             val easeOutFactor = ((noteEnd - sec) / easeOutLength).coerceIn(0.0..1.0)
                 .takeIf { !it.isNaN() } ?: 1.0
             val rad = 2 * kotlin.math.PI * frequency * tickToTimeRate * (tick - vibratoStartTick) + phase
-            depth * easeInFactor * easeOutFactor * kotlin.math.sin(rad)
+            val envelope = vibratoEnv[tick] ?: 1.0
+            envelope * depth * easeInFactor * easeOutFactor * kotlin.math.sin(rad)
         }
     }
 

@@ -114,10 +114,10 @@ object Svp {
     }
 
     private fun parsePitchFromGroup(ref: Ref, group: Group, tempos: List<model.Tempo>): List<Pair<Long, Double>> {
-        val pitchDelta = group.parameters?.pitchDelta ?: return emptyList()
-        val mode = pitchDelta.mode ?: return emptyList()
-        val points = pitchDelta.points ?: return emptyList()
-        val convertedPoints = points.asSequence()
+        val pitchDelta = group.parameters?.pitchDelta
+        val pitchMode = pitchDelta?.mode
+        val pitchPoints = pitchDelta?.points.orEmpty()
+            .asSequence()
             .withIndex()
             .groupBy { it.index / 2 }
             .map { it.value }
@@ -127,6 +127,21 @@ object Svp {
                 val centValue = it.getOrNull(1) ?: return@mapNotNull null
                 val tick = (rawTick + ref.blickOffset) / TICK_RATE
                 val value = centValue / 100
+                tick.roundToLong() to value
+            }
+            .toList()
+        val vibratoEnv = group.parameters?.vibratoEnv
+        val vibratoEnvMode = vibratoEnv?.mode
+        val vibratoEnvPoints = vibratoEnv?.points.orEmpty()
+            .asSequence()
+            .withIndex()
+            .groupBy { it.index / 2 }
+            .map { it.value }
+            .map { it.map { indexedValue -> indexedValue.value } }
+            .mapNotNull {
+                val rawTick = it.getOrNull(0) ?: return@mapNotNull null
+                val value = it.getOrNull(1) ?: return@mapNotNull null
+                val tick = (rawTick + ref.blickOffset) / TICK_RATE
                 tick.roundToLong() to value
             }
             .toList()
@@ -142,7 +157,14 @@ object Svp {
                 frequency = note.attributes?.fF0Vbr
             )
         }
-        return processSvpInputPitchData(convertedPoints, mode, notesWithVibrato, tempos)
+        return processSvpInputPitchData(
+            pitchPoints,
+            pitchMode,
+            notesWithVibrato,
+            tempos,
+            vibratoEnvPoints,
+            vibratoEnvMode
+        )
     }
 
     fun generate(project: model.Project, features: List<Feature>): ExportResult {
@@ -368,7 +390,7 @@ object Svp {
     @Serializable
     private data class VibratoEnv(
         var mode: String? = null,
-        var points: List<String>? = null
+        var points: List<Double>? = null
     )
 
     @Serializable
