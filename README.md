@@ -24,7 +24,7 @@ The current version `3.x` is built with [Kotlin for JavaScript](https://kotlinla
   
 ## Contributors
 
-[sdercolin](https://github.com/sdercolin), [ghosrt](https://github.com/ghosrt), [時雨ゆん](https://twitter.com/Yun_Shigure)
+[sdercolin](https://github.com/sdercolin), [ghosrt](https://github.com/ghosrt), shine5402(https://github.com/shine5402), [時雨ゆん](https://twitter.com/Yun_Shigure)
 
 ## Get started for development
 1. Install [IntelliJ IDEA](https://www.jetbrains.com/idea/)
