@@ -40,7 +40,7 @@ class CustomFooter : RComponent<RProps, RState>() {
                         target = "_blank"
                         color = Color.inherit
                     }
-                    +"Join Us"
+                    +"View Source Code on GitHub"
                 }
             }
         }
