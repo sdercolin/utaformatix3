@@ -30,6 +30,7 @@ import ui.external.materialui.StepIconPropsClasses
 import ui.external.materialui.Style
 import ui.external.materialui.TypographyVariant
 import ui.external.materialui.appBar
+import ui.external.materialui.button
 import ui.external.materialui.container
 import ui.external.materialui.cssBaseline
 import ui.external.materialui.fab
@@ -37,9 +38,13 @@ import ui.external.materialui.step
 import ui.external.materialui.stepLabel
 import ui.external.materialui.stepper
 import ui.external.materialui.toolbar
+import ui.external.materialui.tooltip
 import ui.external.materialui.typography
 import ui.model.Stage
 import ui.model.StageInfo
+import ui.strings.Strings.FaqUrl
+import ui.strings.Strings.FrequentlyAskedQuestionTooltip
+import ui.strings.Strings.ReportFeedbackTooltip
 import ui.strings.Strings.ReportUrl
 import ui.strings.string
 import kotlin.browser.window
@@ -102,12 +107,31 @@ class App : RComponent<RProps, AppState>() {
                         }
                     }
                 }
-                ui.external.materialui.button {
+                tooltip {
                     attrs {
-                        color = Color.inherit
-                        onClick = { window.open(string(ReportUrl), target = "_blank") }
+                        title = string(FrequentlyAskedQuestionTooltip)
+                        interactive = false
                     }
-                    Icons.feedback {}
+                    button {
+                        attrs {
+                            color = Color.inherit
+                            onClick = { window.open(string(FaqUrl), target = "_blank") }
+                        }
+                        Icons.liveHelp {}
+                    }
+                }
+                tooltip {
+                    attrs {
+                        title = string(ReportFeedbackTooltip)
+                        interactive = false
+                    }
+                    button {
+                        attrs {
+                            color = Color.inherit
+                            onClick = { window.open(string(ReportUrl), target = "_blank") }
+                        }
+                        Icons.feedback {}
+                    }
                 }
                 child(LanguageSelector::class) {
                     attrs {

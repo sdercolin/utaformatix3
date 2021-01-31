@@ -42,6 +42,15 @@ class CustomFooter : RComponent<RProps, RState>() {
                     }
                     +"View Source Code on GitHub"
                 }
+                +" | "
+                link {
+                    attrs {
+                        href = "https://gist.github.com/sdercolin/512db280480072f22cf1d462401eb1a0"
+                        target = "_blank"
+                        color = Color.inherit
+                    }
+                    +"Release Notes"
+                }
             }
         }
     }
