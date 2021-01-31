@@ -276,7 +276,7 @@ enum class Strings(val en: String, val ja: String, val zhCN: String) {
         zhCN = "填充短休止符"
     ),
     SlightRestsFillingDescription(
-        en = "Entend note to fill the short rest between it and its next note",
+        en = "Extend note to fill the short rest between it and its next note",
         ja = "ノート同士の間に短い休符が挟まっている場合、前のノートを伸ばして隙間を埋めます",
         zhCN = "当音符之间存在较短的休止符时，将前一个音符延长来填充休止符"
     ),
