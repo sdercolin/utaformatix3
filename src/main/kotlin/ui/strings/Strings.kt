@@ -11,6 +11,11 @@ enum class Strings(val en: String, val ja: String, val zhCN: String) {
         ja = Japanese.displayName,
         zhCN = SimplifiedChinese.displayName
     ),
+    ReportFeedbackTooltip(
+        en = "Send feedback.",
+        ja = "フィードバックを送信",
+        zhCN = "提交反馈"
+    ),
     ImportProjectCaption(
         en = "Import Project",
         ja = "プロジェクトをインポート",
