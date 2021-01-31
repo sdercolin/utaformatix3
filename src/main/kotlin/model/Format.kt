@@ -10,8 +10,8 @@ import org.w3c.files.File
 enum class Format(
     val extension: String,
     val multipleFile: Boolean,
-    val parser: suspend (files: List<File>) -> Project,
-    val generator: suspend (project: Project, _: List<Feature>) -> ExportResult,
+    val parser: suspend (List<File>) -> Project,
+    val generator: suspend (Project, List<Feature>) -> ExportResult,
     val possibleLyricsTypes: List<LyricsType>,
     val suggestedLyricType: LyricsType? = null,
     val availableFeaturesForGeneration: List<Feature> = listOf()
