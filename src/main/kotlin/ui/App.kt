@@ -42,6 +42,8 @@ import ui.external.materialui.tooltip
 import ui.external.materialui.typography
 import ui.model.Stage
 import ui.model.StageInfo
+import ui.strings.Strings.FaqUrl
+import ui.strings.Strings.FrequentlyAskedQuestionTooltip
 import ui.strings.Strings.ReportFeedbackTooltip
 import ui.strings.Strings.ReportUrl
 import ui.strings.string
@@ -103,6 +105,19 @@ class App : RComponent<RProps, AppState>() {
                             }
                             +"v$APP_VERSION"
                         }
+                    }
+                }
+                tooltip {
+                    attrs {
+                        title = string(FrequentlyAskedQuestionTooltip)
+                        interactive = false
+                    }
+                    button {
+                        attrs {
+                            color = Color.inherit
+                            onClick = { window.open(string(FaqUrl), target = "_blank") }
+                        }
+                        Icons.liveHelp {}
                     }
                 }
                 tooltip {

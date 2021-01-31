@@ -12,9 +12,14 @@ enum class Strings(val en: String, val ja: String, val zhCN: String) {
         zhCN = SimplifiedChinese.displayName
     ),
     ReportFeedbackTooltip(
-        en = "Send feedback.",
+        en = "Send feedback",
         ja = "フィードバックを送信",
         zhCN = "提交反馈"
+    ),
+    FrequentlyAskedQuestionTooltip(
+        en = "Frequently Asked Questions",
+        ja = "よくある質問",
+        zhCN = "常见问题解答"
     ),
     ImportProjectCaption(
         en = "Import Project",
@@ -145,6 +150,11 @@ enum class Strings(val en: String, val ja: String, val zhCN: String) {
         en = "https://forms.gle/3Es3ZomcYKNHWBvp6",
         ja = "https://forms.gle/kDY9chZBjGATXqpE8",
         zhCN = "https://forms.gle/nJVdrsfwMhbNXEYUA"
+    ),
+    FaqUrl(
+        en = "https://gist.githubusercontent.com/sdercolin/4d835e7e201a39504f5321f67d254209/",
+        ja = "https://gist.githubusercontent.com/sdercolin/f1de7c1f7a894f1fc8f77b17f3e8f77d/",
+        zhCN = "https://gist.githubusercontent.com/sdercolin/1a940a1357e2a6a5c10561482536bdba/"
     ),
     ImportWarningTitle(
         en = "The following exceptions happened during the import process.",
