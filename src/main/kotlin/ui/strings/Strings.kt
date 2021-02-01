@@ -156,6 +156,11 @@ enum class Strings(val en: String, val ja: String, val zhCN: String) {
         ja = "https://gist.githubusercontent.com/sdercolin/f1de7c1f7a894f1fc8f77b17f3e8f77d/raw",
         zhCN = "https://gist.githubusercontent.com/sdercolin/1a940a1357e2a6a5c10561482536bdba/raw"
     ),
+    ReleaseNotesUrl(
+        en = "https://gist.githubusercontent.com/sdercolin/512db280480072f22cf1d462401eb1a0/raw",
+        ja = "https://gist.githubusercontent.com/sdercolin/512db280480072f22cf1d462401eb1a0/raw",
+        zhCN = "https://gist.githubusercontent.com/sdercolin/512db280480072f22cf1d462401eb1a0/raw"
+    ),
     ImportWarningTitle(
         en = "The following exceptions happened during the import process.",
         ja = "インポート中に下記の例外が発生しました。",

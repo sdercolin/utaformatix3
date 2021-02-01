@@ -3,6 +3,7 @@ package ui.model
 import model.ExportResult
 import model.Format
 import model.Project
+import ui.strings.Strings
 
 sealed class StageInfo(
     val stage: Stage
@@ -24,6 +25,6 @@ sealed class StageInfo(
     ) : StageInfo(Stage.Export)
 
     data class ExtraPage(
-        val url: String
+        val urlKey: Strings
     ) : StageInfo(Stage.ExtraPage)
 }

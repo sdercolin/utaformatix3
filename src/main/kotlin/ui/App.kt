@@ -42,10 +42,7 @@ import ui.external.materialui.tooltip
 import ui.external.materialui.typography
 import ui.model.Stage
 import ui.model.StageInfo
-import ui.strings.Strings.FaqUrl
-import ui.strings.Strings.FrequentlyAskedQuestionTooltip
-import ui.strings.Strings.ReportFeedbackTooltip
-import ui.strings.Strings.ReportUrl
+import ui.strings.Strings
 import ui.strings.string
 import kotlin.browser.window
 
@@ -77,7 +74,7 @@ class App : RComponent<RProps, AppState>() {
             }
             child(CustomFooter::class) {
                 attrs {
-                    onOpenPage = { url -> pushStage(StageInfo.ExtraPage(url)) }
+                    onOpenPage = { urlKey -> pushStage(StageInfo.ExtraPage(urlKey)) }
                 }
             }
             buildBackButton()
@@ -113,26 +110,26 @@ class App : RComponent<RProps, AppState>() {
                 }
                 tooltip {
                     attrs {
-                        title = string(FrequentlyAskedQuestionTooltip)
+                        title = string(Strings.FrequentlyAskedQuestionTooltip)
                         interactive = false
                     }
                     button {
                         attrs {
                             color = Color.inherit
-                            onClick = { pushStage(StageInfo.ExtraPage(url = string(FaqUrl))) }
+                            onClick = { pushStage(StageInfo.ExtraPage(Strings.FaqUrl)) }
                         }
                         Icons.liveHelp {}
                     }
                 }
                 tooltip {
                     attrs {
-                        title = string(ReportFeedbackTooltip)
+                        title = string(Strings.ReportFeedbackTooltip)
                         interactive = false
                     }
                     button {
                         attrs {
                             color = Color.inherit
-                            onClick = { window.open(string(ReportUrl), target = "_blank") }
+                            onClick = { window.open(string(Strings.ReportUrl), target = "_blank") }
                         }
                         Icons.feedback {}
                     }
@@ -231,7 +228,7 @@ class App : RComponent<RProps, AppState>() {
                 is StageInfo.ExtraPage -> {
                     child(EmbeddedPage::class) {
                         attrs {
-                            url = info.url
+                            url = string(info.urlKey)
                         }
                     }
                 }
