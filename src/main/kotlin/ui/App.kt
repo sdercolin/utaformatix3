@@ -74,7 +74,7 @@ class App : RComponent<RProps, AppState>() {
             }
             child(CustomFooter::class) {
                 attrs {
-                    onOpenPage = { urlKey -> pushStage(StageInfo.ExtraPage(urlKey)) }
+                    onOpenEmbeddedPage = { urlKey -> pushStage(StageInfo.ExtraPage(urlKey)) }
                 }
             }
             buildBackButton()
