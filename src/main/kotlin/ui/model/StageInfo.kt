@@ -22,4 +22,8 @@ sealed class StageInfo(
         val result: ExportResult,
         val outputFormat: Format
     ) : StageInfo(Stage.Export)
+
+    data class ExtraPage(
+        val url: String
+    ) : StageInfo(Stage.ExtraPage)
 }

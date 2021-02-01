@@ -115,7 +115,7 @@ class App : RComponent<RProps, AppState>() {
                     button {
                         attrs {
                             color = Color.inherit
-                            onClick = { window.open(string(FaqUrl), target = "_blank") }
+                            onClick = { pushStage(StageInfo.ExtraPage(url = string(FaqUrl))) }
                         }
                         Icons.liveHelp {}
                     }
@@ -147,12 +147,14 @@ class App : RComponent<RProps, AppState>() {
     }
 
     private fun RBuilder.buildStepper() {
+        val stageIndex = state.stageInfo.stage.index
+        if (stageIndex < 0) return
         stepper {
             attrs {
                 style = Style(backgroundColor = Color.transparent)
                 activeStep = state.stageInfo.stage.index
             }
-            Stage.values().forEach { stage ->
+            Stage.forStepper.forEach { stage ->
                 step {
                     attrs {
                         key = stage.name
@@ -167,7 +169,7 @@ class App : RComponent<RProps, AppState>() {
                                 )
                             )
                         }
-                        +stage.displayName
+                        stage.displayName?.let { +it }
                     }
                 }
             }
@@ -184,7 +186,7 @@ class App : RComponent<RProps, AppState>() {
                     child(Importer::class) {
                         attrs {
                             formats = Format.importable
-                            onImported = { goNextStage(StageInfo.SelectOutputFormat(it)) }
+                            onImported = { pushStage(StageInfo.SelectOutputFormat(it)) }
                         }
                     }
                 }
@@ -194,7 +196,7 @@ class App : RComponent<RProps, AppState>() {
                             formats = Format.exportable
                             project = info.project
                             onSelected = {
-                                goNextStage(StageInfo.Configure(info.project, it))
+                                pushStage(StageInfo.Configure(info.project, it))
                             }
                         }
                     }
@@ -205,7 +207,7 @@ class App : RComponent<RProps, AppState>() {
                             project = info.project
                             outputFormat = info.outputFormat
                             onFinished = { result, format ->
-                                goNextStage(StageInfo.Export(info.project, result, format))
+                                pushStage(StageInfo.Export(info.project, result, format))
                             }
                         }
                     }
@@ -219,6 +221,13 @@ class App : RComponent<RProps, AppState>() {
                             onRestart = {
                                 popAllStages()
                             }
+                        }
+                    }
+                }
+                is StageInfo.ExtraPage -> {
+                    child(EmbeddedPage::class) {
+                        attrs {
+                            url = info.url
                         }
                     }
                 }
@@ -247,7 +256,10 @@ class App : RComponent<RProps, AppState>() {
         }
     }
 
-    private fun goNextStage(stageInfo: StageInfo) = setState {
+    private fun pushStage(stageInfo: StageInfo) = setState {
+        if (stageInfoStack.last().stage == stageInfo.stage) {
+            stageInfoStack = stageInfoStack.dropLast(1)
+        }
         stageInfoStack += stageInfo
     }
 
