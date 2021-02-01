@@ -17,8 +17,9 @@ import ui.external.materialui.Color
 import ui.external.materialui.TypographyVariant
 import ui.external.materialui.link
 import ui.external.materialui.typography
+import ui.strings.Strings
 
-class CustomFooter : RComponent<RProps, RState>() {
+class CustomFooter : RComponent<CustomFooterProps, RState>() {
     override fun RBuilder.render() {
         styledFooter {
             css {
@@ -33,7 +34,7 @@ class CustomFooter : RComponent<RProps, RState>() {
                     variant = TypographyVariant.body2
                     color = Color.inherit
                 }
-                +"UtaFormatix © 2015 - 2021  |  "
+                +"UtaFormatix © 2015 - 2021　|　"
                 link {
                     attrs {
                         href = "https://github.com/sdercolin/utaformatix3"
@@ -42,11 +43,12 @@ class CustomFooter : RComponent<RProps, RState>() {
                     }
                     +"View Source Code on GitHub"
                 }
-                +" | "
+                +"　|　"
                 link {
                     attrs {
-                        href = "https://gist.github.com/sdercolin/512db280480072f22cf1d462401eb1a0"
-                        target = "_blank"
+                        onClick = {
+                            props.onOpenEmbeddedPage(Strings.ReleaseNotesUrl)
+                        }
                         color = Color.inherit
                     }
                     +"Release Notes"
@@ -54,4 +56,8 @@ class CustomFooter : RComponent<RProps, RState>() {
             }
         }
     }
+}
+
+external class CustomFooterProps : RProps {
+    var onOpenEmbeddedPage: (urlKey: Strings) -> Unit
 }

@@ -13,4 +13,5 @@ external interface LinkProps : RProps {
     var href: String
     var color: String
     var target: String
+    var onClick: () -> Unit
 }
