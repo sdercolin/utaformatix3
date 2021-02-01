@@ -18,7 +18,7 @@ import ui.external.materialui.TypographyVariant
 import ui.external.materialui.link
 import ui.external.materialui.typography
 
-class CustomFooter : RComponent<RProps, RState>() {
+class CustomFooter : RComponent<CustomFooterProps, RState>() {
     override fun RBuilder.render() {
         styledFooter {
             css {
@@ -45,8 +45,11 @@ class CustomFooter : RComponent<RProps, RState>() {
                 +" | "
                 link {
                     attrs {
-                        href = "https://gist.github.com/sdercolin/512db280480072f22cf1d462401eb1a0"
-                        target = "_blank"
+                        onClick = {
+                            props.onOpenPage(
+                                "https://gist.githubusercontent.com/sdercolin/512db280480072f22cf1d462401eb1a0/raw"
+                            )
+                        }
                         color = Color.inherit
                     }
                     +"Release Notes"
@@ -54,4 +57,8 @@ class CustomFooter : RComponent<RProps, RState>() {
             }
         }
     }
+}
+
+external class CustomFooterProps : RProps {
+    var onOpenPage: (url: String) -> Unit
 }

@@ -4,6 +4,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.await
 import kotlinx.coroutines.launch
 import kotlinx.css.LinearDimension
+import kotlinx.css.marginBottom
 import kotlinx.css.marginTop
 import react.RBuilder
 import react.RComponent
@@ -19,12 +20,14 @@ class EmbeddedPage : RComponent<EmbeddedPageProps, EmbeddedPageState>() {
 
     override fun RBuilder.render() {
         val content = state.content
-        if (content == null) {
+        if (content == null || state.url != props.url) {
+            state.url = props.url
             fetch()
         } else {
             styledDiv {
                 css {
                     marginTop = LinearDimension("32px")
+                    marginBottom = LinearDimension("48px")
                 }
                 markdown {
                     +content
@@ -50,5 +53,6 @@ external interface EmbeddedPageProps : RProps {
 }
 
 external interface EmbeddedPageState : RState {
+    var url: String
     var content: String?
 }

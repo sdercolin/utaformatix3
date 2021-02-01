@@ -75,7 +75,11 @@ class App : RComponent<RProps, AppState>() {
                     buildBody()
                 }
             }
-            child(CustomFooter::class) {}
+            child(CustomFooter::class) {
+                attrs {
+                    onOpenPage = { url -> pushStage(StageInfo.ExtraPage(url)) }
+                }
+            }
             buildBackButton()
         }
     }
