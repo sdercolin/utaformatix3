@@ -11,11 +11,11 @@ import kotlin.math.roundToLong
 
 private const val SAMPLING_INTERVAL_TICK = 4L
 
-data class UtauTrackPitchData(
-    val notes: List<UtauNotePitchData?>
+data class UtauMode2TrackPitchData(
+    val notes: List<UtauMode2NotePitchData?>
 )
 
-data class UtauNotePitchData(
+data class UtauMode2NotePitchData(
     val bpm: Double?,
     val start: Double, // msec
     val startShift: Double, // 10 cents
@@ -25,7 +25,7 @@ data class UtauNotePitchData(
     val vibratoParams: List<Double>? // length(%), period(msec), depth(cent), easeIn(%), easeOut(%), phase(%), shift(%)
 )
 
-fun pitchFromUtauTrack(pitchData: UtauTrackPitchData?, notes: List<Note>): Pitch? {
+fun pitchFromUtauMode2Track(pitchData: UtauMode2TrackPitchData?, notes: List<Note>): Pitch? {
     pitchData ?: return null
     val notePitches = notes.zip(pitchData.notes)
     var bpm = notePitches.firstOrNull { it.second?.bpm != null }?.second?.bpm ?: return null

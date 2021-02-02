@@ -35,7 +35,7 @@ class LanguageSelector : RComponent<LanguageSelectorProps, LanguageSelectorState
                 keepMounted = false
                 anchorEl = state.anchorElement
                 open = state.anchorElement != null
-                onClose = { onClose() }
+                onClose = { setState { anchorElement = null } }
             }
             Language.values().forEach {
                 menuItem {

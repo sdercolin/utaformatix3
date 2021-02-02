@@ -32,6 +32,7 @@ dependencies {
     implementation(npm("@material-ui/lab", "4.0.0-alpha.56"))
     implementation(npm("react-file-drop"))
     implementation(npm("react-is"))
+    implementation(npm("react-markdown"))
 
     // Localization
     implementation(npm("i18next"))

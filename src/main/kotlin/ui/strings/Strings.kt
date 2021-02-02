@@ -11,6 +11,16 @@ enum class Strings(val en: String, val ja: String, val zhCN: String) {
         ja = Japanese.displayName,
         zhCN = SimplifiedChinese.displayName
     ),
+    ReportFeedbackTooltip(
+        en = "Send feedback",
+        ja = "フィードバックを送信",
+        zhCN = "提交反馈"
+    ),
+    FrequentlyAskedQuestionTooltip(
+        en = "Frequently Asked Questions",
+        ja = "よくある質問",
+        zhCN = "常见问题解答"
+    ),
     ImportProjectCaption(
         en = "Import Project",
         ja = "プロジェクトをインポート",
@@ -140,6 +150,16 @@ enum class Strings(val en: String, val ja: String, val zhCN: String) {
         en = "https://forms.gle/3Es3ZomcYKNHWBvp6",
         ja = "https://forms.gle/kDY9chZBjGATXqpE8",
         zhCN = "https://forms.gle/nJVdrsfwMhbNXEYUA"
+    ),
+    FaqUrl(
+        en = "https://gist.githubusercontent.com/sdercolin/4d835e7e201a39504f5321f67d254209/raw",
+        ja = "https://gist.githubusercontent.com/sdercolin/f1de7c1f7a894f1fc8f77b17f3e8f77d/raw",
+        zhCN = "https://gist.githubusercontent.com/sdercolin/1a940a1357e2a6a5c10561482536bdba/raw"
+    ),
+    ReleaseNotesUrl(
+        en = "https://gist.githubusercontent.com/sdercolin/512db280480072f22cf1d462401eb1a0/raw",
+        ja = "https://gist.githubusercontent.com/sdercolin/512db280480072f22cf1d462401eb1a0/raw",
+        zhCN = "https://gist.githubusercontent.com/sdercolin/512db280480072f22cf1d462401eb1a0/raw"
     ),
     ImportWarningTitle(
         en = "The following exceptions happened during the import process.",
@@ -276,7 +296,7 @@ enum class Strings(val en: String, val ja: String, val zhCN: String) {
         zhCN = "填充短休止符"
     ),
     SlightRestsFillingDescription(
-        en = "Entend note to fill the short rest between it and its next note",
+        en = "Extend note to fill the short rest between it and its next note",
         ja = "ノート同士の間に短い休符が挟まっている場合、前のノートを伸ばして隙間を埋めます",
         zhCN = "当音符之间存在较短的休止符时，将前一个音符延长来填充休止符"
     ),

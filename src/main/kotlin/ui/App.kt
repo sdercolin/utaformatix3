@@ -30,6 +30,7 @@ import ui.external.materialui.StepIconPropsClasses
 import ui.external.materialui.Style
 import ui.external.materialui.TypographyVariant
 import ui.external.materialui.appBar
+import ui.external.materialui.button
 import ui.external.materialui.container
 import ui.external.materialui.cssBaseline
 import ui.external.materialui.fab
@@ -37,10 +38,11 @@ import ui.external.materialui.step
 import ui.external.materialui.stepLabel
 import ui.external.materialui.stepper
 import ui.external.materialui.toolbar
+import ui.external.materialui.tooltip
 import ui.external.materialui.typography
 import ui.model.Stage
 import ui.model.StageInfo
-import ui.strings.Strings.ReportUrl
+import ui.strings.Strings
 import ui.strings.string
 import kotlin.browser.window
 
@@ -70,7 +72,11 @@ class App : RComponent<RProps, AppState>() {
                     buildBody()
                 }
             }
-            child(CustomFooter::class) {}
+            child(CustomFooter::class) {
+                attrs {
+                    onOpenEmbeddedPage = { urlKey -> pushStage(StageInfo.ExtraPage(urlKey)) }
+                }
+            }
             buildBackButton()
         }
     }
@@ -102,12 +108,31 @@ class App : RComponent<RProps, AppState>() {
                         }
                     }
                 }
-                ui.external.materialui.button {
+                tooltip {
                     attrs {
-                        color = Color.inherit
-                        onClick = { window.open(string(ReportUrl), target = "_blank") }
+                        title = string(Strings.FrequentlyAskedQuestionTooltip)
+                        interactive = false
                     }
-                    Icons.feedback {}
+                    button {
+                        attrs {
+                            color = Color.inherit
+                            onClick = { pushStage(StageInfo.ExtraPage(Strings.FaqUrl)) }
+                        }
+                        Icons.liveHelp {}
+                    }
+                }
+                tooltip {
+                    attrs {
+                        title = string(Strings.ReportFeedbackTooltip)
+                        interactive = false
+                    }
+                    button {
+                        attrs {
+                            color = Color.inherit
+                            onClick = { window.open(string(Strings.ReportUrl), target = "_blank") }
+                        }
+                        Icons.feedback {}
+                    }
                 }
                 child(LanguageSelector::class) {
                     attrs {
@@ -123,12 +148,14 @@ class App : RComponent<RProps, AppState>() {
     }
 
     private fun RBuilder.buildStepper() {
+        val stageIndex = state.stageInfo.stage.index
+        if (stageIndex < 0) return
         stepper {
             attrs {
                 style = Style(backgroundColor = Color.transparent)
                 activeStep = state.stageInfo.stage.index
             }
-            Stage.values().forEach { stage ->
+            Stage.forStepper.forEach { stage ->
                 step {
                     attrs {
                         key = stage.name
@@ -143,7 +170,7 @@ class App : RComponent<RProps, AppState>() {
                                 )
                             )
                         }
-                        +stage.displayName
+                        stage.displayName?.let { +it }
                     }
                 }
             }
@@ -160,7 +187,7 @@ class App : RComponent<RProps, AppState>() {
                     child(Importer::class) {
                         attrs {
                             formats = Format.importable
-                            onImported = { goNextStage(StageInfo.SelectOutputFormat(it)) }
+                            onImported = { pushStage(StageInfo.SelectOutputFormat(it)) }
                         }
                     }
                 }
@@ -170,7 +197,7 @@ class App : RComponent<RProps, AppState>() {
                             formats = Format.exportable
                             project = info.project
                             onSelected = {
-                                goNextStage(StageInfo.Configure(info.project, it))
+                                pushStage(StageInfo.Configure(info.project, it))
                             }
                         }
                     }
@@ -181,7 +208,7 @@ class App : RComponent<RProps, AppState>() {
                             project = info.project
                             outputFormat = info.outputFormat
                             onFinished = { result, format ->
-                                goNextStage(StageInfo.Export(info.project, result, format))
+                                pushStage(StageInfo.Export(info.project, result, format))
                             }
                         }
                     }
@@ -195,6 +222,13 @@ class App : RComponent<RProps, AppState>() {
                             onRestart = {
                                 popAllStages()
                             }
+                        }
+                    }
+                }
+                is StageInfo.ExtraPage -> {
+                    child(EmbeddedPage::class) {
+                        attrs {
+                            url = string(info.urlKey)
                         }
                     }
                 }
@@ -223,7 +257,10 @@ class App : RComponent<RProps, AppState>() {
         }
     }
 
-    private fun goNextStage(stageInfo: StageInfo) = setState {
+    private fun pushStage(stageInfo: StageInfo) = setState {
+        if (stageInfoStack.last().stage == stageInfo.stage) {
+            stageInfoStack = stageInfoStack.dropLast(1)
+        }
         stageInfoStack += stageInfo
     }
 
