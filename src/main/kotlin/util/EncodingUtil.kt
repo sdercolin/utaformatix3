@@ -1,7 +1,6 @@
 package util
 
 import external.Encoding
-import kotlinx.serialization.stringFromUtf8Bytes
 
 fun String.asByteTypedArray() = indices.map { i -> this.asDynamic().charCodeAt(i) as Byte }.toTypedArray()
 
@@ -9,5 +8,5 @@ fun String.encode(encoding: String) = Encoding.convert(asByteTypedArray(), encod
 
 fun Array<Byte>.decode(encoding: String) = this.let { bytes ->
     val convertedBytes = Encoding.convert(bytes, "UTF8", encoding)
-    stringFromUtf8Bytes(ByteArray(convertedBytes.size) { convertedBytes[it] })
+    ByteArray(convertedBytes.size) { convertedBytes[it] }.decodeToString()
 }

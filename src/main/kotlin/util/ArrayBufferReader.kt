@@ -1,6 +1,5 @@
 package util
 
-import kotlinx.serialization.stringFromUtf8Bytes
 import org.khronos.webgl.ArrayBuffer
 import org.khronos.webgl.Int32Array
 import org.khronos.webgl.Uint8Array
@@ -30,6 +29,6 @@ class ArrayBufferReader(private val buffer: ArrayBuffer) {
 
     fun readString(): String {
         val bytes = readBytes()
-        return stringFromUtf8Bytes(ByteArray(bytes.byteLength) { bytes[it] })
+        return ByteArray(bytes.byteLength) { bytes[it] }.decodeToString()
     }
 }

@@ -1,6 +1,5 @@
 package io
 
-import kotlinx.serialization.toUtf8Bytes
 import model.ExportResult
 import model.Format
 import model.ImportWarning
@@ -207,7 +206,7 @@ object Dv {
         bytes.addAll(header)
         val tickPrefix = project.timeSignatures.first().ticksInMeasure.toLong() * FIXED_MEASURE_PREFIX
         val mainBlock = mutableListOf<Byte>().apply {
-            addAll("ext1ext2ext3ext4ext5ext6ext7".toUtf8Bytes().toList())
+            addAll("ext1ext2ext3ext4ext5ext6ext7".encodeToByteArray().toList())
             addListBlock(generateTempos(project.tempos, tickPrefix))
             addListBlock(generateTimeSignatures(project.timeSignatures))
             addList(project.tracks.map { generateTrack(it, tickPrefix) })

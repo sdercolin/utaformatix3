@@ -5,7 +5,6 @@ import kotlinx.coroutines.await
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonConfiguration
 import model.DEFAULT_LYRIC
 import model.Format
 import model.ImportWarning
@@ -101,15 +100,13 @@ object Ppsf {
         val zip = JsZip().loadAsync(binary).await()
         val vprEntry = zip.file(jsonPath)
         val text = requireNotNull(vprEntry).async("string").await() as String
-        return jsonSerializer.parse(Project.serializer(), text)
+        return jsonSerializer.decodeFromString(Project.serializer(), text)
     }
 
-    private val jsonSerializer = Json(
-        JsonConfiguration.Stable.copy(
-            isLenient = true,
-            ignoreUnknownKeys = true
-        )
-    )
+    private val jsonSerializer = Json {
+        isLenient = true
+        ignoreUnknownKeys = true
+    }
 
     private const val BPM_RATE = 10000.0
     private const val jsonPath = "ppsf.json"
