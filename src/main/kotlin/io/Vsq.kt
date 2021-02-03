@@ -194,9 +194,11 @@ object Vsq {
         }.filterNotNull()
         val sectionMap = titleWithIndexes.zipWithNext().map { (current, next) ->
             current.first to lines.subList(current.second + 1, next.second)
-        }.plus(titleWithIndexes.last().let { last ->
-            last.first to lines.subList(last.second, lines.count())
-        }).map { pair ->
+        }.plus(
+            titleWithIndexes.last().let { last ->
+                last.first to lines.subList(last.second, lines.count())
+            }
+        ).map { pair ->
             pair.first to pair.second.map { it.splitFirst("=") }.toMap()
         }.toMap()
 
@@ -430,7 +432,7 @@ object Vsq {
             add("PlayMode=1")
             if (track.id == 0) {
                 add("[Master]")
-                add("PreMeasure=${measurePrefix}")
+                add("PreMeasure=$measurePrefix")
                 add("[Mixer]")
                 add("MasterFeder=0")
                 add("MasterPanpot=0")

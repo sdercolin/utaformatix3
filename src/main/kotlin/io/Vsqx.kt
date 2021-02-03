@@ -2,6 +2,7 @@ package io
 
 import exception.IllegalFileException
 import external.Resources
+import kotlin.math.max
 import kotlinx.dom.clear
 import model.DEFAULT_LYRIC
 import model.ExportNotification
@@ -37,7 +38,6 @@ import util.insertAfterThis
 import util.nameWithoutExtension
 import util.readText
 import util.setSingleChildValue
-import kotlin.math.max
 
 object Vsqx {
 

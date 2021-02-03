@@ -1,6 +1,7 @@
 package io
 
 import external.Resources
+import kotlin.math.roundToLong
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import model.DEFAULT_LYRIC
@@ -18,7 +19,6 @@ import process.pitch.getRelativeData
 import process.validateNotes
 import util.nameWithoutExtension
 import util.readText
-import kotlin.math.roundToLong
 
 object S5p {
     private const val TICK_RATE = 1470000L

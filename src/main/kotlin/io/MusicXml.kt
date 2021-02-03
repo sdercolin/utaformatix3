@@ -214,12 +214,14 @@ object MusicXml {
     private fun Project.applyTickRate() = copy(
         tempos = tempos.map { it.copy(tickPosition = (it.tickPosition * TICK_RATE).toLong()) },
         tracks = tracks.map { track ->
-            track.copy(notes = track.notes.map {
-                it.copy(
-                    tickOn = (it.tickOn * TICK_RATE).toLong(),
-                    tickOff = (it.tickOff * TICK_RATE).toLong()
-                )
-            })
+            track.copy(
+                notes = track.notes.map {
+                    it.copy(
+                        tickOn = (it.tickOn * TICK_RATE).toLong(),
+                        tickOff = (it.tickOff * TICK_RATE).toLong()
+                    )
+                }
+            )
         }
     )
 
@@ -257,10 +259,11 @@ object MusicXml {
         val keyTicksWithMeasureBorders = measureBorderTicks.zipWithNext()
             .map { borderPair ->
                 borderPair to keyTicks.filter {
-                    if (it is KeyTick.WithNoteEnd)
+                    if (it is KeyTick.WithNoteEnd) {
                         it.tick > borderPair.first && it.tick <= borderPair.second
-                    else
+                    } else {
                         it.tick >= borderPair.first && it.tick < borderPair.second
+                    }
                 }
             }
 

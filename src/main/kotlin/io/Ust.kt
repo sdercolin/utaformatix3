@@ -61,10 +61,12 @@ object Ust {
             }
             it ?: listOf(Tempo.default)
         }
-        warnings.addAll(results.flatMap { result ->
-            val ignoredTempos = result.tempos - tempos
-            ignoredTempos.map { ImportWarning.TempoIgnoredInFile(result.file, it) }
-        })
+        warnings.addAll(
+            results.flatMap { result ->
+                val ignoredTempos = result.tempos - tempos
+                ignoredTempos.map { ImportWarning.TempoIgnoredInFile(result.file, it) }
+            }
+        )
         return Project(
             format = Format.UST,
             inputFiles = files,
@@ -217,18 +219,21 @@ object Ust {
                 // Parse Mode1 pitch data. As these fields would contain same data, if pendingNotePitches is not null,
                 // which means one field has been parsed, we will skip other fields.
                 line.tryGetValue("Piches")?.let {
-                    if (pendingPitchBend != null)
+                    if (pendingPitchBend != null) {
                         return@let
+                    }
                     pendingPitchBend = parseMode1PitchData(it)
                 }
                 line.tryGetValue("Pitches")?.let {
-                    if (pendingPitchBend != null)
+                    if (pendingPitchBend != null) {
                         return@let
+                    }
                     pendingPitchBend = parseMode1PitchData(it)
                 }
                 line.tryGetValue("PitchBend")?.let {
-                    if (pendingPitchBend != null)
+                    if (pendingPitchBend != null) {
                         return@let
+                    }
                     pendingPitchBend = parseMode1PitchData(it)
                 }
             }
@@ -328,4 +333,3 @@ object Ust {
     const val MODE1_PITCH_SAMPLING_INTERVAL_TICK = 5L
     private const val LINE_SEPARATOR = "\r\n"
 }
-

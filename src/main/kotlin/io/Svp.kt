@@ -2,6 +2,7 @@ package io
 
 import external.Resources
 import external.generateUUID
+import kotlin.math.roundToLong
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import model.DEFAULT_LYRIC
@@ -22,7 +23,6 @@ import process.pitch.processSvpInputPitchData
 import process.validateNotes
 import util.nameWithoutExtension
 import util.readText
-import kotlin.math.roundToLong
 
 object Svp {
     suspend fun parse(file: File): model.Project {
@@ -408,5 +408,4 @@ object Svp {
         var name: String? = null,
         var phoneset: String? = null
     )
-
 }

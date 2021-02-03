@@ -1,5 +1,6 @@
 package process.pitch
 
+import kotlin.math.roundToLong
 import model.Note
 import model.Pitch
 import model.TICKS_IN_FULL_NOTE
@@ -7,7 +8,6 @@ import process.interpolateCosineEaseIn
 import process.interpolateCosineEaseInOut
 import process.interpolateCosineEaseOut
 import process.interpolateLinear
-import kotlin.math.roundToLong
 
 private const val SAMPLING_INTERVAL_TICK = 4L
 
@@ -83,9 +83,9 @@ private fun List<Pair<Long, Double>>.addPointsContinuingLastNote(thisNote: Note,
     if (lastNote == null) this
     else {
         val firstPoint = this.firstOrNull()
-        if (firstPoint != null && firstPoint.first > thisNote.tickOn)
+        if (firstPoint != null && firstPoint.first > thisNote.tickOn) {
             listOf(thisNote.tickOn to firstPoint.second) + this
-        else this
+        } else this
     }
 
 private fun List<Pair<Long, Double>>.appendVibrato(
@@ -142,7 +142,6 @@ private fun List<Pair<Long, Double>>.appendVibrato(
         }
         .map { (it.first + thisNote.tickOn) to it.second }
         .toList()
-
 }
 
 private fun List<Pair<Long, Double>>.shape() =

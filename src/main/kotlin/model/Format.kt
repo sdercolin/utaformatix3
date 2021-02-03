@@ -140,4 +140,3 @@ enum class Format(
         val exportable get() = listOf(VSQX, VPR, VSQ, UST, CCS, MUSIC_XML, SVP, S5P, DV)
     }
 }
-

@@ -123,9 +123,11 @@ private fun String.cleanupAsKanaVCV(): String {
 
 private fun List<Track>.cleanup(noteCleanup: (String) -> String) =
     map { track ->
-        track.copy(notes = track.notes.map { note ->
-            note.copy(lyric = noteCleanup(note.lyric))
-        })
+        track.copy(
+            notes = track.notes.map { note ->
+                note.copy(lyric = noteCleanup(note.lyric))
+            }
+        )
     }
 
 private val romajiTails = listOf('a', 'i', 'u', 'e', 'o', 'n', '-')

@@ -19,7 +19,6 @@ fun convert(project: Project, targetType: LyricsType): Project {
     return project.copy(tracks = tracks)
 }
 
-
 private fun convertRomajiToKana(tracks: List<Track>) = tracks.convertBetweenRomajiAndKana {
     it.toKana()
 }

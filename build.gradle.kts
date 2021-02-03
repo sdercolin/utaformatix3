@@ -1,6 +1,7 @@
 plugins {
     kotlin("js") version "1.4.30"
     kotlin("plugin.serialization") version "1.4.30-RC"
+    id("org.jlleitschuh.gradle.ktlint") version "9.4.1"
 }
 
 group = "com.sdercolin.utaformatix"
@@ -9,6 +10,10 @@ repositories {
     mavenCentral()
     maven { url = uri("https://kotlin.bintray.com/kotlin-js-wrappers/") }
     jcenter()
+}
+
+configure<org.jlleitschuh.gradle.ktlint.KtlintExtension> {
+    version.set("0.36.0")
 }
 
 dependencies {

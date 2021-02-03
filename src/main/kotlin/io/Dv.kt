@@ -1,5 +1,6 @@
 package io
 
+import kotlin.math.max
 import model.ExportResult
 import model.Format
 import model.ImportWarning
@@ -22,7 +23,6 @@ import util.addListBlock
 import util.addString
 import util.nameWithoutExtension
 import util.readAsArrayBuffer
-import kotlin.math.max
 
 /**
  * References: https://pypi.org/project/dvfile/

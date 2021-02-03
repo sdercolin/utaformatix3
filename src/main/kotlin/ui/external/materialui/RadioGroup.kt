@@ -16,4 +16,3 @@ external interface RadioGroupProps : RProps {
     var disabled: Boolean
     var row: Boolean
 }
-

@@ -142,7 +142,8 @@ enum class Strings(val en: String, val ja: String, val zhCN: String) {
         zhCN = "在处理中发生了以下错误"
     ),
     ErrorDialogDescription(
-        en = "If you find any problems, please help us collect error information for better performance of this application by submitting a feedback report.",
+        en = "If you find any problems, please help us collect error information" +
+                " for better performance of this application by submitting a feedback report.",
         ja = "サービス向上のためにエラー情報を収集しております。問題を発見した場合、フィードバックにご協力をお願いします。",
         zhCN = "如您在使用中发现问题，您可以向提交反馈表单。感谢您对本应用的改善所提供的帮助！"
     ),
@@ -192,7 +193,8 @@ enum class Strings(val en: String, val ja: String, val zhCN: String) {
         zhCN = "- 在导入的工程中未找到节拍记号。"
     ),
     ImportWarningTimeSignatureIgnoredInTrack(
-        en = "- Time signature label ({{timeSignature}}) at measure {{measure}} in Track {{number}}: [{{name}}] was ignored.",
+        en = "- Time signature label ({{timeSignature}}) at measure {{measure}}" +
+                " in Track {{number}}: [{{name}}] was ignored.",
         ja = "- トラック{{number}}：[{{name}}]の小節{{measure}}にある拍子記号（{{timeSignature}}）を読み込めませんでした。",
         zhCN = "- 未能读取音轨{{number}}: [{{name}}]中小节{{measure}}处的节拍记号（{{timeSignature}}）。"
     ),
@@ -269,8 +271,8 @@ enum class Strings(val en: String, val ja: String, val zhCN: String) {
         zhCN = "所有音符的音素都被设为了\"a\"。请使用VOCALOID4菜单中的「歌词」->「音位变换」功能来重置音素。"
     ),
     ExportNotificationPhonemeResetRequiredV5(
-        en = "Phonemes of all notes were set to \"a\"." +
-                " Please use \"Job\" -> \"Convert Phonemes to Match Languages\" in the menu of VOCALOID5 to reset them.",
+        en = "Phonemes of all notes were set to \"a\". Please use \"Job\" -> \"Convert Phonemes to Match Languages\"" +
+                " in the menu of VOCALOID5 to reset them.",
         ja = "全てのノートの発音記号が\"a\"に設定されました。" +
                 "VOCALOID5のメニューから「ジョブ」->「発音記号を言語に合わせて変換」機能で発音記号をリセットしてください。",
         zhCN = "所有音符的音素都被设为了\"a\"。请使用VOCALOID5菜单中的「任务」->「发音符号匹配」功能来重置音素。"
@@ -286,7 +288,8 @@ enum class Strings(val en: String, val ja: String, val zhCN: String) {
         zhCN = "未能将节拍记号导出到目标格式。"
     ),
     ExportNotificationPitchDataExported(
-        en = "Some pitch parameters were exported. For a higher reproduction accuracy, you may need to turn off pitch transition and vibrato settings in the target editor.",
+        en = "Some pitch parameters were exported. For a higher reproduction accuracy," +
+                " you may need to turn off pitch transition and vibrato settings in the target editor.",
         ja = "ピッチパラメータが出力されました。出力側のエディターでピッチ推移やビブラートなどの設定を削除することで、より高い精度でピッチを再現できる場合があります。",
         zhCN = "生成的文件中带有音高参数。您可能需要在对象编辑器中关闭音高平滑设置及颤音设置以达到更高的重现精度。"
     ),
