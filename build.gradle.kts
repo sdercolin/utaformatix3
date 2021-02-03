@@ -7,7 +7,7 @@ group = "com.sdercolin.utaformatix"
 
 repositories {
     mavenCentral()
-    maven { url = uri("https://kotlin.bintray.com/kotlin-js-wrappers") }
+    maven { url = uri("https://kotlin.bintray.com/kotlin-js-wrappers/") }
     jcenter()
 }
 

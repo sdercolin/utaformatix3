@@ -1,6 +1,7 @@
 package util
 
 import exception.CannotReadFileException
+import kotlinx.browser.document
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.khronos.webgl.ArrayBuffer
@@ -9,7 +10,6 @@ import org.w3c.files.File
 import org.w3c.files.FileList
 import org.w3c.files.FileReader
 import org.w3c.files.get
-import kotlin.browser.document
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine

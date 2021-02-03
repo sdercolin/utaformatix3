@@ -13,7 +13,7 @@ import model.Track
 fun analyseLyricsTypeForProject(project: Project): LyricsType {
     if (project.tracks.isEmpty()) return UNKNOWN
 
-    val maxNoteCountInAllTracks = project.tracks.maxBy { it.notes.count() }!!.notes.count()
+    val maxNoteCountInAllTracks = project.tracks.maxByOrNull { it.notes.count() }!!.notes.count()
     val minNoteCountForAvailableTrack = maxNoteCountInAllTracks * MIN_NOTE_RATIO_FOR_AVAILABLE_TRACK
 
     val availableResults = project.tracks

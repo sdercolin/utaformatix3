@@ -92,7 +92,7 @@ fun Pitch.generateForVocaloid(notes: List<Note>): VocaloidPartPitchData? {
     val pit = mutableListOf<Event>()
     val pbs = mutableListOf<Event>()
     for (section in pitchSectioned) {
-        val maxAbsValue = section.map { abs(it.second) }.max() ?: 0.0
+        val maxAbsValue = section.map { abs(it.second) }.maxOrNull() ?: 0.0
         var pbsForThisSection = ceil(abs(maxAbsValue)).toInt()
         if (pbsForThisSection > DEFAULT_PITCH_BEND_SENSITIVITY) {
             pbs.add(Event(section.first().first, pbsForThisSection))

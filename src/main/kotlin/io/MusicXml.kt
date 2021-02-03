@@ -9,6 +9,7 @@ import io.MusicXml.MXmlMeasureContent.NoteType.END
 import io.MusicXml.MXmlMeasureContent.NoteType.MIDDLE
 import io.MusicXml.MXmlMeasureContent.NoteType.SINGLE
 import kotlinx.coroutines.await
+import kotlinx.dom.appendText
 import model.ExportResult
 import model.Format
 import model.KEY_IN_OCTAVE
@@ -29,7 +30,6 @@ import util.appendNewChildTo
 import util.clone
 import util.getSafeFileName
 import util.getSingleElementByTagName
-import kotlin.dom.appendText
 
 object MusicXml {
     suspend fun generate(project: Project): ExportResult {

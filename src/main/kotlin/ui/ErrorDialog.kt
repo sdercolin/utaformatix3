@@ -1,5 +1,6 @@
 package ui
 
+import kotlinx.browser.window
 import react.RBuilder
 import react.dom.div
 import ui.external.materialui.Severity
@@ -16,7 +17,6 @@ import ui.strings.Strings.ErrorDialogDescription
 import ui.strings.Strings.ReportButton
 import ui.strings.Strings.ReportUrl
 import ui.strings.string
-import kotlin.browser.window
 
 fun RBuilder.errorDialog(
     open: Boolean,

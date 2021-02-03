@@ -1,5 +1,3 @@
-@file:Suppress("UnsafeCastFromDynamic")
-
 package ui.strings
 
 import external.require
