@@ -72,7 +72,6 @@ private fun List<Pair<Long, Double>>.appendVibrato(
     tempos: List<Tempo>,
     vibratoEnv: Map<Long, Double>
 ): List<Pair<Long, Double>> {
-
     // a piecewise linear transformation from tick to sec
     // simplify the calculation here for every usage to reduce cost
     val timeTransformationParameters = (tempos.zipWithNext() + (tempos.last() to null))
@@ -110,7 +109,8 @@ private fun List<Pair<Long, Double>>.appendVibrato(
         .fold<SvpNoteWithVibrato, List<Pair<LongRange, SvpNoteWithVibrato?>>>(listOf()) { acc, note ->
             val lastNoteEndTick = acc.lastOrNull()?.first?.last ?: 0L
             if (lastNoteEndTick < note.noteStartTick) {
-                acc + ((lastNoteEndTick until note.noteStartTick) to null) + ((note.noteStartTick until note.noteEndTick) to note)
+                acc + ((lastNoteEndTick until note.noteStartTick) to null) +
+                        ((note.noteStartTick until note.noteEndTick) to note)
             } else {
                 acc + ((note.noteStartTick until note.noteEndTick) to note)
             }

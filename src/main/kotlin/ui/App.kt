@@ -2,6 +2,7 @@ package ui
 
 import APP_NAME
 import APP_VERSION
+import kotlinx.browser.window
 import kotlinx.css.FontWeight
 import kotlinx.css.LinearDimension
 import kotlinx.css.color
@@ -44,7 +45,6 @@ import ui.model.Stage
 import ui.model.StageInfo
 import ui.strings.Strings
 import ui.strings.string
-import kotlin.browser.window
 
 class App : RComponent<RProps, AppState>() {
 

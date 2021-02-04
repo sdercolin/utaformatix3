@@ -9,7 +9,4 @@ import react.RProps
 @JsName("default")
 external val toolbar: RClass<ToolbarProps>
 
-external interface ToolbarProps : RProps {
-
-}
-
+external interface ToolbarProps : RProps

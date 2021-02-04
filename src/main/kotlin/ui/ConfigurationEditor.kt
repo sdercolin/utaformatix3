@@ -210,7 +210,6 @@ class ConfigurationEditor(props: ConfigurationEditorProps) :
                         }
                     }
                 }
-
             }
         }
     }
@@ -350,10 +349,10 @@ class ConfigurationEditor(props: ConfigurationEditorProps) :
                                     attrs {
                                         value = denominator.toString()
                                     }
-                                    +(string(
+                                    +string(
                                         Strings.SlightRestsFillingThresholdItem,
                                         "denominator" to denominator.toString()
-                                    ))
+                                    )
                                 }
                             }
                         }
@@ -437,18 +436,18 @@ class ConfigurationEditor(props: ConfigurationEditorProps) :
 
                 val project = props.project
                     .let {
-                        if (lyricsConversionState.isOn && fromType != null && toType != null)
+                        if (lyricsConversionState.isOn && fromType != null && toType != null) {
                             convert(it.copy(lyricsType = fromType), toType)
-                        else it
+                        } else it
                     }
                     .let {
-                        if (slightRestsFillingState.isOn)
+                        if (slightRestsFillingState.isOn) {
                             it.copy(
                                 tracks = it.tracks.map { track ->
                                     track.fillRests(slightRestsFillingState.excludedMaxLength)
                                 }
                             )
-                        else it
+                        } else it
                     }
 
                 val format = props.outputFormat

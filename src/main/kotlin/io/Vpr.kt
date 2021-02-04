@@ -6,7 +6,6 @@ import external.Resources
 import kotlinx.coroutines.await
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonConfiguration
 import model.DEFAULT_LYRIC
 import model.ExportNotification
 import model.ExportResult
@@ -107,7 +106,7 @@ object Vpr {
             null
         }
         val text = requireNotNull(vprEntry).async("string").await() as String
-        return jsonSerializer.parse(Project.serializer(), text)
+        return jsonSerializer.decodeFromString(Project.serializer(), text)
     }
 
     suspend fun generate(project: model.Project, features: List<Feature>): ExportResult {
@@ -132,7 +131,7 @@ object Vpr {
 
     private fun generateContent(project: model.Project, features: List<Feature>): String {
         val template = Resources.vprTemplate
-        val vpr = jsonSerializer.parse(Project.serializer(), template)
+        val vpr = jsonSerializer.decodeFromString(Project.serializer(), template)
         var endTick = 0L
         vpr.title = project.name
         val tickCounter = TickCounter()
@@ -146,7 +145,7 @@ object Vpr {
             TempoEvent(pos = it.tickPosition, value = (it.bpm * BPM_RATE).toInt())
         }
         vpr.masterTrack!!.tempo!!.events = tempoEvents
-        endTick = endTick.coerceAtLeast(tempoEvents.map { it.pos }.max() ?: 0)
+        endTick = endTick.coerceAtLeast(tempoEvents.map { it.pos }.maxOrNull() ?: 0)
         val emptyTrack = vpr.tracks.first()
         val emptyNote = emptyTrack.parts.first().notes.first()
         val tracks = project.tracks.map { track ->
@@ -174,9 +173,9 @@ object Vpr {
             )
         }
         vpr.tracks = tracks
-        endTick = endTick.coerceAtLeast(tracks.map { it.parts.firstOrNull()?.duration ?: 0 }.max() ?: 0)
+        endTick = endTick.coerceAtLeast(tracks.map { it.parts.firstOrNull()?.duration ?: 0 }.maxOrNull() ?: 0)
         vpr.masterTrack!!.loop!!.end = endTick
-        return jsonSerializer.stringify(Project.serializer(), vpr)
+        return jsonSerializer.encodeToString(Project.serializer(), vpr)
     }
 
     private fun generatePitchData(track: model.Track): List<Controller>? {
@@ -203,12 +202,10 @@ object Vpr {
         return controllers.takeIf { it.isNotEmpty() }
     }
 
-    private val jsonSerializer = Json(
-        JsonConfiguration.Stable.copy(
-            isLenient = true,
-            ignoreUnknownKeys = true
-        )
-    )
+    private val jsonSerializer = Json {
+        isLenient = true
+        ignoreUnknownKeys = true
+    }
 
     private const val BPM_RATE = 100.0
     private val possibleJsonPaths = listOf(

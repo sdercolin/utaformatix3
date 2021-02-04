@@ -6,4 +6,3 @@ data class Track(
     val notes: List<Note>,
     val pitch: Pitch? = null
 )
-

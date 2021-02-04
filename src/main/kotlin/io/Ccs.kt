@@ -3,6 +3,7 @@ package io
 import exception.IllegalFileException
 import external.Resources
 import external.generateUUID
+import kotlinx.dom.appendText
 import model.ExportNotification
 import model.ExportResult
 import model.Feature
@@ -41,7 +42,6 @@ import util.insertAfterThis
 import util.nameWithoutExtension
 import util.readText
 import util.toFixed
-import kotlin.dom.appendText
 
 object Ccs {
     suspend fun parse(file: File): Project {
@@ -100,10 +100,12 @@ object Ccs {
             it ?: listOf(Tempo.default)
         }.toMutableList()
 
-        warnings.addAll(results.flatMap { result ->
-            val ignoredTempos = result.tempos - tempos
-            ignoredTempos.map { ImportWarning.TempoIgnoredInTrack(result.track, it) }
-        })
+        warnings.addAll(
+            results.flatMap { result ->
+                val ignoredTempos = result.tempos - tempos
+                ignoredTempos.map { ImportWarning.TempoIgnoredInTrack(result.track, it) }
+            }
+        )
 
         // Delete all tempo tags inside prefix, add apply the last as the first
         val firstTempoIndex = tempos
@@ -128,10 +130,12 @@ object Ccs {
             it ?: listOf(TimeSignature.default)
         }.toMutableList()
 
-        warnings.addAll(results.flatMap { result ->
-            val ignoredTimeSignatures = result.timeSignatures - timeSignatures
-            ignoredTimeSignatures.map { ImportWarning.TimeSignatureIgnoredInTrack(result.track, it) }
-        })
+        warnings.addAll(
+            results.flatMap { result ->
+                val ignoredTimeSignatures = result.timeSignatures - timeSignatures
+                ignoredTimeSignatures.map { ImportWarning.TimeSignatureIgnoredInTrack(result.track, it) }
+            }
+        )
 
         // Delete all time signatures inside prefix, add apply the last as the first
         val firstTimeSignatureIndex = timeSignatures

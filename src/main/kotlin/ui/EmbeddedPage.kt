@@ -1,5 +1,6 @@
 package ui
 
+import kotlinx.browser.window
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.await
 import kotlinx.coroutines.launch
@@ -14,7 +15,6 @@ import react.setState
 import styled.css
 import styled.styledDiv
 import ui.external.react.markdown
-import kotlin.browser.window
 
 class EmbeddedPage : RComponent<EmbeddedPageProps, EmbeddedPageState>() {
 

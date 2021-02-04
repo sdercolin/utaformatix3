@@ -1,7 +1,6 @@
 package util
 
 import exception.ValueTooLargeException
-import kotlinx.serialization.toUtf8Bytes
 import org.khronos.webgl.ArrayBuffer
 import org.khronos.webgl.DataView
 import org.khronos.webgl.Uint8Array
@@ -74,7 +73,7 @@ fun MutableList<Byte>.addShort(short: Short, littleEndian: Boolean = true) {
 }
 
 fun MutableList<Byte>.addString(string: String, littleEndian: Boolean = true, lengthInVariableLength: Boolean = false) {
-    val bytes = string.toUtf8Bytes().toList()
+    val bytes = string.encodeToByteArray().toList()
     if (lengthInVariableLength) addIntVariableLengthBigEndian(bytes.count())
     else addInt(bytes.count(), littleEndian)
     addAll(bytes)

@@ -1,9 +1,9 @@
 package io
 
 import external.Resources
+import kotlin.math.roundToLong
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonConfiguration
 import model.DEFAULT_LYRIC
 import model.ExportNotification
 import model.ExportResult
@@ -19,7 +19,6 @@ import process.pitch.getRelativeData
 import process.validateNotes
 import util.nameWithoutExtension
 import util.readText
-import kotlin.math.roundToLong
 
 object S5p {
     private const val TICK_RATE = 1470000L
@@ -30,7 +29,7 @@ object S5p {
             val index = it.lastIndexOf('}')
             it.take(index + 1)
         }
-        val project = jsonSerializer.parse(Project.serializer(), text)
+        val project = jsonSerializer.decodeFromString(Project.serializer(), text)
         val warnings = mutableListOf<ImportWarning>()
         val timeSignatures = project.meter.map {
             TimeSignature(
@@ -117,7 +116,7 @@ object S5p {
 
     private fun generateContent(project: model.Project, features: List<Feature>): String {
         val template = Resources.s5pTemplate
-        val s5p = jsonSerializer.parse(Project.serializer(), template)
+        val s5p = jsonSerializer.decodeFromString(Project.serializer(), template)
         s5p.meter = project.timeSignatures.map {
             Meter(
                 measure = it.measurePosition,
@@ -135,7 +134,7 @@ object S5p {
         s5p.tracks = project.tracks.map {
             generateTrack(it, emptyTrack, features)
         }
-        return jsonSerializer.stringify(Project.serializer(), s5p)
+        return jsonSerializer.encodeToString(Project.serializer(), s5p)
     }
 
     private fun generateTrack(track: model.Track, emptyTrack: Track, features: List<Feature>): Track {
@@ -165,12 +164,10 @@ object S5p {
         return data.flatMap { listOf(it.first, it.second) }
     }
 
-    private val jsonSerializer = Json(
-        JsonConfiguration.Stable.copy(
-            isLenient = true,
-            ignoreUnknownKeys = true
-        )
-    )
+    private val jsonSerializer = Json {
+        isLenient = true
+        ignoreUnknownKeys = true
+    }
 
     @Serializable
     private data class Project(

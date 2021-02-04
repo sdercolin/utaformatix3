@@ -1,11 +1,9 @@
-@file:Suppress("UnsafeCastFromDynamic")
-
 package ui.strings
 
 import external.require
-import ui.strings.Strings.LanguageDisplayName
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
+import ui.strings.Strings.LanguageDisplayName
 
 val i18next = require("i18next").default
 

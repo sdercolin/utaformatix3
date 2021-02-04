@@ -24,7 +24,7 @@ private fun String.cleanupAsRomajiCV(): String {
     result = result.trim()
     result = result.trimStart('?')
 
-    val maxLength = romajis.map { it.length }.max() ?: 0
+    val maxLength = romajis.map { it.length }.maxOrNull() ?: 0
     for (length in maxLength downTo 1) {
         val text = result.take(length)
         if (text.isRomaji) result = text
@@ -47,7 +47,7 @@ private fun String.cleanupAsRomajiVCV(): String {
     val blankPos = result.indexOf(" ")
     var body = ""
 
-    val maxLength = romajis.map { it.length }.max() ?: 0
+    val maxLength = romajis.map { it.length }.maxOrNull() ?: 0
     for (length in 1..maxLength) {
         val startPos = blankPos + 1
         val endPos = startPos + length
@@ -123,9 +123,11 @@ private fun String.cleanupAsKanaVCV(): String {
 
 private fun List<Track>.cleanup(noteCleanup: (String) -> String) =
     map { track ->
-        track.copy(notes = track.notes.map { note ->
-            note.copy(lyric = noteCleanup(note.lyric))
-        })
+        track.copy(
+            notes = track.notes.map { note ->
+                note.copy(lyric = noteCleanup(note.lyric))
+            }
+        )
     }
 
 private val romajiTails = listOf('a', 'i', 'u', 'e', 'o', 'n', '-')

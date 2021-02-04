@@ -12,4 +12,3 @@ external val container: RClass<ContainerProps>
 external interface ContainerProps : RProps {
     var maxWidth: dynamic
 }
-

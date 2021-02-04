@@ -1,6 +1,6 @@
 package io
 
-import kotlinx.serialization.toUtf8Bytes
+import kotlin.math.max
 import model.ExportResult
 import model.Format
 import model.ImportWarning
@@ -23,7 +23,6 @@ import util.addListBlock
 import util.addString
 import util.nameWithoutExtension
 import util.readAsArrayBuffer
-import kotlin.math.max
 
 /**
  * References: https://pypi.org/project/dvfile/
@@ -207,7 +206,7 @@ object Dv {
         bytes.addAll(header)
         val tickPrefix = project.timeSignatures.first().ticksInMeasure.toLong() * FIXED_MEASURE_PREFIX
         val mainBlock = mutableListOf<Byte>().apply {
-            addAll("ext1ext2ext3ext4ext5ext6ext7".toUtf8Bytes().toList())
+            addAll("ext1ext2ext3ext4ext5ext6ext7".encodeToByteArray().toList())
             addListBlock(generateTempos(project.tempos, tickPrefix))
             addListBlock(generateTimeSignatures(project.timeSignatures))
             addList(project.tracks.map { generateTrack(it, tickPrefix) })

@@ -8,4 +8,3 @@ import react.RProps
 
 @JsName("default")
 external val radio: RClass<RProps>
-
