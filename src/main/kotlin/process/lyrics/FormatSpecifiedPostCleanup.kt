@@ -15,7 +15,7 @@ fun postCleanup(tracks: List<Track>, targetFormat: Format): List<Track> {
 }
 
 private fun notePostCleanup(lyric: String, targetFormat: Format): String {
-    val dictionary = getDictionary(targetFormat) ?: return lyric
+    val dictionary = requireNotNull(getDictionary(targetFormat))
     return dictionary[lyric] ?: lyric
 }
 
