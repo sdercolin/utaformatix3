@@ -1,11 +1,12 @@
 package process.lyrics
 
+import model.Format
 import model.LyricsType
 import model.Note
 import model.Project
 import model.Track
 
-fun convert(project: Project, targetType: LyricsType): Project {
+fun convert(project: Project, targetType: LyricsType, targetFormat: Format): Project {
     val sourceType = project.lyricsType
     var tracks = cleanup(project.tracks, sourceType)
     when {
@@ -16,6 +17,7 @@ fun convert(project: Project, targetType: LyricsType): Project {
         sourceType.isCV && !targetType.isCV -> tracks = convertCVToVCV(tracks)
         !sourceType.isCV && targetType.isCV -> tracks = convertVCVToCV(tracks)
     }
+    tracks = postCleanup(tracks, targetFormat)
     return project.copy(tracks = tracks)
 }
 

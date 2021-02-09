@@ -428,16 +428,16 @@ class ConfigurationEditor(props: ConfigurationEditorProps) :
         }
         GlobalScope.launch {
             try {
+                val format = props.outputFormat
                 val lyricsConversionState = state.lyricsConversion
                 val fromType = lyricsConversionState.fromType
                 val toType = lyricsConversionState.toType
-
                 val slightRestsFillingState = state.slightRestsFilling
 
                 val project = props.project
                     .let {
                         if (lyricsConversionState.isOn && fromType != null && toType != null) {
-                            convert(it.copy(lyricsType = fromType), toType)
+                            convert(it.copy(lyricsType = fromType), toType, format)
                         } else it
                     }
                     .let {
@@ -450,7 +450,6 @@ class ConfigurationEditor(props: ConfigurationEditorProps) :
                         } else it
                     }
 
-                val format = props.outputFormat
                 delay(100)
                 val availableFeatures = Feature.values().filter {
                     it.isAvailable.invoke(project) &&
