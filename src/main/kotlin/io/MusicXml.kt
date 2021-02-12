@@ -49,9 +49,7 @@ object MusicXml {
 
     private fun generateTrackContent(project: Project, track: Track): String {
         val keyTicks = project.getKeyTicks(track)
-        console.log(keyTicks)
         val measures = getMeasures(keyTicks, project.timeSignatures)
-        console.log(measures)
 
         val templateText = Resources.musicXmlTemplate
         val parser = DOMParser()
@@ -212,13 +210,13 @@ object MusicXml {
     }
 
     private fun Project.applyTickRate() = copy(
-        tempos = tempos.map { it.copy(tickPosition = (it.tickPosition * TICK_RATE).toLong()) },
+        tempos = tempos.map { it.copy(tickPosition = (it.tickPosition * DEFAULT_TICK_RATE_CEVIO).toLong()) },
         tracks = tracks.map { track ->
             track.copy(
                 notes = track.notes.map {
                     it.copy(
-                        tickOn = (it.tickOn * TICK_RATE).toLong(),
-                        tickOff = (it.tickOff * TICK_RATE).toLong()
+                        tickOn = (it.tickOn * DEFAULT_TICK_RATE_CEVIO).toLong(),
+                        tickOff = (it.tickOff * DEFAULT_TICK_RATE_CEVIO).toLong()
                     )
                 }
             )
@@ -233,7 +231,7 @@ object MusicXml {
     }
 
     private fun getMeasures(keyTicks: List<KeyTick>, timeSignatures: List<TimeSignature>): List<MXmlMeasure> {
-        val tickCounter = TickCounter(ticksInFullNote = (TICKS_IN_FULL_NOTE * TICK_RATE).toLong())
+        val tickCounter = TickCounter(ticksInFullNote = (TICKS_IN_FULL_NOTE * DEFAULT_TICK_RATE_CEVIO).toLong())
         val measureBorderTicks = mutableListOf(0L)
         for (timeSignature in timeSignatures) {
             val previousMeasure = tickCounter.measure
@@ -374,6 +372,6 @@ object MusicXml {
         }
     }
 
-    private const val TICK_RATE = 2.0
+    private const val DEFAULT_TICK_RATE_CEVIO = 2.0
     const val MUSIC_XML_VERSION = "2.0"
 }
