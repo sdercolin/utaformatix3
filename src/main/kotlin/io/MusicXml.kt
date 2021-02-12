@@ -1,5 +1,6 @@
 package io
 
+import exception.IllegalFileException
 import external.JsZip
 import external.JsZipOption
 import external.Resources
@@ -10,11 +11,14 @@ import io.MusicXml.MXmlMeasureContent.NoteType.MIDDLE
 import io.MusicXml.MXmlMeasureContent.NoteType.SINGLE
 import kotlinx.coroutines.await
 import kotlinx.dom.appendText
+import model.DEFAULT_LYRIC
 import model.ExportResult
 import model.Format
+import model.ImportWarning
 import model.KEY_IN_OCTAVE
 import model.Note
 import model.Project
+import model.TICKS_IN_BEAT
 import model.TICKS_IN_FULL_NOTE
 import model.Tempo
 import model.TickCounter
@@ -26,12 +30,179 @@ import org.w3c.dom.XMLDocument
 import org.w3c.dom.parsing.DOMParser
 import org.w3c.dom.parsing.XMLSerializer
 import org.w3c.files.Blob
+import org.w3c.files.File
 import util.appendNewChildTo
 import util.clone
+import util.getElementListByTagName
 import util.getSafeFileName
 import util.getSingleElementByTagName
+import util.getSingleElementByTagNameOrNull
+import util.innerValue
+import util.innerValueOrNull
+import util.nameWithoutExtension
+import util.readText
 
 object MusicXml {
+
+    suspend fun parse(file: File): Project {
+        val projectName = file.nameWithoutExtension
+        val text = file.readText()
+        val parser = DOMParser()
+        val document = parser.parseFromString(text, "text/xml") as XMLDocument
+
+        val rootNode = document.documentElement ?: throw IllegalFileException.XmlRootNotFound()
+        val partNodes = rootNode.getElementListByTagName("part")
+
+        val warnings = mutableListOf<ImportWarning>()
+        val masterTrackResult = parseMasterTrack(partNodes.first(), warnings)
+
+        val tracks = partNodes.mapIndexed { index, element -> parseTrack(index, element, masterTrackResult) }
+
+        return Project(
+            format = Format.MUSIC_XML,
+            inputFiles = listOf(file),
+            name = projectName,
+            tracks = tracks,
+            timeSignatures = masterTrackResult.timeSignatures,
+            tempos = masterTrackResult.tempoWithMeasureIndexes.map { it.second },
+            measurePrefix = 0,
+            importWarnings = warnings
+        )
+    }
+
+    private fun parseMasterTrack(partNode: Element, warnings: MutableList<ImportWarning>): MasterTrackParseResult {
+        val measureNodes = partNode.getElementListByTagName("measure")
+        val divisions = measureNodes.first()
+            .getElementListByTagName("attributes")
+            .flatMap { it.getElementListByTagName("divisions") }
+            .first().innerValue.toLong()
+        val importTickRate = TICKS_IN_BEAT.toDouble() / divisions
+        val tempos = mutableListOf<Pair<Int, Tempo>>()
+        val timeSignatures = mutableListOf<TimeSignature>()
+        val measureBorders = mutableListOf(0L)
+        var tickPosition = 0L
+        var currentTimeSignature = TimeSignature.default
+        measureNodes.forEachIndexed { index, measureNode ->
+            val timeSignature = measureNode.getElementListByTagName("attributes")
+                .flatMap { it.getElementListByTagName("time") }
+                .firstOrNull()
+                ?.let { timeNode ->
+                    TimeSignature(
+                        measurePosition = index,
+                        numerator = timeNode.getSingleElementByTagName("beats").innerValue.toInt(),
+                        denominator = timeNode.getSingleElementByTagName("beat-type").innerValue.toInt()
+                    )
+                }
+                ?.also {
+                    timeSignatures.add(it)
+                    currentTimeSignature = it
+                }
+                ?: currentTimeSignature
+
+            measureNode.getElementListByTagName("sound")
+                .firstOrNull()
+                ?.let { soundNode ->
+                    Tempo(
+                        tickPosition = tickPosition,
+                        bpm = soundNode.getAttribute("tempo")!!.toDouble()
+                    )
+                }
+                ?.also {
+                    tempos.add(index to it)
+                }
+
+            tickPosition += timeSignature.ticksInMeasure
+            measureBorders.add(tickPosition)
+        }
+        if (timeSignatures.isEmpty()) {
+            warnings.add(ImportWarning.TimeSignatureNotFound)
+        }
+        if (tempos.isEmpty()) {
+            warnings.add(ImportWarning.TempoNotFound)
+        }
+        return MasterTrackParseResult(
+            tempoWithMeasureIndexes = tempos,
+            timeSignatures = timeSignatures,
+            importTickRate = importTickRate,
+            measureBorders = measureBorders
+        )
+    }
+
+    private fun parseTrack(trackIndex: Int, partNode: Element, masterTrackResult: MasterTrackParseResult): Track {
+        val trackName = "Track ${trackIndex + 1}"
+        val notes = mutableListOf<Note>()
+        var isInsideNote = false
+        val importTickRate = masterTrackResult.importTickRate
+        partNode.getElementListByTagName("measure").forEachIndexed { index, measureNode ->
+            var tickPosition = masterTrackResult.measureBorders[index]
+            measureNode.getElementListByTagName("note").forEach { noteNode ->
+                val duration =
+                    (noteNode.getSingleElementByTagName("duration")
+                        .innerValue.toLong() * importTickRate).toLong()
+                if (noteNode.getElementListByTagName("rest").isNotEmpty()) {
+                    tickPosition += duration
+                    return@forEach
+                }
+
+                val key = noteNode.getSingleElementByTagName("pitch").let { pitchNode ->
+                    val step = pitchNode.getSingleElementByTagName("step").innerValue
+                    val alter = pitchNode.getSingleElementByTagNameOrNull("alter")?.innerValueOrNull?.toInt()
+                    val relativeKey = when (step) {
+                        "C" -> 0
+                        "D" -> 2
+                        "E" -> 4
+                        "F" -> 5
+                        "G" -> 7
+                        "A" -> 9
+                        "B" -> 11
+                        else -> throw IllegalStateException()
+                    } + (alter ?: 0)
+                    val octave = pitchNode.getSingleElementByTagName("octave").innerValue.toInt() + 1
+                    octave * KEY_IN_OCTAVE + relativeKey
+                }
+
+                val lyric = noteNode.getSingleElementByTagNameOrNull("lyric")
+                    ?.getSingleElementByTagNameOrNull("text")
+                    ?.innerValueOrNull ?: DEFAULT_LYRIC
+
+                val note = if (!isInsideNote) {
+                    Note(
+                        id = 0,
+                        key = key,
+                        lyric = lyric,
+                        tickOn = tickPosition,
+                        tickOff = tickPosition + duration
+                    )
+                } else {
+                    notes.removeLast().let {
+                        it.copy(tickOff = it.tickOff + duration)
+                    }
+                }
+
+                tickPosition += duration
+                notes.add(note)
+
+                when (noteNode.getSingleElementByTagNameOrNull("tie")?.getAttribute("type")) {
+                    "start" -> isInsideNote = true
+                    "stop" -> isInsideNote = false
+                    else -> Unit
+                }
+            }
+        }
+        return Track(
+            id = trackIndex,
+            name = trackName,
+            notes = notes
+        )
+    }
+
+    private data class MasterTrackParseResult(
+        val tempoWithMeasureIndexes: List<Pair<Int, Tempo>>,
+        val timeSignatures: List<TimeSignature>,
+        val importTickRate: Double,
+        val measureBorders: List<Long>
+    )
+
     suspend fun generate(project: Project): ExportResult {
         val projectWithTickRateApplied = project.applyTickRate()
         val zip = JsZip()

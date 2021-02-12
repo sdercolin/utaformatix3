@@ -1,6 +1,6 @@
 package process.pitch
 
-import model.TICKS_IN_FULL_NOTE
+import model.TICKS_IN_BEAT
 import model.Tempo
 import process.interpolateCosineEaseInOut
 import process.interpolateLinear
@@ -181,7 +181,7 @@ private fun List<Pair<Long, Double>>.appendVibratoInNote(
         .toList()
 }
 
-private fun getTickToTimeRate(bpm: Double) = 60.0 / (TICKS_IN_FULL_NOTE / 4) / bpm
+private fun getTickToTimeRate(bpm: Double) = 60.0 / TICKS_IN_BEAT / bpm
 
 private fun List<Pair<Long, Double>>.removeRedundantPoints() =
     fold(listOf<Pair<Long, Double>>()) { acc, point ->

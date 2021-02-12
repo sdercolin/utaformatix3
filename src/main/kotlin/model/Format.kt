@@ -87,7 +87,7 @@ enum class Format(
         ".xml",
         otherExtensions = listOf(".musicxml"),
         parser = {
-            TODO("Not Implemented")
+            io.MusicXml.parse(it.first())
         },
         generator = { project, _ ->
             io.MusicXml.generate(project)
@@ -131,7 +131,7 @@ enum class Format(
     val allExtensions get() = listOf(extension) + otherExtensions
 
     companion object {
-        val importable get() = listOf(VSQX, VPR, VSQ, UST, CCS, SVP, S5P, DV, PPSF)
+        val importable get() = listOf(VSQX, VPR, VSQ, UST, CCS, MUSIC_XML, SVP, S5P, DV, PPSF)
         val exportable get() = listOf(VSQX, VPR, VSQ, UST, CCS, MUSIC_XML, SVP, S5P, DV)
     }
 }
