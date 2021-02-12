@@ -134,7 +134,7 @@ class Importer : RComponent<ImporterProps, ImporterState>() {
             try {
                 delay(100)
                 val parseFunction = format.parser
-                val project = parseFunction(files).lyricsTypeAnalysed()
+                val project = parseFunction(files).lyricsTypeAnalysed().requireValid()
                 console.log("Project was imported successfully.")
                 console.log(project)
                 props.onImported.invoke(project)

@@ -1,5 +1,6 @@
 package process.pitch
 
+import model.DEFAULT_BPM
 import model.TICKS_IN_BEAT
 import model.Tempo
 import process.interpolateCosineEaseInOut
@@ -129,7 +130,8 @@ private fun List<Pair<Long, Double>>.appendVibratoInNote(
     tempos: List<Tempo>,
     vibratoEnv: Map<Long, Double>
 ): List<Pair<Long, Double>> {
-    note ?: return this
+    // Note with minus position is skipped, but with raise an error after import, see Project.requireValid()
+    note?.takeIf { it.noteStartTick >= 0L } ?: return this
 
     val noteStart = tickToSecTransformation(note.noteStartTick)
     val noteEnd = tickToSecTransformation(note.noteEndTick)
@@ -143,7 +145,8 @@ private fun List<Pair<Long, Double>>.appendVibratoInNote(
     val phase = note.phase ?: SVP_VIBRATO_DEFAULT_PHASE_RAD
     val frequency = note.frequency ?: SVP_VIBRATO_DEFAULT_FREQUENCY_HZ
 
-    val tickToTimeRate = getTickToTimeRate(tempos.last { it.tickPosition <= note.noteStartTick }.bpm)
+    val tickToTimeRate =
+        getTickToTimeRate(tempos.lastOrNull { it.tickPosition <= note.noteStartTick }?.bpm ?: DEFAULT_BPM)
 
     val vibrato = { tick: Long ->
         val sec = tickToSecTransformation(tick)
