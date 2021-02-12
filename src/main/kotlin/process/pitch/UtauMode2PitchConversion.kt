@@ -3,7 +3,7 @@ package process.pitch
 import kotlin.math.roundToLong
 import model.Note
 import model.Pitch
-import model.TICKS_IN_FULL_NOTE
+import model.TICKS_IN_BEAT
 import process.interpolateCosineEaseIn
 import process.interpolateCosineEaseInOut
 import process.interpolateCosineEaseOut
@@ -171,5 +171,5 @@ private fun interpolate(
 }
 
 private fun tickFromMilliSec(msec: Double, bpm: Double): Long {
-    return (msec * bpm * (TICKS_IN_FULL_NOTE / 4) / 60000).roundToLong()
+    return (msec * bpm * (TICKS_IN_BEAT) / 60000).roundToLong()
 }
