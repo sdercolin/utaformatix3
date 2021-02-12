@@ -156,7 +156,7 @@ class Importer : RComponent<ImporterProps, ImporterState>() {
         val extensions = files.map { it.extensionName }.distinct()
 
         return if (extensions.count() > 1) null
-        else props.formats.find { it.extension == ".${extensions.first()}" }
+        else props.formats.find { it.allExtensions.contains(".${extensions.first()}") }
     }
 
     private fun closeMessageBar() {

@@ -9,7 +9,8 @@ import org.w3c.files.File
 
 enum class Format(
     val extension: String,
-    val multipleFile: Boolean,
+    val otherExtensions: List<String> = listOf(),
+    val multipleFile: Boolean = false,
     val parser: suspend (List<File>) -> Project,
     val generator: suspend (Project, List<Feature>) -> ExportResult,
     val possibleLyricsTypes: List<LyricsType>,
@@ -18,7 +19,6 @@ enum class Format(
 ) {
     VSQX(
         ".vsqx",
-        multipleFile = false,
         parser = {
             io.Vsqx.parse(it.first())
         },
@@ -30,7 +30,6 @@ enum class Format(
     ),
     VPR(
         ".vpr",
-        multipleFile = false,
         parser = {
             io.Vpr.parse(it.first())
         },
@@ -53,7 +52,6 @@ enum class Format(
     ),
     CCS(
         ".ccs",
-        multipleFile = false,
         parser = {
             io.Ccs.parse(it.first())
         },
@@ -65,7 +63,6 @@ enum class Format(
     ),
     SVP(
         ".svp",
-        multipleFile = false,
         parser = {
             io.Svp.parse(it.first())
         },
@@ -77,7 +74,6 @@ enum class Format(
     ),
     S5P(
         ".s5p",
-        multipleFile = false,
         parser = {
             io.S5p.parse(it.first())
         },
@@ -89,7 +85,7 @@ enum class Format(
     ),
     MUSIC_XML(
         ".xml",
-        multipleFile = true,
+        otherExtensions = listOf(".musicxml"),
         parser = {
             TODO("Not Implemented")
         },
@@ -101,7 +97,6 @@ enum class Format(
     ),
     DV(
         ".dv",
-        multipleFile = false,
         parser = {
             io.Dv.parse(it.first())
         },
@@ -113,7 +108,6 @@ enum class Format(
     ),
     VSQ(
         ".vsq",
-        multipleFile = false,
         parser = {
             io.Vsq.parse(it.first())
         },
@@ -125,7 +119,6 @@ enum class Format(
     ),
     PPSF(
         ".ppsf",
-        multipleFile = false,
         parser = {
             io.Ppsf.parse(it.first())
         },
@@ -134,6 +127,8 @@ enum class Format(
         },
         possibleLyricsTypes = listOf(ROMAJI_CV, KANA_CV)
     ), ;
+
+    val allExtensions get() = listOf(extension) + otherExtensions
 
     companion object {
         val importable get() = listOf(VSQX, VPR, VSQ, UST, CCS, SVP, S5P, DV, PPSF)
