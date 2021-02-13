@@ -1,5 +1,6 @@
 package model
 
+import exception.IllegalNotePositionException
 import org.w3c.files.File
 import process.lyrics.analyseLyricsTypeForProject
 
@@ -29,4 +30,13 @@ data class Project(
         ).takeIf { it.tracks.isNotEmpty() }
 
     val hasXSampaData get() = tracks.any { track -> track.notes.any { it.xSampa != null } }
+
+    fun requireValid() = this.also {
+        tracks.forEachIndexed { index, track ->
+            val firstNote = track.notes.firstOrNull() ?: return@forEachIndexed
+            if (firstNote.tickOn < 0L) {
+                throw IllegalNotePositionException(firstNote, index)
+            }
+        }
+    }
 }

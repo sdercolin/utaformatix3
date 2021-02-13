@@ -1,7 +1,7 @@
 package process
 
-import model.Track
 import kotlin.math.min
+import model.Track
 
 fun Track.validateNotes() =
     if (notes.isEmpty()) this
@@ -25,9 +25,9 @@ fun Track.fillRests(excludedMaxLength: Long) =
         notes = notes.let {
             it.zipWithNext()
                 .map { (note, nextNote) ->
-                    if (nextNote.tickOn - note.tickOff < excludedMaxLength)
+                    if (nextNote.tickOn - note.tickOff < excludedMaxLength) {
                         note.copy(tickOff = nextNote.tickOn)
-                    else note
+                    } else note
                 }
                 .plus(it.last())
         }

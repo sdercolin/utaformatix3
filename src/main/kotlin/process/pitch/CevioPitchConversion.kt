@@ -1,11 +1,11 @@
 package process.pitch
 
+import kotlin.math.max
+import kotlin.math.roundToLong
 import model.Note
 import model.Pitch
 import model.Tempo
 import process.pitch.CevioTrackPitchData.Event
-import kotlin.math.max
-import kotlin.math.roundToLong
 
 data class CevioTrackPitchData(
     val events: List<Event>,
@@ -276,9 +276,9 @@ private fun mergeEventsIfPossible(eventsWithFullParams: List<Event>) =
         } else {
             val areAdjacent = lastEvent.index + lastEvent.repeat == thisEvent.index
             val areValuesSame = lastEvent.value == thisEvent.value
-            if (areAdjacent && areValuesSame)
+            if (areAdjacent && areValuesSame) {
                 accEvents.dropLast(1) + lastEvent.copy(repeat = lastEvent.repeat + thisEvent.repeat!!)
-            else accEvents + thisEvent
+            } else accEvents + thisEvent
         }
     }
 

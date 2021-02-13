@@ -15,4 +15,3 @@ external interface FormControlProps : RProps {
     var disabled: Boolean
     var focused: Boolean
 }
-

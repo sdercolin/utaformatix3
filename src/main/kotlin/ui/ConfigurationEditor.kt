@@ -210,7 +210,6 @@ class ConfigurationEditor(props: ConfigurationEditorProps) :
                         }
                     }
                 }
-
             }
         }
     }
@@ -350,10 +349,10 @@ class ConfigurationEditor(props: ConfigurationEditorProps) :
                                     attrs {
                                         value = denominator.toString()
                                     }
-                                    +(string(
+                                    +string(
                                         Strings.SlightRestsFillingThresholdItem,
                                         "denominator" to denominator.toString()
-                                    ))
+                                    )
                                 }
                             }
                         }
@@ -429,29 +428,28 @@ class ConfigurationEditor(props: ConfigurationEditorProps) :
         }
         GlobalScope.launch {
             try {
+                val format = props.outputFormat
                 val lyricsConversionState = state.lyricsConversion
                 val fromType = lyricsConversionState.fromType
                 val toType = lyricsConversionState.toType
-
                 val slightRestsFillingState = state.slightRestsFilling
 
                 val project = props.project
                     .let {
-                        if (lyricsConversionState.isOn && fromType != null && toType != null)
-                            convert(it.copy(lyricsType = fromType), toType)
-                        else it
+                        if (lyricsConversionState.isOn && fromType != null && toType != null) {
+                            convert(it.copy(lyricsType = fromType), toType, format)
+                        } else it
                     }
                     .let {
-                        if (slightRestsFillingState.isOn)
+                        if (slightRestsFillingState.isOn) {
                             it.copy(
                                 tracks = it.tracks.map { track ->
                                     track.fillRests(slightRestsFillingState.excludedMaxLength)
                                 }
                             )
-                        else it
+                        } else it
                     }
 
-                val format = props.outputFormat
                 delay(100)
                 val availableFeatures = Feature.values().filter {
                     it.isAvailable.invoke(project) &&

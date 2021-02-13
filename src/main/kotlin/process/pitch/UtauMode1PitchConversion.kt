@@ -31,11 +31,12 @@ fun pitchFromUtauMode1Track(pitchData: UtauMode1TrackPitchData?, notes: List<Not
     val pitchPoints = mutableListOf<Pair<Long, Double>>()
     for ((note, notePitch) in notePitches) {
         notePitch?.pitchPoints?.let { data ->
-            pitchPoints.addAll(data.mapIndexed { index, value ->
-                Pair(note.tickOn + index * Ust.MODE1_PITCH_SAMPLING_INTERVAL_TICK, value / 100)
-            })
+            pitchPoints.addAll(
+                data.mapIndexed { index, value ->
+                    Pair(note.tickOn + index * Ust.MODE1_PITCH_SAMPLING_INTERVAL_TICK, value / 100)
+                }
+            )
         }
     }
     return Pitch(pitchPoints, false).getAbsoluteData(notes)?.let { Pitch(it, true) }
 }
-

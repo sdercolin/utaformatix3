@@ -13,4 +13,3 @@ external interface BackdropProps : RProps {
     var open: Boolean
     var style: Style
 }
-

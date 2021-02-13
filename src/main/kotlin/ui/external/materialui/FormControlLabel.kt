@@ -16,4 +16,3 @@ external interface FormControlLabelProps : RProps {
     var labelPlacement: String
     var value: String
 }
-
