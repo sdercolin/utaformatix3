@@ -18,7 +18,7 @@ The current version `3.x` is built with [Kotlin for JavaScript](https://kotlinla
   | ------------ | ------------ | -------------- | ------------ |
   | VSQ/VSQX/VPR |       ✓      |                |       ✓      |
   |  UST(mode2)  |       ✓      |        ✓       |              |
-  |  UST(mode1)  |       ✓      |                |              |
+  |  UST(mode1)  |       ✓      |       N/A      |              |
   |     CCS      |       ✓      |                |       ✓      |
   |     SVP      |       ✓      |        ✓       |       ✓      |
   |     S5P      |       ✓      |                |       ✓      |
