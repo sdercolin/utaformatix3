@@ -248,14 +248,14 @@ enum class Strings(val en: String, val ja: String, val zhCN: String) {
         ja = "VOCALOID2 プロジェクト",
         zhCN = "VOCALOID2 工程"
     ),
-    DownloadButton(
-        en = "Download",
-        ja = "ダウンロード",
-        zhCN = "下载"
+    ExportButton(
+        en = "Export",
+        ja = "エクスポート",
+        zhCN = "导出"
     ),
     RestartButton(
         en = "Back to the beginning",
-        ja = "ファイルのインポート画面に戻る",
+        ja = "プロジェクトインポート画面に戻る",
         zhCN = "回到初始页面"
     ),
     ExportNotificationPhonemeResetRequiredVSQ(
