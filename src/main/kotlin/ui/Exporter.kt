@@ -22,7 +22,7 @@ import ui.external.materialui.Severity
 import ui.external.materialui.Style
 import ui.external.materialui.alert
 import ui.external.materialui.button
-import ui.strings.Strings.DownloadButton
+import ui.strings.Strings.ExportButton
 import ui.strings.Strings.ExportNotificationPhonemeResetRequiredV4
 import ui.strings.Strings.ExportNotificationPhonemeResetRequiredV5
 import ui.strings.Strings.ExportNotificationPhonemeResetRequiredVSQ
@@ -74,7 +74,7 @@ class Exporter : RComponent<ExporterProps, RState>() {
                     css {
                         padding = "8px"
                     }
-                    +(string(DownloadButton))
+                    +(string(ExportButton))
                 }
             }
             button {
