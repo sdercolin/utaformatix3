@@ -6,6 +6,7 @@ import external.Resources
 import kotlinx.coroutines.await
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObject
 import model.DEFAULT_LYRIC
 import model.ExportNotification
 import model.ExportResult
@@ -359,13 +360,7 @@ object Vpr {
         var id: String? = null,
         var isBypassed: Boolean? = null,
         var isFolded: Boolean? = null,
-        var parameters: List<Parameter>? = null
-    )
-
-    @Serializable
-    private data class Parameter(
-        var name: String? = null,
-        var value: String? = null
+        var parameters: List<JsonObject>? = null
     )
 
     @Serializable
