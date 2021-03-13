@@ -5,6 +5,7 @@ import external.generateUUID
 import kotlin.math.roundToLong
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonElement
 import model.DEFAULT_LYRIC
 import model.ExportNotification
 import model.ExportResult
@@ -277,7 +278,7 @@ object Svp {
         var groups: List<Ref>? = null,
         var mainGroup: Group? = null,
         var mainRef: Ref? = null,
-        var mixer: Mixer? = null,
+        var mixer: JsonElement? = null,
         var name: String? = null,
         var renderEnabled: Boolean? = null
     )
@@ -305,22 +306,13 @@ object Svp {
 
     @Serializable
     private data class Ref(
-        var audio: Audio? = null,
+        var audio: JsonElement? = null,
         var blickOffset: Long = 0,
-        var database: Database? = null,
+        var database: JsonElement? = null,
         var dictionary: String? = null,
         var groupID: String,
         var isInstrumental: Boolean? = null,
         var pitchOffset: Int = 0
-    )
-
-    @Serializable
-    private data class Mixer(
-        var display: Boolean? = null,
-        var gainDecibel: Double? = null,
-        var mute: Boolean? = null,
-        var pan: Double? = null,
-        var solo: Boolean? = null
     )
 
     @Serializable
@@ -335,13 +327,13 @@ object Svp {
 
     @Serializable
     private data class Parameters(
-        var breathiness: Breathiness? = null,
-        var gender: Gender? = null,
-        var loudness: Loudness? = null,
+        var breathiness: JsonElement? = null,
+        var gender: JsonElement? = null,
+        var loudness: JsonElement? = null,
         var pitchDelta: PitchDelta? = null,
-        var tension: Tension? = null,
+        var tension: JsonElement? = null,
         var vibratoEnv: VibratoEnv? = null,
-        var voicing: Voicing? = null
+        var voicing: JsonElement? = null
     )
 
     @Serializable
@@ -355,33 +347,9 @@ object Svp {
     )
 
     @Serializable
-    private data class Breathiness(
-        var mode: String? = null,
-        var points: List<String>? = null
-    )
-
-    @Serializable
-    private data class Gender(
-        var mode: String? = null,
-        var points: List<String>? = null
-    )
-
-    @Serializable
-    private data class Loudness(
-        var mode: String? = null,
-        var points: List<String>? = null
-    )
-
-    @Serializable
     private data class PitchDelta(
         var mode: String? = null,
         var points: List<Double>? = null
-    )
-
-    @Serializable
-    private data class Tension(
-        var mode: String? = null,
-        var points: List<String>? = null
     )
 
     @Serializable
@@ -390,22 +358,4 @@ object Svp {
         var points: List<Double>? = null
     )
 
-    @Serializable
-    private data class Voicing(
-        var mode: String? = null,
-        var points: List<String>? = null
-    )
-
-    @Serializable
-    private data class Audio(
-        var duration: Double? = null,
-        var filename: String? = null
-    )
-
-    @Serializable
-    private data class Database(
-        var language: String? = null,
-        var name: String? = null,
-        var phoneset: String? = null
-    )
 }
