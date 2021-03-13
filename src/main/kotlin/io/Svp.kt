@@ -357,5 +357,4 @@ object Svp {
         var mode: String? = null,
         var points: List<Double>? = null
     )
-
 }
