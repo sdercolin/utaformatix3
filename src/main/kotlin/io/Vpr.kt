@@ -6,7 +6,7 @@ import external.Resources
 import kotlinx.coroutines.await
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonElement
 import model.DEFAULT_LYRIC
 import model.ExportNotification
 import model.ExportResult
@@ -233,13 +233,13 @@ object Vpr {
         var samplingRate: Int? = null,
         var tempo: Tempo? = null,
         var timeSig: TimeSig? = null,
-        var volume: MasterVolume? = null
+        var volume: JsonElement? = null
     )
 
     @Serializable
     private data class Tempo(
         var events: List<TempoEvent> = listOf(),
-        var global: Global? = null,
+        var global: JsonElement? = null,
         var height: Double? = null,
         var isFolded: Boolean? = null
     )
@@ -248,12 +248,6 @@ object Vpr {
     private data class TempoEvent(
         var pos: Long,
         var value: Int
-    )
-
-    @Serializable
-    private data class Global(
-        var isEnabled: Boolean? = null,
-        var varue: Int? = null
     )
 
     @Serializable
@@ -270,19 +264,6 @@ object Vpr {
     )
 
     @Serializable
-    private data class MasterVolume(
-        var events: List<MasterVolumeEvent>? = null,
-        var height: Double? = null,
-        var isFolded: Boolean? = null
-    )
-
-    @Serializable
-    private data class MasterVolumeEvent(
-        var pos: Long? = null,
-        var value: Int? = null
-    )
-
-    @Serializable
     private data class Track(
         var busNo: Int? = null,
         var color: Int? = null,
@@ -291,23 +272,10 @@ object Vpr {
         var isMuted: Boolean? = null,
         var isSoloMode: Boolean? = null,
         var name: String? = null,
-        var panpot: Panpot? = null,
+        var panpot: JsonElement? = null,
         var parts: List<Part> = listOf(),
         var type: Int? = null,
-        var volume: Volume? = null
-    )
-
-    @Serializable
-    private data class Panpot(
-        var events: List<PanpotEvent>? = null,
-        var height: Double? = null,
-        var isFolded: Boolean? = null
-    )
-
-    @Serializable
-    private data class PanpotEvent(
-        var pos: Long? = null,
-        var value: Int? = null
+        var volume: JsonElement? = null
     )
 
     @Serializable
@@ -333,11 +301,11 @@ object Vpr {
     @Serializable
     private data class Part(
         var duration: Long = 0L,
-        var midiEffects: List<MidiEffect>? = null,
+        var midiEffects: JsonElement? = null,
         var notes: List<Note> = listOf(),
         var pos: Long,
         var styleName: String? = null,
-        var voice: PartVoice? = null,
+        var voice: JsonElement? = null,
         var controllers: List<Controller>? = null
     ) {
         fun getControllerEvents(name: String) = controllers?.find { it.name == name }?.events.orEmpty()
@@ -356,66 +324,16 @@ object Vpr {
     )
 
     @Serializable
-    private data class MidiEffect(
-        var id: String? = null,
-        var isBypassed: Boolean? = null,
-        var isFolded: Boolean? = null,
-        var parameters: List<JsonObject>? = null
-    )
-
-    @Serializable
     private data class Note(
         var duration: Long = 0L,
-        var exp: Exp? = null,
+        var exp: JsonElement? = null,
         var isProtected: Boolean? = null,
         var lyric: String? = null,
         var number: Int,
         var phoneme: String? = null,
         var pos: Long,
-        var singingSkill: SingingSkill? = null,
+        var singingSkill: JsonElement? = null,
         var velocity: Int? = null,
-        var vibrato: Vibrato? = null
-    )
-
-    @Serializable
-    private data class Exp(
-        var opening: Int? = null
-    )
-
-    @Serializable
-    private data class SingingSkill(
-        var duration: Int? = null,
-        var weight: Weight? = null
-    )
-
-    @Serializable
-    private data class Weight(
-        var post: Int? = null,
-        var pre: Int? = null
-    )
-
-    @Serializable
-    private data class Vibrato(
-        var duration: Int? = null,
-        var type: Int? = null
-    )
-
-    @Serializable
-    private data class PartVoice(
-        var compID: String? = null,
-        var langID: Int? = null
-    )
-
-    @Serializable
-    private data class Volume(
-        var events: List<VolumeEvent>? = null,
-        var height: Double? = null,
-        var isFolded: Boolean? = null
-    )
-
-    @Serializable
-    private data class VolumeEvent(
-        var pos: Int? = null,
-        var value: Int? = null
+        var vibrato: JsonElement? = null
     )
 }

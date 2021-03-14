@@ -4,6 +4,7 @@ import external.Resources
 import kotlin.math.roundToLong
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonElement
 import model.DEFAULT_LYRIC
 import model.ExportNotification
 import model.ExportResult
@@ -171,18 +172,12 @@ object S5p {
 
     @Serializable
     private data class Project(
-        var instrumental: Instrumental? = null,
+        var instrumental: JsonElement? = null,
         var meter: List<Meter> = listOf(),
-        var mixer: Mixer? = null,
+        var mixer: JsonElement? = null,
         var tempo: List<Tempo> = listOf(),
         var tracks: List<Track> = listOf(),
         var version: Int? = null
-    )
-
-    @Serializable
-    private data class Instrumental(
-        var filename: String? = null,
-        var offset: Double? = null
     )
 
     @Serializable
@@ -190,14 +185,6 @@ object S5p {
         var beatGranularity: Int,
         var beatPerMeasure: Int,
         var measure: Int
-    )
-
-    @Serializable
-    private data class Mixer(
-        var gainInstrumentalDecibel: Double? = null,
-        var gainVocalMasterDecibel: Double? = null,
-        var instrumentalMuted: Boolean? = null,
-        var vocalMasterMuted: Boolean? = null
     )
 
     @Serializable
@@ -209,26 +196,13 @@ object S5p {
     @Serializable
     private data class Track(
         var color: String? = null,
-        var dbDefaults: DbDefaults? = null,
+        var dbDefaults: JsonElement? = null,
         var dbName: String? = null,
         var displayOrder: Int? = null,
-        var mixer: MixerX? = null,
+        var mixer: JsonElement? = null,
         var name: String? = null,
         var notes: List<Note> = listOf(),
         var parameters: Parameters? = null
-    )
-
-    @Serializable
-    private class DbDefaults
-
-    @Serializable
-    private data class MixerX(
-        var display: Boolean? = null,
-        var engineOn: Boolean? = null,
-        var gainDecibel: Double? = null,
-        var muted: Boolean? = null,
-        var pan: Double? = null,
-        var solo: Boolean? = null
     )
 
     @Serializable
