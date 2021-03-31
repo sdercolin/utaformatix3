@@ -17,6 +17,7 @@ import model.TimeSignature
 import org.w3c.files.Blob
 import org.w3c.files.BlobPropertyBag
 import org.w3c.files.File
+import process.pitch.SvpDefaultVibratoParameters
 import process.pitch.SvpNoteWithVibrato
 import process.pitch.appendPitchPointsForSvpOutput
 import process.pitch.getRelativeData
@@ -114,6 +115,15 @@ object Svp {
     }
 
     private fun parsePitchFromGroup(ref: Ref, group: Group, tempos: List<model.Tempo>): List<Pair<Long, Double>> {
+        val vibratoDefaultParameters = ref.voice?.let {
+            SvpDefaultVibratoParameters(
+                vibratoStart = it.tF0VbrStart,
+                easeInLength = it.tF0VbrLeft,
+                easeOutLength = it.tF0VbrRight,
+                depth = it.dF0Vbr,
+                frequency = it.fF0Vbr
+            )
+        }
         val pitchDelta = group.parameters?.pitchDelta
         val pitchMode = pitchDelta?.mode
         val pitchPoints = pitchDelta?.points.orEmpty()
@@ -163,7 +173,8 @@ object Svp {
             notesWithVibrato,
             tempos,
             vibratoEnvPoints,
-            vibratoEnvMode
+            vibratoEnvMode,
+            vibratoDefaultParameters
         )
     }
 
@@ -310,6 +321,7 @@ object Svp {
         var blickOffset: Long = 0,
         var database: JsonElement? = null,
         var dictionary: String? = null,
+        var voice: Voice? = null,
         var groupID: String,
         var isInstrumental: Boolean? = null,
         var pitchOffset: Int = 0
@@ -356,5 +368,24 @@ object Svp {
     private data class VibratoEnv(
         var mode: String? = null,
         var points: List<Double>? = null
+    )
+
+    @Serializable
+    private data class Voice(
+        var tF0Left: JsonElement? = null,
+        var tF0Right: JsonElement? = null,
+        var dF0Left: JsonElement? = null,
+        var dF0Right: JsonElement? = null,
+        var tF0VbrStart: Double? = null,
+        var tF0VbrLeft: Double? = null,
+        var tF0VbrRight: Double? = null,
+        var dF0Vbr: Double? = null,
+        var fF0Vbr: Double? = null,
+        var paramLoudness: JsonElement? = null,
+        var paramTension: JsonElement? = null,
+        var paramBreathiness: JsonElement? = null,
+        var paramGender: JsonElement? = null,
+        var paramToneShift: JsonElement? = null,
+        var renderMode: JsonElement? = null
     )
 }
