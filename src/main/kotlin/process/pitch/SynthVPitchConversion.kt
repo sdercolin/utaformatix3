@@ -14,6 +14,14 @@ private const val SVP_VIBRATO_DEFAULT_DEPTH_SEMITONE = 1.0
 private const val SVP_VIBRATO_DEFAULT_FREQUENCY_HZ = 5.5
 private const val SVP_VIBRATO_DEFAULT_PHASE_RAD = 0.0
 
+data class SvpDefaultVibratoParameters(
+    val vibratoStart: Double?, // sec
+    val easeInLength: Double?, // sec
+    val easeOutLength: Double?, // sec
+    val depth: Double?, // semitone
+    val frequency: Double? // Hz
+)
+
 data class SvpNoteWithVibrato(
     val noteStartTick: Long, // tick
     val noteLengthTick: Long, // tick
@@ -33,13 +41,15 @@ fun processSvpInputPitchData(
     notesWithVibrato: List<SvpNoteWithVibrato>,
     tempos: List<Tempo>,
     vibratoEnvPoints: List<Pair<Long, Double>>,
-    vibratoEnvMode: String?
+    vibratoEnvMode: String?,
+    vibratoDefaultParameters: SvpDefaultVibratoParameters?
 ) = points
     .merge()
     .interpolate(mode)
     .orEmpty()
     .appendVibrato(
         notesWithVibrato,
+        vibratoDefaultParameters,
         tempos,
         vibratoEnvPoints.merge().interpolate(vibratoEnvMode).orEmpty().extendEveryTick()
     )
@@ -70,6 +80,7 @@ private fun List<Pair<Long, Double>>.extendEveryTick() =
 
 private fun List<Pair<Long, Double>>.appendVibrato(
     notes: List<SvpNoteWithVibrato>,
+    vibratoDefaultParameters: SvpDefaultVibratoParameters?,
     tempos: List<Tempo>,
     vibratoEnv: Map<Long, Double>
 ): List<Pair<Long, Double>> {
@@ -119,12 +130,20 @@ private fun List<Pair<Long, Double>>.appendVibrato(
         .let { it + ((it.lastOrNull()?.first?.last ?: 0L) until Long.MAX_VALUE to null) }
         .flatMap { (range, note) ->
             this.filter { (tick, _) -> tick in range }
-                .appendVibratoInNote(note, tickToSecTransformation, secToTickTransformation, tempos, vibratoEnv)
+                .appendVibratoInNote(
+                    note,
+                    vibratoDefaultParameters,
+                    tickToSecTransformation,
+                    secToTickTransformation,
+                    tempos,
+                    vibratoEnv
+                )
         }
 }
 
 private fun List<Pair<Long, Double>>.appendVibratoInNote(
     note: SvpNoteWithVibrato?,
+    defaultParameters: SvpDefaultVibratoParameters?,
     tickToSecTransformation: (Long) -> Double,
     secToTickTransformation: (Double) -> Long,
     tempos: List<Tempo>,
@@ -136,14 +155,15 @@ private fun List<Pair<Long, Double>>.appendVibratoInNote(
     val noteStart = tickToSecTransformation(note.noteStartTick)
     val noteEnd = tickToSecTransformation(note.noteEndTick)
 
-    val vibratoStart = (note.vibratoStart ?: SVP_VIBRATO_DEFAULT_START_SEC) + noteStart
+    val vibratoStart =
+        (note.vibratoStart ?: defaultParameters?.vibratoStart ?: SVP_VIBRATO_DEFAULT_START_SEC) + noteStart
     val vibratoStartTick = secToTickTransformation(vibratoStart)
-    val easeInLength = note.easeInLength ?: SVP_VIBRATO_DEFAULT_EASE_IN_SEC
-    val easeOutLength = note.easeOutLength ?: SVP_VIBRATO_DEFAULT_EASE_OUT_SEC
-    val depth = (note.depth ?: SVP_VIBRATO_DEFAULT_DEPTH_SEMITONE) * 0.5
+    val easeInLength = note.easeInLength ?: defaultParameters?.easeInLength ?: SVP_VIBRATO_DEFAULT_EASE_IN_SEC
+    val easeOutLength = note.easeOutLength ?: defaultParameters?.easeOutLength ?: SVP_VIBRATO_DEFAULT_EASE_OUT_SEC
+    val depth = (note.depth ?: defaultParameters?.depth ?: SVP_VIBRATO_DEFAULT_DEPTH_SEMITONE) * 0.5
     if (depth == 0.0) return this
     val phase = note.phase ?: SVP_VIBRATO_DEFAULT_PHASE_RAD
-    val frequency = note.frequency ?: SVP_VIBRATO_DEFAULT_FREQUENCY_HZ
+    val frequency = note.frequency ?: defaultParameters?.frequency ?: SVP_VIBRATO_DEFAULT_FREQUENCY_HZ
 
     val tickToTimeRate =
         getTickToTimeRate(tempos.lastOrNull { it.tickPosition <= note.noteStartTick }?.bpm ?: DEFAULT_BPM)
