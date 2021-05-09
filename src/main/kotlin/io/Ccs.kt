@@ -352,7 +352,7 @@ object Ccs {
             val newNote = document.createElement("Note")
             newNote.setAttribute("Clock", (it.tickOn * TICK_RATE + tickPrefix).toLong().toString())
             newNote.setAttribute("PitchStep", (it.key % KEY_IN_OCTAVE).toString())
-            newNote.setAttribute("PitchOctave", (it.key / KEY_IN_OCTAVE - 1).toString())
+            newNote.setAttribute("PitchOctave", (it.key / KEY_IN_OCTAVE + OCTAVE_OFFSET).toString())
             newNote.setAttribute("Duration", (it.length * TICK_RATE).toLong().toString())
             newNote.setAttribute("Lyric", it.lyric)
             score.appendChild(newNote)
