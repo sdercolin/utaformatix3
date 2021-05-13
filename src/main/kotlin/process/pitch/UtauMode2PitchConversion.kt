@@ -93,7 +93,7 @@ private fun List<Pair<Long, Double>>.appendVibrato(
     thisNote: Note,
     bpm: Double
 ): List<Pair<Long, Double>> {
-    vibratoParams ?: return this
+    vibratoParams?.takeIf { it.isNotEmpty() } ?: return this
 
     // x-axis: tick, y-axis: 100cents
     val noteLength = thisNote.length
@@ -101,12 +101,12 @@ private fun List<Pair<Long, Double>>.appendVibrato(
     if (vibratoLength <= 0) return this
     val frequency = 1.0 / tickFromMilliSec(vibratoParams[1], bpm)
     if (frequency.isNaN()) return this
-    val depth = vibratoParams[2] / 100
+    val depth = (vibratoParams.getOrNull(2) ?: 0.0) / 100
     if (depth <= 0) return this
-    val easeInLength = noteLength * vibratoParams[3] / 100
-    val easeOutLength = noteLength * vibratoParams[4] / 100
-    val phase = vibratoParams[5] / 100
-    val shift = depth * vibratoParams[6] / 100
+    val easeInLength = noteLength * (vibratoParams.getOrNull(3) ?: 0.0) / 100
+    val easeOutLength = noteLength * (vibratoParams.getOrNull(4) ?: 0.0) / 100
+    val phase = (vibratoParams.getOrNull(5) ?: 0.0) / 100
+    val shift = depth * (vibratoParams.getOrNull(6) ?: 0.0) / 100
 
     val start = noteLength - vibratoLength
     val vibrato = { t: Double ->
