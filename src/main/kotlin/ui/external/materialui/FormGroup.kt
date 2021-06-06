@@ -7,8 +7,4 @@ import react.RClass
 import react.RProps
 
 @JsName("default")
-external val formGroup: RClass<FormGroupProps>
-
-external interface FormGroupProps : RProps {
-    var row: Boolean
-}
+external val formGroup: RClass<RProps>

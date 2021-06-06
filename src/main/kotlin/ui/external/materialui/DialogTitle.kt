@@ -10,6 +10,5 @@ import react.RProps
 external val dialogTitle: RClass<DialogTitleProps>
 
 external interface DialogTitleProps : RProps {
-    var severity: String
     var variant: String
 }

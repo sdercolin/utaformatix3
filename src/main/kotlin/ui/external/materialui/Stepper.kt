@@ -11,11 +11,5 @@ external val stepper: RClass<StepperProps>
 
 external interface StepperProps : RProps {
     var activeStep: Number
-    var alternativeLabel: Boolean
-    var children: dynamic
-    var classes: dynamic
-    var connector: dynamic
-    var nonLinear: Boolean
-    var orientation: String
     var style: Style
 }

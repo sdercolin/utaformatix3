@@ -1,6 +1,6 @@
 package ui.external.materialui
 
-class SnackbarAnchorOrigin(
+data class SnackbarAnchorOrigin(
     var vertical: String? = undefined,
     var horizontal: String? = undefined
 )

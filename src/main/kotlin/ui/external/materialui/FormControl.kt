@@ -10,8 +10,6 @@ import react.RProps
 external val formControl: RClass<FormControlProps>
 
 external interface FormControlProps : RProps {
-    var label: String
     var margin: String
-    var disabled: Boolean
     var focused: Boolean
 }
