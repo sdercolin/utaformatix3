@@ -37,7 +37,7 @@ suspend fun initializeI18n(defaultLanguage: Language) = suspendCoroutine<dynamic
             val languageName = i18next.t(LanguageDisplayName.name)
             console.log("i18n is initialized with language: $languageName")
             cont.resume(i18next)
-        }
+        } as Unit
 }
 
 suspend fun changeLanguage(code: String) = suspendCoroutine<Unit> { cont ->
@@ -46,5 +46,5 @@ suspend fun changeLanguage(code: String) = suspendCoroutine<Unit> { cont ->
             val languageName = i18next.t(LanguageDisplayName.name)
             console.log("i18n has changed language to: $languageName")
             cont.resume(Unit)
-        }
+        } as Unit
 }

@@ -163,7 +163,7 @@ object Ccs {
             val denominator = timeNode.getAttribute("BeatType")?.toIntOrNull() ?: continue
 
             tickCounter.goToTick(tick, numerator, denominator)
-            timeSignatures += TimeSignature(tickCounter.measure, numerator, denominator)
+            timeSignatures = timeSignatures + TimeSignature(tickCounter.measure, numerator, denominator)
         }
 
         val tickPrefix = getTickPrefix(timeSignatures, FIXED_MEASURE_PREFIX)

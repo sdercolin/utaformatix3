@@ -261,7 +261,7 @@ class App : RComponent<RProps, AppState>() {
         if (stageInfoStack.last().stage == stageInfo.stage) {
             stageInfoStack = stageInfoStack.dropLast(1)
         }
-        stageInfoStack += stageInfo
+        stageInfoStack = stageInfoStack + stageInfo
     }
 
     private fun popStage() = setState {
