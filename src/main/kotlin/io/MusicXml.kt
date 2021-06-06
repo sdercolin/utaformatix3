@@ -341,8 +341,8 @@ object MusicXml {
                 it.appendText(note.duration.toString())
             }
             val tieType = when (note.type) {
-                Begin -> "start"
-                End -> "stop"
+                NoteType.Begin -> "start"
+                NoteType.End -> "stop"
                 else -> null
             }
             if (tieType != null) {
@@ -363,15 +363,15 @@ object MusicXml {
             appendNewChildTo(lyricNode, "syllabic") {
                 it.appendText(
                     when (type) {
-                        Begin -> "begin"
-                        Middle -> "middle"
-                        End -> "end"
-                        Single -> "single"
+                        NoteType.Begin -> "begin"
+                        NoteType.Middle -> "middle"
+                        NoteType.End -> "end"
+                        NoteType.Single -> "single"
                     }
                 )
             }
             appendNewChildTo(lyricNode, "text") {
-                if (type == Begin || type == Single) it.appendText(lyric)
+                if (type == NoteType.Begin || type == NoteType.Single) it.appendText(lyric)
             }
         }
     }
@@ -460,7 +460,7 @@ object MusicXml {
                                 MXmlMeasureContent.Note(
                                     duration = keyTick.tick - head,
                                     note = note,
-                                    type = if (note.tickOn == head) Begin else Middle
+                                    type = if (note.tickOn == head) NoteType.Begin else NoteType.Middle
                                 )
                             )
                             ongoingNoteWithCurrentHead = note to keyTick.tick
@@ -474,7 +474,7 @@ object MusicXml {
                             MXmlMeasureContent.Note(
                                 duration = keyTick.note.tickOff - head,
                                 note = keyTick.note,
-                                type = if (note.tickOn == head) Single else End
+                                type = if (note.tickOn == head) NoteType.Single else NoteType.End
                             )
                         )
                         ongoingNoteWithCurrentHead = null
@@ -492,7 +492,7 @@ object MusicXml {
                         MXmlMeasureContent.Note(
                             duration = borderPair.second - head,
                             note = note,
-                            type = if (note.tickOn == head) Begin else Middle
+                            type = if (note.tickOn == head) NoteType.Begin else NoteType.Middle
                         )
                     )
                     ongoingNoteWithCurrentHead = note to borderPair.second
