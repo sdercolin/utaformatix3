@@ -4,6 +4,8 @@ import external.Resources
 import external.generateUUID
 import kotlin.math.roundToLong
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
 import model.DEFAULT_LYRIC
@@ -32,7 +34,7 @@ object Svp {
             val index = it.lastIndexOf('}')
             it.take(index + 1)
         }
-        val project = jsonSerializer.decodeFromString(Project.serializer(), text)
+        val project = jsonSerializer.decodeFromString<Project>(text)
         val warnings = mutableListOf<ImportWarning>()
         val timeSignatures = project.time.meter?.map {
             TimeSignature(
@@ -193,7 +195,7 @@ object Svp {
 
     private fun generateContent(project: model.Project, features: List<Feature>): String {
         val template = Resources.svpTemplate
-        val svp = jsonSerializer.decodeFromString(Project.serializer(), template)
+        val svp = jsonSerializer.decodeFromString<Project>(template)
         svp.time.meter = project.timeSignatures.map {
             Meter(
                 index = it.measurePosition,
@@ -211,7 +213,7 @@ object Svp {
         svp.tracks = project.tracks.map {
             generateTrack(it, emptyTrack, features)
         }
-        return jsonSerializer.encodeToString(Project.serializer(), svp)
+        return jsonSerializer.encodeToString(svp)
     }
 
     private fun generateTrack(track: model.Track, emptyTrack: Track, features: List<Feature>): Track {
