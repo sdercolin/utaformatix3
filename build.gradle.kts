@@ -1,6 +1,6 @@
 plugins {
-    kotlin("js") version "1.4.30"
-    kotlin("plugin.serialization") version "1.4.30-RC"
+    kotlin("js") version "1.5.10"
+    kotlin("plugin.serialization") version "1.5.0"
     id("org.jlleitschuh.gradle.ktlint") version "9.4.1"
 }
 
@@ -9,7 +9,7 @@ group = "com.sdercolin.utaformatix"
 repositories {
     mavenCentral()
     maven { url = uri("https://kotlin.bintray.com/kotlin-js-wrappers/") }
-    jcenter()
+    maven { url = uri("https://dl.bintray.com/kotlin/kotlinx/") }
 }
 
 configure<org.jlleitschuh.gradle.ktlint.KtlintExtension> {
@@ -20,21 +20,21 @@ dependencies {
     // Kotlin
     implementation(kotlin("stdlib-js"))
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core-js:1.4.2")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.0.1")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.2.1")
 
     // React, React DOM + Wrappers
-    implementation("org.jetbrains:kotlin-react:16.13.1-pre.113-kotlin-1.4.0")
-    implementation("org.jetbrains:kotlin-react-dom:16.13.1-pre.113-kotlin-1.4.0")
-    implementation("org.jetbrains:kotlin-styled:1.0.0-pre.113-kotlin-1.4.0")
-    implementation(npm("react", "16.13.1"))
-    implementation(npm("react-dom", "16.13.1"))
+    implementation("org.jetbrains:kotlin-react:17.0.1-pre.148-kotlin-1.4.21")
+    implementation("org.jetbrains:kotlin-react-dom:17.0.1-pre.148-kotlin-1.4.21")
+    implementation("org.jetbrains:kotlin-styled:5.2.1-pre.148-kotlin-1.4.21")
+    implementation(npm("react", "17.0.2"))
+    implementation(npm("react-dom", "17.0.2"))
 
     // React components
-    implementation(npm("@material-ui/core", "4.11.3"))
+    implementation(npm("@material-ui/core", "4.11.4"))
     implementation(npm("@material-ui/icons", "4.11.2"))
-    implementation(npm("@material-ui/lab", "4.0.0-alpha.57"))
+    implementation(npm("@material-ui/lab", "4.0.0-alpha.58"))
     implementation(npm("react-file-drop", "3.1.2"))
-    implementation(npm("react-is", "17.0.1"))
+    implementation(npm("react-is", "17.0.2"))
     implementation(npm("react-markdown", "5.0.3"))
 
     // Localization
@@ -56,9 +56,8 @@ dependencies {
 }
 
 kotlin {
-    js(LEGACY) {
+    js {
         browser {
-            binaries.executable()
             webpackTask {
                 cssSupport.enabled = true
             }
@@ -72,6 +71,7 @@ kotlin {
                 }
             }
         }
+        binaries.executable()
     }
 }
 
