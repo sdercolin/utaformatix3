@@ -20,12 +20,7 @@ import ui.external.materialui.Severity
 import ui.external.materialui.TypographyVariant
 import ui.external.materialui.typography
 import ui.external.react.fileDrop
-import ui.strings.Strings.ImportErrorDialogTitle
-import ui.strings.Strings.ImportFileDescription
-import ui.strings.Strings.ImportFileSubDescription
-import ui.strings.Strings.ImportProjectCaption
-import ui.strings.Strings.MultipleFileImportError
-import ui.strings.Strings.UnsupportedFileTypeImportError
+import ui.strings.Strings
 import ui.strings.string
 import util.extensionName
 import util.toList
@@ -40,7 +35,7 @@ class Importer : RComponent<ImporterProps, ImporterState>() {
     }
 
     override fun RBuilder.render() {
-        title(ImportProjectCaption)
+        title(Strings.ImportProjectCaption)
 
         styledDiv {
             css {
@@ -88,7 +83,7 @@ class Importer : RComponent<ImporterProps, ImporterState>() {
                 attrs {
                     variant = TypographyVariant.h5
                 }
-                +(string(ImportFileDescription))
+                +(string(Strings.ImportFileDescription))
             }
             styledDiv {
                 css {
@@ -98,7 +93,7 @@ class Importer : RComponent<ImporterProps, ImporterState>() {
                     attrs {
                         variant = TypographyVariant.body2
                     }
-                    +(string(ImportFileSubDescription))
+                    +(string(Strings.ImportFileSubDescription))
                 }
             }
         }
@@ -109,14 +104,14 @@ class Importer : RComponent<ImporterProps, ImporterState>() {
         when {
             fileFormat == null -> {
                 setState {
-                    snackbarError = SnackbarErrorState(true, string(UnsupportedFileTypeImportError))
+                    snackbarError = SnackbarErrorState(true, string(Strings.UnsupportedFileTypeImportError))
                 }
             }
             !fileFormat.multipleFile && files.count() > 1 -> {
                 setState {
                     snackbarError = SnackbarErrorState(
                         true,
-                        string(MultipleFileImportError, "format" to fileFormat.name)
+                        string(Strings.MultipleFileImportError, "format" to fileFormat.name)
                     )
                 }
             }
@@ -144,7 +139,7 @@ class Importer : RComponent<ImporterProps, ImporterState>() {
                     isLoading = false
                     dialogError = DialogErrorState(
                         open = true,
-                        title = string(ImportErrorDialogTitle),
+                        title = string(Strings.ImportErrorDialogTitle),
                         message = t.message ?: t.toString()
                     )
                 }

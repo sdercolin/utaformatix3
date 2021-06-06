@@ -57,8 +57,6 @@ import ui.external.materialui.switch
 import ui.external.materialui.tooltip
 import ui.external.materialui.typography
 import ui.strings.Strings
-import ui.strings.Strings.NextButton
-import ui.strings.Strings.ProcessErrorDialogTitle
 import ui.strings.string
 
 class ConfigurationEditor(props: ConfigurationEditorProps) :
@@ -417,7 +415,7 @@ class ConfigurationEditor(props: ConfigurationEditorProps) :
                         process()
                     }
                 }
-                +(string(NextButton))
+                +(string(Strings.NextButton))
             }
         }
     }
@@ -467,7 +465,7 @@ class ConfigurationEditor(props: ConfigurationEditorProps) :
                     isProcessing = false
                     dialogError = DialogErrorState(
                         open = true,
-                        title = string(ProcessErrorDialogTitle),
+                        title = string(Strings.ProcessErrorDialogTitle),
                         message = t.message ?: t.toString()
                     )
                 }

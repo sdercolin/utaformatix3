@@ -3,7 +3,6 @@ package ui.strings
 import external.require
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
-import ui.strings.Strings.LanguageDisplayName
 
 val i18next = require("i18next").default
 
@@ -34,7 +33,7 @@ suspend fun initializeI18n(defaultLanguage: Language) = suspendCoroutine<dynamic
         .use(reactI18next)
         .use(languageDetector)
         .init(options).then {
-            val languageName = i18next.t(LanguageDisplayName.name)
+            val languageName = i18next.t(Strings.LanguageDisplayName.name)
             console.log("i18n is initialized with language: $languageName")
             cont.resume(i18next)
         } as Unit
@@ -43,7 +42,7 @@ suspend fun initializeI18n(defaultLanguage: Language) = suspendCoroutine<dynamic
 suspend fun changeLanguage(code: String) = suspendCoroutine<Unit> { cont ->
     i18next.changeLanguage(code)
         .then {
-            val languageName = i18next.t(LanguageDisplayName.name)
+            val languageName = i18next.t(Strings.LanguageDisplayName.name)
             console.log("i18n has changed language to: $languageName")
             cont.resume(Unit)
         } as Unit

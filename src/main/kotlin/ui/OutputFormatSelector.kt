@@ -33,30 +33,13 @@ import ui.external.materialui.list
 import ui.external.materialui.listItem
 import ui.external.materialui.listItemText
 import ui.external.materialui.typography
-import ui.strings.Strings.CCSFormatDescription
-import ui.strings.Strings.DVFormatDescription
-import ui.strings.Strings.ImportWarningTempoIgnoredInFile
-import ui.strings.Strings.ImportWarningTempoIgnoredInPreMeasure
-import ui.strings.Strings.ImportWarningTempoIgnoredInTrack
-import ui.strings.Strings.ImportWarningTempoNotFound
-import ui.strings.Strings.ImportWarningTimeSignatureIgnoredInPreMeasure
-import ui.strings.Strings.ImportWarningTimeSignatureIgnoredInTrack
-import ui.strings.Strings.ImportWarningTimeSignatureNotFound
-import ui.strings.Strings.ImportWarningTitle
-import ui.strings.Strings.MusicXmlFormatDescription
-import ui.strings.Strings.S5PFormatDescription
-import ui.strings.Strings.SVPFormatDescription
-import ui.strings.Strings.SelectOutputFormatCaption
-import ui.strings.Strings.USTFormatDescription
-import ui.strings.Strings.VPRFormatDescription
-import ui.strings.Strings.VSQFormatDescription
-import ui.strings.Strings.VSQXFormatDescription
+import ui.strings.Strings
 import ui.strings.string
 
 class OutputFormatSelector : RComponent<OutputFormatSelectorProps, RState>() {
 
     override fun RBuilder.render() {
-        title(SelectOutputFormatCaption)
+        title(Strings.SelectOutputFormatCaption)
         buildImportWarnings()
         buildFormatList()
     }
@@ -69,7 +52,7 @@ class OutputFormatSelector : RComponent<OutputFormatSelectorProps, RState>() {
             attrs {
                 severity = Severity.warning
             }
-            alertTitle { +(string(ImportWarningTitle)) }
+            alertTitle { +(string(Strings.ImportWarningTitle)) }
             importWarnings
                 .map { it.text }
                 .forEach {
@@ -119,34 +102,34 @@ class OutputFormatSelector : RComponent<OutputFormatSelectorProps, RState>() {
 
     private val ImportWarning.text: String
         get() = when (this) {
-            is ImportWarning.TempoNotFound -> string(ImportWarningTempoNotFound)
+            is ImportWarning.TempoNotFound -> string(Strings.ImportWarningTempoNotFound)
             is ImportWarning.TempoIgnoredInFile -> string(
-                ImportWarningTempoIgnoredInFile,
+                Strings.ImportWarningTempoIgnoredInFile,
                 "bpm" to tempo.bpm.toString(),
                 "tick" to tempo.tickPosition.toString(),
                 "file" to file.name
             )
             is ImportWarning.TempoIgnoredInTrack -> string(
-                ImportWarningTempoIgnoredInTrack,
+                Strings.ImportWarningTempoIgnoredInTrack,
                 "bpm" to tempo.bpm.toString(),
                 "tick" to tempo.tickPosition.toString(),
                 "number" to (track.id + 1).toString(),
                 "name" to track.name
             )
             is ImportWarning.TempoIgnoredInPreMeasure -> string(
-                ImportWarningTempoIgnoredInPreMeasure,
+                Strings.ImportWarningTempoIgnoredInPreMeasure,
                 "bpm" to tempo.bpm.toString()
             )
-            is ImportWarning.TimeSignatureNotFound -> string(ImportWarningTimeSignatureNotFound)
+            is ImportWarning.TimeSignatureNotFound -> string(Strings.ImportWarningTimeSignatureNotFound)
             is ImportWarning.TimeSignatureIgnoredInTrack -> string(
-                ImportWarningTimeSignatureIgnoredInTrack,
+                Strings.ImportWarningTimeSignatureIgnoredInTrack,
                 "timeSignature" to timeSignature.displayValue,
                 "measure" to timeSignature.measurePosition.toString(),
                 "number" to (track.id + 1).toString(),
                 "name" to track.name
             )
             is ImportWarning.TimeSignatureIgnoredInPreMeasure -> string(
-                ImportWarningTimeSignatureIgnoredInPreMeasure,
+                Strings.ImportWarningTimeSignatureIgnoredInPreMeasure,
                 "timeSignature" to timeSignature.displayValue
             )
         }
@@ -154,15 +137,15 @@ class OutputFormatSelector : RComponent<OutputFormatSelectorProps, RState>() {
     private val Format.description: String?
         get() =
             when (this) {
-                VSQX -> VSQXFormatDescription
-                VPR -> VPRFormatDescription
-                UST -> USTFormatDescription
-                CCS -> CCSFormatDescription
-                SVP -> SVPFormatDescription
-                S5P -> S5PFormatDescription
-                MUSIC_XML -> MusicXmlFormatDescription
-                DV -> DVFormatDescription
-                VSQ -> VSQFormatDescription
+                VSQX -> Strings.VSQXFormatDescription
+                VPR -> Strings.VPRFormatDescription
+                UST -> Strings.USTFormatDescription
+                CCS -> Strings.CCSFormatDescription
+                SVP -> Strings.SVPFormatDescription
+                S5P -> Strings.S5PFormatDescription
+                MUSIC_XML -> Strings.MusicXmlFormatDescription
+                DV -> Strings.DVFormatDescription
+                VSQ -> Strings.VSQFormatDescription
                 PPSF -> null
             }?.let { string(it) }
 

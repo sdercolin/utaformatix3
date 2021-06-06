@@ -12,10 +12,7 @@ import ui.external.materialui.dialogActions
 import ui.external.materialui.dialogContent
 import ui.external.materialui.dialogContentText
 import ui.external.materialui.dialogTitle
-import ui.strings.Strings.CancelButton
-import ui.strings.Strings.ErrorDialogDescription
-import ui.strings.Strings.ReportButton
-import ui.strings.Strings.ReportUrl
+import ui.strings.Strings
 import ui.strings.string
 
 fun RBuilder.errorDialog(
@@ -42,7 +39,7 @@ fun RBuilder.errorDialog(
         div {
             dialogContent {
                 dialogContentText {
-                    +(string(ErrorDialogDescription))
+                    +(string(Strings.ErrorDialogDescription))
                 }
             }
         }
@@ -53,16 +50,16 @@ fun RBuilder.errorDialog(
                         onClose()
                     }
                 }
-                +(string(CancelButton))
+                +(string(Strings.CancelButton))
             }
             button {
                 attrs {
                     onClick = {
                         onClose()
-                        window.open(string(ReportUrl), target = "_blank")
+                        window.open(string(Strings.ReportUrl), target = "_blank")
                     }
                 }
-                +(string(ReportButton))
+                +(string(Strings.ReportButton))
             }
         }
     }
