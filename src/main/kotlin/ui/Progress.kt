@@ -16,10 +16,10 @@ import ui.external.materialui.typography
 import ui.strings.Strings
 import ui.strings.string
 
-fun RBuilder.progress() {
+fun RBuilder.progress(isShowing: Boolean) {
     backdrop {
         attrs {
-            open = true
+            open = isShowing
             style = Style(zIndex = 1201) // just over drawer: 1200
         }
         styledDiv {
@@ -29,10 +29,8 @@ fun RBuilder.progress() {
                 justifyContent = JustifyContent.center
             }
             typography {
-                attrs {
-                    variant = TypographyVariant.h3
-                }
-                +(string(Strings.ProcessingOverlay))
+                attrs.variant = TypographyVariant.h3
+                +string(Strings.ProcessingOverlay)
             }
         }
     }

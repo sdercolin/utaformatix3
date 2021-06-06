@@ -39,11 +39,9 @@ class LanguageSelector : RComponent<LanguageSelectorProps, LanguageSelectorState
             }
             Language.values().forEach {
                 menuItem {
-                    attrs {
-                        onClick = {
-                            selectLanguage(it)
-                            closeMenu()
-                        }
+                    attrs.onClick = {
+                        selectLanguage(it)
+                        closeMenu()
                     }
                     +it.displayName
                 }
@@ -59,15 +57,11 @@ class LanguageSelector : RComponent<LanguageSelectorProps, LanguageSelectorState
     }
 
     private fun openMenu() {
-        setState {
-            anchorElement = findDOMNode(this@LanguageSelector)
-        }
+        setState { anchorElement = findDOMNode(this@LanguageSelector) }
     }
 
     private fun closeMenu() {
-        setState {
-            anchorElement = null
-        }
+        setState { anchorElement = null }
     }
 }
 

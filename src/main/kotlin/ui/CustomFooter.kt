@@ -46,9 +46,7 @@ class CustomFooter : RComponent<CustomFooterProps, RState>() {
                 +"　|　"
                 link {
                     attrs {
-                        onClick = {
-                            props.onOpenEmbeddedPage(Strings.ReleaseNotesUrl)
-                        }
+                        onClick = { props.onOpenEmbeddedPage(Strings.ReleaseNotesUrl) }
                         color = Color.inherit
                     }
                     +"Release Notes"

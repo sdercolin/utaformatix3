@@ -38,11 +38,8 @@ class Exporter : RComponent<ExporterProps, RState>() {
         if (notifications.isEmpty()) return
 
         alert {
-            attrs {
-                severity = Severity.warning
-            }
-            notifications
-                .map { it.text }
+            attrs.severity = Severity.warning
+            notifications.map { it.text }
                 .forEach {
                     div { +it }
                 }
@@ -57,16 +54,14 @@ class Exporter : RComponent<ExporterProps, RState>() {
             button {
                 attrs {
                     variant = ButtonVariant.contained
-                    onClick = {
-                        download()
-                    }
+                    onClick = { download() }
                 }
                 Icons.save {}
                 styledDiv {
                     css {
                         padding = "8px"
                     }
-                    +(string(Strings.ExportButton))
+                    +string(Strings.ExportButton)
                 }
             }
             button {
@@ -74,16 +69,14 @@ class Exporter : RComponent<ExporterProps, RState>() {
                     style = Style(marginLeft = "16px")
                     variant = ButtonVariant.contained
                     color = Color.primary
-                    onClick = {
-                        props.onRestart()
-                    }
+                    onClick = { props.onRestart() }
                 }
                 Icons.refresh {}
                 styledDiv {
                     css {
                         padding = "8px"
                     }
-                    +(string(Strings.RestartButton))
+                    +string(Strings.RestartButton)
                 }
             }
         }

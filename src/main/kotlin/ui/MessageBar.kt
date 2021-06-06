@@ -6,9 +6,9 @@ import ui.external.materialui.alert
 import ui.external.materialui.snackbar
 
 fun RBuilder.messageBar(
-    open: Boolean,
+    isShowing: Boolean,
     message: String,
-    onClose: () -> Unit,
+    close: () -> Unit,
     severityString: String
 ) = snackbar {
     attrs {
@@ -17,8 +17,8 @@ fun RBuilder.messageBar(
             horizontal = "center"
         )
         autoHideDuration = 5000 // ms
-        this.open = open
-        this.onClose = onClose
+        open = isShowing
+        onClose = close
     }
     alert {
         attrs {

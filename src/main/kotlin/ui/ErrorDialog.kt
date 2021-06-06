@@ -16,18 +16,18 @@ import ui.strings.Strings
 import ui.strings.string
 
 fun RBuilder.errorDialog(
-    open: Boolean,
-    onClose: () -> Unit,
+    isShowing: Boolean,
+    close: () -> Unit,
     title: String,
     errorMessage: String
 ) {
     dialog {
         attrs {
-            this.open = open
-            this.onClose = onClose
+            open = isShowing
+            onClose = close
         }
         dialogTitle {
-            +(title)
+            +title
         }
         alert {
             attrs {
@@ -39,34 +39,28 @@ fun RBuilder.errorDialog(
         div {
             dialogContent {
                 dialogContentText {
-                    +(string(Strings.ErrorDialogDescription))
+                    +string(Strings.ErrorDialogDescription)
                 }
             }
         }
         dialogActions {
             button {
-                attrs {
-                    onClick = {
-                        onClose()
-                    }
-                }
-                +(string(Strings.CancelButton))
+                attrs.onClick = { close() }
+                +string(Strings.CancelButton)
             }
             button {
-                attrs {
-                    onClick = {
-                        onClose()
-                        window.open(string(Strings.ReportUrl), target = "_blank")
-                    }
+                attrs.onClick = {
+                    close()
+                    window.open(string(Strings.ReportUrl), target = "_blank")
                 }
-                +(string(Strings.ReportButton))
+                +string(Strings.ReportButton)
             }
         }
     }
 }
 
 data class DialogErrorState(
-    val open: Boolean = false,
+    val isShowing: Boolean = false,
     val title: String = "",
     val message: String = ""
 )

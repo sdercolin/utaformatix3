@@ -41,59 +41,49 @@ class Importer : RComponent<ImporterProps, ImporterState>() {
             css {
                 marginTop = LinearDimension("40px")
             }
-            attrs {
-                onClickFunction = {
-                    GlobalScope.launch {
-                        val accept = props.formats.joinToString(",") { it.extension }
-                        val files = waitFileSelection(accept = accept, multiple = true)
-                        checkFilesToImport(files)
-                    }
+            attrs.onClickFunction = {
+                GlobalScope.launch {
+                    val accept = props.formats.joinToString(",") { it.extension }
+                    val files = waitFileSelection(accept = accept, multiple = true)
+                    checkFilesToImport(files)
                 }
             }
             buildFileDrop()
         }
 
         messageBar(
-            open = state.snackbarError.open,
+            isShowing = state.snackbarError.isShowing,
             message = state.snackbarError.message,
-            onClose = { closeMessageBar() },
+            close = { closeMessageBar() },
             severityString = Severity.error
         )
 
         errorDialog(
-            open = state.dialogError.open,
+            isShowing = state.dialogError.isShowing,
             title = state.dialogError.title,
             errorMessage = state.dialogError.message,
-            onClose = { closeErrorDialog() }
+            close = { closeErrorDialog() }
         )
 
-        if (state.isLoading) {
-            progress()
-        }
+        progress(isShowing = state.isLoading)
     }
 
     private fun RBuilder.buildFileDrop() {
         fileDrop {
-            attrs {
-                onDrop = { files, _ ->
-                    checkFilesToImport(files.toList())
-                }
+            attrs.onDrop = { files, _ ->
+                checkFilesToImport(files.toList())
             }
             typography {
-                attrs {
-                    variant = TypographyVariant.h5
-                }
-                +(string(Strings.ImportFileDescription))
+                attrs.variant = TypographyVariant.h5
+                +string(Strings.ImportFileDescription)
             }
             styledDiv {
                 css {
                     marginTop = LinearDimension("5px")
                 }
                 typography {
-                    attrs {
-                        variant = TypographyVariant.body2
-                    }
-                    +(string(Strings.ImportFileSubDescription))
+                    attrs.variant = TypographyVariant.body2
+                    +string(Strings.ImportFileSubDescription)
                 }
             }
         }
@@ -102,29 +92,21 @@ class Importer : RComponent<ImporterProps, ImporterState>() {
     private fun checkFilesToImport(files: List<File>) {
         val fileFormat = getFileFormat(files)
         when {
-            fileFormat == null -> {
-                setState {
-                    snackbarError = SnackbarErrorState(true, string(Strings.UnsupportedFileTypeImportError))
-                }
+            fileFormat == null -> setState {
+                snackbarError = SnackbarErrorState(true, string(Strings.UnsupportedFileTypeImportError))
             }
-            !fileFormat.multipleFile && files.count() > 1 -> {
-                setState {
-                    snackbarError = SnackbarErrorState(
-                        true,
-                        string(Strings.MultipleFileImportError, "format" to fileFormat.name)
-                    )
-                }
+            !fileFormat.multipleFile && files.count() > 1 -> setState {
+                snackbarError = SnackbarErrorState(
+                    true,
+                    string(Strings.MultipleFileImportError, "format" to fileFormat.name)
+                )
             }
-            else -> {
-                import(files, fileFormat)
-            }
+            else -> import(files, fileFormat)
         }
     }
 
     private fun import(files: List<File>, format: Format) {
-        setState {
-            isLoading = true
-        }
+        setState { isLoading = true }
         GlobalScope.launch {
             try {
                 delay(100)
@@ -138,7 +120,7 @@ class Importer : RComponent<ImporterProps, ImporterState>() {
                 setState {
                     isLoading = false
                     dialogError = DialogErrorState(
-                        open = true,
+                        isShowing = true,
                         title = string(Strings.ImportErrorDialogTitle),
                         message = t.message ?: t.toString()
                     )
@@ -155,15 +137,11 @@ class Importer : RComponent<ImporterProps, ImporterState>() {
     }
 
     private fun closeMessageBar() {
-        setState {
-            snackbarError = snackbarError.copy(open = false)
-        }
+        setState { snackbarError = snackbarError.copy(isShowing = false) }
     }
 
     private fun closeErrorDialog() {
-        setState {
-            dialogError = dialogError.copy(open = false)
-        }
+        setState { dialogError = dialogError.copy(isShowing = false) }
     }
 }
 
@@ -179,6 +157,6 @@ external interface ImporterState : RState {
 }
 
 data class SnackbarErrorState(
-    val open: Boolean = false,
+    val isShowing: Boolean = false,
     val message: String = ""
 )

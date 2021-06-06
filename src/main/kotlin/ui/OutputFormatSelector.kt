@@ -52,9 +52,8 @@ class OutputFormatSelector : RComponent<OutputFormatSelectorProps, RState>() {
             attrs {
                 severity = Severity.warning
             }
-            alertTitle { +(string(Strings.ImportWarningTitle)) }
-            importWarnings
-                .map { it.text }
+            alertTitle { +string(Strings.ImportWarningTitle) }
+            importWarnings.map { it.text }
                 .forEach {
                     div { +it }
                 }
@@ -67,9 +66,7 @@ class OutputFormatSelector : RComponent<OutputFormatSelectorProps, RState>() {
                 listItem {
                     attrs {
                         button = true
-                        onClick = {
-                            props.onSelected(format)
-                        }
+                        onClick = { props.onSelected(format) }
                         style = Style(padding = "24px")
                     }
                     avatar {
@@ -135,34 +132,32 @@ class OutputFormatSelector : RComponent<OutputFormatSelectorProps, RState>() {
         }
 
     private val Format.description: String?
-        get() =
-            when (this) {
-                VSQX -> Strings.VSQXFormatDescription
-                VPR -> Strings.VPRFormatDescription
-                UST -> Strings.USTFormatDescription
-                CCS -> Strings.CCSFormatDescription
-                SVP -> Strings.SVPFormatDescription
-                S5P -> Strings.S5PFormatDescription
-                MUSIC_XML -> Strings.MusicXmlFormatDescription
-                DV -> Strings.DVFormatDescription
-                VSQ -> Strings.VSQFormatDescription
-                PPSF -> null
-            }?.let { string(it) }
+        get() = when (this) {
+            VSQX -> Strings.VSQXFormatDescription
+            VPR -> Strings.VPRFormatDescription
+            UST -> Strings.USTFormatDescription
+            CCS -> Strings.CCSFormatDescription
+            SVP -> Strings.SVPFormatDescription
+            S5P -> Strings.S5PFormatDescription
+            MUSIC_XML -> Strings.MusicXmlFormatDescription
+            DV -> Strings.DVFormatDescription
+            VSQ -> Strings.VSQFormatDescription
+            PPSF -> null
+        }?.let { string(it) }
 
     private val Format.iconPath: String?
-        get() =
-            when (this) {
-                VSQX -> Resources.vsqxIcon
-                VPR -> Resources.vprIcon
-                UST -> Resources.ustIcon
-                CCS -> Resources.ccsIcon
-                SVP -> Resources.svpIcon
-                S5P -> Resources.s5pIcon
-                MUSIC_XML -> Resources.ccsIcon
-                DV -> Resources.dvIcon
-                VSQ -> Resources.vsqIcon
-                PPSF -> null
-            }
+        get() = when (this) {
+            VSQX -> Resources.vsqxIcon
+            VPR -> Resources.vprIcon
+            UST -> Resources.ustIcon
+            CCS -> Resources.ccsIcon
+            SVP -> Resources.svpIcon
+            S5P -> Resources.s5pIcon
+            MUSIC_XML -> Resources.ccsIcon
+            DV -> Resources.dvIcon
+            VSQ -> Resources.vsqIcon
+            PPSF -> null
+        }
 }
 
 external interface OutputFormatSelectorProps : RProps {
