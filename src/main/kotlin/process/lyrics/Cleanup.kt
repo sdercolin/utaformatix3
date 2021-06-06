@@ -1,20 +1,20 @@
 package process.lyrics
 
 import model.LyricsType
-import model.LyricsType.KANA_CV
-import model.LyricsType.KANA_VCV
-import model.LyricsType.ROMAJI_CV
-import model.LyricsType.ROMAJI_VCV
-import model.LyricsType.UNKNOWN
+import model.LyricsType.KanaCv
+import model.LyricsType.KanaVcv
+import model.LyricsType.RomajiCv
+import model.LyricsType.RomajiVcv
+import model.LyricsType.Unknown
 import model.Track
 
 fun cleanup(tracks: List<Track>, type: LyricsType) =
     when (type) {
-        UNKNOWN -> tracks
-        ROMAJI_CV -> tracks.cleanup { it.cleanupAsRomajiCV() }
-        ROMAJI_VCV -> tracks.cleanup { it.cleanupAsRomajiVCV() }
-        KANA_CV -> tracks.cleanup { it.cleanupAsKanaCV() }
-        KANA_VCV -> tracks.cleanup { it.cleanupAsKanaVCV() }
+        Unknown -> tracks
+        RomajiCv -> tracks.cleanup { it.cleanupAsRomajiCV() }
+        RomajiVcv -> tracks.cleanup { it.cleanupAsRomajiVCV() }
+        KanaCv -> tracks.cleanup { it.cleanupAsKanaCV() }
+        KanaVcv -> tracks.cleanup { it.cleanupAsKanaVCV() }
     }
 
 private fun String.cleanupAsRomajiCV(): String {

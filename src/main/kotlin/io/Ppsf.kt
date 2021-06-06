@@ -68,7 +68,7 @@ object Ppsf {
         val tracks = content.ppsf.project.dvlTrack.mapIndexed { i, track -> parseTrack(i, track) }
 
         return model.Project(
-            format = Format.PPSF,
+            format = Format.Ppsf,
             inputFiles = listOf(file),
             name = name,
             tracks = tracks,

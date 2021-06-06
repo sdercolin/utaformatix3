@@ -53,7 +53,7 @@ object S5p {
         }
         val tracks = parseTracks(project)
         return model.Project(
-            format = Format.S5P,
+            format = Format.S5p,
             inputFiles = listOf(file),
             name = file.nameWithoutExtension,
             tracks = tracks,
@@ -107,12 +107,12 @@ object S5p {
     fun generate(project: model.Project, features: List<Feature>): ExportResult {
         val jsonText = generateContent(project, features)
         val blob = Blob(arrayOf(jsonText), BlobPropertyBag("application/octet-stream"))
-        val name = project.name + Format.S5P.extension
+        val name = project.name + Format.S5p.extension
         return ExportResult(
             blob,
             name,
             listOfNotNull(
-                if (features.contains(Feature.CONVERT_PITCH)) ExportNotification.PitchDataExported else null
+                if (features.contains(Feature.ConvertPitch)) ExportNotification.PitchDataExported else null
             )
         )
     }
@@ -160,7 +160,7 @@ object S5p {
     }
 
     private fun generatePitchData(track: model.Track, features: List<Feature>, interval: Long): List<Double> {
-        if (!features.contains(Feature.CONVERT_PITCH)) return emptyList()
+        if (!features.contains(Feature.ConvertPitch)) return emptyList()
         val data = track.pitch?.getRelativeData(track.notes)
             ?.map { (it.first / (interval.toDouble().div(TICK_RATE)) to (it.second * 100)) }
             ?: return emptyList()

@@ -14,11 +14,11 @@ import model.ExportResult
 import model.Feature
 import model.Format
 import model.LyricsType
-import model.LyricsType.KANA_CV
-import model.LyricsType.KANA_VCV
-import model.LyricsType.ROMAJI_CV
-import model.LyricsType.ROMAJI_VCV
-import model.LyricsType.UNKNOWN
+import model.LyricsType.KanaCv
+import model.LyricsType.KanaVcv
+import model.LyricsType.RomajiCv
+import model.LyricsType.RomajiVcv
+import model.LyricsType.Unknown
 import model.Project
 import model.TICKS_IN_FULL_NOTE
 import org.w3c.dom.HTMLInputElement
@@ -65,13 +65,13 @@ class ConfigurationEditor(props: ConfigurationEditorProps) :
     override fun ConfigurationEditorState.init(props: ConfigurationEditorProps) {
         isProcessing = false
         val analysedType = props.project.lyricsType
-        val doLyricsConversion = analysedType != UNKNOWN
+        val doLyricsConversion = analysedType != Unknown
         val fromLyricsType: LyricsType?
         val toLyricsType: LyricsType?
         val isPitchReadable =
-            Feature.CONVERT_PITCH.isAvailable(props.project)
+            Feature.ConvertPitch.isAvailable(props.project)
         val isPitchConversionAvailable =
-            props.outputFormat.availableFeaturesForGeneration.contains(Feature.CONVERT_PITCH)
+            props.outputFormat.availableFeaturesForGeneration.contains(Feature.ConvertPitch)
 
         if (doLyricsConversion) {
             fromLyricsType = analysedType
@@ -184,7 +184,7 @@ class ConfigurationEditor(props: ConfigurationEditorProps) :
                         }
                     }
                 }
-                listOf(ROMAJI_CV, ROMAJI_VCV, KANA_CV, KANA_VCV).forEach { lyricsType ->
+                listOf(RomajiCv, RomajiVcv, KanaCv, KanaVcv).forEach { lyricsType ->
                     formControlLabel {
                         attrs {
                             value = lyricsType.name
@@ -436,7 +436,7 @@ class ConfigurationEditor(props: ConfigurationEditorProps) :
     private fun removeUncheckedFeatures(featureList: List<Feature>): List<Feature> {
         return featureList.filter {
             when (it) {
-                Feature.CONVERT_PITCH -> state.pitchConversion.isOn
+                Feature.ConvertPitch -> state.pitchConversion.isOn
             }
         }
     }

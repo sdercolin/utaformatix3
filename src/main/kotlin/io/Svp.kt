@@ -55,7 +55,7 @@ object Svp {
         }
         val tracks = parseTracks(project, tempos)
         return model.Project(
-            format = Format.SVP,
+            format = Format.Svp,
             inputFiles = listOf(file),
             name = file.nameWithoutExtension,
             tracks = tracks,
@@ -183,12 +183,12 @@ object Svp {
     fun generate(project: model.Project, features: List<Feature>): ExportResult {
         val jsonText = generateContent(project, features)
         val blob = Blob(arrayOf(jsonText), BlobPropertyBag("application/octet-stream"))
-        val name = project.name + Format.SVP.extension
+        val name = project.name + Format.Svp.extension
         return ExportResult(
             blob,
             name,
             listOfNotNull(
-                if (features.contains(Feature.CONVERT_PITCH)) ExportNotification.PitchDataExported else null
+                if (features.contains(Feature.ConvertPitch)) ExportNotification.PitchDataExported else null
             )
         )
     }
@@ -243,7 +243,7 @@ object Svp {
     }
 
     private fun generatePitchData(track: model.Track, features: List<Feature>): PitchDelta? {
-        if (!features.contains(Feature.CONVERT_PITCH)) return null
+        if (!features.contains(Feature.ConvertPitch)) return null
         val data = track.pitch?.getRelativeData(track.notes)
             ?.let(::appendPitchPointsForSvpOutput)
             ?.map { (it.first * TICK_RATE) to (it.second * 100) }

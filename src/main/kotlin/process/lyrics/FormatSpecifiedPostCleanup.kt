@@ -20,6 +20,6 @@ private fun notePostCleanup(lyric: String, targetFormat: Format): String {
 }
 
 private fun getDictionary(targetFormat: Format): Map<String, String>? = when (targetFormat) {
-    Format.CCS -> mapOf("-" to "ー")
+    Format.Ccs -> mapOf("-" to "ー")
     else -> null
 }

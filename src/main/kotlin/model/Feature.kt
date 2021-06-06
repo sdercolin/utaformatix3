@@ -1,7 +1,7 @@
 package model
 
 enum class Feature(val isAvailable: (Project) -> Boolean) {
-    CONVERT_PITCH(
+    ConvertPitch(
         isAvailable = { project ->
             project.tracks.any { it.pitch != null }
         }

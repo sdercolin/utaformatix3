@@ -1,17 +1,17 @@
 package process.lyrics
 
 import model.LyricsType
-import model.LyricsType.KANA_CV
-import model.LyricsType.KANA_VCV
-import model.LyricsType.ROMAJI_CV
-import model.LyricsType.ROMAJI_VCV
-import model.LyricsType.UNKNOWN
+import model.LyricsType.KanaCv
+import model.LyricsType.KanaVcv
+import model.LyricsType.RomajiCv
+import model.LyricsType.RomajiVcv
+import model.LyricsType.Unknown
 import model.Note
 import model.Project
 import model.Track
 
 fun analyseLyricsTypeForProject(project: Project): LyricsType {
-    if (project.tracks.isEmpty()) return UNKNOWN
+    if (project.tracks.isEmpty()) return Unknown
 
     val maxNoteCountInAllTracks = project.tracks.maxByOrNull { it.notes.count() }!!.notes.count()
     val minNoteCountForAvailableTrack = maxNoteCountInAllTracks * MIN_NOTE_RATIO_FOR_AVAILABLE_TRACK
@@ -20,12 +20,12 @@ fun analyseLyricsTypeForProject(project: Project): LyricsType {
         .filter { it.notes.count() >= minNoteCountForAvailableTrack }
         .map { analyseLyricsTypeForTrack(it) }
         .distinct()
-        .filter { it != UNKNOWN }
+        .filter { it != Unknown }
 
     return if (availableResults.count() > 1) {
-        UNKNOWN
+        Unknown
     } else {
-        availableResults.firstOrNull() ?: UNKNOWN
+        availableResults.firstOrNull() ?: Unknown
     }
 }
 
@@ -38,20 +38,20 @@ private fun analyseLyricsTypeForTrack(track: Track): LyricsType {
     return typePercentages
         .find { it.second > MIN_RELIABLE_PERCENTAGE }
         ?.first
-        ?: UNKNOWN
+        ?: Unknown
 }
 
 private fun checkNoteType(note: Note): LyricsType {
     val lyric = note.lyric
     if (lyric.contains(" ")) {
         val mainLyric = lyric.substring(lyric.indexOf(" ") + 1)
-        if (mainLyric.isKana) return KANA_VCV
-        if (mainLyric.isRomaji) return ROMAJI_VCV
+        if (mainLyric.isKana) return KanaVcv
+        if (mainLyric.isRomaji) return RomajiVcv
     } else {
-        if (lyric.isKana) return KANA_CV
-        if (lyric.isRomaji) return ROMAJI_CV
+        if (lyric.isKana) return KanaCv
+        if (lyric.isRomaji) return RomajiCv
     }
-    return UNKNOWN
+    return Unknown
 }
 
 private const val MIN_RELIABLE_PERCENTAGE = 0.7

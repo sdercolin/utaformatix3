@@ -4,11 +4,11 @@ import kotlin.math.pow
 
 object MidiUtil {
     enum class MetaType(val value: Byte) {
-        TEXT(0x01),
-        TRACK_NAME(0x03),
-        TEMPO(0x51),
-        TIME_SIGNATURE(0x58),
-        END_OF_TRACK(0x2f);
+        Text(0x01),
+        TrackName(0x03),
+        Tempo(0x51),
+        TimeSignature(0x58),
+        EndOfTrack(0x2f);
 
         val eventHeaderBytes get() = listOf(0xff.toByte(), value)
 

@@ -4,16 +4,16 @@ import external.Resources
 import kotlinx.css.LinearDimension
 import kotlinx.css.marginLeft
 import model.Format
-import model.Format.CCS
-import model.Format.DV
-import model.Format.MUSIC_XML
-import model.Format.PPSF
-import model.Format.S5P
-import model.Format.SVP
-import model.Format.UST
-import model.Format.VPR
-import model.Format.VSQ
-import model.Format.VSQX
+import model.Format.Ccs
+import model.Format.Dv
+import model.Format.MusicXml
+import model.Format.Ppsf
+import model.Format.S5p
+import model.Format.Svp
+import model.Format.Ust
+import model.Format.Vpr
+import model.Format.Vsq
+import model.Format.Vsqx
 import model.ImportWarning
 import model.Project
 import react.RBuilder
@@ -133,30 +133,30 @@ class OutputFormatSelector : RComponent<OutputFormatSelectorProps, RState>() {
 
     private val Format.description: String?
         get() = when (this) {
-            VSQX -> Strings.VSQXFormatDescription
-            VPR -> Strings.VPRFormatDescription
-            UST -> Strings.USTFormatDescription
-            CCS -> Strings.CCSFormatDescription
-            SVP -> Strings.SVPFormatDescription
-            S5P -> Strings.S5PFormatDescription
-            MUSIC_XML -> Strings.MusicXmlFormatDescription
-            DV -> Strings.DVFormatDescription
-            VSQ -> Strings.VSQFormatDescription
-            PPSF -> null
+            Vsqx -> Strings.VSQXFormatDescription
+            Vpr -> Strings.VPRFormatDescription
+            Ust -> Strings.USTFormatDescription
+            Ccs -> Strings.CCSFormatDescription
+            Svp -> Strings.SVPFormatDescription
+            S5p -> Strings.S5PFormatDescription
+            MusicXml -> Strings.MusicXmlFormatDescription
+            Dv -> Strings.DVFormatDescription
+            Vsq -> Strings.VSQFormatDescription
+            Ppsf -> null
         }?.let { string(it) }
 
     private val Format.iconPath: String?
         get() = when (this) {
-            VSQX -> Resources.vsqxIcon
-            VPR -> Resources.vprIcon
-            UST -> Resources.ustIcon
-            CCS -> Resources.ccsIcon
-            SVP -> Resources.svpIcon
-            S5P -> Resources.s5pIcon
-            MUSIC_XML -> Resources.ccsIcon
-            DV -> Resources.dvIcon
-            VSQ -> Resources.vsqIcon
-            PPSF -> null
+            Vsqx -> Resources.vsqxIcon
+            Vpr -> Resources.vprIcon
+            Ust -> Resources.ustIcon
+            Ccs -> Resources.ccsIcon
+            Svp -> Resources.svpIcon
+            S5p -> Resources.s5pIcon
+            MusicXml -> Resources.ccsIcon
+            Dv -> Resources.dvIcon
+            Vsq -> Resources.vsqIcon
+            Ppsf -> null
         }
 }
 
