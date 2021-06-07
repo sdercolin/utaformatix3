@@ -20,7 +20,7 @@ fun cleanup(tracks: List<Track>, type: LyricsType) =
 private fun String.cleanupAsRomajiCV(): String {
     if (this.isEmpty()) return this
 
-    var result = this.lowercase()
+    var result = this.toLowerCase()
     result = result.trim()
     result = result.trimStart('?')
 
@@ -37,7 +37,7 @@ private fun String.cleanupAsRomajiCV(): String {
 private fun String.cleanupAsRomajiVCV(): String {
     if (this.isEmpty()) return this
 
-    var result = this.lowercase()
+    var result = this.toLowerCase()
     result = result.trim()
 
     if (!result.contains(" ")) {

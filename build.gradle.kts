@@ -1,6 +1,6 @@
 plugins {
-    kotlin("js") version "1.5.10"
-    kotlin("plugin.serialization") version "1.5.0"
+    kotlin("js") version "1.4.30"
+    kotlin("plugin.serialization") version "1.4.30-RC"
     id("org.jlleitschuh.gradle.ktlint") version "9.4.1"
 }
 
@@ -58,6 +58,7 @@ dependencies {
 kotlin {
     js(LEGACY) {
         browser {
+            binaries.executable()
             webpackTask {
                 cssSupport.enabled = true
             }
@@ -71,7 +72,6 @@ kotlin {
                 }
             }
         }
-        binaries.executable()
     }
 }
 
