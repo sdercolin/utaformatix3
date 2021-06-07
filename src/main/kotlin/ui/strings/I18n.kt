@@ -6,7 +6,7 @@ import kotlin.coroutines.suspendCoroutine
 
 val i18next = require("i18next").default
 
-suspend fun initializeI18n(defaultLanguage: Language) = suspendCoroutine<dynamic> { cont ->
+suspend fun initializeI18n(defaultLanguage: Language) = suspendCoroutine<Unit> { cont ->
     val reactI18next = require("react-i18next").initReactI18next
     val languageDetector = require("i18next-browser-languagedetector").default
     val options = object {}.asDynamic()
@@ -36,7 +36,8 @@ suspend fun initializeI18n(defaultLanguage: Language) = suspendCoroutine<dynamic
             val languageName = i18next.t(Strings.LanguageDisplayName.name)
             console.log("i18n is initialized with language: $languageName")
             cont.resume(i18next)
-        } as Unit
+        }
+    Unit
 }
 
 suspend fun changeLanguage(code: String) = suspendCoroutine<Unit> { cont ->
@@ -45,5 +46,6 @@ suspend fun changeLanguage(code: String) = suspendCoroutine<Unit> { cont ->
             val languageName = i18next.t(Strings.LanguageDisplayName.name)
             console.log("i18n has changed language to: $languageName")
             cont.resume(Unit)
-        } as Unit
+        }
+    Unit
 }
