@@ -64,18 +64,14 @@ class App : RComponent<RProps, AppState>() {
                     minHeight = LinearDimension("95vh")
                 }
                 container {
-                    attrs {
-                        maxWidth = Breakpoint.lg
-                    }
+                    attrs.maxWidth = Breakpoint.lg
                     buildAppBar()
                     buildStepper()
                     buildBody()
                 }
             }
             child(CustomFooter::class) {
-                attrs {
-                    onOpenEmbeddedPage = { urlKey -> pushStage(StageInfo.ExtraPage(urlKey)) }
-                }
+                attrs.onOpenEmbeddedPage = { urlKey -> pushStage(StageInfo.ExtraPage(urlKey)) }
             }
             buildBackButton()
         }
@@ -83,9 +79,7 @@ class App : RComponent<RProps, AppState>() {
 
     private fun RBuilder.buildAppBar() {
         appBar {
-            attrs {
-                position = Position.fixed
-            }
+            attrs.position = Position.fixed
             toolbar {
                 styledDiv {
                     css {
@@ -135,11 +129,7 @@ class App : RComponent<RProps, AppState>() {
                     }
                 }
                 child(LanguageSelector::class) {
-                    attrs {
-                        onChangeLanguage = {
-                            setState { }
-                        }
-                    }
+                    attrs.onChangeLanguage = { setState { } }
                 }
             }
         }
@@ -157,19 +147,15 @@ class App : RComponent<RProps, AppState>() {
             }
             Stage.forStepper.forEach { stage ->
                 step {
-                    attrs {
-                        key = stage.name
-                    }
+                    attrs.key = stage.name
                     stepLabel {
-                        attrs {
-                            StepIconProps = StepIconProps(
-                                StepIconPropsClasses(
-                                    root = "main-stepper-icon",
-                                    active = "main-stepper-icon-active",
-                                    completed = "main-stepper-icon-completed"
-                                )
+                        attrs.StepIconProps = StepIconProps(
+                            StepIconPropsClasses(
+                                root = "main-stepper-icon",
+                                active = "main-stepper-icon-active",
+                                completed = "main-stepper-icon-completed"
                             )
-                        }
+                        )
                         stage.displayName?.let { +it }
                     }
                 }
@@ -196,9 +182,7 @@ class App : RComponent<RProps, AppState>() {
                         attrs {
                             formats = Format.exportable
                             project = info.project
-                            onSelected = {
-                                pushStage(StageInfo.Configure(info.project, it))
-                            }
+                            onSelected = { pushStage(StageInfo.Configure(info.project, it)) }
                         }
                     }
                 }
@@ -219,17 +203,13 @@ class App : RComponent<RProps, AppState>() {
                             project = info.project
                             format = info.outputFormat
                             result = info.result
-                            onRestart = {
-                                popAllStages()
-                            }
+                            onRestart = { popAllStages() }
                         }
                     }
                 }
                 is StageInfo.ExtraPage -> {
                     child(EmbeddedPage::class) {
-                        attrs {
-                            url = string(info.urlKey)
-                        }
+                        attrs.url = string(info.urlKey)
                     }
                 }
             }
@@ -242,9 +222,7 @@ class App : RComponent<RProps, AppState>() {
             attrs {
                 size = "large"
                 color = Color.primary
-                onClick = {
-                    popStage()
-                }
+                onClick = { popStage() }
                 style = Style(
                     position = "fixed",
                     top = "auto",
@@ -261,7 +239,7 @@ class App : RComponent<RProps, AppState>() {
         if (stageInfoStack.last().stage == stageInfo.stage) {
             stageInfoStack = stageInfoStack.dropLast(1)
         }
-        stageInfoStack += stageInfo
+        stageInfoStack = stageInfoStack + stageInfo
     }
 
     private fun popStage() = setState {

@@ -45,9 +45,9 @@ object Vsqx {
         val text = file.readText()
         return when {
             text.contains("xmlns=\"http://www.yamaha.co.jp/vocaloid/schema/vsq3/\"") ->
-                parse(file, text, TagNames.VSQ3)
+                parse(file, text, TagNames.Vsq3)
             text.contains("xmlns=\"http://www.yamaha.co.jp/vocaloid/schema/vsq4/\"") ->
-                parse(file, text, TagNames.VSQ4)
+                parse(file, text, TagNames.Vsq4)
             else -> throw IllegalFileException.UnknownVsqVersion()
         }
     }
@@ -76,7 +76,7 @@ object Vsqx {
         }
 
         return Project(
-            format = Format.VSQX,
+            format = Format.Vsqx,
             inputFiles = listOf(file),
             name = projectName,
             tracks = tracks,
@@ -247,13 +247,13 @@ object Vsqx {
         val serializer = XMLSerializer()
         val content = serializer.serializeToString(document).cleanEmptyXmlns()
         val blob = Blob(arrayOf(content), BlobPropertyBag("application/octet-stream"))
-        val name = project.name + Format.VSQX.extension
+        val name = project.name + Format.Vsqx.extension
         return ExportResult(
             blob,
             name,
             listOfNotNull(
                 if (project.hasXSampaData) null else ExportNotification.PhonemeResetRequiredV4,
-                if (features.contains(Feature.CONVERT_PITCH)) ExportNotification.PitchDataExported else null
+                if (features.contains(Feature.ConvertPitch)) ExportNotification.PitchDataExported else null
             )
         )
     }
@@ -262,7 +262,7 @@ object Vsqx {
 
     private fun generateContent(project: Project, features: List<Feature>): Document {
         val text = Resources.vsqxTemplate
-        val tagNames = TagNames.VSQ4
+        val tagNames = TagNames.Vsq4
         val parser = DOMParser()
         val document = parser.parseFromString(text, "text/xml") as XMLDocument
         val root = requireNotNull(document.documentElement)
@@ -364,7 +364,7 @@ object Vsqx {
         part.setSingleChildValue(tagNames.playTime, trackModel.notes.lastOrNull()?.tickOff ?: 0)
 
         setupPitchControllingNodes(
-            features.contains(Feature.CONVERT_PITCH),
+            features.contains(Feature.ConvertPitch),
             part,
             trackModel,
             tagNames
@@ -469,8 +469,8 @@ object Vsqx {
         val pbsName: String = "PBS",
         val pitName: String = "PIT"
     ) {
-        VSQ3,
-        VSQ4(
+        Vsq3,
+        Vsq4(
             posMes = "m",
             nume = "nu",
             denomi = "de",

@@ -5,10 +5,6 @@ import external.JsZip
 import external.JsZipOption
 import external.Resources
 import io.MusicXml.MXmlMeasureContent.NoteType
-import io.MusicXml.MXmlMeasureContent.NoteType.BEGIN
-import io.MusicXml.MXmlMeasureContent.NoteType.END
-import io.MusicXml.MXmlMeasureContent.NoteType.MIDDLE
-import io.MusicXml.MXmlMeasureContent.NoteType.SINGLE
 import kotlinx.coroutines.await
 import kotlinx.dom.appendText
 import model.DEFAULT_LYRIC
@@ -59,7 +55,7 @@ object MusicXml {
         val tracks = partNodes.mapIndexed { index, element -> parseTrack(index, element, masterTrackResult) }
 
         return Project(
-            format = Format.MUSIC_XML,
+            format = Format.MusicXml,
             inputFiles = listOf(file),
             name = projectName,
             tracks = tracks,
@@ -209,7 +205,7 @@ object MusicXml {
         for (track in projectWithTickRateApplied.tracks) {
             val content = generateTrackContent(projectWithTickRateApplied, track)
             val trackNameUrlSafe = getSafeFileName(track.name)
-            val trackFileName = "${project.name}_${track.id + 1}_$trackNameUrlSafe${Format.MUSIC_XML.extension}"
+            val trackFileName = "${project.name}_${track.id + 1}_$trackNameUrlSafe${Format.MusicXml.extension}"
             zip.file(trackFileName, content)
         }
         val option = JsZipOption().also { it.type = "blob" }
@@ -345,8 +341,8 @@ object MusicXml {
                 it.appendText(note.duration.toString())
             }
             val tieType = when (note.type) {
-                BEGIN -> "start"
-                END -> "stop"
+                NoteType.Begin -> "start"
+                NoteType.End -> "stop"
                 else -> null
             }
             if (tieType != null) {
@@ -367,15 +363,15 @@ object MusicXml {
             appendNewChildTo(lyricNode, "syllabic") {
                 it.appendText(
                     when (type) {
-                        BEGIN -> "begin"
-                        MIDDLE -> "middle"
-                        END -> "end"
-                        SINGLE -> "single"
+                        NoteType.Begin -> "begin"
+                        NoteType.Middle -> "middle"
+                        NoteType.End -> "end"
+                        NoteType.Single -> "single"
                     }
                 )
             }
             appendNewChildTo(lyricNode, "text") {
-                if (type == BEGIN || type == SINGLE) it.appendText(lyric)
+                if (type == NoteType.Begin || type == NoteType.Single) it.appendText(lyric)
             }
         }
     }
@@ -464,7 +460,7 @@ object MusicXml {
                                 MXmlMeasureContent.Note(
                                     duration = keyTick.tick - head,
                                     note = note,
-                                    type = if (note.tickOn == head) BEGIN else MIDDLE
+                                    type = if (note.tickOn == head) NoteType.Begin else NoteType.Middle
                                 )
                             )
                             ongoingNoteWithCurrentHead = note to keyTick.tick
@@ -478,7 +474,7 @@ object MusicXml {
                             MXmlMeasureContent.Note(
                                 duration = keyTick.note.tickOff - head,
                                 note = keyTick.note,
-                                type = if (note.tickOn == head) SINGLE else END
+                                type = if (note.tickOn == head) NoteType.Single else NoteType.End
                             )
                         )
                         ongoingNoteWithCurrentHead = null
@@ -496,7 +492,7 @@ object MusicXml {
                         MXmlMeasureContent.Note(
                             duration = borderPair.second - head,
                             note = note,
-                            type = if (note.tickOn == head) BEGIN else MIDDLE
+                            type = if (note.tickOn == head) NoteType.Begin else NoteType.Middle
                         )
                     )
                     ongoingNoteWithCurrentHead = note to borderPair.second
@@ -536,10 +532,10 @@ object MusicXml {
         class Note(val duration: Long, val note: model.Note, val type: NoteType) : MXmlMeasureContent()
 
         enum class NoteType {
-            BEGIN,
-            MIDDLE,
-            END,
-            SINGLE
+            Begin,
+            Middle,
+            End,
+            Single
         }
     }
 

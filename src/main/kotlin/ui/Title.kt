@@ -15,9 +15,7 @@ fun RBuilder.title(titleKey: Strings) = styledDiv {
         margin(vertical = LinearDimension("20px"))
     }
     typography {
-        attrs {
-            variant = TypographyVariant.h3
-        }
-        +(string(titleKey))
+        attrs.variant = TypographyVariant.h3
+        +string(titleKey)
     }
 }

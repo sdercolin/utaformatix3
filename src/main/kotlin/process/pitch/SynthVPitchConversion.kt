@@ -56,7 +56,7 @@ fun processSvpInputPitchData(
     .removeRedundantPoints()
 
 private fun List<Pair<Long, Double>>.merge() = groupBy { it.first }
-    .mapValues { it.value.sumByDouble { (_, value) -> value } / it.value.count() }
+    .mapValues { it.value.sumOf { (_, value) -> value } / it.value.count() }
     .toList()
     .sortedBy { it.first }
 

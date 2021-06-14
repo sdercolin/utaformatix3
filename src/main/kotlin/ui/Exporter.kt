@@ -22,21 +22,13 @@ import ui.external.materialui.Severity
 import ui.external.materialui.Style
 import ui.external.materialui.alert
 import ui.external.materialui.button
-import ui.strings.Strings.ExportButton
-import ui.strings.Strings.ExportNotificationPhonemeResetRequiredV4
-import ui.strings.Strings.ExportNotificationPhonemeResetRequiredV5
-import ui.strings.Strings.ExportNotificationPhonemeResetRequiredVSQ
-import ui.strings.Strings.ExportNotificationPitchDataExported
-import ui.strings.Strings.ExportNotificationTempoChangeIgnored
-import ui.strings.Strings.ExportNotificationTimeSignatureIgnored
-import ui.strings.Strings.ExporterTitleSuccess
-import ui.strings.Strings.RestartButton
+import ui.strings.Strings
 import ui.strings.string
 
 class Exporter : RComponent<ExporterProps, RState>() {
 
     override fun RBuilder.render() {
-        title(ExporterTitleSuccess)
+        title(Strings.ExporterTitleSuccess)
         buildExportInfo()
         buildButtons()
     }
@@ -46,11 +38,8 @@ class Exporter : RComponent<ExporterProps, RState>() {
         if (notifications.isEmpty()) return
 
         alert {
-            attrs {
-                severity = Severity.warning
-            }
-            notifications
-                .map { it.text }
+            attrs.severity = Severity.warning
+            notifications.map { it.text }
                 .forEach {
                     div { +it }
                 }
@@ -65,16 +54,14 @@ class Exporter : RComponent<ExporterProps, RState>() {
             button {
                 attrs {
                     variant = ButtonVariant.contained
-                    onClick = {
-                        download()
-                    }
+                    onClick = { download() }
                 }
                 Icons.save {}
                 styledDiv {
                     css {
                         padding = "8px"
                     }
-                    +(string(ExportButton))
+                    +string(Strings.ExportButton)
                 }
             }
             button {
@@ -82,16 +69,14 @@ class Exporter : RComponent<ExporterProps, RState>() {
                     style = Style(marginLeft = "16px")
                     variant = ButtonVariant.contained
                     color = Color.primary
-                    onClick = {
-                        props.onRestart()
-                    }
+                    onClick = { props.onRestart() }
                 }
                 Icons.refresh {}
                 styledDiv {
                     css {
                         padding = "8px"
                     }
-                    +(string(RestartButton))
+                    +string(Strings.RestartButton)
                 }
             }
         }
@@ -104,12 +89,12 @@ class Exporter : RComponent<ExporterProps, RState>() {
     private val ExportNotification.text: String
         get() = string(
             when (this) {
-                ExportNotification.PhonemeResetRequiredVSQ -> ExportNotificationPhonemeResetRequiredVSQ
-                ExportNotification.PhonemeResetRequiredV4 -> ExportNotificationPhonemeResetRequiredV4
-                ExportNotification.PhonemeResetRequiredV5 -> ExportNotificationPhonemeResetRequiredV5
-                ExportNotification.TempoChangeIgnored -> ExportNotificationTimeSignatureIgnored
-                ExportNotification.TimeSignatureIgnored -> ExportNotificationTempoChangeIgnored
-                ExportNotification.PitchDataExported -> ExportNotificationPitchDataExported
+                ExportNotification.PhonemeResetRequiredVSQ -> Strings.ExportNotificationPhonemeResetRequiredVSQ
+                ExportNotification.PhonemeResetRequiredV4 -> Strings.ExportNotificationPhonemeResetRequiredV4
+                ExportNotification.PhonemeResetRequiredV5 -> Strings.ExportNotificationPhonemeResetRequiredV5
+                ExportNotification.TempoChangeIgnored -> Strings.ExportNotificationTimeSignatureIgnored
+                ExportNotification.TimeSignatureIgnored -> Strings.ExportNotificationTempoChangeIgnored
+                ExportNotification.PitchDataExported -> Strings.ExportNotificationPitchDataExported
             }
         )
 }

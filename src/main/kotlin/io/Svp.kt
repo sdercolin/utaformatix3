@@ -4,6 +4,8 @@ import external.Resources
 import external.generateUUID
 import kotlin.math.roundToLong
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
 import model.DEFAULT_LYRIC
@@ -32,7 +34,7 @@ object Svp {
             val index = it.lastIndexOf('}')
             it.take(index + 1)
         }
-        val project = jsonSerializer.decodeFromString(Project.serializer(), text)
+        val project = jsonSerializer.decodeFromString<Project>(text)
         val warnings = mutableListOf<ImportWarning>()
         val timeSignatures = project.time.meter?.map {
             TimeSignature(
@@ -53,7 +55,7 @@ object Svp {
         }
         val tracks = parseTracks(project, tempos)
         return model.Project(
-            format = Format.SVP,
+            format = Format.Svp,
             inputFiles = listOf(file),
             name = file.nameWithoutExtension,
             tracks = tracks,
@@ -181,19 +183,19 @@ object Svp {
     fun generate(project: model.Project, features: List<Feature>): ExportResult {
         val jsonText = generateContent(project, features)
         val blob = Blob(arrayOf(jsonText), BlobPropertyBag("application/octet-stream"))
-        val name = project.name + Format.SVP.extension
+        val name = project.name + Format.Svp.extension
         return ExportResult(
             blob,
             name,
             listOfNotNull(
-                if (features.contains(Feature.CONVERT_PITCH)) ExportNotification.PitchDataExported else null
+                if (features.contains(Feature.ConvertPitch)) ExportNotification.PitchDataExported else null
             )
         )
     }
 
     private fun generateContent(project: model.Project, features: List<Feature>): String {
         val template = Resources.svpTemplate
-        val svp = jsonSerializer.decodeFromString(Project.serializer(), template)
+        val svp = jsonSerializer.decodeFromString<Project>(template)
         svp.time.meter = project.timeSignatures.map {
             Meter(
                 index = it.measurePosition,
@@ -211,7 +213,7 @@ object Svp {
         svp.tracks = project.tracks.map {
             generateTrack(it, emptyTrack, features)
         }
-        return jsonSerializer.encodeToString(Project.serializer(), svp)
+        return jsonSerializer.encodeToString(svp)
     }
 
     private fun generateTrack(track: model.Track, emptyTrack: Track, features: List<Feature>): Track {
@@ -241,7 +243,7 @@ object Svp {
     }
 
     private fun generatePitchData(track: model.Track, features: List<Feature>): PitchDelta? {
-        if (!features.contains(Feature.CONVERT_PITCH)) return null
+        if (!features.contains(Feature.ConvertPitch)) return null
         val data = track.pitch?.getRelativeData(track.notes)
             ?.let(::appendPitchPointsForSvpOutput)
             ?.map { (it.first * TICK_RATE) to (it.second * 100) }

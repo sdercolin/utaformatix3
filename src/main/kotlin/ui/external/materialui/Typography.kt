@@ -11,8 +11,6 @@ external val typography: RClass<TypographyProps>
 
 external interface TypographyProps : RProps {
     var variant: String
-    var className: String
     var color: String
-    var noWrap: Boolean
     var style: Style
 }

@@ -13,6 +13,5 @@ external val radioGroup: RClass<RadioGroupProps>
 external interface RadioGroupProps : RProps {
     var onChange: (Event) -> Unit
     var value: String
-    var disabled: Boolean
     var row: Boolean
 }

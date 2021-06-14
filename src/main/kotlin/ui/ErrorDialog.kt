@@ -12,25 +12,22 @@ import ui.external.materialui.dialogActions
 import ui.external.materialui.dialogContent
 import ui.external.materialui.dialogContentText
 import ui.external.materialui.dialogTitle
-import ui.strings.Strings.CancelButton
-import ui.strings.Strings.ErrorDialogDescription
-import ui.strings.Strings.ReportButton
-import ui.strings.Strings.ReportUrl
+import ui.strings.Strings
 import ui.strings.string
 
 fun RBuilder.errorDialog(
-    open: Boolean,
-    onClose: () -> Unit,
+    isShowing: Boolean,
+    close: () -> Unit,
     title: String,
     errorMessage: String
 ) {
     dialog {
         attrs {
-            this.open = open
-            this.onClose = onClose
+            open = isShowing
+            onClose = close
         }
         dialogTitle {
-            +(title)
+            +title
         }
         alert {
             attrs {
@@ -42,34 +39,28 @@ fun RBuilder.errorDialog(
         div {
             dialogContent {
                 dialogContentText {
-                    +(string(ErrorDialogDescription))
+                    +string(Strings.ErrorDialogDescription)
                 }
             }
         }
         dialogActions {
             button {
-                attrs {
-                    onClick = {
-                        onClose()
-                    }
-                }
-                +(string(CancelButton))
+                attrs.onClick = { close() }
+                +string(Strings.CancelButton)
             }
             button {
-                attrs {
-                    onClick = {
-                        onClose()
-                        window.open(string(ReportUrl), target = "_blank")
-                    }
+                attrs.onClick = {
+                    close()
+                    window.open(string(Strings.ReportUrl), target = "_blank")
                 }
-                +(string(ReportButton))
+                +string(Strings.ReportButton)
             }
         }
     }
 }
 
 data class DialogErrorState(
-    val open: Boolean = false,
+    val isShowing: Boolean = false,
     val title: String = "",
     val message: String = ""
 )

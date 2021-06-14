@@ -5,6 +5,8 @@ import external.JsZipOption
 import external.Resources
 import kotlinx.coroutines.await
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
 import model.DEFAULT_LYRIC
@@ -50,7 +52,7 @@ object Vpr {
             warnings.add(ImportWarning.TempoNotFound)
         }
         return model.Project(
-            format = Format.VPR,
+            format = Format.Vpr,
             inputFiles = listOf(file),
             name = content.title ?: file.nameWithoutExtension,
             tracks = tracks,
@@ -107,7 +109,7 @@ object Vpr {
             null
         }
         val text = requireNotNull(vprEntry).async("string").await() as String
-        return jsonSerializer.decodeFromString(Project.serializer(), text)
+        return jsonSerializer.decodeFromString(text)
     }
 
     suspend fun generate(project: model.Project, features: List<Feature>): ExportResult {
@@ -119,20 +121,20 @@ object Vpr {
             it.mimeType = "application/octet-stream"
         }
         val blob = zip.generateAsync(option).await() as Blob
-        val name = project.name + Format.VPR.extension
+        val name = project.name + Format.Vpr.extension
         return ExportResult(
             blob,
             name,
             listOfNotNull(
                 if (project.hasXSampaData) null else ExportNotification.PhonemeResetRequiredV5,
-                if (features.contains(Feature.CONVERT_PITCH)) ExportNotification.PitchDataExported else null
+                if (features.contains(Feature.ConvertPitch)) ExportNotification.PitchDataExported else null
             )
         )
     }
 
     private fun generateContent(project: model.Project, features: List<Feature>): String {
         val template = Resources.vprTemplate
-        val vpr = jsonSerializer.decodeFromString(Project.serializer(), template)
+        val vpr = jsonSerializer.decodeFromString<Project>(template)
         var endTick = 0L
         vpr.title = project.name
         val tickCounter = TickCounter()
@@ -160,7 +162,7 @@ object Vpr {
                 )
             }
             val duration = track.notes.lastOrNull()?.tickOff
-            val controllers = if (features.contains(Feature.CONVERT_PITCH)) generatePitchData(track) else null
+            val controllers = if (features.contains(Feature.ConvertPitch)) generatePitchData(track) else null
             val part = duration?.let {
                 emptyTrack.parts.first().copy(
                     duration = it,
@@ -176,7 +178,7 @@ object Vpr {
         vpr.tracks = tracks
         endTick = endTick.coerceAtLeast(tracks.map { it.parts.firstOrNull()?.duration ?: 0 }.maxOrNull() ?: 0)
         vpr.masterTrack!!.loop!!.end = endTick
-        return jsonSerializer.encodeToString(Project.serializer(), vpr)
+        return jsonSerializer.encodeToString(vpr)
     }
 
     private fun generatePitchData(track: model.Track): List<Controller>? {
