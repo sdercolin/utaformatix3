@@ -1,7 +1,3 @@
 .gradle
 build
-.idea/dictionaries
-.idea/modules
-.idea/artifacts
-modules.xml
-*.iml
+.idea
