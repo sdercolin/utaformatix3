@@ -290,8 +290,15 @@ enum class Strings(val en: String, val ja: String, val zhCN: String) {
     ExportNotificationPitchDataExported(
         en = "Some pitch parameters were exported. For a higher reproduction accuracy," +
                 " you may need to turn off pitch transition and vibrato settings in the target editor.",
-        ja = "ピッチパラメータが出力されました。出力側のエディターでピッチ推移やビブラートなどの設定を削除することで、より高い精度でピッチを再現できる場合があります。",
+        ja = "ピッチパラメータが出力されました。出力側のエディターでピッチ推移やビブラートなどの設定を削除することで、より高い精度でピッチを" +
+                "再現できる場合があります。",
         zhCN = "生成的文件中带有音高参数。您可能需要在对象编辑器中关闭音高平滑设置及颤音设置以达到更高的重现精度。"
+    ),
+    ExportNotificationDataOverLengthLimitIgnored(
+        en = "Data exceeding length limit ignored. Please check if your output includes all your intended data.",
+        ja = "一部のデータが長さ制限を超えているため、すべてのデータを出力することができませんでした。意図したデータが出力結果にすべて" +
+                "入っているかどうかを確認してください。",
+        zhCN = "部分数据超过了长度限制而被忽略，请检查生成的文件是否完整包含您所需要的数据。"
     ),
     SlightRestsFillingSwitchLabel(
         en = "Fill short rests",

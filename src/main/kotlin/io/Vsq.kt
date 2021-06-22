@@ -13,6 +13,7 @@ import model.ImportWarning
 import model.Note
 import model.Pitch
 import model.Project
+import model.TICKS_IN_FULL_NOTE
 import model.Tempo
 import model.TickCounter
 import model.TimeSignature
@@ -21,6 +22,7 @@ import org.khronos.webgl.Uint8Array
 import org.w3c.files.Blob
 import org.w3c.files.BlobPropertyBag
 import org.w3c.files.File
+import process.lengthLimited
 import process.pitch.VocaloidPartPitchData
 import process.pitch.generateForVocaloid
 import process.pitch.pitchFromVocaloidParts
@@ -259,16 +261,18 @@ object Vsq {
     }
 
     fun generate(project: Project, features: List<Feature>): ExportResult {
-        val content =
-            project.withoutEmptyTracks()?.let { generateContent(it, features) } ?: throw EmptyProjectException()
+        val projectLengthLimited = project.lengthLimited(MAX_OUTPUT_TICK)
+        val content = projectLengthLimited.withoutEmptyTracks()?.let { generateContent(it, features) }
+            ?: throw EmptyProjectException()
         val blob = Blob(arrayOf(content), BlobPropertyBag("application/octet-stream"))
-        val name = project.name + Format.Vsq.extension
+        val name = projectLengthLimited.name + Format.Vsq.extension
         return ExportResult(
             blob,
             name,
             listOfNotNull(
-                if (project.hasXSampaData) null else ExportNotification.PhonemeResetRequiredVSQ,
-                if (features.contains(Feature.ConvertPitch)) ExportNotification.PitchDataExported else null
+                if (projectLengthLimited.hasXSampaData) null else ExportNotification.PhonemeResetRequiredVSQ,
+                if (features.contains(Feature.ConvertPitch)) ExportNotification.PitchDataExported else null,
+                if (project == projectLengthLimited) null else ExportNotification.DataOverLengthLimitIgnored
             )
         )
     }
@@ -496,4 +500,5 @@ object Vsq {
     private const val MIN_MEASURE_OFFSET = 1
     private const val MAX_MEASURE_OFFSET = 8
     private const val IS_LITTLE_ENDIAN = false
+    private const val MAX_OUTPUT_TICK = 4096L * TICKS_IN_FULL_NOTE
 }

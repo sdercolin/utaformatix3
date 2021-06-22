@@ -95,6 +95,7 @@ class Exporter : RComponent<ExporterProps, RState>() {
                 ExportNotification.TempoChangeIgnored -> Strings.ExportNotificationTimeSignatureIgnored
                 ExportNotification.TimeSignatureIgnored -> Strings.ExportNotificationTempoChangeIgnored
                 ExportNotification.PitchDataExported -> Strings.ExportNotificationPitchDataExported
+                ExportNotification.DataOverLengthLimitIgnored -> Strings.ExportNotificationDataOverLengthLimitIgnored
             }
         )
 }
