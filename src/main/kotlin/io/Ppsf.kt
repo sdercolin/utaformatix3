@@ -4,7 +4,6 @@ import external.JsZip
 import kotlinx.coroutines.await
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
 import model.DEFAULT_LYRIC
@@ -102,7 +101,7 @@ object Ppsf {
         val zip = JsZip().loadAsync(binary).await()
         val vprEntry = zip.file(jsonPath)
         val text = requireNotNull(vprEntry).async("string").await() as String
-        return jsonSerializer.decodeFromString(text)
+        return jsonSerializer.decodeFromString(Project.serializer(), text)
     }
 
     private val jsonSerializer = Json {

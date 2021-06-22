@@ -5,8 +5,6 @@ import external.JsZipOption
 import external.Resources
 import kotlinx.coroutines.await
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
 import model.DEFAULT_LYRIC
@@ -109,7 +107,7 @@ object Vpr {
             null
         }
         val text = requireNotNull(vprEntry).async("string").await() as String
-        return jsonSerializer.decodeFromString(text)
+        return jsonSerializer.decodeFromString(Project.serializer(), text)
     }
 
     suspend fun generate(project: model.Project, features: List<Feature>): ExportResult {
@@ -134,7 +132,7 @@ object Vpr {
 
     private fun generateContent(project: model.Project, features: List<Feature>): String {
         val template = Resources.vprTemplate
-        val vpr = jsonSerializer.decodeFromString<Project>(template)
+        val vpr = jsonSerializer.decodeFromString(Project.serializer(), template)
         var endTick = 0L
         vpr.title = project.name
         val tickCounter = TickCounter()
@@ -178,7 +176,7 @@ object Vpr {
         vpr.tracks = tracks
         endTick = endTick.coerceAtLeast(tracks.map { it.parts.firstOrNull()?.duration ?: 0 }.maxOrNull() ?: 0)
         vpr.masterTrack!!.loop!!.end = endTick
-        return jsonSerializer.encodeToString(vpr)
+        return jsonSerializer.encodeToString(Project.serializer(), vpr)
     }
 
     private fun generatePitchData(track: model.Track): List<Controller>? {

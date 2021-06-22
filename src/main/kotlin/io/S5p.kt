@@ -3,8 +3,6 @@ package io
 import external.Resources
 import kotlin.math.roundToLong
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
 import model.DEFAULT_LYRIC
@@ -32,7 +30,7 @@ object S5p {
             val index = it.lastIndexOf('}')
             it.take(index + 1)
         }
-        val project = jsonSerializer.decodeFromString<Project>(text)
+        val project = jsonSerializer.decodeFromString(Project.serializer(), text)
         val warnings = mutableListOf<ImportWarning>()
         val timeSignatures = project.meter.map {
             TimeSignature(
@@ -119,7 +117,7 @@ object S5p {
 
     private fun generateContent(project: model.Project, features: List<Feature>): String {
         val template = Resources.s5pTemplate
-        val s5p = jsonSerializer.decodeFromString<Project>(template)
+        val s5p = jsonSerializer.decodeFromString(Project.serializer(), template)
         s5p.meter = project.timeSignatures.map {
             Meter(
                 measure = it.measurePosition,
@@ -137,7 +135,7 @@ object S5p {
         s5p.tracks = project.tracks.map {
             generateTrack(it, emptyTrack, features)
         }
-        return jsonSerializer.encodeToString(s5p)
+        return jsonSerializer.encodeToString(Project.serializer(), s5p)
     }
 
     private fun generateTrack(track: model.Track, emptyTrack: Track, features: List<Feature>): Track {
