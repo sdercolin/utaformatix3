@@ -6,6 +6,12 @@ val String.isRomaji get() = findRomajiIndex(this) != null
 fun findKanaIndex(text: String) = kanas.indexOf(text).takeIf { it >= 0 }
 fun findRomajiIndex(text: String) = romajis.indexOf(text).takeIf { it >= 0 }
 
+fun findVowelKana(kana: String): String? {
+    val romaji = kanaToRomaji.find { it.first == kana }?.second ?: return null
+    val vowelRomaji = romaji.takeLast(1)
+    return kanaToRomaji.find { it.second == vowelRomaji }?.first
+}
+
 val kanaToRomaji = listOf(
     "あ" to "a",
     "い" to "i",
