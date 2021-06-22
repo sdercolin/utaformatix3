@@ -88,20 +88,23 @@ private fun List<Track>.convert(conversion: (List<Note>) -> List<Note>) = map { 
 
 private fun convertVowelConnections(tracks: List<Track>, targetType: LyricsType): List<Track> {
     return tracks.map { track ->
-        val notes = track.notes.zipWithNext().map { (previousNote, currentNote) ->
-            if (currentNote.lyric !in listOf("-", "ー")) currentNote
-            else {
-                val previousLyric = previousNote.lyric
-                val currentLyric = if (targetType.isRomaji) {
-                    if (previousLyric.isRomaji) previousLyric.takeLast(1)
-                    else null
-                } else {
-                    if (previousLyric.isKana) findVowelKana(previousLyric)
-                    else null
-                }
-                currentLyric?.let { currentNote.copy(lyric = it) } ?: currentNote
+        val lyrics = track.notes.map { it.lyric }.toMutableList()
+        if (lyrics.size < 2) return@map track
+
+        for (index in 1 until lyrics.size) {
+            val currentLyric = lyrics[index]
+            if (currentLyric !in listOf("-", "ー")) continue
+            val previousLyric = lyrics[index - 1]
+            val newCurrentLyric = if (targetType.isRomaji) {
+                if (previousLyric.isRomaji) previousLyric.takeLast(1)
+                else null
+            } else {
+                if (previousLyric.isKana) findVowelKana(previousLyric)
+                else null
             }
+            newCurrentLyric?.let { lyrics[index] = it }
         }
+        val notes = track.notes.mapIndexed { index, note -> note.copy(lyric = lyrics[index]) }
         track.copy(notes = notes)
     }
 }
