@@ -96,7 +96,7 @@ object MusicXml {
                 ?: currentTimeSignature
 
             measureNode.getElementListByTagName("sound")
-                .firstOrNull()
+                .firstOrNull { it.hasAttribute("tempo") }
                 ?.let { soundNode ->
                     Tempo(
                         tickPosition = tickPosition,
