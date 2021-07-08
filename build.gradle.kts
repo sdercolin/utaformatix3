@@ -8,8 +8,7 @@ group = "com.sdercolin.utaformatix"
 
 repositories {
     mavenCentral()
-    maven { url = uri("https://kotlin.bintray.com/kotlin-js-wrappers/") }
-    maven { url = uri("https://dl.bintray.com/kotlin/kotlinx/") }
+    jcenter()
 }
 
 configure<org.jlleitschuh.gradle.ktlint.KtlintExtension> {
