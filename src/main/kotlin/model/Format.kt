@@ -84,8 +84,8 @@ enum class Format(
         availableFeaturesForGeneration = listOf(ConvertPitch)
     ),
     MusicXml(
-        ".xml",
-        otherExtensions = listOf(".musicxml"),
+        ".musicxml",
+        otherExtensions = listOf(".xml"),
         parser = {
             io.MusicXml.parse(it.first())
         },
