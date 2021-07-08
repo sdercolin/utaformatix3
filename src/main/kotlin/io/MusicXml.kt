@@ -96,7 +96,7 @@ object MusicXml {
                 ?: currentTimeSignature
 
             measureNode.getElementListByTagName("sound")
-                .firstOrNull()
+                .firstOrNull { it.hasAttribute("tempo") }
                 ?.let { soundNode ->
                     Tempo(
                         tickPosition = tickPosition,
@@ -132,9 +132,13 @@ object MusicXml {
         partNode.getElementListByTagName("measure").forEachIndexed { index, measureNode ->
             var tickPosition = masterTrackResult.measureBorders[index]
             measureNode.getElementListByTagName("note").forEach { noteNode ->
-                val duration =
-                    (noteNode.getSingleElementByTagName("duration")
-                        .innerValue.toLong() * importTickRate).toLong()
+                val duration = noteNode.getSingleElementByTagNameOrNull("duration")
+                    ?.innerValue?.toLongOrNull()?.times(importTickRate)?.toLong()
+                    ?: if (noteNode.getSingleElementByTagNameOrNull("grace") != null) {
+                        return@forEach
+                    } else {
+                        throw IllegalFileException.XmlElementNotFound("duration")
+                    }
                 if (noteNode.getElementListByTagName("rest").isNotEmpty()) {
                     tickPosition += duration
                     return@forEach
