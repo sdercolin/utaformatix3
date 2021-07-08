@@ -8,11 +8,11 @@ enum class LyricsType(
     val isRomaji: Boolean,
     val isCV: Boolean
 ) {
-    UNKNOWN(Strings.LyricsTypeUnknown, false, false),
-    ROMAJI_CV(Strings.LyricsTypeRomajiCV, true, true),
-    ROMAJI_VCV(Strings.LyricsTypeRomajiVCV, true, false),
-    KANA_CV(Strings.LyricsTypeKanaCV, false, true),
-    KANA_VCV(Strings.LyricsTypeKanaVCV, false, false);
+    Unknown(Strings.LyricsTypeUnknown, false, false),
+    RomajiCv(Strings.LyricsTypeRomajiCV, true, true),
+    RomajiVcv(Strings.LyricsTypeRomajiVCV, true, false),
+    KanaCv(Strings.LyricsTypeKanaCV, false, true),
+    KanaVcv(Strings.LyricsTypeKanaVCV, false, false);
 
     val displayName get() = string(displayNameKey)
 

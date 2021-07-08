@@ -17,6 +17,7 @@ fun convert(project: Project, targetType: LyricsType, targetFormat: Format): Pro
         sourceType.isCV && !targetType.isCV -> tracks = convertCVToVCV(tracks)
         !sourceType.isCV && targetType.isCV -> tracks = convertVCVToCV(tracks)
     }
+    if (targetFormat == Format.Ust) tracks = convertVowelConnections(tracks, targetType)
     tracks = postCleanup(tracks, targetFormat)
     return project.copy(tracks = tracks)
 }
@@ -83,6 +84,29 @@ private fun convertVCVToCV(tracks: List<Track>) = tracks.convert { notes ->
 
 private fun List<Track>.convert(conversion: (List<Note>) -> List<Note>) = map { track ->
     track.copy(notes = conversion(track.notes))
+}
+
+private fun convertVowelConnections(tracks: List<Track>, targetType: LyricsType): List<Track> {
+    return tracks.map { track ->
+        val lyrics = track.notes.map { it.lyric }.toMutableList()
+        if (lyrics.size < 2) return@map track
+
+        for (index in 1 until lyrics.size) {
+            val currentLyric = lyrics[index]
+            if (currentLyric !in listOf("-", "ー")) continue
+            val previousLyric = lyrics[index - 1]
+            val newCurrentLyric = if (targetType.isRomaji) {
+                if (previousLyric.isRomaji) previousLyric.takeLast(1)
+                else null
+            } else {
+                if (previousLyric.isKana) findVowelKana(previousLyric)
+                else null
+            }
+            newCurrentLyric?.let { lyrics[index] = it }
+        }
+        val notes = track.notes.mapIndexed { index, note -> note.copy(lyric = lyrics[index]) }
+        track.copy(notes = notes)
+    }
 }
 
 private fun String.toRomaji() =

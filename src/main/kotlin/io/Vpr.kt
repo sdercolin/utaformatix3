@@ -50,7 +50,7 @@ object Vpr {
             warnings.add(ImportWarning.TempoNotFound)
         }
         return model.Project(
-            format = Format.VPR,
+            format = Format.Vpr,
             inputFiles = listOf(file),
             name = content.title ?: file.nameWithoutExtension,
             tracks = tracks,
@@ -119,13 +119,13 @@ object Vpr {
             it.mimeType = "application/octet-stream"
         }
         val blob = zip.generateAsync(option).await() as Blob
-        val name = project.name + Format.VPR.extension
+        val name = project.name + Format.Vpr.extension
         return ExportResult(
             blob,
             name,
             listOfNotNull(
                 if (project.hasXSampaData) null else ExportNotification.PhonemeResetRequiredV5,
-                if (features.contains(Feature.CONVERT_PITCH)) ExportNotification.PitchDataExported else null
+                if (features.contains(Feature.ConvertPitch)) ExportNotification.PitchDataExported else null
             )
         )
     }
@@ -160,7 +160,7 @@ object Vpr {
                 )
             }
             val duration = track.notes.lastOrNull()?.tickOff
-            val controllers = if (features.contains(Feature.CONVERT_PITCH)) generatePitchData(track) else null
+            val controllers = if (features.contains(Feature.ConvertPitch)) generatePitchData(track) else null
             val part = duration?.let {
                 emptyTrack.parts.first().copy(
                     duration = it,

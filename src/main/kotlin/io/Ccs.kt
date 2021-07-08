@@ -78,7 +78,7 @@ object Ccs {
         val timeSignatures = mergeTimeSignatures(results, warnings)
 
         return Project(
-            format = Format.CCS,
+            format = Format.Ccs,
             inputFiles = listOf(file),
             name = projectName,
             tracks = tracks,
@@ -163,7 +163,7 @@ object Ccs {
             val denominator = timeNode.getAttribute("BeatType")?.toIntOrNull() ?: continue
 
             tickCounter.goToTick(tick, numerator, denominator)
-            timeSignatures += TimeSignature(tickCounter.measure, numerator, denominator)
+            timeSignatures = timeSignatures + TimeSignature(tickCounter.measure, numerator, denominator)
         }
 
         val tickPrefix = getTickPrefix(timeSignatures, FIXED_MEASURE_PREFIX)
@@ -242,12 +242,12 @@ object Ccs {
         val serializer = XMLSerializer()
         val content = serializer.serializeToString(document)
         val blob = Blob(arrayOf(content), BlobPropertyBag("application/octet-stream"))
-        val name = project.name + Format.CCS.extension
+        val name = project.name + Format.Ccs.extension
         return ExportResult(
             blob,
             name,
             listOfNotNull(
-                if (features.contains(Feature.CONVERT_PITCH)) ExportNotification.PitchDataExported else null
+                if (features.contains(Feature.ConvertPitch)) ExportNotification.PitchDataExported else null
             )
         )
     }
@@ -291,7 +291,7 @@ object Ccs {
             newGroup.setAttribute("Name", model.name)
             setupNotes(document, newUnit, model.notes, tickPrefix)
 
-            if (features.contains(Feature.CONVERT_PITCH)) {
+            if (features.contains(Feature.ConvertPitch)) {
                 setupPitchData(document, newUnit, model, project.tempos, tickPrefix)
             }
 
@@ -352,7 +352,7 @@ object Ccs {
             val newNote = document.createElement("Note")
             newNote.setAttribute("Clock", (it.tickOn * TICK_RATE + tickPrefix).toLong().toString())
             newNote.setAttribute("PitchStep", (it.key % KEY_IN_OCTAVE).toString())
-            newNote.setAttribute("PitchOctave", (it.key / KEY_IN_OCTAVE - 1).toString())
+            newNote.setAttribute("PitchOctave", (it.key / KEY_IN_OCTAVE + OCTAVE_OFFSET).toString())
             newNote.setAttribute("Duration", (it.length * TICK_RATE).toLong().toString())
             newNote.setAttribute("Lyric", it.lyric)
             score.appendChild(newNote)

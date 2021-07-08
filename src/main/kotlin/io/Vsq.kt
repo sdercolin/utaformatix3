@@ -13,6 +13,7 @@ import model.ImportWarning
 import model.Note
 import model.Pitch
 import model.Project
+import model.TICKS_IN_FULL_NOTE
 import model.Tempo
 import model.TickCounter
 import model.TimeSignature
@@ -21,6 +22,7 @@ import org.khronos.webgl.Uint8Array
 import org.w3c.files.Blob
 import org.w3c.files.BlobPropertyBag
 import org.w3c.files.File
+import process.lengthLimited
 import process.pitch.VocaloidPartPitchData
 import process.pitch.generateForVocaloid
 import process.pitch.pitchFromVocaloidParts
@@ -63,7 +65,7 @@ object Vsq {
         }
 
         return Project(
-            format = Format.VSQ,
+            format = Format.Vsq,
             inputFiles = listOf(file),
             name = file.nameWithoutExtension,
             tracks = tracks,
@@ -80,7 +82,7 @@ object Vsq {
                 (track.event as Array<dynamic>)
                     .fold("") { accumulator, element ->
                         val metaType = MetaType.parse(element.metaType as? Byte)
-                        if (metaType != MetaType.TEXT) accumulator
+                        if (metaType != MetaType.Text) accumulator
                         else {
                             var text = element.data as String
                             text = text.encodeToByteArray().toTypedArray().decode("SJIS")
@@ -125,7 +127,7 @@ object Vsq {
         for (event in events) {
             tickPosition += event.deltaTime as Int
             when (MetaType.parse(event.metaType as? Byte)) {
-                MetaType.TEMPO -> {
+                MetaType.Tempo -> {
                     rawTempos.add(
                         Tempo(
                             tickPosition.toLong(),
@@ -133,7 +135,7 @@ object Vsq {
                         )
                     )
                 }
-                MetaType.TIME_SIGNATURE -> {
+                MetaType.TimeSignature -> {
                     val (numerator, denominator) = MidiUtil.parseMidiTimeSignature(event.data)
                     tickCounter.goToTick(tickPosition.toLong(), numerator, denominator)
                     rawTimeSignatures.add(
@@ -259,16 +261,18 @@ object Vsq {
     }
 
     fun generate(project: Project, features: List<Feature>): ExportResult {
-        val content =
-            project.withoutEmptyTracks()?.let { generateContent(it, features) } ?: throw EmptyProjectException()
+        val projectLengthLimited = project.lengthLimited(MAX_OUTPUT_TICK)
+        val content = projectLengthLimited.withoutEmptyTracks()?.let { generateContent(it, features) }
+            ?: throw EmptyProjectException()
         val blob = Blob(arrayOf(content), BlobPropertyBag("application/octet-stream"))
-        val name = project.name + Format.VSQ.extension
+        val name = projectLengthLimited.name + Format.Vsq.extension
         return ExportResult(
             blob,
             name,
             listOfNotNull(
-                if (project.hasXSampaData) null else ExportNotification.PhonemeResetRequiredVSQ,
-                if (features.contains(Feature.CONVERT_PITCH)) ExportNotification.PitchDataExported else null
+                if (projectLengthLimited.hasXSampaData) null else ExportNotification.PhonemeResetRequiredVSQ,
+                if (features.contains(Feature.ConvertPitch)) ExportNotification.PitchDataExported else null,
+                if (project == projectLengthLimited) null else ExportNotification.DataOverLengthLimitIgnored
             )
         )
     }
@@ -307,7 +311,7 @@ object Vsq {
     private fun generateMasterTrack(project: Project, tickPrefix: Int): List<Byte> {
         val bytes = mutableListOf<Byte>()
         bytes.add(0x00)
-        bytes.addAll(MetaType.TRACK_NAME.eventHeaderBytes)
+        bytes.addAll(MetaType.TrackName.eventHeaderBytes)
         bytes.addString("Master Track", IS_LITTLE_ENDIAN, lengthInVariableLength = true)
 
         val tickEventPairs = mutableListOf<Pair<Long, Any>>()
@@ -333,7 +337,7 @@ object Vsq {
             bytes.addIntVariableLengthBigEndian(delta.toInt())
             when (event) {
                 is TimeSignature -> {
-                    bytes.addAll(MetaType.TIME_SIGNATURE.eventHeaderBytes)
+                    bytes.addAll(MetaType.TimeSignature.eventHeaderBytes)
                     bytes.addBlock(
                         MidiUtil.generateMidiTimeSignatureBytes(event.numerator, event.denominator),
                         IS_LITTLE_ENDIAN,
@@ -341,7 +345,7 @@ object Vsq {
                     )
                 }
                 is Tempo -> {
-                    bytes.addAll(MetaType.TEMPO.eventHeaderBytes)
+                    bytes.addAll(MetaType.Tempo.eventHeaderBytes)
                     val tempoBytes = mutableListOf<Byte>().let {
                         it.addInt(MidiUtil.convertBpmToMidiTempo(event.bpm), IS_LITTLE_ENDIAN)
                         it.takeLast(3)
@@ -352,7 +356,7 @@ object Vsq {
             }
         }
         bytes.add(0x00)
-        bytes.addAll(MetaType.END_OF_TRACK.eventHeaderBytes)
+        bytes.addAll(MetaType.EndOfTrack.eventHeaderBytes)
         bytes.add(0x00)
         return bytes
     }
@@ -366,7 +370,7 @@ object Vsq {
     ): List<Byte> {
         val bytes = mutableListOf<Byte>()
         bytes.add(0x00)
-        bytes.addAll(MetaType.TRACK_NAME.eventHeaderBytes)
+        bytes.addAll(MetaType.TrackName.eventHeaderBytes)
         bytes.addString(track.name, IS_LITTLE_ENDIAN, lengthInVariableLength = true)
         var textBytes = generateTrackText(track, tickPrefix, measurePrefix, project, features)
             .encode("SJIS")
@@ -383,11 +387,11 @@ object Vsq {
         }
         textEvents.forEach {
             bytes.add(0x00)
-            bytes.addAll(MetaType.TEXT.eventHeaderBytes)
+            bytes.addAll(MetaType.Text.eventHeaderBytes)
             bytes.addBlock(it, IS_LITTLE_ENDIAN, lengthInVariableLength = true)
         }
         bytes.add(0x00)
-        bytes.addAll(MetaType.END_OF_TRACK.eventHeaderBytes)
+        bytes.addAll(MetaType.EndOfTrack.eventHeaderBytes)
         bytes.add(0x00)
         return bytes
     }
@@ -465,7 +469,7 @@ object Vsq {
             add("Language=0")
             add("Program=0")
             addAll(lyricsLines)
-            if (features.contains(Feature.CONVERT_PITCH) && track.pitch != null) {
+            if (features.contains(Feature.ConvertPitch) && track.pitch != null) {
                 addAll(generatePitchTexts(track.pitch, tickPrefix, track.notes))
             }
         }.joinToString("\n")
@@ -496,4 +500,5 @@ object Vsq {
     private const val MIN_MEASURE_OFFSET = 1
     private const val MAX_MEASURE_OFFSET = 8
     private const val IS_LITTLE_ENDIAN = false
+    private const val MAX_OUTPUT_TICK = 4096L * TICKS_IN_FULL_NOTE
 }

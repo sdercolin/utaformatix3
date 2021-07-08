@@ -14,11 +14,11 @@ import model.ExportResult
 import model.Feature
 import model.Format
 import model.LyricsType
-import model.LyricsType.KANA_CV
-import model.LyricsType.KANA_VCV
-import model.LyricsType.ROMAJI_CV
-import model.LyricsType.ROMAJI_VCV
-import model.LyricsType.UNKNOWN
+import model.LyricsType.KanaCv
+import model.LyricsType.KanaVcv
+import model.LyricsType.RomajiCv
+import model.LyricsType.RomajiVcv
+import model.LyricsType.Unknown
 import model.Project
 import model.TICKS_IN_FULL_NOTE
 import org.w3c.dom.HTMLInputElement
@@ -57,8 +57,6 @@ import ui.external.materialui.switch
 import ui.external.materialui.tooltip
 import ui.external.materialui.typography
 import ui.strings.Strings
-import ui.strings.Strings.NextButton
-import ui.strings.Strings.ProcessErrorDialogTitle
 import ui.strings.string
 
 class ConfigurationEditor(props: ConfigurationEditorProps) :
@@ -67,13 +65,13 @@ class ConfigurationEditor(props: ConfigurationEditorProps) :
     override fun ConfigurationEditorState.init(props: ConfigurationEditorProps) {
         isProcessing = false
         val analysedType = props.project.lyricsType
-        val doLyricsConversion = analysedType != UNKNOWN
+        val doLyricsConversion = analysedType != Unknown
         val fromLyricsType: LyricsType?
         val toLyricsType: LyricsType?
         val isPitchReadable =
-            Feature.CONVERT_PITCH.isAvailable(props.project)
+            Feature.ConvertPitch.isAvailable(props.project)
         val isPitchConversionAvailable =
-            props.outputFormat.availableFeaturesForGeneration.contains(Feature.CONVERT_PITCH)
+            props.outputFormat.availableFeaturesForGeneration.contains(Feature.ConvertPitch)
 
         if (doLyricsConversion) {
             fromLyricsType = analysedType
@@ -102,21 +100,17 @@ class ConfigurationEditor(props: ConfigurationEditorProps) :
         title(Strings.ConfigurationEditorCaption)
         buildLyricsBlock()
         buildRestsFillingBlock()
-        if (state.pitchConversion.isAvailable) {
-            buildPitchConversion()
-        }
+        if (state.pitchConversion.isAvailable) buildPitchConversion()
         buildNextButton()
 
         errorDialog(
-            open = state.dialogError.open,
+            isShowing = state.dialogError.isShowing,
             title = state.dialogError.title,
             errorMessage = state.dialogError.message,
-            onClose = { closeErrorDialog() }
+            close = { closeErrorDialog() }
         )
 
-        if (state.isProcessing) {
-            progress()
-        }
+        progress(isShowing = state.isProcessing)
     }
 
     private fun RBuilder.buildLyricsBlock() {
@@ -142,9 +136,7 @@ class ConfigurationEditor(props: ConfigurationEditorProps) :
             }
         }
 
-        if (state.lyricsConversion.isOn) {
-            buildLyricsDetail()
-        }
+        if (state.lyricsConversion.isOn) buildLyricsDetail()
     }
 
     private fun RBuilder.buildLyricsDetail() {
@@ -154,9 +146,7 @@ class ConfigurationEditor(props: ConfigurationEditorProps) :
                 width = LinearDimension.maxContent
             }
             paper {
-                attrs {
-                    elevation = 0
-                }
+                attrs.elevation = 0
                 styledDiv {
                     css {
                         margin(
@@ -176,12 +166,10 @@ class ConfigurationEditor(props: ConfigurationEditorProps) :
 
     private fun RBuilder.buildFromLyricsTypeControl() {
         formControl {
-            attrs {
-                margin = FormControlMargin.normal
-            }
+            attrs.margin = FormControlMargin.normal
             formLabel {
                 attrs.focused = false
-                +(string(Strings.FromLyricsTypeLabel, "type" to props.project.lyricsType.displayName))
+                +string(Strings.FromLyricsTypeLabel, "type" to props.project.lyricsType.displayName)
             }
             radioGroup {
                 attrs {
@@ -196,15 +184,13 @@ class ConfigurationEditor(props: ConfigurationEditorProps) :
                         }
                     }
                 }
-                listOf(ROMAJI_CV, ROMAJI_VCV, KANA_CV, KANA_VCV).forEach { lyricsType ->
+                listOf(RomajiCv, RomajiVcv, KanaCv, KanaVcv).forEach { lyricsType ->
                     formControlLabel {
                         attrs {
                             value = lyricsType.name
                             control = radio {}
                             label = typography {
-                                attrs {
-                                    variant = TypographyVariant.subtitle2
-                                }
+                                attrs.variant = TypographyVariant.subtitle2
                                 +lyricsType.displayName
                             }
                         }
@@ -216,12 +202,10 @@ class ConfigurationEditor(props: ConfigurationEditorProps) :
 
     private fun RBuilder.buildToLyricsTypeControl() {
         formControl {
-            attrs {
-                margin = FormControlMargin.normal
-            }
+            attrs.margin = FormControlMargin.normal
             formLabel {
                 attrs.focused = false
-                +(string(Strings.ToLyricsTypeLabel))
+                +string(Strings.ToLyricsTypeLabel)
             }
             radioGroup {
                 attrs {
@@ -242,9 +226,7 @@ class ConfigurationEditor(props: ConfigurationEditorProps) :
                             value = lyricsType.name
                             control = radio {}
                             label = typography {
-                                attrs {
-                                    variant = TypographyVariant.subtitle2
-                                }
+                                attrs.variant = TypographyVariant.subtitle2
                                 +lyricsType.displayName
                             }
                         }
@@ -265,11 +247,7 @@ class ConfigurationEditor(props: ConfigurationEditorProps) :
                                 checked = state.slightRestsFilling.isOn
                                 onChange = {
                                     val checked = (it.target as HTMLInputElement).checked
-                                    setState {
-                                        slightRestsFilling = slightRestsFilling.copy(
-                                            isOn = checked
-                                        )
-                                    }
+                                    setState { slightRestsFilling = slightRestsFilling.copy(isOn = checked) }
                                 }
                             }
                         }
@@ -283,20 +261,16 @@ class ConfigurationEditor(props: ConfigurationEditorProps) :
                         interactive = true
                     }
                     Icons.help {
-                        attrs {
-                            style = Style(
-                                fontSize = FontSize.initial,
-                                verticalAlign = VerticalAlign.middle
-                            )
-                        }
+                        attrs.style = Style(
+                            fontSize = FontSize.initial,
+                            verticalAlign = VerticalAlign.middle
+                        )
                     }
                 }
             }
         }
 
-        if (state.slightRestsFilling.isOn) {
-            buildRestsFillingDetail()
-        }
+        if (state.slightRestsFilling.isOn) buildRestsFillingDetail()
     }
 
     private fun RBuilder.buildRestsFillingDetail() {
@@ -306,9 +280,7 @@ class ConfigurationEditor(props: ConfigurationEditorProps) :
                 width = LinearDimension.maxContent
             }
             paper {
-                attrs {
-                    elevation = 0
-                }
+                attrs.elevation = 0
                 styledDiv {
                     css {
                         margin(
@@ -329,7 +301,7 @@ class ConfigurationEditor(props: ConfigurationEditorProps) :
                                 id = slightRestsFillingLabelId
                                 focused = false
                             }
-                            +(string(Strings.SlightRestsFillingThresholdLabel))
+                            +string(Strings.SlightRestsFillingThresholdLabel)
                         }
                         select {
                             attrs {
@@ -346,9 +318,7 @@ class ConfigurationEditor(props: ConfigurationEditorProps) :
                             }
                             restsFillingMaxLengthDenominatorOptions.forEach { denominator ->
                                 menuItem {
-                                    attrs {
-                                        value = denominator.toString()
-                                    }
+                                    attrs.value = denominator.toString()
                                     +string(
                                         Strings.SlightRestsFillingThresholdItem,
                                         "denominator" to denominator.toString()
@@ -373,11 +343,7 @@ class ConfigurationEditor(props: ConfigurationEditorProps) :
                                 checked = state.pitchConversion.isOn
                                 onChange = {
                                     val checked = (it.target as HTMLInputElement).checked
-                                    setState {
-                                        pitchConversion = pitchConversion.copy(
-                                            isOn = checked
-                                        )
-                                    }
+                                    setState { pitchConversion = pitchConversion.copy(isOn = checked) }
                                 }
                             }
                         }
@@ -391,12 +357,10 @@ class ConfigurationEditor(props: ConfigurationEditorProps) :
                         interactive = true
                     }
                     Icons.warning {
-                        attrs {
-                            style = Style(
-                                fontSize = FontSize.initial,
-                                verticalAlign = VerticalAlign.middle
-                            )
-                        }
+                        attrs.style = Style(
+                            fontSize = FontSize.initial,
+                            verticalAlign = VerticalAlign.middle
+                        )
                     }
                 }
             }
@@ -413,19 +377,15 @@ class ConfigurationEditor(props: ConfigurationEditorProps) :
                     color = Color.primary
                     variant = ButtonVariant.contained
                     disabled = !state.canGoNext
-                    onClick = {
-                        process()
-                    }
+                    onClick = { process() }
                 }
-                +(string(NextButton))
+                +string(Strings.NextButton)
             }
         }
     }
 
     private fun process() {
-        setState {
-            isProcessing = true
-        }
+        setState { isProcessing = true }
         GlobalScope.launch {
             try {
                 val format = props.outputFormat
@@ -454,9 +414,7 @@ class ConfigurationEditor(props: ConfigurationEditorProps) :
                 val availableFeatures = Feature.values().filter {
                     it.isAvailable.invoke(project) &&
                             format.availableFeaturesForGeneration.contains(it)
-                }.let {
-                    removeUncheckedFeatures(it)
-                }
+                }.let(::removeUncheckedFeatures)
 
                 val result = format.generator.invoke(project, availableFeatures)
                 console.log(result.blob)
@@ -466,8 +424,8 @@ class ConfigurationEditor(props: ConfigurationEditorProps) :
                 setState {
                     isProcessing = false
                     dialogError = DialogErrorState(
-                        open = true,
-                        title = string(ProcessErrorDialogTitle),
+                        isShowing = true,
+                        title = string(Strings.ProcessErrorDialogTitle),
                         message = t.message ?: t.toString()
                     )
                 }
@@ -478,7 +436,7 @@ class ConfigurationEditor(props: ConfigurationEditorProps) :
     private fun removeUncheckedFeatures(featureList: List<Feature>): List<Feature> {
         return featureList.filter {
             when (it) {
-                Feature.CONVERT_PITCH -> state.pitchConversion.isOn
+                Feature.ConvertPitch -> state.pitchConversion.isOn
             }
         }
     }
@@ -487,9 +445,7 @@ class ConfigurationEditor(props: ConfigurationEditorProps) :
         get() = lyricsConversion.isReady
 
     private fun closeErrorDialog() {
-        setState {
-            dialogError = dialogError.copy(open = false)
-        }
+        setState { dialogError = dialogError.copy(isShowing = false) }
     }
 
     private val slightRestsFillingLabelId = "slight-rests-filling"
@@ -514,7 +470,7 @@ data class LyricsConversionState(
     val fromType: LyricsType?,
     val toType: LyricsType?
 ) {
-    val isReady =
+    val isReady: Boolean =
         if (isOn) fromType != null && toType != null
         else true
 }
@@ -524,7 +480,7 @@ data class SlightRestsFillingState(
     val excludedMaxLengthDenominator: Int
 ) {
 
-    val excludedMaxLength
+    val excludedMaxLength: Long
         get() = (TICKS_IN_FULL_NOTE / excludedMaxLengthDenominator).toLong()
 }
 

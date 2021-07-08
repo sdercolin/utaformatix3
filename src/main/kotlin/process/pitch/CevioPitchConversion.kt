@@ -259,7 +259,7 @@ private fun mergeEventsIfPossible(eventsWithFullParams: List<Event>) =
             val mergedPoints = (lastEventAsPoints + thisEventAsPoints)
                 .groupBy { it.first }
                 .map { (key, value) ->
-                    key to (value.sumByDouble { it.second } / value.count())
+                    key to (value.sumOf { it.second } / value.count())
                 }
                 .sortedBy { it.first }
             val mergedEvents = mergedPoints

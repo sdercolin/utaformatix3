@@ -11,5 +11,4 @@ external val formLabel: RClass<FormLabelProps>
 
 external interface FormLabelProps : RProps {
     var focused: Boolean
-    var required: Boolean
 }

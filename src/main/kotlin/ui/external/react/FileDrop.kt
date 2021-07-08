@@ -12,10 +12,5 @@ import react.RProps
 external val fileDrop: RClass<FileDropProps>
 
 external interface FileDropProps : RProps {
-    var onFrameDragEnter: (Event) -> Unit
-    var onFrameDragLeave: (Event) -> Unit
-    var onFrameDrop: (Event) -> Unit
-    var onDragOver: (Event) -> Unit
-    var onDragLeave: (Event) -> Unit
     var onDrop: (FileList, Event) -> Unit
 }

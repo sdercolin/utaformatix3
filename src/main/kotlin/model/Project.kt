@@ -13,14 +13,14 @@ data class Project(
     val tempos: List<Tempo>,
     val measurePrefix: Int,
     val importWarnings: List<ImportWarning>,
-    val lyricsType: LyricsType = LyricsType.UNKNOWN
+    val lyricsType: LyricsType = LyricsType.Unknown
 ) {
 
     fun lyricsTypeAnalysed() =
         copy(
             lyricsType = analyseLyricsTypeForProject(this)
                 .takeIf { format.possibleLyricsTypes.contains(it) }
-                ?: LyricsType.UNKNOWN
+                ?: LyricsType.Unknown
         )
 
     fun withoutEmptyTracks() =
