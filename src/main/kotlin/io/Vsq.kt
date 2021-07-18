@@ -85,7 +85,7 @@ object Vsq {
                         if (metaType != MetaType.Text) accumulator
                         else {
                             var text = element.data as String
-                            text = text.encodeToByteArray().toTypedArray().decode("SJIS")
+                            text = text.asByteTypedArray().decode("SJIS")
                             text = text.drop(3)
                             text = text.drop(text.indexOf(':') + 1)
                             accumulator + text
