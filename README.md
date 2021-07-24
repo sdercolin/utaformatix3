@@ -30,7 +30,8 @@ The current version `3.x` is built with [Kotlin for JavaScript](https://kotlinla
 ## Get started for development
 1. Install [IntelliJ IDEA](https://www.jetbrains.com/idea/)
 2. Clone and import as a Gradle project
-3. Run by `./gradlew run`
+3. Configure IDEA's Gradle settings with `JDK11+` and `Use Gradle from: gradle-wrapper.properties file`
+4. Run by `./gradlew run` or Gradle Task `other/run`
 
 ## License
 [Apache License, Version 2.0](https://github.com/sdercolin/utaformatix3/blob/master/LICENSE.md)
