@@ -45,14 +45,20 @@ fun pitchFromUtauMode1Track(pitchData: UtauMode1TrackPitchData?, notes: List<Not
 fun pitchToUtauMode1Track(pitch: Pitch?, notes: List<Note>): UtauMode1TrackPitchData? {
     pitch ?: return null
     return UtauMode1TrackPitchData(notes.map { note ->
+        console.log(note)
         UtauMode1NotePitchData(
             pitch
+                //.apply { console.log("raw = \n");console.log(this) }
                 .getAbsoluteData(notes)
+                //.apply { console.log("absolute = \n");console.log(this) }
                 ?.filter { it.second != null }
                 ?.filter { it.first >= note.tickOn && it.first < note.tickOff }
-                ?.dotResampled(Ust.MODE1_PITCH_SAMPLING_INTERVAL_TICK)?.let { absoluteData ->
-                    Pitch(absoluteData, isAbsolute = true).getRelativeData(notes)?.map { it.second * 100 }
-                }
+                //.apply { console.log("filtered = \n");console.log(this) }
+                ?.dotResampled(Ust.MODE1_PITCH_SAMPLING_INTERVAL_TICK)
+                //.apply { console.log("resampled = \n");console.log(this) }
+                ?.map { Pair(it.first, it.second ?: note.key.toDouble()) }
+                ?.map { (it.second - note.key) * 100 }
+                //.apply { console.log("final = \n");console.log(this) }
         )
     })
 }
