@@ -301,12 +301,14 @@ object Ust {
         builder.appendLine("Tempo=$bpm")
         builder.appendLine("Tracks=1")
         builder.appendLine("ProjectName=${track.name}")
-        //TODO:Mode2 output
+        // TODO: Mode2 output
         if (!features.contains(Feature.ConvertPitch))
             builder.appendLine("Mode2=True")
         var tickPos = 0L
         var restCount = 0
-        val pitchData = if (features.contains(Feature.ConvertPitch)) pitchToUtauMode1Track(track.pitch, track.notes) else null
+        val pitchData = if (features.contains(Feature.ConvertPitch)) {
+            pitchToUtauMode1Track(track.pitch, track.notes)
+        } else null
         for ((index, note) in track.notes.withIndex()) {
             if (tickPos < note.tickOn) {
                 val restNoteNumber = (note.id + restCount).padStartZero(4)
@@ -324,10 +326,10 @@ object Ust {
             builder.appendLine("NoteNum=${note.key}")
             builder.appendLine("PreUtterance=")
 
-            if (features.contains(Feature.ConvertPitch)){
+            if (features.contains(Feature.ConvertPitch)) {
                 builder.appendLine("PBType=5")
                 val pitchString = makeMode1PitchDataString(pitchData?.notes?.get(index))
-                builder.appendLine("PitchBend=${pitchString}")
+                builder.appendLine("PitchBend=$pitchString")
                 builder.appendLine("PBStart=0")
             }
 
@@ -343,7 +345,7 @@ object Ust {
         return substring(index + 1).takeIf { it.isNotBlank() }
     }
 
-    private fun makeMode1PitchDataString(notePitch : UtauMode1NotePitchData?): String?{
+    private fun makeMode1PitchDataString(notePitch: UtauMode1NotePitchData?): String? {
         return notePitch?.pitchPoints?.joinToString(separator = ",") { it.toInt().toString() }
     }
 
