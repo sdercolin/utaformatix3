@@ -8,6 +8,7 @@ import model.DEFAULT_METER_HIGH
 import model.DEFAULT_METER_LOW
 import model.ExportNotification
 import model.ExportResult
+import model.Feature
 import model.Format
 import model.ImportWarning
 import model.Note
@@ -24,6 +25,7 @@ import process.pitch.UtauMode2NotePitchData
 import process.pitch.UtauMode2TrackPitchData
 import process.pitch.pitchFromUtauMode1Track
 import process.pitch.pitchFromUtauMode2Track
+import process.pitch.pitchToUtauMode1Track
 import process.validateNotes
 import util.encode
 import util.getSafeFileName
@@ -261,10 +263,10 @@ object Ust {
         val pitchDataMode2: UtauMode2TrackPitchData?
     )
 
-    suspend fun generate(project: Project): ExportResult {
+    suspend fun generate(project: Project, features: List<Feature>): ExportResult {
         val zip = JsZip()
         for (track in project.tracks) {
-            val content = generateTrackContent(project, track)
+            val content = generateTrackContent(project, track, features)
             val contentEncodedArray = content.encode("SJIS")
             val trackNameUrlSafe = getSafeFileName(track.name)
             val trackFileName = "${project.name}_${track.id + 1}_$trackNameUrlSafe${Format.Ust.extension}"
@@ -283,7 +285,7 @@ object Ust {
         return ExportResult(blob, name, notifications)
     }
 
-    private fun generateTrackContent(project: Project, track: Track): String {
+    private fun generateTrackContent(project: Project, track: Track, features: List<Feature>): String {
         val builder = object {
             var content = ""
                 private set
@@ -299,10 +301,13 @@ object Ust {
         builder.appendLine("Tempo=$bpm")
         builder.appendLine("Tracks=1")
         builder.appendLine("ProjectName=${track.name}")
-        builder.appendLine("Mode2=True")
+        //TODO:Mode2 output
+        if (!features.contains(Feature.ConvertPitch))
+            builder.appendLine("Mode2=True")
         var tickPos = 0L
         var restCount = 0
-        for (note in track.notes) {
+        val pitchData = if (features.contains(Feature.ConvertPitch)) pitchToUtauMode1Track(track.pitch, track.notes) else null
+        for ((index, note) in track.notes.withIndex()) {
             if (tickPos < note.tickOn) {
                 val restNoteNumber = (note.id + restCount).padStartZero(4)
                 builder.appendLine("[#$restNoteNumber]")
@@ -318,6 +323,14 @@ object Ust {
             builder.appendLine("Lyric=${note.lyric}")
             builder.appendLine("NoteNum=${note.key}")
             builder.appendLine("PreUtterance=")
+
+            if (features.contains(Feature.ConvertPitch)){
+                builder.appendLine("PBType=5")
+                val pitchString = makeMode1PitchDataString(pitchData?.notes?.get(index))
+                builder.appendLine("PitchBend=${pitchString}")
+                builder.appendLine("PBStart=0")
+            }
+
             tickPos = note.tickOff
         }
         builder.appendLine("[#TRACKEND]")
@@ -328,6 +341,10 @@ object Ust {
         if (!startsWith("$key=")) return null
         val index = indexOf("=").takeIf { it in 0 until lastIndex } ?: return null
         return substring(index + 1).takeIf { it.isNotBlank() }
+    }
+
+    private fun makeMode1PitchDataString(notePitch : UtauMode1NotePitchData?): String?{
+        return notePitch?.pitchPoints?.joinToString(separator = ",") { it.toInt().toString() }
     }
 
     const val MODE1_PITCH_SAMPLING_INTERVAL_TICK = 5L

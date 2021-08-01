@@ -45,10 +45,11 @@ enum class Format(
         parser = {
             io.Ust.parse(it)
         },
-        generator = { project, _ ->
-            io.Ust.generate(project)
+        generator = { project, features ->
+            io.Ust.generate(project, features)
         },
-        possibleLyricsTypes = listOf(RomajiCv, RomajiVcv, KanaCv, KanaVcv)
+        possibleLyricsTypes = listOf(RomajiCv, RomajiVcv, KanaCv, KanaVcv),
+        availableFeaturesForGeneration = listOf(ConvertPitch)
     ),
     Ccs(
         ".ccs",

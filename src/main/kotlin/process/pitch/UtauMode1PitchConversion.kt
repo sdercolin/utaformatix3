@@ -3,6 +3,7 @@ package process.pitch
 import io.Ust
 import model.Note
 import model.Pitch
+import process.dotResampled
 
 data class UtauMode1TrackPitchData(
     val notes: List<UtauMode1NotePitchData?>
@@ -39,4 +40,16 @@ fun pitchFromUtauMode1Track(pitchData: UtauMode1TrackPitchData?, notes: List<Not
         }
     }
     return Pitch(pitchPoints, false).getAbsoluteData(notes)?.let { Pitch(it, true) }
+}
+const val SEMITONE_TO_CENT_RATIO = 100;
+fun pitchToUtauMode1Track(pitch: Pitch?, notes: List<Note>): UtauMode1TrackPitchData? {
+    pitch ?: return null
+    val pitchResampled = pitch.dotResampled(Ust.MODE1_PITCH_SAMPLING_INTERVAL_TICK)
+    console.log(pitchResampled.getRelativeData(notes))
+    return UtauMode1TrackPitchData(notes.map{ note ->
+        UtauMode1NotePitchData(pitchResampled
+            .getRelativeData(notes)
+            ?.filter { it.first >= note.tickOn && it.first <= note.tickOff}
+            ?.map { it.second * SEMITONE_TO_CENT_RATIO})
+    })
 }

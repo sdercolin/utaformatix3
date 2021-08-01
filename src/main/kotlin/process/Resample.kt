@@ -15,5 +15,5 @@ fun List<Pair<Long, Double?>>.resampled(sampleRate : Long,
         return result
     }
 
-/// A shorthand for pitch represented in dot. Its interpolateMethod simply copy the value from prev.
-fun Pitch.dotResampled(sampleRate: Long) = Pitch(data.resampled(sampleRate) { prev, _, _ -> prev?.second }, isAbsolute)
+/// A shorthand for pitch represented in dot. Its interpolateMethod simply copy the value from prev, or next if prev not exists, or 0.0 if neither of them exists.
+fun Pitch.dotResampled(sampleRate: Long) = Pitch(data.resampled(sampleRate) { prev, next, _ -> prev?.second ?: next?.second ?: 0.0 }, isAbsolute)
