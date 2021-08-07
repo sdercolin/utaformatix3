@@ -477,7 +477,7 @@ object VsqUtil {
         val projectLengthLimited = project.lengthLimited(MAX_VSQ_OUTPUT_TICK)
         val content = projectLengthLimited.withoutEmptyTracks()?.let {
             generateContent(it, features)
-        }?: throw EmptyProjectException()
+        } ?: throw EmptyProjectException()
         val blob = Blob(arrayOf(content), BlobPropertyBag("application/octet-stream"))
         val name = projectLengthLimited.name + format.extension
         return ExportResult(
@@ -499,5 +499,3 @@ object VsqUtil {
     private const val IS_LITTLE_ENDIAN = false
     private const val MAX_VSQ_OUTPUT_TICK = 4096L * TICKS_IN_FULL_NOTE
 }
-
-

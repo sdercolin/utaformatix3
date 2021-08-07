@@ -6,6 +6,7 @@ import kotlinx.css.marginLeft
 import model.Format
 import model.Format.Ccs
 import model.Format.Dv
+import model.Format.Midi
 import model.Format.MusicXml
 import model.Format.Ppsf
 import model.Format.S5p
@@ -13,7 +14,6 @@ import model.Format.Svp
 import model.Format.Ust
 import model.Format.Vpr
 import model.Format.Vsq
-import model.Format.Midi
 import model.Format.Vsqx
 import model.ImportWarning
 import model.Project
