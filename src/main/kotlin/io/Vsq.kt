@@ -7,7 +7,6 @@ import model.Feature
 import model.Format
 import model.Project
 import org.w3c.files.File
-import util.VsqUtil
 
 object Vsq {
     suspend fun parse(file: File): Project {

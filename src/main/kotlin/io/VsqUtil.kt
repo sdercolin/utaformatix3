@@ -1,4 +1,4 @@
-package util
+package io
 
 import exception.EmptyProjectException
 import model.DEFAULT_LYRIC
@@ -7,10 +7,10 @@ import model.ExportResult
 import model.Feature
 import model.Format
 import model.ImportWarning
-import model.MAX_VSQ_OUTPUT_TICK
 import model.Note
 import model.Pitch
 import model.Project
+import model.TICKS_IN_FULL_NOTE
 import model.Tempo
 import model.TickCounter
 import model.TimeSignature
@@ -24,6 +24,20 @@ import process.pitch.VocaloidPartPitchData
 import process.pitch.generateForVocaloid
 import process.pitch.pitchFromVocaloidParts
 import process.validateNotes
+import util.MidiUtil
+import util.addBlock
+import util.addInt
+import util.addIntVariableLengthBigEndian
+import util.addShort
+import util.addString
+import util.asByteTypedArray
+import util.decode
+import util.encode
+import util.linesNotBlank
+import util.nameWithoutExtension
+import util.padStartZero
+import util.readAsArrayBuffer
+import util.splitFirst
 
 object VsqUtil {
     private fun extractTextsFromMetaEvents(midiTracks: Array<dynamic>): List<String> {
@@ -483,6 +497,7 @@ object VsqUtil {
     private const val MIN_MEASURE_OFFSET = 1
     private const val MAX_MEASURE_OFFSET = 8
     private const val IS_LITTLE_ENDIAN = false
+    private const val MAX_VSQ_OUTPUT_TICK = 4096L * TICKS_IN_FULL_NOTE
 }
 
 

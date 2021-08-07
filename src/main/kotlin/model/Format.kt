@@ -1,6 +1,5 @@
 package model
 
-import io.Midi
 import model.Feature.ConvertPitch
 import model.LyricsType.KanaCv
 import model.LyricsType.KanaVcv
@@ -122,10 +121,10 @@ enum class Format(
     Midi(
         ".mid",
         parser = {
-            io.Midi.parse(it.first())
+            io.VocaloidMidi.parse(it.first())
         },
         generator = { project, features ->
-            io.Midi.generate(project, features)
+            io.VocaloidMidi.generate(project, features)
         },
         possibleLyricsTypes = listOf(RomajiCv, KanaCv),
         availableFeaturesForGeneration = listOf(ConvertPitch)

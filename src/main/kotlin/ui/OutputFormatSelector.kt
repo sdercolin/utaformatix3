@@ -134,16 +134,16 @@ class OutputFormatSelector : RComponent<OutputFormatSelectorProps, RState>() {
 
     private val Format.description: String?
         get() = when (this) {
-            Midi -> Strings.MIDIFormatDescription
-            Vsqx -> Strings.VSQXFormatDescription
-            Vpr -> Strings.VPRFormatDescription
-            Ust -> Strings.USTFormatDescription
-            Ccs -> Strings.CCSFormatDescription
-            Svp -> Strings.SVPFormatDescription
-            S5p -> Strings.S5PFormatDescription
+            Midi -> Strings.MidiFormatDescription
+            Vsqx -> Strings.VsqxFormatDescription
+            Vpr -> Strings.VprFormatDescription
+            Ust -> Strings.UstFormatDescription
+            Ccs -> Strings.CcsFormatDescription
+            Svp -> Strings.SvpFormatDescription
+            S5p -> Strings.S5pFormatDescription
             MusicXml -> Strings.MusicXmlFormatDescription
-            Dv -> Strings.DVFormatDescription
-            Vsq -> Strings.VSQFormatDescription
+            Dv -> Strings.DvFormatDescription
+            Vsq -> Strings.VsqFormatDescription
             Ppsf -> null
         }?.let { string(it) }
 
