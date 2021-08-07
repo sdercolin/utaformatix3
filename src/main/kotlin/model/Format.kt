@@ -127,7 +127,8 @@ enum class Format(
         generator = { project, features ->
             io.Midi.generate(project, features)
         },
-        possibleLyricsTypes = listOf(RomajiCv, KanaCv)
+        possibleLyricsTypes = listOf(RomajiCv, KanaCv),
+        availableFeaturesForGeneration = listOf(ConvertPitch)
     ),
     Ppsf(
         ".ppsf",
