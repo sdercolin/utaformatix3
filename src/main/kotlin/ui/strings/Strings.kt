@@ -117,9 +117,9 @@ enum class Strings(val en: String, val ja: String, val zhCN: String) {
         zhCN = "拖放文件或点击导入"
     ),
     ImportFileSubDescription(
-        en = "Supported file types: VSQX, VPR, VSQ, USTs, CCS, MUSICXML, SVP, S5P, DV, PPSF(NT)",
-        ja = "サポートされているファイル形式：VSQX、VPR、VSQ、UST（複数可）、CCS、MUSICXML、SVP、S5P、DV、PPSF（NT）",
-        zhCN = "支持的文件类型：VSQX、VPR、VSQ、UST（允许复数个）、CCS、MUSICXML、SVP、S5P、DV、PPSF（NT）"
+        en = "Supported file types: VSQX, VPR, VSQ, MID(VOCALOID), USTs, CCS, MUSICXML, XML, SVP, S5P, DV, PPSF(NT)",
+        ja = "サポートされているファイル形式：VSQX、VPR、VSQ、MID（VOCALOID）、UST（複数可）、CCS、MUSICXML、XML、SVP、S5P、DV、PPSF（NT）",
+        zhCN = "支持的文件类型：VSQX、VPR、VSQ、MID（VOCALOID）、UST（允许复数个）、CCS、MUSICXML、XML、SVP、S5P、DV、PPSF（NT）"
     ),
     UnsupportedFileTypeImportError(
         en = "Unsupported file type",
@@ -203,32 +203,32 @@ enum class Strings(val en: String, val ja: String, val zhCN: String) {
         ja = "- プリメジャーにある拍子記号（{{timeSignature}}）を読み込めませんでした。",
         zhCN = "- 未能读取前置小节中的节拍记号（{{timeSignature}}）。"
     ),
-    VSQXFormatDescription(
+    VsqxFormatDescription(
         en = "Project for VOCALOID4",
         ja = "VOCALOID4 プロジェクト",
         zhCN = "VOCALOID4 工程"
     ),
-    VPRFormatDescription(
+    VprFormatDescription(
         en = "Project for VOCALOID5",
         ja = "VOCALOID5 プロジェクト",
         zhCN = "VOCALOID5 工程"
     ),
-    USTFormatDescription(
+    UstFormatDescription(
         en = "Project for UTAU",
         ja = "UTAU プロジェクト",
         zhCN = "UTAU 工程"
     ),
-    CCSFormatDescription(
+    CcsFormatDescription(
         en = "Project for CeVIO Creative Studio",
         ja = "CeVIO Creative Studio プロジェクト",
         zhCN = "CeVIO Creative Studio 工程"
     ),
-    SVPFormatDescription(
+    SvpFormatDescription(
         en = "Project for Synthesizer V Studio",
         ja = "Synthesizer V Studio プロジェクト",
         zhCN = "Synthesizer V Studio 工程"
     ),
-    S5PFormatDescription(
+    S5pFormatDescription(
         en = "Project for Synthesizer V",
         ja = "Synthesizer V プロジェクト",
         zhCN = "Synthesizer V 工程"
@@ -238,15 +238,20 @@ enum class Strings(val en: String, val ja: String, val zhCN: String) {
         ja = "MusicXML $MUSIC_XML_VERSION （CeVIO基準に準じる）",
         zhCN = "MusicXML $MUSIC_XML_VERSION（参照CeVIO标准）"
     ),
-    DVFormatDescription(
+    DvFormatDescription(
         en = "Project for DeepVocal",
         ja = "DeepVocal プロジェクト",
         zhCN = "DeepVocal 工程"
     ),
-    VSQFormatDescription(
+    VsqFormatDescription(
         en = "Project for VOCALOID2",
         ja = "VOCALOID2 プロジェクト",
         zhCN = "VOCALOID2 工程"
+    ),
+    VocaloidMidiFormatDescription(
+        en = "Project for VOCALOID1",
+        ja = "VOCALOID1 プロジェクト",
+        zhCN = "VOCALOID1 工程"
     ),
     ExportButton(
         en = "Export",
