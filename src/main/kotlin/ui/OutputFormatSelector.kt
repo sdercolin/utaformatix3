@@ -149,7 +149,7 @@ class OutputFormatSelector : RComponent<OutputFormatSelectorProps, RState>() {
 
     private val Format.iconPath: String?
         get() = when (this) {
-            Midi -> Resources.vsqIcon
+            Midi -> Resources.midiIcon
             Vsqx -> Resources.vsqxIcon
             Vpr -> Resources.vprIcon
             Ust -> Resources.ustIcon

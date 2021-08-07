@@ -19,6 +19,9 @@ object Resources {
     val s5pTemplate: String
         get() = require("format_templates/template.s5p").default as String
 
+    val midiIcon: String
+        get() = require("images/vocaloid1.png").defualt as String
+
     val vsqIcon: String
         get() = require("images/vocaloid2.png").default as String
 
