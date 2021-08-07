@@ -119,7 +119,7 @@ enum class Strings(val en: String, val ja: String, val zhCN: String) {
     ImportFileSubDescription(
         en = "Supported file types: VSQX, VPR, VSQ, MID(VOCALOID), USTs, CCS, MUSICXML, XML, SVP, S5P, DV, PPSF(NT)",
         ja = "サポートされているファイル形式：VSQX、VPR、VSQ、MID（VOCALOID）、UST（複数可）、CCS、MUSICXML、XML、SVP、S5P、DV、PPSF（NT）",
-        zhCN = "支持的文件类型：VSQX、VPR、VSQ、MIDI（VOCALOID）、UST（允许复数个）、CCS、MUSICXML、XML、SVP、S5P、DV、PPSF（NT）"
+        zhCN = "支持的文件类型：VSQX、VPR、VSQ、MID（VOCALOID）、UST（允许复数个）、CCS、MUSICXML、XML、SVP、S5P、DV、PPSF（NT）"
     ),
     UnsupportedFileTypeImportError(
         en = "Unsupported file type",
