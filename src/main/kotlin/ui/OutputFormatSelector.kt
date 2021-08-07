@@ -13,6 +13,7 @@ import model.Format.Svp
 import model.Format.Ust
 import model.Format.Vpr
 import model.Format.Vsq
+import model.Format.Midi
 import model.Format.Vsqx
 import model.ImportWarning
 import model.Project
@@ -133,6 +134,7 @@ class OutputFormatSelector : RComponent<OutputFormatSelectorProps, RState>() {
 
     private val Format.description: String?
         get() = when (this) {
+            Midi -> Strings.MIDIFormatDescription
             Vsqx -> Strings.VSQXFormatDescription
             Vpr -> Strings.VPRFormatDescription
             Ust -> Strings.USTFormatDescription
@@ -147,6 +149,7 @@ class OutputFormatSelector : RComponent<OutputFormatSelectorProps, RState>() {
 
     private val Format.iconPath: String?
         get() = when (this) {
+            Midi -> Resources.vsqIcon
             Vsqx -> Resources.vsqxIcon
             Vpr -> Resources.vprIcon
             Ust -> Resources.ustIcon

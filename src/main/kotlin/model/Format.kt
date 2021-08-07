@@ -1,5 +1,6 @@
 package model
 
+import io.Midi
 import model.Feature.ConvertPitch
 import model.LyricsType.KanaCv
 import model.LyricsType.KanaVcv
@@ -118,6 +119,16 @@ enum class Format(
         possibleLyricsTypes = listOf(RomajiCv, KanaCv),
         availableFeaturesForGeneration = listOf(ConvertPitch)
     ),
+    Midi(
+        ".mid",
+        parser = {
+            io.Midi.parse(it.first())
+        },
+        generator = { project, features ->
+            io.Midi.generate(project, features)
+        },
+        possibleLyricsTypes = listOf(RomajiCv, KanaCv)
+    ),
     Ppsf(
         ".ppsf",
         parser = {
@@ -132,7 +143,7 @@ enum class Format(
     val allExtensions get() = listOf(extension) + otherExtensions
 
     companion object {
-        val importable get() = listOf(Vsqx, Vpr, Vsq, Ust, Ccs, MusicXml, Svp, S5p, Dv, Ppsf)
-        val exportable get() = listOf(Vsqx, Vpr, Vsq, Ust, Ccs, MusicXml, Svp, S5p, Dv)
+        val importable get() = listOf(Vsqx, Vpr, Vsq, Midi, Ust, Ccs, MusicXml, Svp, S5p, Dv, Ppsf)
+        val exportable get() = listOf(Vsqx, Vpr, Vsq, Midi, Ust, Ccs, MusicXml, Svp, S5p, Dv)
     }
 }

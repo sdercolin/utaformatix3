@@ -117,9 +117,9 @@ enum class Strings(val en: String, val ja: String, val zhCN: String) {
         zhCN = "拖放文件或点击导入"
     ),
     ImportFileSubDescription(
-        en = "Supported file types: VSQX, VPR, VSQ, USTs, CCS, MUSICXML, SVP, S5P, DV, PPSF(NT)",
-        ja = "サポートされているファイル形式：VSQX、VPR、VSQ、UST（複数可）、CCS、MUSICXML、SVP、S5P、DV、PPSF（NT）",
-        zhCN = "支持的文件类型：VSQX、VPR、VSQ、UST（允许复数个）、CCS、MUSICXML、SVP、S5P、DV、PPSF（NT）"
+        en = "Supported file types: MIDI (V1), VSQX, VPR, VSQ, USTs, CCS, MUSICXML, SVP, S5P, DV, PPSF(NT)",
+        ja = "サポートされているファイル形式：MIDI（ボカロ1）、VSQX、VPR、VSQ、UST（複数可）、CCS、MUSICXML、SVP、S5P、DV、PPSF（NT）",
+        zhCN = "支持的文件类型：MIDI（V1）、VSQX、VPR、VSQ、UST（允许复数个）、CCS、MUSICXML、SVP、S5P、DV、PPSF（NT）"
     ),
     UnsupportedFileTypeImportError(
         en = "Unsupported file type",
@@ -247,6 +247,11 @@ enum class Strings(val en: String, val ja: String, val zhCN: String) {
         en = "Project for VOCALOID2",
         ja = "VOCALOID2 プロジェクト",
         zhCN = "VOCALOID2 工程"
+    ),
+    MIDIFormatDescription(
+        en = "Project for VOCALOID1",
+        ja = "VOCALOID1 プロジェクト",
+        zhCN = "VOCALOID1 工程"
     ),
     ExportButton(
         en = "Export",
