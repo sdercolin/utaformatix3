@@ -248,7 +248,7 @@ enum class Strings(val en: String, val ja: String, val zhCN: String) {
         ja = "VOCALOID2 プロジェクト",
         zhCN = "VOCALOID2 工程"
     ),
-    MidiFormatDescription(
+    VocaloidMidiFormatDescription(
         en = "Project for VOCALOID1",
         ja = "VOCALOID1 プロジェクト",
         zhCN = "VOCALOID1 工程"
