@@ -2,10 +2,10 @@ package io
 
 import kotlin.math.max
 import model.ExportResult
+import model.Feature
 import model.Format
 import model.ImportWarning
 import model.Note
-import model.Pitch
 import model.Project
 import model.Tempo
 import model.TickCounter
@@ -16,6 +16,7 @@ import org.w3c.files.Blob
 import org.w3c.files.BlobPropertyBag
 import org.w3c.files.File
 import process.pitch.DvSegmentPitchData
+import process.pitch.generateForDv
 import process.pitch.pitchFromDvSegments
 import process.validateNotes
 import util.ArrayBufferReader
@@ -212,13 +213,13 @@ object Dv {
         return results
     }
 
-    fun generate(project: Project): ExportResult {
-        val contentBytes = generateContent(project)
+    fun generate(project: Project, features: List<Feature>): ExportResult {
+        val contentBytes = generateContent(project, features)
         val blob = Blob(arrayOf(contentBytes), BlobPropertyBag("application/octet-stream"))
         return ExportResult(blob, project.name + Format.Dv.extension, listOf())
     }
 
-    private fun generateContent(project: Project): Uint8Array {
+    private fun generateContent(project: Project, features: List<Feature>): Uint8Array {
         val bytes = mutableListOf<Byte>()
         bytes.addAll(header)
         val tickPrefix = project.timeSignatures.first().ticksInMeasure.toLong() * FIXED_MEASURE_PREFIX
@@ -226,7 +227,7 @@ object Dv {
             addAll("ext1ext2ext3ext4ext5ext6ext7".encodeToByteArray().toList())
             addListBlock(generateTempos(project.tempos, tickPrefix))
             addListBlock(generateTimeSignatures(project.timeSignatures))
-            addList(project.tracks.map { generateTrack(it, tickPrefix) })
+            addList(project.tracks.map { generateTrack(it, tickPrefix, features) })
         }
         bytes.addBlock(mainBlock)
         return Uint8Array(bytes.toTypedArray())
@@ -259,7 +260,7 @@ object Dv {
             }
     }
 
-    private fun generateTrack(track: Track, tickPrefix: Long): List<Byte> {
+    private fun generateTrack(track: Track, tickPrefix: Long, features: List<Feature>): List<Byte> {
         val segmentBytes = mutableListOf<Byte>().apply {
             addInt(tickPrefix.toInt())
             val lastNoteTickOff = track.notes.lastOrNull()?.tickOff?.toInt() ?: 0
@@ -267,7 +268,20 @@ object Dv {
             addString(track.name)
             addString("")
             addListBlock(track.notes.map { generateNote(it) })
-            addAll(segmentDefaultParameterData)
+            addAll(segmentDefaultParameterData1)
+            if (features.contains(Feature.ConvertPitch)) {
+                console.log(track.pitch)
+                val pitch = track.pitch?.generateForDv(track.notes)
+                console.log(pitch)
+                if (pitch == null) {
+                    addAll(segmentDefaultParameterDataPitch)
+                } else {
+                    addListBlock(generatePitchPoints(pitch.data))
+                }
+            } else {
+                addAll(segmentDefaultParameterDataPitch)
+            }
+            addAll(segmentDefaultParameterData2)
         }
         return mutableListOf<Byte>().apply {
             addInt(0)
@@ -341,9 +355,19 @@ object Dv {
         }
     }
 
-    fun convertNoteKey(key: Int) = NOTE_KEY_SUM - key
+    private fun generatePitchPoints(data: List<Pair<Int, Int>>): List<List<Byte>> = mutableListOf<List<Byte>>().apply {
+        data.forEach { point ->
+            val pointBytes = mutableListOf<Byte>().apply {
+                addInt(point.first)
+                addInt(point.second)
+            }
+            add(pointBytes)
+        }
+    }
+
+    private fun convertNoteKey(key: Int) = NOTE_KEY_SUM.toInt() - key
     fun convertNoteKey(key: Double) = NOTE_KEY_SUM - key
-    private const val NOTE_KEY_SUM = 115
+    private const val NOTE_KEY_SUM = 115.5
 
     private const val STARTING_MEASURE_POSITION = -3
     private const val FIXED_MEASURE_PREFIX = 4
@@ -352,11 +376,15 @@ object Dv {
     ).map { it.toByte() }
     private const val DEFAULT_VOLUME = 30
     private const val MIN_SEGMENT_LENGTH = 480 * 4
-    private val segmentDefaultParameterData = listOf(
+    private val segmentDefaultParameterData1 = listOf(
         0x14, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0xFF, 0xFF,
-        0x80, 0x00, 0x00, 0x00, 0x01, 0xB0, 0x04, 0x00, 0x80, 0x00, 0x00, 0x00,
+        0x80, 0x00, 0x00, 0x00, 0x01, 0xB0, 0x04, 0x00, 0x80, 0x00, 0x00, 0x00
+    ).map { it.toByte() }
+    private val segmentDefaultParameterDataPitch = listOf(
         0x14, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0xFF, 0xFF,
-        0xFF, 0xFF, 0xFF, 0xFF, 0x01, 0xB0, 0x04, 0x00, 0xFF, 0xFF, 0xFF, 0xFF,
+        0xFF, 0xFF, 0xFF, 0xFF, 0x01, 0xB0, 0x04, 0x00, 0xFF, 0xFF, 0xFF, 0xFF
+    ).map { it.toByte() }
+    private val segmentDefaultParameterData2 = listOf(
         0x14, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0xFF, 0xFF,
         0x80, 0x00, 0x00, 0x00, 0x01, 0xB0, 0x04, 0x00, 0x80, 0x00, 0x00, 0x00,
         0x14, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0xFF, 0xFF,

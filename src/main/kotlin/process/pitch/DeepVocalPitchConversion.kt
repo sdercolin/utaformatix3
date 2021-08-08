@@ -1,6 +1,8 @@
 package process.pitch
 
 import io.Dv
+import kotlin.math.roundToInt
+import model.Note
 import model.Pitch
 
 data class DvSegmentPitchData(
@@ -50,3 +52,34 @@ private fun List<Pair<Long, Double?>>.mergeSameValuePoints() = asSequence()
         val lastValue = acc.lastOrNull()?.second
         if (point.second != lastValue) acc + point else acc
     }
+
+fun Pitch.generateForDv(notes: List<Note>): DvSegmentPitchData? {
+    if (notes.isEmpty()) return null
+    val points: List<Pair<Long, Double?>> = getAbsoluteData(notes)
+        ?.takeIf { it.isNotEmpty() }
+        ?: return null
+
+    val data = listOf(-1 to -1) + points.appendPoints()
+        .map {
+            val rawValue = it.second?.let(Dv::convertNoteKey)?.times(100)?.roundToInt() ?: -1
+            it.first.toInt() to rawValue
+        }
+
+    return DvSegmentPitchData(0L, data)
+}
+
+private fun List<Pair<Long, Double?>>.appendPoints(): List<Pair<Long, Double?>> {
+    val results = mutableListOf<Pair<Long, Double?>>()
+    var lastValue: Double? = null
+    for (point in this) {
+        if (lastValue == null && point.second != null) {
+            results.add(point.first to null)
+        }
+        if (lastValue != null && point.second == null) {
+            results.add(point.first to lastValue)
+        }
+        results.add(point)
+        lastValue = point.second
+    }
+    return results.toList()
+}
