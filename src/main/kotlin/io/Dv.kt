@@ -270,9 +270,7 @@ object Dv {
             addListBlock(track.notes.map { generateNote(it) })
             addAll(segmentDefaultParameterData1)
             if (features.contains(Feature.ConvertPitch)) {
-                console.log(track.pitch)
                 val pitch = track.pitch?.generateForDv(track.notes)
-                console.log(pitch)
                 if (pitch == null) {
                     addAll(segmentDefaultParameterDataPitch)
                 } else {
