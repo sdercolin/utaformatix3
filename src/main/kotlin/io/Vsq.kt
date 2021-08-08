@@ -10,10 +10,10 @@ import org.w3c.files.File
 
 object Vsq {
     suspend fun parse(file: File): Project {
-        return VsqUtil.getMappedTrackData(file, Format.Vsq)
+        return VsqLike.getMappedTrackData(file, Format.Vsq)
     }
 
     fun generate(project: Project, features: List<Feature>): ExportResult {
-        return VsqUtil.getExportResult(project, features, Format.Vsq)
+        return VsqLike.getExportResult(project, features, Format.Vsq)
     }
 }
