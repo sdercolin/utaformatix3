@@ -20,7 +20,7 @@ object Resources {
         get() = require("format_templates/template.s5p").default as String
 
     val vocaloidMidIcon: String
-        get() = require("images/vocaloid1.png").defualt as String
+        get() = require("images/vocaloid1.png").default as String
 
     val vsqIcon: String
         get() = require("images/vocaloid2.png").default as String
