@@ -118,13 +118,13 @@ enum class Format(
         possibleLyricsTypes = listOf(RomajiCv, KanaCv),
         availableFeaturesForGeneration = listOf(ConvertPitch)
     ),
-    Midi(
+    VocaloidMid(
         ".mid",
         parser = {
-            io.VocaloidMidi.parse(it.first())
+            io.VocaloidMid.parse(it.first())
         },
         generator = { project, features ->
-            io.VocaloidMidi.generate(project, features)
+            io.VocaloidMid.generate(project, features)
         },
         possibleLyricsTypes = listOf(RomajiCv, KanaCv),
         availableFeaturesForGeneration = listOf(ConvertPitch)
@@ -143,7 +143,7 @@ enum class Format(
     val allExtensions get() = listOf(extension) + otherExtensions
 
     companion object {
-        val importable get() = listOf(Vsqx, Vpr, Vsq, Midi, Ust, Ccs, MusicXml, Svp, S5p, Dv, Ppsf)
-        val exportable get() = listOf(Vsqx, Vpr, Vsq, Midi, Ust, Ccs, MusicXml, Svp, S5p, Dv)
+        val importable get() = listOf(Vsqx, Vpr, Vsq, VocaloidMid, Ust, Ccs, MusicXml, Svp, S5p, Dv, Ppsf)
+        val exportable get() = listOf(Vsqx, Vpr, Vsq, VocaloidMid, Ust, Ccs, MusicXml, Svp, S5p, Dv)
     }
 }

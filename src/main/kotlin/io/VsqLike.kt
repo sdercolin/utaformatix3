@@ -39,7 +39,7 @@ import util.padStartZero
 import util.readAsArrayBuffer
 import util.splitFirst
 
-object VsqUtil {
+object VsqLike {
     private fun extractTextsFromMetaEvents(midiTracks: Array<dynamic>): List<String> {
         return midiTracks.drop(1)
             .map { track ->

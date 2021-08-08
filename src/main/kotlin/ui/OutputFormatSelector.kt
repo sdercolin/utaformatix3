@@ -6,7 +6,7 @@ import kotlinx.css.marginLeft
 import model.Format
 import model.Format.Ccs
 import model.Format.Dv
-import model.Format.Midi
+import model.Format.VocaloidMid
 import model.Format.MusicXml
 import model.Format.Ppsf
 import model.Format.S5p
@@ -134,7 +134,7 @@ class OutputFormatSelector : RComponent<OutputFormatSelectorProps, RState>() {
 
     private val Format.description: String?
         get() = when (this) {
-            Midi -> Strings.VocaloidMidiFormatDescription
+            VocaloidMid -> Strings.VocaloidMidiFormatDescription
             Vsqx -> Strings.VsqxFormatDescription
             Vpr -> Strings.VprFormatDescription
             Ust -> Strings.UstFormatDescription
@@ -149,7 +149,7 @@ class OutputFormatSelector : RComponent<OutputFormatSelectorProps, RState>() {
 
     private val Format.iconPath: String?
         get() = when (this) {
-            Midi -> Resources.vocaloidMidIcon
+            VocaloidMid -> Resources.vocaloidMidIcon
             Vsqx -> Resources.vsqxIcon
             Vpr -> Resources.vprIcon
             Ust -> Resources.ustIcon
