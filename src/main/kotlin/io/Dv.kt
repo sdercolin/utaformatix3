@@ -267,7 +267,7 @@ object Dv {
             addInt(max(lastNoteTickOff, MIN_SEGMENT_LENGTH))
             addString(track.name)
             addString("")
-            addListBlock(track.notes.map { generateNote(it) })
+            addListBlock(track.notes.map { generateNote(it, features) })
             addAll(segmentDefaultParameterData1)
             if (features.contains(Feature.ConvertPitch)) {
                 val pitch = track.pitch?.generateForDv(track.notes)
@@ -292,7 +292,7 @@ object Dv {
         }
     }
 
-    private fun generateNote(note: Note): List<Byte> {
+    private fun generateNote(note: Note, features: List<Feature>): List<Byte> {
         return mutableListOf<Byte>().apply {
             addInt(note.tickOn.toInt())
             addInt(note.length.toInt())
@@ -343,10 +343,14 @@ object Dv {
             )
             addBlock(noteUnknownDataBlock)
             addAll(noteUnknownPhonemes)
-            addInt(8)
-            addInt(5)
-            addInt(16)
-            addInt(16)
+            if (features.contains(Feature.ConvertPitch)) {
+                repeat(4) { addInt(0) }
+            } else {
+                addInt(8)
+                addInt(5)
+                addInt(16)
+                addInt(16)
+            }
             addInt(-1)
             addString("")
             addInt(-1)
