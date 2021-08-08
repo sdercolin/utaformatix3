@@ -5,6 +5,7 @@ import model.ExportResult
 import model.Format
 import model.ImportWarning
 import model.Note
+import model.Pitch
 import model.Project
 import model.Tempo
 import model.TickCounter
@@ -14,6 +15,8 @@ import org.khronos.webgl.Uint8Array
 import org.w3c.files.Blob
 import org.w3c.files.BlobPropertyBag
 import org.w3c.files.File
+import process.pitch.DvSegmentPitchData
+import process.pitch.pitchFromDvSegments
 import process.validateNotes
 import util.ArrayBufferReader
 import util.addBlock
@@ -92,6 +95,7 @@ object Dv {
 
         val notes = mutableListOf<Note>()
         val segmentCount = reader.readInt()
+        val segmentPitchDataList = mutableListOf<DvSegmentPitchData>()
         repeat(segmentCount) {
             val segmentStart = reader.readInt()
             reader.readInt() // segment length
@@ -117,13 +121,26 @@ object Dv {
                     )
                 )
             }
+            reader.readBytes()
+            segmentPitchDataList.add(parsePitchData(segmentStart - tickPrefix, reader))
             skipRestOfSegment(reader)
         }
         return Track(
             id = 0,
             name = trackName,
-            notes = notes
+            notes = notes,
+            pitch = pitchFromDvSegments(segmentPitchDataList)
         )
+    }
+
+    private fun parsePitchData(tickOffset: Long, reader: ArrayBufferReader): DvSegmentPitchData {
+        reader.readInt()
+        val pointLength = reader.readInt()
+        val data = mutableListOf<Pair<Int, Int>>()
+        repeat(pointLength) {
+            data.add(reader.readInt() to reader.readInt())
+        }
+        return DvSegmentPitchData(tickOffset, data)
     }
 
     private fun skipRestOfInstTrack(reader: ArrayBufferReader) {
@@ -137,7 +154,7 @@ object Dv {
     }
 
     private fun skipRestOfSegment(reader: ArrayBufferReader) {
-        repeat(7) {
+        repeat(5) {
             reader.readBytes()
         }
     }
@@ -324,7 +341,8 @@ object Dv {
         }
     }
 
-    private fun convertNoteKey(key: Int) = NOTE_KEY_SUM - key
+    fun convertNoteKey(key: Int) = NOTE_KEY_SUM - key
+    fun convertNoteKey(key: Double) = NOTE_KEY_SUM - key
     private const val NOTE_KEY_SUM = 115
 
     private const val STARTING_MEASURE_POSITION = -3
