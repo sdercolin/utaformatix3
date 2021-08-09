@@ -22,7 +22,7 @@ The current version `3.x` is built with [Kotlin for JavaScript](https://kotlinla
   |         CCS          |       ✓      |                |       ✓      |
   |         SVP          |       ✓      |        ✓       |       ✓      |
   |         S5P          |       ✓      |                |       ✓      |
-  |         DV           |       ✓      |                |       ✓      |
+  |         DV           |       ✓      |        ✓       |       ✓      |
   
 ## Contributors
 
