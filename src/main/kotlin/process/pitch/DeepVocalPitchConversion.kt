@@ -214,7 +214,6 @@ private fun getVibratoPitch(
         .interpolateLinear(1L)
         .orEmpty()
         .also { console.log(it) }
-
 }.mergeSameTickPoints().orEmpty().toMap()
 
 private val Note.tickHalfStart: Long get() = tickOn + (length + 1) / 2
