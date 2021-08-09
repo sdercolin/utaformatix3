@@ -19,7 +19,7 @@ private const val BEND_VALUE_MAX = 3.0 // benDep == 100
 
 data class DvSegmentPitchRawData(
     val tickOffset: Long, // only for import
-    val data: List<Pair<Int, Int>>
+    val data: List<Pair<Int, Int>> // (tick, DV style cent)
 )
 
 data class DvNoteWithPitch(
@@ -28,7 +28,7 @@ data class DvNoteWithPitch(
     val porTail: Int, // 0~100
     val benLen: Int, // 0~100
     val benDep: Int, // 0~100
-    val vibrato: List<Pair<Long, Int>> // (ms, DV standard cent)
+    val vibrato: List<Pair<Int, Int>> // (ms, minus cent)
 ) : RichNote<DvNoteWithPitch> {
     override fun copyWithNote(note: Note) = copy(note = note)
 }
@@ -92,8 +92,8 @@ private fun List<Pair<Long, Double?>>.applyDefaultPitch(
     val transformer = TickTimeTransformer(tempos)
 
     val base = getBasePitch(notes, transformer)
-
     val bendDiff = getBendPitch(notes, transformer)
+    val vibratoDiff = getVibratoPitch(notes, transformer)
 
     val appendingLastPoint = if (last().first < notes.last().note.tickOff) {
         notes.last().note.tickOff to null
@@ -107,7 +107,7 @@ private fun List<Pair<Long, Double?>>.applyDefaultPitch(
 
             if (lastPoint?.second == null) {
                 val interpolatedPoints = (startTick until endTick step SAMPLING_INTERVAL_TICK)
-                    .map { it to (requireNotNull(base[it]) + (bendDiff[it] ?: 0.0)) }
+                    .map { it to (requireNotNull(base[it]) + (bendDiff[it] ?: 0.0) + (vibratoDiff[it] ?: 0.0)) }
                 acc + interpolatedPoints + point
             } else {
                 acc + point
@@ -175,7 +175,7 @@ private fun getBendPitch(
         .drop(1)
 
     bendDown + bendUp
-}.mergeSameTickPoints().let { requireNotNull(it) }.toMap()
+}.mergeSameTickPoints().orEmpty().toMap()
 
 private fun getPortamento(
     lastNote: DvNoteWithPitch,
@@ -194,6 +194,28 @@ private fun getPortamento(
         .interpolateCosineEaseInOut(1L)
         .orEmpty()
 }
+
+private fun getVibratoPitch(
+    notes: List<DvNoteWithPitch>,
+    transformer: TickTimeTransformer
+) = notes.flatMap { note ->
+    val startTick = note.note.tickOn
+    val startSec = transformer.tickToSec(startTick)
+    note.vibrato.asSequence()
+        .map { (mSec, minusCent) ->
+            val tick = transformer.secToTick((startSec + mSec.toDouble() / 1000))
+            val key = -minusCent.toDouble() / 100
+            tick to key
+        }
+        .also { console.log(it) }
+        .filter { it.first >= startTick && it.first < note.note.tickOff }
+        .sortedBy { it.first }
+        .toList()
+        .interpolateLinear(1L)
+        .orEmpty()
+        .also { console.log(it) }
+
+}.mergeSameTickPoints().orEmpty().toMap()
 
 private val Note.tickHalfStart: Long get() = tickOn + (length + 1) / 2
 

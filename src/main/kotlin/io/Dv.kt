@@ -113,7 +113,7 @@ object Dv {
                 val lyric = reader.readString()
                 reader.readString() // lyric in Chinese character
                 reader.skip(1)
-                reader.readBytes()
+                val vibratoData = parseNoteVibratoData(reader)
                 reader.readBytes()
                 reader.skip(18)
                 val benDep = reader.readInt()
@@ -137,7 +137,7 @@ object Dv {
                         benLen = benLen,
                         porHead = porHead,
                         porTail = porTail,
-                        vibrato = listOf()
+                        vibrato = vibratoData
                     )
                 )
             }
@@ -152,6 +152,19 @@ object Dv {
             notes = notesWithPitchValidated.map { it.note },
             pitch = pitchFromDvTrack(segmentPitchDataList, notesWithPitchValidated, tempos)
         )
+    }
+
+    private fun parseNoteVibratoData(reader: ArrayBufferReader): List<Pair<Int, Int>> {
+        reader.readInt() // vibrato block size
+        reader.readBytes()
+        reader.readBytes()
+        reader.readInt() // rendered-vibrato block size
+        val pointLength = reader.readInt()
+        val data = mutableListOf<Pair<Int, Int>>()
+        repeat(pointLength) {
+            data.add(reader.readInt() to reader.readInt())
+        }
+        return data
     }
 
     private fun parsePitchData(tickOffset: Long, reader: ArrayBufferReader): DvSegmentPitchRawData {
