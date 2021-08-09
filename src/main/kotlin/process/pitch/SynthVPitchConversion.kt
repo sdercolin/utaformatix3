@@ -1,8 +1,9 @@
 package process.pitch
 
 import model.DEFAULT_BPM
-import model.TICKS_IN_BEAT
 import model.Tempo
+import process.TickTimeTransformer
+import process.bpmToSecPerTick
 import process.interpolateCosineEaseInOut
 import process.interpolateLinear
 
@@ -84,38 +85,8 @@ private fun List<Pair<Long, Double>>.appendVibrato(
     tempos: List<Tempo>,
     vibratoEnv: Map<Long, Double>
 ): List<Pair<Long, Double>> {
-    // a piecewise linear transformation from tick to sec
-    // simplify the calculation here for every usage to reduce cost
-    val timeTransformationParameters = (tempos.zipWithNext() + (tempos.last() to null))
-        .fold(listOf<Triple<LongRange, Double, Double>>()) { acc, (thisTempo, nextTempo) ->
-            val range = thisTempo.tickPosition until (nextTempo?.tickPosition ?: Long.MAX_VALUE)
-            val rate = getTickToTimeRate(thisTempo.bpm)
-            val thisResult = if (acc.isEmpty()) {
-                Triple(range, 0.0, rate)
-            } else {
-                val (lastRange, lastOffset, lastRate) = acc.last()
-                val offset = lastOffset + (lastRange.last - lastRange.first) * lastRate
-                Triple(range, offset, rate)
-            }
-            acc + thisResult
-        }
-        .map {
-            object {
-                val range = it.first
-                val offset = it.second
-                val rate = it.third
-            }
-        }
-    val tickToSecTransformation: (Long) -> Double = { tick: Long ->
-        timeTransformationParameters
-            .first { tick in it.range }
-            .let { it.offset + (tick - it.range.first) * it.rate }
-    }
-    val secToTickTransformation: (Double) -> Long = { sec: Double ->
-        timeTransformationParameters
-            .last { it.offset <= sec }
-            .let { ((sec - it.offset) / it.rate).toLong() + it.range.first }
-    }
+
+    val transformer = TickTimeTransformer(tempos)
 
     return notes
         .fold<SvpNoteWithVibrato, List<Pair<LongRange, SvpNoteWithVibrato?>>>(listOf()) { acc, note ->
@@ -133,8 +104,7 @@ private fun List<Pair<Long, Double>>.appendVibrato(
                 .appendVibratoInNote(
                     note,
                     vibratoDefaultParameters,
-                    tickToSecTransformation,
-                    secToTickTransformation,
+                    transformer,
                     tempos,
                     vibratoEnv
                 )
@@ -144,20 +114,19 @@ private fun List<Pair<Long, Double>>.appendVibrato(
 private fun List<Pair<Long, Double>>.appendVibratoInNote(
     note: SvpNoteWithVibrato?,
     defaultParameters: SvpDefaultVibratoParameters?,
-    tickToSecTransformation: (Long) -> Double,
-    secToTickTransformation: (Double) -> Long,
+    tickTimeTransformer: TickTimeTransformer,
     tempos: List<Tempo>,
     vibratoEnv: Map<Long, Double>
 ): List<Pair<Long, Double>> {
     // Note with minus position is skipped, but with raise an error after import, see Project.requireValid()
     note?.takeIf { it.noteStartTick >= 0L } ?: return this
 
-    val noteStart = tickToSecTransformation(note.noteStartTick)
-    val noteEnd = tickToSecTransformation(note.noteEndTick)
+    val noteStart = tickTimeTransformer.tickToSec(note.noteStartTick)
+    val noteEnd = tickTimeTransformer.tickToSec(note.noteEndTick)
 
     val vibratoStart =
         (note.vibratoStart ?: defaultParameters?.vibratoStart ?: SVP_VIBRATO_DEFAULT_START_SEC) + noteStart
-    val vibratoStartTick = secToTickTransformation(vibratoStart)
+    val vibratoStartTick = tickTimeTransformer.secToTick(vibratoStart)
     val easeInLength = note.easeInLength ?: defaultParameters?.easeInLength ?: SVP_VIBRATO_DEFAULT_EASE_IN_SEC
     val easeOutLength = note.easeOutLength ?: defaultParameters?.easeOutLength ?: SVP_VIBRATO_DEFAULT_EASE_OUT_SEC
     val depth = (note.depth ?: defaultParameters?.depth ?: SVP_VIBRATO_DEFAULT_DEPTH_SEMITONE) * 0.5
@@ -165,18 +134,18 @@ private fun List<Pair<Long, Double>>.appendVibratoInNote(
     val phase = note.phase ?: SVP_VIBRATO_DEFAULT_PHASE_RAD
     val frequency = note.frequency ?: defaultParameters?.frequency ?: SVP_VIBRATO_DEFAULT_FREQUENCY_HZ
 
-    val tickToTimeRate =
-        getTickToTimeRate(tempos.lastOrNull { it.tickPosition <= note.noteStartTick }?.bpm ?: DEFAULT_BPM)
+    val secPerTick =
+        (tempos.lastOrNull { it.tickPosition <= note.noteStartTick }?.bpm ?: DEFAULT_BPM).bpmToSecPerTick()
 
     val vibrato = { tick: Long ->
-        val sec = tickToSecTransformation(tick)
+        val sec = tickTimeTransformer.tickToSec(tick)
         if (sec < vibratoStart) 0.0
         else {
             val easeInFactor = ((sec - vibratoStart) / easeInLength).coerceIn(0.0..1.0)
                 .takeIf { !it.isNaN() } ?: 1.0
             val easeOutFactor = ((noteEnd - sec) / easeOutLength).coerceIn(0.0..1.0)
                 .takeIf { !it.isNaN() } ?: 1.0
-            val rad = 2 * kotlin.math.PI * frequency * tickToTimeRate * (tick - vibratoStartTick) + phase
+            val rad = 2 * kotlin.math.PI * frequency * secPerTick * (tick - vibratoStartTick) + phase
             val envelope = vibratoEnv[tick] ?: 1.0
             envelope * depth * easeInFactor * easeOutFactor * kotlin.math.sin(rad)
         }
@@ -203,8 +172,6 @@ private fun List<Pair<Long, Double>>.appendVibratoInNote(
         }
         .toList()
 }
-
-private fun getTickToTimeRate(bpm: Double) = 60.0 / TICKS_IN_BEAT / bpm
 
 private fun List<Pair<Long, Double>>.removeRedundantPoints() =
     fold(listOf<Pair<Long, Double>>()) { acc, point ->
