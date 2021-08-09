@@ -128,10 +128,7 @@ object Svp {
         val pitchMode = pitchDelta?.mode
         val pitchPoints = pitchDelta?.points.orEmpty()
             .asSequence()
-            .withIndex()
-            .groupBy { it.index / 2 }
-            .map { it.value }
-            .map { it.map { indexedValue -> indexedValue.value } }
+            .chunked(2)
             .mapNotNull {
                 val rawTick = it.getOrNull(0) ?: return@mapNotNull null
                 val centValue = it.getOrNull(1) ?: return@mapNotNull null

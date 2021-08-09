@@ -74,10 +74,7 @@ object S5p {
     private fun parsePitch(track: Track): Pitch? {
         val pitchDelta = track.parameters?.pitchDelta ?: return Pitch(emptyList(), isAbsolute = false)
         val convertedPoints = pitchDelta.asSequence()
-            .withIndex()
-            .groupBy { it.index / 2 }
-            .map { it.value }
-            .map { it.map { indexedValue -> indexedValue.value } }
+            .chunked(2)
             .mapNotNull {
                 val rawTick = it.getOrNull(0) ?: return@mapNotNull null
                 val centValue = it.getOrNull(1) ?: return@mapNotNull null

@@ -101,11 +101,12 @@ enum class Format(
         parser = {
             io.Dv.parse(it.first())
         },
-        generator = { project, _ ->
-            io.Dv.generate(project)
+        generator = { project, features ->
+            io.Dv.generate(project, features)
         },
         possibleLyricsTypes = listOf(RomajiCv, KanaCv),
-        suggestedLyricType = RomajiCv
+        suggestedLyricType = RomajiCv,
+        availableFeaturesForGeneration = listOf(ConvertPitch)
     ),
     Vsq(
         ".vsq",
