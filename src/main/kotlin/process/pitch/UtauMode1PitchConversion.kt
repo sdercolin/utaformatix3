@@ -45,7 +45,6 @@ fun pitchFromUtauMode1Track(pitchData: UtauMode1TrackPitchData?, notes: List<Not
 fun pitchToUtauMode1Track(pitch: Pitch?, notes: List<Note>): UtauMode1TrackPitchData? {
     pitch ?: return null
     return UtauMode1TrackPitchData(notes.map { note ->
-        console.log(note)
         UtauMode1NotePitchData(
             pitch
                 .getAbsoluteData(notes)
