@@ -15,9 +15,10 @@ import org.khronos.webgl.Uint8Array
 import org.w3c.files.Blob
 import org.w3c.files.BlobPropertyBag
 import org.w3c.files.File
-import process.pitch.DvSegmentPitchData
+import process.pitch.DvNoteWithPitch
+import process.pitch.DvSegmentPitchRawData
 import process.pitch.generateForDv
-import process.pitch.pitchFromDvSegments
+import process.pitch.pitchFromDvTrack
 import process.validateNotes
 import util.ArrayBufferReader
 import util.addBlock
@@ -67,7 +68,7 @@ object Dv {
         val trackCount = reader.readInt()
         var tracks = mutableListOf<Track>()
         repeat(trackCount) {
-            parseTrack(tickPrefix, reader)?.let { track ->
+            parseTrack(tickPrefix, tempos, reader)?.let { track ->
                 tracks.add(track.validateNotes())
             }
         }
@@ -85,7 +86,7 @@ object Dv {
         )
     }
 
-    private fun parseTrack(tickPrefix: Long, reader: ArrayBufferReader): Track? {
+    private fun parseTrack(tickPrefix: Long, tempos: List<Tempo>, reader: ArrayBufferReader): Track? {
         val trackType = reader.readInt()
         if (trackType != 0) {
             skipRestOfInstTrack(reader)
@@ -94,9 +95,9 @@ object Dv {
         val trackName = reader.readString()
         reader.skip(14)
 
-        val notes = mutableListOf<Note>()
+        val notesWithPitch = mutableListOf<DvNoteWithPitch>()
         val segmentCount = reader.readInt()
-        val segmentPitchDataList = mutableListOf<DvSegmentPitchData>()
+        val segmentPitchDataList = mutableListOf<DvSegmentPitchRawData>()
         repeat(segmentCount) {
             val segmentStart = reader.readInt()
             reader.readInt() // segment length
@@ -111,14 +112,32 @@ object Dv {
                 reader.skip(4)
                 val lyric = reader.readString()
                 reader.readString() // lyric in Chinese character
-                skipRestOfNote(reader)
-                notes.add(
-                    Note(
-                        id = 0,
-                        key = noteKey,
-                        lyric = lyric,
-                        tickOn = segmentStart + noteStart - tickPrefix,
-                        tickOff = segmentStart + noteStart - tickPrefix + noteLength
+                reader.skip(1)
+                val vibratoData = parseNoteVibratoData(reader)
+                reader.readBytes()
+                reader.skip(18)
+                val benDep = reader.readInt()
+                val benLen = reader.readInt()
+                val porTail = reader.readInt()
+                val porHead = reader.readInt()
+                reader.readInt()
+                reader.readBytes()
+                reader.readInt()
+                val note = Note(
+                    id = 0,
+                    key = noteKey,
+                    lyric = lyric,
+                    tickOn = segmentStart + noteStart - tickPrefix,
+                    tickOff = segmentStart + noteStart - tickPrefix + noteLength
+                )
+                notesWithPitch.add(
+                    DvNoteWithPitch(
+                        note = note,
+                        benDep = benDep,
+                        benLen = benLen,
+                        porHead = porHead,
+                        porTail = porTail,
+                        vibrato = vibratoData
                     )
                 )
             }
@@ -126,22 +145,36 @@ object Dv {
             segmentPitchDataList.add(parsePitchData(segmentStart - tickPrefix, reader))
             skipRestOfSegment(reader)
         }
+        val notesWithPitchValidated = notesWithPitch.validateNotes()
         return Track(
             id = 0,
             name = trackName,
-            notes = notes,
-            pitch = pitchFromDvSegments(segmentPitchDataList)
+            notes = notesWithPitchValidated.map { it.note },
+            pitch = pitchFromDvTrack(segmentPitchDataList, notesWithPitchValidated, tempos)
         )
     }
 
-    private fun parsePitchData(tickOffset: Long, reader: ArrayBufferReader): DvSegmentPitchData {
+    private fun parseNoteVibratoData(reader: ArrayBufferReader): List<Pair<Int, Int>> {
+        reader.readInt() // vibrato block size
+        reader.readBytes()
+        reader.readBytes()
+        reader.readInt() // rendered-vibrato block size
+        val pointLength = reader.readInt()
+        val data = mutableListOf<Pair<Int, Int>>()
+        repeat(pointLength) {
+            data.add(reader.readInt() to reader.readInt())
+        }
+        return data
+    }
+
+    private fun parsePitchData(tickOffset: Long, reader: ArrayBufferReader): DvSegmentPitchRawData {
         reader.readInt()
         val pointLength = reader.readInt()
         val data = mutableListOf<Pair<Int, Int>>()
         repeat(pointLength) {
             data.add(reader.readInt() to reader.readInt())
         }
-        return DvSegmentPitchData(tickOffset, data)
+        return DvSegmentPitchRawData(tickOffset, data)
     }
 
     private fun skipRestOfInstTrack(reader: ArrayBufferReader) {
@@ -158,15 +191,6 @@ object Dv {
         repeat(5) {
             reader.readBytes()
         }
-    }
-
-    private fun skipRestOfNote(reader: ArrayBufferReader) {
-        reader.skip(1)
-        reader.readBytes()
-        reader.readBytes()
-        reader.skip(38)
-        reader.readBytes()
-        reader.skip(4)
     }
 
     private fun getTickPrefix(timeSignatures: List<TimeSignature>): Long {
