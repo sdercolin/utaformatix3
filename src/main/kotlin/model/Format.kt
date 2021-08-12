@@ -45,10 +45,11 @@ enum class Format(
         parser = {
             io.Ust.parse(it)
         },
-        generator = { project, _ ->
-            io.Ust.generate(project)
+        generator = { project, features ->
+            io.Ust.generate(project, features)
         },
-        possibleLyricsTypes = listOf(RomajiCv, RomajiVcv, KanaCv, KanaVcv)
+        possibleLyricsTypes = listOf(RomajiCv, RomajiVcv, KanaCv, KanaVcv),
+        availableFeaturesForGeneration = listOf(ConvertPitch)
     ),
     Ccs(
         ".ccs",
@@ -100,11 +101,12 @@ enum class Format(
         parser = {
             io.Dv.parse(it.first())
         },
-        generator = { project, _ ->
-            io.Dv.generate(project)
+        generator = { project, features ->
+            io.Dv.generate(project, features)
         },
         possibleLyricsTypes = listOf(RomajiCv, KanaCv),
-        suggestedLyricType = RomajiCv
+        suggestedLyricType = RomajiCv,
+        availableFeaturesForGeneration = listOf(ConvertPitch)
     ),
     Vsq(
         ".vsq",
@@ -113,6 +115,17 @@ enum class Format(
         },
         generator = { project, features ->
             io.Vsq.generate(project, features)
+        },
+        possibleLyricsTypes = listOf(RomajiCv, KanaCv),
+        availableFeaturesForGeneration = listOf(ConvertPitch)
+    ),
+    VocaloidMid(
+        ".mid",
+        parser = {
+            io.VocaloidMid.parse(it.first())
+        },
+        generator = { project, features ->
+            io.VocaloidMid.generate(project, features)
         },
         possibleLyricsTypes = listOf(RomajiCv, KanaCv),
         availableFeaturesForGeneration = listOf(ConvertPitch)
@@ -131,7 +144,7 @@ enum class Format(
     val allExtensions get() = listOf(extension) + otherExtensions
 
     companion object {
-        val importable get() = listOf(Vsqx, Vpr, Vsq, Ust, Ccs, MusicXml, Svp, S5p, Dv, Ppsf)
-        val exportable get() = listOf(Vsqx, Vpr, Vsq, Ust, Ccs, MusicXml, Svp, S5p, Dv)
+        val importable get() = listOf(Vsqx, Vpr, Vsq, VocaloidMid, Ust, Ccs, MusicXml, Svp, S5p, Dv, Ppsf)
+        val exportable get() = listOf(Vsqx, Vpr, Vsq, VocaloidMid, Ust, Ccs, MusicXml, Svp, S5p, Dv)
     }
 }

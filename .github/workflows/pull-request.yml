@@ -1,8 +1,9 @@
-name: master-deploy
+name: pull-request-builder
 
 on:
-    push:
-        branches: [ master ]
+    pull_request:
+        branches: [ master, develop ]
+        types: [ opened, synchronize, reopened ]
 
 jobs:
     build:
@@ -20,11 +21,6 @@ jobs:
                 run: chmod +x gradlew
 
             -   name: Build with Gradle
-                run: ./gradlew build
-
-            -   name: Deploy to GitHub Pages
-                uses: JamesIves/github-pages-deploy-action@3.7.1
-                with:
-                    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-                    BRANCH: gh-pages
-                    FOLDER: build/distributions
+                run: |
+                    ./gradlew build
+                    ./gradlew ktlintFormat

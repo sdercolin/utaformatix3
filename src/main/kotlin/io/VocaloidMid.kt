@@ -8,12 +8,12 @@ import model.Format
 import model.Project
 import org.w3c.files.File
 
-object Vsq {
+object VocaloidMid {
     suspend fun parse(file: File): Project {
-        return VsqLike.getMappedTrackData(file, Format.Vsq)
+        return VsqLike.getMappedTrackData(file, Format.VocaloidMid)
     }
 
     fun generate(project: Project, features: List<Feature>): ExportResult {
-        return VsqLike.getExportResult(project, features, Format.Vsq)
+        return VsqLike.getExportResult(project, features, Format.VocaloidMid)
     }
 }

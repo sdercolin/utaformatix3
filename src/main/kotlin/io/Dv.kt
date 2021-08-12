@@ -2,6 +2,7 @@ package io
 
 import kotlin.math.max
 import model.ExportResult
+import model.Feature
 import model.Format
 import model.ImportWarning
 import model.Note
@@ -14,6 +15,10 @@ import org.khronos.webgl.Uint8Array
 import org.w3c.files.Blob
 import org.w3c.files.BlobPropertyBag
 import org.w3c.files.File
+import process.pitch.DvNoteWithPitch
+import process.pitch.DvSegmentPitchRawData
+import process.pitch.generateForDv
+import process.pitch.pitchFromDvTrack
 import process.validateNotes
 import util.ArrayBufferReader
 import util.addBlock
@@ -63,7 +68,7 @@ object Dv {
         val trackCount = reader.readInt()
         var tracks = mutableListOf<Track>()
         repeat(trackCount) {
-            parseTrack(tickPrefix, reader)?.let { track ->
+            parseTrack(tickPrefix, tempos, reader)?.let { track ->
                 tracks.add(track.validateNotes())
             }
         }
@@ -81,7 +86,7 @@ object Dv {
         )
     }
 
-    private fun parseTrack(tickPrefix: Long, reader: ArrayBufferReader): Track? {
+    private fun parseTrack(tickPrefix: Long, tempos: List<Tempo>, reader: ArrayBufferReader): Track? {
         val trackType = reader.readInt()
         if (trackType != 0) {
             skipRestOfInstTrack(reader)
@@ -90,8 +95,9 @@ object Dv {
         val trackName = reader.readString()
         reader.skip(14)
 
-        val notes = mutableListOf<Note>()
+        val notesWithPitch = mutableListOf<DvNoteWithPitch>()
         val segmentCount = reader.readInt()
+        val segmentPitchDataList = mutableListOf<DvSegmentPitchRawData>()
         repeat(segmentCount) {
             val segmentStart = reader.readInt()
             reader.readInt() // segment length
@@ -106,24 +112,69 @@ object Dv {
                 reader.skip(4)
                 val lyric = reader.readString()
                 reader.readString() // lyric in Chinese character
-                skipRestOfNote(reader)
-                notes.add(
-                    Note(
-                        id = 0,
-                        key = noteKey,
-                        lyric = lyric,
-                        tickOn = segmentStart + noteStart - tickPrefix,
-                        tickOff = segmentStart + noteStart - tickPrefix + noteLength
+                reader.skip(1)
+                val vibratoData = parseNoteVibratoData(reader)
+                reader.readBytes()
+                reader.skip(18)
+                val benDep = reader.readInt()
+                val benLen = reader.readInt()
+                val porTail = reader.readInt()
+                val porHead = reader.readInt()
+                reader.readInt()
+                reader.readBytes()
+                reader.readInt()
+                val note = Note(
+                    id = 0,
+                    key = noteKey,
+                    lyric = lyric,
+                    tickOn = segmentStart + noteStart - tickPrefix,
+                    tickOff = segmentStart + noteStart - tickPrefix + noteLength
+                )
+                notesWithPitch.add(
+                    DvNoteWithPitch(
+                        note = note,
+                        benDep = benDep,
+                        benLen = benLen,
+                        porHead = porHead,
+                        porTail = porTail,
+                        vibrato = vibratoData
                     )
                 )
             }
+            reader.readBytes()
+            segmentPitchDataList.add(parsePitchData(segmentStart - tickPrefix, reader))
             skipRestOfSegment(reader)
         }
+        val notesWithPitchValidated = notesWithPitch.validateNotes()
         return Track(
             id = 0,
             name = trackName,
-            notes = notes
+            notes = notesWithPitchValidated.map { it.note },
+            pitch = pitchFromDvTrack(segmentPitchDataList, notesWithPitchValidated, tempos)
         )
+    }
+
+    private fun parseNoteVibratoData(reader: ArrayBufferReader): List<Pair<Int, Int>> {
+        reader.readInt() // vibrato block size
+        reader.readBytes()
+        reader.readBytes()
+        reader.readInt() // rendered-vibrato block size
+        val pointLength = reader.readInt()
+        val data = mutableListOf<Pair<Int, Int>>()
+        repeat(pointLength) {
+            data.add(reader.readInt() to reader.readInt())
+        }
+        return data
+    }
+
+    private fun parsePitchData(tickOffset: Long, reader: ArrayBufferReader): DvSegmentPitchRawData {
+        reader.readInt()
+        val pointLength = reader.readInt()
+        val data = mutableListOf<Pair<Int, Int>>()
+        repeat(pointLength) {
+            data.add(reader.readInt() to reader.readInt())
+        }
+        return DvSegmentPitchRawData(tickOffset, data)
     }
 
     private fun skipRestOfInstTrack(reader: ArrayBufferReader) {
@@ -137,18 +188,9 @@ object Dv {
     }
 
     private fun skipRestOfSegment(reader: ArrayBufferReader) {
-        repeat(7) {
+        repeat(5) {
             reader.readBytes()
         }
-    }
-
-    private fun skipRestOfNote(reader: ArrayBufferReader) {
-        reader.skip(1)
-        reader.readBytes()
-        reader.readBytes()
-        reader.skip(38)
-        reader.readBytes()
-        reader.skip(4)
     }
 
     private fun getTickPrefix(timeSignatures: List<TimeSignature>): Long {
@@ -195,13 +237,13 @@ object Dv {
         return results
     }
 
-    fun generate(project: Project): ExportResult {
-        val contentBytes = generateContent(project)
+    fun generate(project: Project, features: List<Feature>): ExportResult {
+        val contentBytes = generateContent(project, features)
         val blob = Blob(arrayOf(contentBytes), BlobPropertyBag("application/octet-stream"))
         return ExportResult(blob, project.name + Format.Dv.extension, listOf())
     }
 
-    private fun generateContent(project: Project): Uint8Array {
+    private fun generateContent(project: Project, features: List<Feature>): Uint8Array {
         val bytes = mutableListOf<Byte>()
         bytes.addAll(header)
         val tickPrefix = project.timeSignatures.first().ticksInMeasure.toLong() * FIXED_MEASURE_PREFIX
@@ -209,7 +251,7 @@ object Dv {
             addAll("ext1ext2ext3ext4ext5ext6ext7".encodeToByteArray().toList())
             addListBlock(generateTempos(project.tempos, tickPrefix))
             addListBlock(generateTimeSignatures(project.timeSignatures))
-            addList(project.tracks.map { generateTrack(it, tickPrefix) })
+            addList(project.tracks.map { generateTrack(it, tickPrefix, features) })
         }
         bytes.addBlock(mainBlock)
         return Uint8Array(bytes.toTypedArray())
@@ -242,15 +284,26 @@ object Dv {
             }
     }
 
-    private fun generateTrack(track: Track, tickPrefix: Long): List<Byte> {
+    private fun generateTrack(track: Track, tickPrefix: Long, features: List<Feature>): List<Byte> {
         val segmentBytes = mutableListOf<Byte>().apply {
             addInt(tickPrefix.toInt())
             val lastNoteTickOff = track.notes.lastOrNull()?.tickOff?.toInt() ?: 0
             addInt(max(lastNoteTickOff, MIN_SEGMENT_LENGTH))
             addString(track.name)
             addString("")
-            addListBlock(track.notes.map { generateNote(it) })
-            addAll(segmentDefaultParameterData)
+            addListBlock(track.notes.map { generateNote(it, features) })
+            addAll(segmentDefaultParameterData1)
+            if (features.contains(Feature.ConvertPitch)) {
+                val pitch = track.pitch?.generateForDv(track.notes)
+                if (pitch == null) {
+                    addAll(segmentDefaultParameterDataPitch)
+                } else {
+                    addListBlock(generatePitchPoints(pitch.data))
+                }
+            } else {
+                addAll(segmentDefaultParameterDataPitch)
+            }
+            addAll(segmentDefaultParameterData2)
         }
         return mutableListOf<Byte>().apply {
             addInt(0)
@@ -263,7 +316,7 @@ object Dv {
         }
     }
 
-    private fun generateNote(note: Note): List<Byte> {
+    private fun generateNote(note: Note, features: List<Feature>): List<Byte> {
         return mutableListOf<Byte>().apply {
             addInt(note.tickOn.toInt())
             addInt(note.length.toInt())
@@ -314,18 +367,33 @@ object Dv {
             )
             addBlock(noteUnknownDataBlock)
             addAll(noteUnknownPhonemes)
-            addInt(8)
-            addInt(5)
-            addInt(16)
-            addInt(16)
+            if (features.contains(Feature.ConvertPitch)) {
+                repeat(4) { addInt(0) }
+            } else {
+                addInt(8)
+                addInt(5)
+                addInt(16)
+                addInt(16)
+            }
             addInt(-1)
             addString("")
             addInt(-1)
         }
     }
 
-    private fun convertNoteKey(key: Int) = NOTE_KEY_SUM - key
-    private const val NOTE_KEY_SUM = 115
+    private fun generatePitchPoints(data: List<Pair<Int, Int>>): List<List<Byte>> = mutableListOf<List<Byte>>().apply {
+        data.forEach { point ->
+            val pointBytes = mutableListOf<Byte>().apply {
+                addInt(point.first)
+                addInt(point.second)
+            }
+            add(pointBytes)
+        }
+    }
+
+    private fun convertNoteKey(key: Int) = NOTE_KEY_SUM.toInt() - key
+    fun convertNoteKey(key: Double) = NOTE_KEY_SUM - key
+    private const val NOTE_KEY_SUM = 115.5
 
     private const val STARTING_MEASURE_POSITION = -3
     private const val FIXED_MEASURE_PREFIX = 4
@@ -334,11 +402,15 @@ object Dv {
     ).map { it.toByte() }
     private const val DEFAULT_VOLUME = 30
     private const val MIN_SEGMENT_LENGTH = 480 * 4
-    private val segmentDefaultParameterData = listOf(
+    private val segmentDefaultParameterData1 = listOf(
         0x14, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0xFF, 0xFF,
-        0x80, 0x00, 0x00, 0x00, 0x01, 0xB0, 0x04, 0x00, 0x80, 0x00, 0x00, 0x00,
+        0x80, 0x00, 0x00, 0x00, 0x01, 0xB0, 0x04, 0x00, 0x80, 0x00, 0x00, 0x00
+    ).map { it.toByte() }
+    private val segmentDefaultParameterDataPitch = listOf(
         0x14, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0xFF, 0xFF,
-        0xFF, 0xFF, 0xFF, 0xFF, 0x01, 0xB0, 0x04, 0x00, 0xFF, 0xFF, 0xFF, 0xFF,
+        0xFF, 0xFF, 0xFF, 0xFF, 0x01, 0xB0, 0x04, 0x00, 0xFF, 0xFF, 0xFF, 0xFF
+    ).map { it.toByte() }
+    private val segmentDefaultParameterData2 = listOf(
         0x14, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0xFF, 0xFF,
         0x80, 0x00, 0x00, 0x00, 0x01, 0xB0, 0x04, 0x00, 0x80, 0x00, 0x00, 0x00,
         0x14, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0xFF, 0xFF,

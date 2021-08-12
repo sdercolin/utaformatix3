@@ -6,22 +6,23 @@ The current version `3.x` is built with [Kotlin for JavaScript](https://kotlinla
 
 ## Features
 
-- Supported importing formats: `.vsqx(3/4)`, `.vpr`, `.vsq`, `.ust`, `.ccs`,`.xml(MusicXML)`, `.musicxml`, `.svp`, `.s5p`, `.dv`, `.ppsf(NT)`
-- Supported exporting formats: `.vsqx(4)`, `.vpr`, `.vsq`, `.ust`, `.ccs`, `.xml(MusicXML)`, `.svp`, `.s5p`, `.dv`
+- Supported importing formats: `.vsqx(3/4)`, `.vpr`, `.vsq`, `.mid(VOCALOID)`, `.ust`, `.ccs`,`.xml(MusicXML)`, `.musicxml`, `.svp`, `.s5p`, `.dv`, `.ppsf(NT)`
+- Supported exporting formats: `.vsqx(4)`, `.vpr`, `.vsq`, `.mid(VOCALOID)`, `.ust`, `.ccs`, `.xml(MusicXML)`, `.svp`, `.s5p`, `.dv`
 - Keep information including: tracks, notes, tempo labels, time signatures
 - Detect and convert Japanese lyrics types
   - between CV and VCV
   - between Kana and Romaji
 - Convert pitch for the following supported formats
   
-  |    Format    | Pitch import | Vibrato import | Pitch export | 
-  | ------------ | ------------ | -------------- | ------------ |
-  | VSQ/VSQX/VPR |       ✓      |                |       ✓      |
-  |  UST(mode2)  |       ✓      |        ✓       |              |
-  |  UST(mode1)  |       ✓      |       N/A      |              |
-  |     CCS      |       ✓      |                |       ✓      |
-  |     SVP      |       ✓      |        ✓       |       ✓      |
-  |     S5P      |       ✓      |                |       ✓      |
+  |        Format        | Pitch import | Vibrato import | Pitch export | 
+  | -------------------- | ------------ | -------------- | ------------ |
+  | VSQ/VSQX/VPR/MID(V1) |       ✓      |                |       ✓      |
+  |      UST(mode2)      |       ✓      |        ✓       |              |
+  |      UST(mode1)      |       ✓      |       N/A      |       ✓      |
+  |         CCS          |       ✓      |                |       ✓      |
+  |         SVP          |       ✓      |        ✓       |       ✓      |
+  |         S5P          |       ✓      |                |       ✓      |
+  |         DV           |       ✓      |        ✓       |       ✓      |
   
 ## Contributors
 
@@ -30,7 +31,8 @@ The current version `3.x` is built with [Kotlin for JavaScript](https://kotlinla
 ## Get started for development
 1. Install [IntelliJ IDEA](https://www.jetbrains.com/idea/)
 2. Clone and import as a Gradle project
-3. Run by `./gradlew run`
+3. Configure IDEA's Gradle settings with `JDK11+` and `Use Gradle from: gradle-wrapper.properties file`
+4. Run by `./gradlew run` or Gradle Task `other/run`
 
 ## License
 [Apache License, Version 2.0](https://github.com/sdercolin/utaformatix3/blob/master/LICENSE.md)

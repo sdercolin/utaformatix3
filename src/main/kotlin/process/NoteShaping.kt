@@ -1,23 +1,28 @@
 package process
 
 import kotlin.math.min
+import model.Note
 import model.Track
 
-fun Track.validateNotes() =
-    if (notes.isEmpty()) this
-    else this.copy(
-        notes = notes
-            .sortedBy { it.tickOn }
-            .let {
-                it.zipWithNext()
-                    .map { (note, nextNote) ->
-                        note.copy(tickOff = min(note.tickOff, nextNote.tickOn))
-                    }
-                    .filter { note -> note.length > 0 }
-                    .plus(it.last())
-            }
-            .mapIndexed { index, note -> note.copy(id = index) }
-    )
+interface RichNote<T : Any> {
+    val note: Note
+    fun copyWithNote(note: Note): T
+}
+
+fun <T : RichNote<T>> List<T>.validateNotes(): List<T> {
+    if (isEmpty()) return this
+    return this.sortedBy { it.note.tickOn }
+        .let { list ->
+            list.zipWithNext()
+                .map { (current, next) ->
+                    current.copyWithNote(current.note.copy(tickOff = min(current.note.tickOff, next.note.tickOn)))
+                }
+                .filter { it.note.length > 0 }
+                .plus(list.last())
+        }
+}
+
+fun Track.validateNotes() = copy(notes = notes.validateNotes())
 
 fun Track.fillRests(excludedMaxLength: Long) =
     if (notes.isEmpty()) this
