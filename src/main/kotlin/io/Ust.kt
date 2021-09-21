@@ -119,7 +119,8 @@ object Ust {
                 projectName = it
             }
             line.tryGetValue("Tempo")?.let {
-                val bpm = it.toDoubleOrNull() ?: return@let
+                // Some locales use ',' instead of '.' for tempo
+                val bpm = it.replace(',', '.').toDoubleOrNull() ?: return@let
                 if (isHeader) {
                     tempos.add(Tempo(0, bpm))
                 } else {
