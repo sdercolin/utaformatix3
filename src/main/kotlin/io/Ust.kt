@@ -35,6 +35,8 @@ import util.padStartZero
 import util.readBinary
 import util.readText
 import util.toFixed
+import kotlin.math.roundToInt
+import kotlin.math.roundToLong
 
 object Ust {
     suspend fun parse(files: List<File>): Project {
@@ -182,7 +184,7 @@ object Ust {
                 pendingPitchBend = null
             }
             line.tryGetValue("Length")?.let {
-                val length = it.toLongOrNull() ?: return@let
+                val length = it.toDoubleOrNull()?.roundToLong() ?: return@let
                 pendingNoteTickOn = time
                 pendingBpm?.let { bpm ->
                     tempos.add(Tempo(time, bpm))
