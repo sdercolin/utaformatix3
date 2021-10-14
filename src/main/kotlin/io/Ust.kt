@@ -3,6 +3,7 @@ package io
 import external.Encoding
 import external.JsZip
 import external.JsZipOption
+import kotlin.math.roundToLong
 import kotlinx.coroutines.await
 import model.DEFAULT_METER_HIGH
 import model.DEFAULT_METER_LOW
@@ -35,8 +36,6 @@ import util.padStartZero
 import util.readBinary
 import util.readText
 import util.toFixed
-import kotlin.math.roundToInt
-import kotlin.math.roundToLong
 
 object Ust {
     suspend fun parse(files: List<File>): Project {
