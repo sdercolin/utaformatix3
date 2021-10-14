@@ -3,6 +3,7 @@ package io
 import external.Encoding
 import external.JsZip
 import external.JsZipOption
+import kotlin.math.roundToLong
 import kotlinx.coroutines.await
 import model.DEFAULT_METER_HIGH
 import model.DEFAULT_METER_LOW
@@ -182,7 +183,7 @@ object Ust {
                 pendingPitchBend = null
             }
             line.tryGetValue("Length")?.let {
-                val length = it.toLongOrNull() ?: return@let
+                val length = it.toDoubleOrNull()?.roundToLong() ?: return@let
                 pendingNoteTickOn = time
                 pendingBpm?.let { bpm ->
                     tempos.add(Tempo(time, bpm))
