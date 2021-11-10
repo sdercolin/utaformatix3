@@ -41,8 +41,8 @@ fun pitchToUtauMode2Track(pitch: Pitch?, notes: List<Note>, tempos: List<Tempo>)
         val bpm: Double
     )
 
-    val toRelative = { absolutePitch: List<Pair<Long, Double?>>, key: Int ->
-        absolutePitch.map { Pair(it.first, (it.second ?: key.toDouble()) - key.toDouble()) }
+    val toRelative = { from: List<Pair<Long, Double?>>, key: Int ->
+        from.map { Pair(it.first, (it.second ?: key.toDouble()) - key.toDouble()) }
     }
 
     val dotPitData = listOf(
@@ -114,7 +114,7 @@ fun pitchFromUtauMode2Track(pitchData: UtauMode2TrackPitchData?, notes: List<Not
                 }
             }
         }
-        pitchPoints.addAll(pendingPitchPoints.filter { it.first < points.firstOrNull()?.first ?: Long.MAX_VALUE })
+        pitchPoints.addAll(pendingPitchPoints.filter { it.first < (points.firstOrNull()?.first ?: Long.MAX_VALUE) })
         pendingPitchPoints = points
             .fixPointsAtLastNote(note, lastNote)
             .addPointsContinuingLastNote(note, lastNote)
