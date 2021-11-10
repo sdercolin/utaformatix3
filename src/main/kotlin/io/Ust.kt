@@ -27,6 +27,7 @@ import process.pitch.UtauMode2TrackPitchData
 import process.pitch.pitchFromUtauMode1Track
 import process.pitch.pitchFromUtauMode2Track
 import process.pitch.pitchToUtauMode1Track
+import process.pitch.pitchToUtauMode2Track
 import process.validateNotes
 import util.encode
 import util.getSafeFileName
@@ -278,6 +279,7 @@ object Ust {
         val blob = zip.generateAsync(option).await() as Blob
         val name = project.name + ".zip"
         val notifications = mutableListOf<ExportNotification>()
+        //TODO: Maybe find a better way to handle multi tempo export in future
         if (project.tempos.distinctBy { it.bpm }.count() > 1) {
             notifications.add(ExportNotification.TempoChangeIgnored)
         }
@@ -304,12 +306,14 @@ object Ust {
         builder.appendLine("Tracks=1")
         builder.appendLine("ProjectName=${track.name}")
         // TODO: Mode2 output
-        if (!features.contains(Feature.ConvertPitch))
-            builder.appendLine("Mode2=True")
+        builder.appendLine("Mode2=True")
         var tickPos = 0L
         var restCount = 0
-        val pitchData = if (features.contains(Feature.ConvertPitch)) {
+        val pitchDataMode1 = if (features.contains(Feature.ConvertPitch)) {
             pitchToUtauMode1Track(track.pitch, track.notes)
+        } else null
+        val pitchDataMode2 = if (features.contains(Feature.ConvertPitch)){
+            pitchToUtauMode2Track(track.pitch, track.notes, project.tempos)
         } else null
         for ((index, note) in track.notes.withIndex()) {
             if (tickPos < note.tickOn) {
@@ -330,9 +334,17 @@ object Ust {
 
             if (features.contains(Feature.ConvertPitch)) {
                 builder.appendLine("PBType=5")
-                val pitchString = makeMode1PitchDataString(pitchData?.notes?.get(index))
+                val pitchString = makeMode1PitchDataString(pitchDataMode1?.notes?.get(index))
                 builder.appendLine("PitchBend=$pitchString")
                 builder.appendLine("PBStart=0")
+
+                val currMode2Pitch = pitchDataMode2?.notes?.get(index)
+                builder.appendLine("PBS=${currMode2Pitch?.start};${currMode2Pitch?.startShift}")
+                builder.appendLine("PBW=${currMode2Pitch?.widths?.joinToString(",") { it.toString() }}")
+                builder.appendLine("PBY=${currMode2Pitch?.shifts?.joinToString(",") { it.toString() }}")
+                builder.appendLine("PBM=${currMode2Pitch?.curveTypes?.joinToString(",")}")
+                if (currMode2Pitch?.vibratoParams != null)
+                    builder.appendLine("VBR=${currMode2Pitch.vibratoParams.joinToString(",")}")
             }
 
             tickPos = note.tickOff
@@ -352,5 +364,7 @@ object Ust {
     }
 
     const val MODE1_PITCH_SAMPLING_INTERVAL_TICK = 5L
+    const val MODE2_PITCH_MAX_POINT_COUNT = 50L
+    //TODO: Use a smaller export count may be better, as it can be painful for user with plain UTAU to edit.
     private const val LINE_SEPARATOR = "\r\n"
 }

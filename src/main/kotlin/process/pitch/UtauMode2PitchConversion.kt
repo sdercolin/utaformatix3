@@ -4,6 +4,7 @@ import kotlin.math.roundToLong
 import model.Note
 import model.Pitch
 import model.TICKS_IN_BEAT
+import model.Tempo
 import process.interpolateCosineEaseIn
 import process.interpolateCosineEaseInOut
 import process.interpolateCosineEaseOut
@@ -24,6 +25,59 @@ data class UtauMode2NotePitchData(
     val curveTypes: List<String>, // (blank)/s/r/j
     val vibratoParams: List<Double>? // length(%), period(msec), depth(cent), easeIn(%), easeOut(%), phase(%), shift(%)
 )
+
+
+private const val MAX_OVERLAP_LENGTH = 240L
+private const val MIX_OVERLAP_RATIO = 0.5
+fun pitchToUtauMode2Track(pitch: Pitch?, notes: List<Note>, tempos: List<Tempo>): UtauMode2TrackPitchData? {
+    pitch ?: return null
+    //FIXME:We need to convert to relative by ourselves as we need relative to current note
+    val absolutePitch = pitch.getAbsoluteData(notes) ?: return null
+    val notePairs = notes.zipWithNext()
+
+    data class NotePitchData(
+        val pitch: List<Pair<Long, Double>>,
+        val offset: Long,
+        val bpm: Double
+    )
+
+    val toRelative = { absolutePitch: List<Pair<Long, Double?>>, key: Int ->
+        absolutePitch.map { Pair(it.first, (it.second ?: key.toDouble()) - key.toDouble()) }
+    }
+
+    val dotPitData = listOf(
+        listOf(
+            NotePitchData(
+                toRelative(absolutePitch.filter { it.first < notes.first().tickOff }, notes.first().key),
+                -(absolutePitch.filter { it.first < 0 }.unzip().first.minOrNull() ?: 0),
+                tempos.bpmForNote(notes.first())
+            )
+        ) // first note
+        , notePairs.map { notePair ->
+            val prev = notePair.first
+            val curr = notePair.second
+            val expectedOverlap = kotlin.math.min((prev.length * MIX_OVERLAP_RATIO).toLong(), MAX_OVERLAP_LENGTH)
+            val overlap = curr.tickOn - absolutePitch.first{it.first >= (curr.tickOn - expectedOverlap)}.first
+            NotePitchData(
+                toRelative(
+                    absolutePitch.filter { it.first >= (curr.tickOn - overlap) && it.first < curr.tickOff },
+                    curr.key
+                ), -overlap, tempos.bpmForNote(curr)
+            )
+        }).flatten()
+
+    return UtauMode2TrackPitchData(dotPitData.map { currNote ->
+        UtauMode2NotePitchData(
+            currNote.bpm,
+            milliSecFromTick(currNote.offset, currNote.bpm),
+            currNote.pitch.first().second * 10,//*10 = semitone -> 10 cents
+            currNote.pitch.zipWithNext().map { milliSecFromTick(it.second.first - it.first.first, currNote.bpm) },
+            currNote.pitch.drop(1).unzip().second.map { it * 10 },
+            List(currNote.pitch.size - 1) { "" },//TODO: We use line to connect here, but maybe "s" is better?
+            null
+        )
+    })
+}
 
 fun pitchFromUtauMode2Track(pitchData: UtauMode2TrackPitchData?, notes: List<Note>): Pitch? {
     pitchData ?: return null
@@ -170,6 +224,14 @@ private fun interpolate(
     return output.orEmpty()
 }
 
+private fun List<Tempo>.bpmForNote(note: Note): Double {
+    return this.last { it.tickPosition < note.tickOn }.bpm
+}
+
 private fun tickFromMilliSec(msec: Double, bpm: Double): Long {
     return (msec * bpm * (TICKS_IN_BEAT) / 60000).roundToLong()
+}
+
+private fun milliSecFromTick(tick: Long, bpm: Double): Double {
+    return tick * 60000 / (bpm * TICKS_IN_BEAT)
 }
