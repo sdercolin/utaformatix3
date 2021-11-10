@@ -279,7 +279,7 @@ object Ust {
         val blob = zip.generateAsync(option).await() as Blob
         val name = project.name + ".zip"
         val notifications = mutableListOf<ExportNotification>()
-        //TODO: Maybe find a better way to handle multi tempo export in future
+        // TODO: Maybe find a better way to handle multi tempo export in future
         if (project.tempos.distinctBy { it.bpm }.count() > 1) {
             notifications.add(ExportNotification.TempoChangeIgnored)
         }
@@ -311,7 +311,7 @@ object Ust {
         val pitchDataMode1 = if (features.contains(Feature.ConvertPitch)) {
             pitchToUtauMode1Track(track.pitch, track.notes)
         } else null
-        val pitchDataMode2 = if (features.contains(Feature.ConvertPitch)){
+        val pitchDataMode2 = if (features.contains(Feature.ConvertPitch)) {
             pitchToUtauMode2Track(track.pitch, track.notes, project.tempos)
         } else null
         for ((index, note) in track.notes.withIndex()) {
