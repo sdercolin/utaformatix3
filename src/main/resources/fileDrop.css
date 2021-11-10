@@ -66,5 +66,5 @@
 }
 
 .file-drop > .file-drop-target > div > p {
-  white-space: nowrap
+  margin: 12px;
 }
