@@ -305,7 +305,6 @@ object Ust {
         builder.appendLine("Tempo=$bpm")
         builder.appendLine("Tracks=1")
         builder.appendLine("ProjectName=${track.name}")
-        // TODO: Mode2 output
         builder.appendLine("Mode2=True")
         var tickPos = 0L
         var restCount = 0

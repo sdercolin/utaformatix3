@@ -34,7 +34,6 @@ private const val MAX_OVERLAP_LENGTH = 240L
 private const val MIX_OVERLAP_RATIO = 0.5
 fun pitchToUtauMode2Track(pitch: Pitch?, notes: List<Note>, tempos: List<Tempo>): UtauMode2TrackPitchData? {
     pitch ?: return null
-    //FIXME:We need to convert to relative by ourselves as we need relative to current note
     val absolutePitch = pitch.getAbsoluteData(notes) ?: return null
     val notePairs = notes.zipWithNext()
 
@@ -80,7 +79,7 @@ fun pitchToUtauMode2Track(pitch: Pitch?, notes: List<Note>, tempos: List<Tempo>)
             currNote.pitch.first().second * 10,//*10 = semitone -> 10 cents
             currNote.pitch.zipWithNext().map { milliSecFromTick(it.second.first - it.first.first, currNote.bpm) },
             currNote.pitch.drop(1).unzip().second.map { it * 10 },
-            List(currNote.pitch.size - 1) { "" },//TODO: We use line to connect here, but maybe "s" is better?
+            List(currNote.pitch.size - 1) { "" },
             null
         )
     })
