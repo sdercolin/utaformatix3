@@ -337,13 +337,13 @@ object Ust {
                 builder.appendLine("PitchBend=$pitchString")
                 builder.appendLine("PBStart=0")
 
-                val currMode2Pitch = pitchDataMode2?.notes?.get(index)
-                builder.appendLine("PBS=${currMode2Pitch?.start};${currMode2Pitch?.startShift}")
-                builder.appendLine("PBW=${currMode2Pitch?.widths?.joinToString(",") { it.toString() }}")
-                builder.appendLine("PBY=${currMode2Pitch?.shifts?.joinToString(",") { it.toString() }}")
-                builder.appendLine("PBM=${currMode2Pitch?.curveTypes?.joinToString(",")}")
-                if (currMode2Pitch?.vibratoParams != null)
-                    builder.appendLine("VBR=${currMode2Pitch.vibratoParams.joinToString(",")}")
+                val mode2Pitch = pitchDataMode2?.notes?.get(index)
+                builder.appendLine("PBS=${mode2Pitch?.start};${mode2Pitch?.startShift}")
+                builder.appendLine("PBW=${mode2Pitch?.widths?.joinToString(",") { it.toString() }}")
+                builder.appendLine("PBY=${mode2Pitch?.shifts?.joinToString(",") { it.toString() }}")
+                builder.appendLine("PBM=${mode2Pitch?.curveTypes?.joinToString(",")}")
+                if (mode2Pitch?.vibratoParams != null)
+                    builder.appendLine("VBR=${mode2Pitch.vibratoParams.joinToString(",")}")
             }
 
             tickPos = note.tickOff

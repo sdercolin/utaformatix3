@@ -9,7 +9,7 @@ package process
 * */
 
 // As Utaformatix use Pair<Long, Double> to describe pitch point, so...
-typealias Point = Pair<Long, Double>
+private typealias Point = Pair<Long, Double>
 
 private fun perpendicularDistance(pt: Point, lineStart: Point, lineEnd: Point): Double {
     var dx = (lineEnd.first - lineStart.first).toDouble()
@@ -17,7 +17,10 @@ private fun perpendicularDistance(pt: Point, lineStart: Point, lineEnd: Point): 
 
     // Normalize
     val mag = kotlin.math.hypot(dx, dy)
-    if (mag > 0.0) { dx /= mag; dy /= mag }
+    if (mag > 0.0) {
+        dx /= mag
+        dy /= mag
+    }
     val pvx = pt.first - lineStart.first
     val pvy = pt.second - lineStart.second
 
@@ -31,14 +34,14 @@ private fun perpendicularDistance(pt: Point, lineStart: Point, lineEnd: Point): 
     return kotlin.math.hypot(ax, ay)
 }
 
-/** The RDP(Ramer–Douglas–Peucker) simplification algorithm for line based shape.
- *  Slightly modified from rosettacode.org's implementation.
- *  @param pointList Points that form the shape, connected by lines.
- *  @param epsilon Defines how much the algorithm should simplify. Bigger value leads to more point to drop.
+/**
+ * The RDP(Ramer–Douglas–Peucker) simplification algorithm for line based shape.
+ * Slightly modified from rosettacode.org's implementation.
+ * @param pointList Points that form the shape, connected by lines.
+ * @param epsilon Defines how much the algorithm should simplify. Bigger value leads to more point to drop.
  */
 fun simplifyShape(pointList: List<Point>, epsilon: Double): List<Point> {
-    if (pointList.size < 2)
-        return pointList
+    if (pointList.size < 2) return pointList
 
     // Find the point with the maximum distance from line between start and end
     var dmax = 0.0
@@ -51,8 +54,6 @@ fun simplifyShape(pointList: List<Point>, epsilon: Double): List<Point> {
 
     // If max distance is greater than epsilon, recursively simplify
     return if (dmax > epsilon) {
-        // val recResults1 = mutableListOf<Point>()
-        // val recResults2 = mutableListOf<Point>()
         val firstLine = pointList.take(index + 1)
         val lastLine = pointList.drop(index)
         val recResults1 = simplifyShape(firstLine, epsilon)
@@ -72,8 +73,7 @@ fun simplifyShape(pointList: List<Point>, epsilon: Double): List<Point> {
  * Using [simplifyShape], which implements The RDP(Ramer–Douglas–Peucker) algorithm.
  * */
 fun simplifyShapeTo(pointList: List<Point>, maxPointCount: Long): List<Point> {
-    if (pointList.size < maxPointCount)
-        return pointList
+    if (pointList.size < maxPointCount) return pointList
     var epsilon = 0.1
     val step = 0.1
     while (true) {
