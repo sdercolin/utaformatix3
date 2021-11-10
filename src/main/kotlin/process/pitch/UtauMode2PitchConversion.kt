@@ -114,7 +114,7 @@ fun pitchFromUtauMode2Track(pitchData: UtauMode2TrackPitchData?, notes: List<Not
                 }
             }
         }
-        pitchPoints.addAll(pendingPitchPoints.filter { it.first < points.firstOrNull()?.first ?: Long.MAX_VALUE })
+        pitchPoints.addAll(pendingPitchPoints.filter { it.first < (points.firstOrNull()?.first ?: Long.MAX_VALUE) })
         pendingPitchPoints = points
             .fixPointsAtLastNote(note, lastNote)
             .addPointsContinuingLastNote(note, lastNote)
