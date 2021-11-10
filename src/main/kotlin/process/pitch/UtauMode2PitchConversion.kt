@@ -1,5 +1,6 @@
 package process.pitch
 
+import io.Ust
 import kotlin.math.roundToLong
 import model.Note
 import model.Pitch
@@ -9,6 +10,8 @@ import process.interpolateCosineEaseIn
 import process.interpolateCosineEaseInOut
 import process.interpolateCosineEaseOut
 import process.interpolateLinear
+import process.simplifyShape
+import process.simplifyShapeTo
 
 private const val SAMPLING_INTERVAL_TICK = 4L
 
@@ -66,7 +69,11 @@ fun pitchToUtauMode2Track(pitch: Pitch?, notes: List<Note>, tempos: List<Tempo>)
             )
         }).flatten()
 
-    return UtauMode2TrackPitchData(dotPitData.map { currNote ->
+    val dotPitDataSimplified = dotPitData.map {
+        NotePitchData(simplifyShapeTo(it.pitch, Ust.MODE2_PITCH_MAX_POINT_COUNT), it.offset, it.bpm)
+    }
+
+    return UtauMode2TrackPitchData(dotPitDataSimplified.map { currNote ->
         UtauMode2NotePitchData(
             currNote.bpm,
             milliSecFromTick(currNote.offset, currNote.bpm),

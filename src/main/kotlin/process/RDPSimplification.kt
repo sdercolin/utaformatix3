@@ -73,6 +73,8 @@ fun simplifyShape(pointList: List<Point>, epsilon: Double):List<Point> {
  * Using [simplifyShape], which implements The RDP(Ramer–Douglas–Peucker) algorithm.
  * */
 fun simplifyShapeTo(pointList: List<Point>, maxPointCount:Long): List<Point>{
+    if (pointList.size < maxPointCount)
+        return pointList
     var epsilon = 0.1
     val step = 0.1
     while (true){

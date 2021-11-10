@@ -365,6 +365,5 @@ object Ust {
 
     const val MODE1_PITCH_SAMPLING_INTERVAL_TICK = 5L
     const val MODE2_PITCH_MAX_POINT_COUNT = 50L
-    //TODO: Use a smaller export count may be better, as it can be painful for user with plain UTAU to edit.
     private const val LINE_SEPARATOR = "\r\n"
 }
