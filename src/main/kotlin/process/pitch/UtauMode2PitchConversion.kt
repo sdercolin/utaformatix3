@@ -56,20 +56,12 @@ fun pitchToUtauMode2Track(pitch: Pitch?, notes: List<Note>, tempos: List<Tempo>)
         notePairs.map { notePair ->
             val prev = notePair.first
             val curr = notePair.second
-            /* Get an overlap between two notes when cut pit data from track to get a more smooth result.
-             Overlap is half of previous note's length, or MAX_OVERLAP_LENGTH if too large. */
-            val expectedOverlap = kotlin.math.min((prev.length * MIX_OVERLAP_RATIO).toLong(), MAX_OVERLAP_LENGTH)
-            /* But in this overlap area, we may only get points which are closer to current note than overlap, as we
-             simplify the pit data. So we get the first point in overlap area here, and calculate the actual overlap
-             we need. */
-            val overlap = curr.tickOn -
-                    (absolutePitch.firstOrNull { it.first >= (curr.tickOn - expectedOverlap) }?.first ?: curr.tickOn)
-                    // So if we can not find any data, we just get the overlap to 0 [curr.tickOn - curr.tickOn]
             NotePitchData(
                 toRelative(
-                    absolutePitch.filter { it.first >= (curr.tickOn - overlap) && it.first < curr.tickOff },
+                    absolutePitch.filter { it.first >= curr.tickOn && it.first < curr.tickOff },
                     curr.key
-                ), -overlap, tempos.bpmForNote(curr)
+                ), (absolutePitch.firstOrNull{it.first >= curr.tickOn}?.first ?: curr.tickOn) - curr.tickOn,
+                tempos.bpmForNote(curr)
             )
         }).flatten()
 
