@@ -69,13 +69,12 @@ fun simplifyShape(pointList: List<Point>, epsilon: Double): List<Point> {
 
 /**
  * Simplify given shape, which should later be described by [maxPointCount] (or less) points.
- * Note that this function will simplify with epsilon = 0.1 anyway even your input count is satisfied.
+ * Note that this function will simplify with a small epsilon anyway even your input count is satisfied.
  * Using [simplifyShape], which implements The RDP(Ramer–Douglas–Peucker) algorithm.
  * */
 fun simplifyShapeTo(pointList: List<Point>, maxPointCount: Long): List<Point> {
-    // if (pointList.size < maxPointCount) return pointList
     /* As sometimes we will have pit data that is less than 50 points, but way too dense for mode2 ust
-       So we commented this check here to make sure data will be simplified least with epsilon = 0.1. */
+       So we commented this check here to make sure data will be simplified least with epsilon = step. */
     val step = 0.05
     var epsilon = step
     while (true) {
