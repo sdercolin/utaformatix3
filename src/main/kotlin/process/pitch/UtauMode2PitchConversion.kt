@@ -78,9 +78,7 @@ fun pitchToUtauMode2Track(pitch: Pitch?, notes: List<Note>, tempos: List<Tempo>)
     }
 
     return UtauMode2TrackPitchData(dotPitDataSimplified.map { currNote ->
-        if (currNote.pitch.isEmpty())
-            return@map null
-        UtauMode2NotePitchData(
+        if (currNote.pitch.isEmpty()) null else UtauMode2NotePitchData(
             currNote.bpm,
             milliSecFromTick(currNote.offset, currNote.bpm),
             currNote.pitch.first().second * 10, // *10 = semitone -> 10 cents
