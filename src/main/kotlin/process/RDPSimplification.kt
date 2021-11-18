@@ -76,8 +76,8 @@ fun simplifyShapeTo(pointList: List<Point>, maxPointCount: Long): List<Point> {
     // if (pointList.size < maxPointCount) return pointList
     /* As sometimes we will have pit data that is less than 50 points, but way too dense for mode2 ust
        So we commented this check here to make sure data will be simplified least with epsilon = 0.1. */
-    var epsilon = 0.1
-    val step = 0.1
+    val step = 0.05
+    var epsilon = step
     while (true) {
         val result = simplifyShape(pointList, epsilon)
         if (result.count() < maxPointCount) return result
