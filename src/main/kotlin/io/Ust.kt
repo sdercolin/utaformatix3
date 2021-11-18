@@ -3,6 +3,7 @@ package io
 import external.Encoding
 import external.JsZip
 import external.JsZipOption
+import kotlin.math.roundToLong
 import kotlinx.coroutines.await
 import model.DEFAULT_METER_HIGH
 import model.DEFAULT_METER_LOW
@@ -26,6 +27,7 @@ import process.pitch.UtauMode2TrackPitchData
 import process.pitch.pitchFromUtauMode1Track
 import process.pitch.pitchFromUtauMode2Track
 import process.pitch.pitchToUtauMode1Track
+import process.pitch.pitchToUtauMode2Track
 import process.validateNotes
 import util.encode
 import util.getSafeFileName
@@ -182,7 +184,7 @@ object Ust {
                 pendingPitchBend = null
             }
             line.tryGetValue("Length")?.let {
-                val length = it.toLongOrNull() ?: return@let
+                val length = it.toDoubleOrNull()?.roundToLong() ?: return@let
                 pendingNoteTickOn = time
                 pendingBpm?.let { bpm ->
                     tempos.add(Tempo(time, bpm))
@@ -277,6 +279,7 @@ object Ust {
         val blob = zip.generateAsync(option).await() as Blob
         val name = project.name + ".zip"
         val notifications = mutableListOf<ExportNotification>()
+        // TODO: Maybe find a better way to handle multi tempo export in future
         if (project.tempos.distinctBy { it.bpm }.count() > 1) {
             notifications.add(ExportNotification.TempoChangeIgnored)
         }
@@ -302,13 +305,14 @@ object Ust {
         builder.appendLine("Tempo=$bpm")
         builder.appendLine("Tracks=1")
         builder.appendLine("ProjectName=${track.name}")
-        // TODO: Mode2 output
-        if (!features.contains(Feature.ConvertPitch))
-            builder.appendLine("Mode2=True")
+        builder.appendLine("Mode2=True")
         var tickPos = 0L
         var restCount = 0
-        val pitchData = if (features.contains(Feature.ConvertPitch)) {
+        val pitchDataMode1 = if (features.contains(Feature.ConvertPitch)) {
             pitchToUtauMode1Track(track.pitch, track.notes)
+        } else null
+        val pitchDataMode2 = if (features.contains(Feature.ConvertPitch)) {
+            pitchToUtauMode2Track(track.pitch, track.notes, project.tempos)
         } else null
         for ((index, note) in track.notes.withIndex()) {
             if (tickPos < note.tickOn) {
@@ -329,9 +333,17 @@ object Ust {
 
             if (features.contains(Feature.ConvertPitch)) {
                 builder.appendLine("PBType=5")
-                val pitchString = makeMode1PitchDataString(pitchData?.notes?.get(index))
+                val pitchString = makeMode1PitchDataString(pitchDataMode1?.notes?.get(index))
                 builder.appendLine("PitchBend=$pitchString")
                 builder.appendLine("PBStart=0")
+
+                val mode2Pitch = pitchDataMode2?.notes?.get(index)
+                builder.appendLine("PBS=${mode2Pitch?.start};${mode2Pitch?.startShift}")
+                builder.appendLine("PBW=${mode2Pitch?.widths?.joinToString(",") { it.toString() }}")
+                builder.appendLine("PBY=${mode2Pitch?.shifts?.joinToString(",") { it.toString() }}")
+                builder.appendLine("PBM=${mode2Pitch?.curveTypes?.joinToString(",")}")
+                if (mode2Pitch?.vibratoParams != null)
+                    builder.appendLine("VBR=${mode2Pitch.vibratoParams.joinToString(",")}")
             }
 
             tickPos = note.tickOff
@@ -351,5 +363,6 @@ object Ust {
     }
 
     const val MODE1_PITCH_SAMPLING_INTERVAL_TICK = 5L
+    const val MODE2_PITCH_MAX_POINT_COUNT = 50L
     private const val LINE_SEPARATOR = "\r\n"
 }

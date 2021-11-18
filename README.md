@@ -17,7 +17,7 @@ The current version `3.x` is built with [Kotlin for JavaScript](https://kotlinla
   |        Format        | Pitch import | Vibrato import | Pitch export | 
   | -------------------- | ------------ | -------------- | ------------ |
   | VSQ/VSQX/VPR/MID(V1) |       ✓      |                |       ✓      |
-  |      UST(mode2)      |       ✓      |        ✓       |              |
+  |      UST(mode2)      |       ✓      |        ✓       |       ✓      |
   |      UST(mode1)      |       ✓      |       N/A      |       ✓      |
   |         CCS          |       ✓      |                |       ✓      |
   |         SVP          |       ✓      |        ✓       |       ✓      |
