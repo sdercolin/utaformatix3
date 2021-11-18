@@ -60,7 +60,7 @@ fun pitchToUtauMode2Track(pitch: Pitch?, notes: List<Note>, tempos: List<Tempo>)
                 toRelative(
                     absolutePitch.filter { it.first >= curr.tickOn && it.first < curr.tickOff },
                     curr.key
-                ), (absolutePitch.firstOrNull{it.first >= curr.tickOn}?.first ?: curr.tickOn) - curr.tickOn,
+                ), (absolutePitch.firstOrNull { it.first >= curr.tickOn }?.first ?: curr.tickOn) - curr.tickOn,
                 tempos.bpmForNote(curr)
             )
         }).flatten()
