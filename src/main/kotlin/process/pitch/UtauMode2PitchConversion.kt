@@ -56,13 +56,12 @@ fun pitchToUtauMode2Track(pitch: Pitch?, notes: List<Note>, tempos: List<Tempo>)
         notePairs.map { notePair ->
             val prev = notePair.first
             val curr = notePair.second
-            val expectedOverlap = kotlin.math.min((prev.length * MIX_OVERLAP_RATIO).toLong(), MAX_OVERLAP_LENGTH)
-            val overlap = curr.tickOn - absolutePitch.first { it.first >= (curr.tickOn - expectedOverlap) }.first
             NotePitchData(
                 toRelative(
-                    absolutePitch.filter { it.first >= (curr.tickOn - overlap) && it.first < curr.tickOff },
+                    absolutePitch.filter { it.first >= curr.tickOn && it.first < curr.tickOff },
                     curr.key
-                ), -overlap, tempos.bpmForNote(curr)
+                ), (absolutePitch.firstOrNull { it.first >= curr.tickOn }?.first ?: curr.tickOn) - curr.tickOn,
+                tempos.bpmForNote(curr)
             )
         }).flatten()
 
@@ -71,7 +70,7 @@ fun pitchToUtauMode2Track(pitch: Pitch?, notes: List<Note>, tempos: List<Tempo>)
     }
 
     return UtauMode2TrackPitchData(dotPitDataSimplified.map { currNote ->
-        UtauMode2NotePitchData(
+        if (currNote.pitch.isEmpty()) null else UtauMode2NotePitchData(
             currNote.bpm,
             milliSecFromTick(currNote.offset, currNote.bpm),
             currNote.pitch.first().second * 10, // *10 = semitone -> 10 cents
@@ -229,7 +228,7 @@ private fun interpolate(
 }
 
 private fun List<Tempo>.bpmForNote(note: Note): Double {
-    return this.last { it.tickPosition < note.tickOn }.bpm
+    return this.last { it.tickPosition <= note.tickOn }.bpm
 }
 
 private fun tickFromMilliSec(msec: Double, bpm: Double): Long {

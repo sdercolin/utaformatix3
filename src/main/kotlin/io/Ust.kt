@@ -338,9 +338,12 @@ object Ust {
                 builder.appendLine("PBStart=0")
 
                 val mode2Pitch = pitchDataMode2?.notes?.get(index)
-                builder.appendLine("PBS=${mode2Pitch?.start};${mode2Pitch?.startShift}")
-                builder.appendLine("PBW=${mode2Pitch?.widths?.joinToString(",") { it.toString() }}")
-                builder.appendLine("PBY=${mode2Pitch?.shifts?.joinToString(",") { it.toString() }}")
+                builder.appendLine("PBS=${mode2Pitch?.start}")
+                // We insert startShift in PBW and PBY with width=1, as UTAU would just ignore it
+                // Theoretically this would make all pit data moved behind by 1 tick, but hey, who can tell the difference...
+                builder.appendLine("PBW=1,${mode2Pitch?.widths?.joinToString(",") { it.toString() }}")
+                builder.appendLine("PBY=${mode2Pitch?.startShift},${mode2Pitch?.shifts
+                    ?.joinToString(",") { it.toString() }}")
                 builder.appendLine("PBM=${mode2Pitch?.curveTypes?.joinToString(",")}")
                 if (mode2Pitch?.vibratoParams != null)
                     builder.appendLine("VBR=${mode2Pitch.vibratoParams.joinToString(",")}")
