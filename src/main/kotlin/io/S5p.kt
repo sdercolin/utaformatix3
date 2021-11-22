@@ -88,7 +88,7 @@ object S5p {
         return Pitch(convertedPoints, isAbsolute = false).takeIf { it.data.isNotEmpty() }
     }
 
-    private fun parseNotes(track: Track): List<model.Note> = track.notes.map { note ->
+    private fun parseNotes(track: Track): List<model.Note> = track.notes.filterNotNull().map { note ->
         val tickOn = note.onset / TICK_RATE
         model.Note(
             id = 0,
@@ -198,7 +198,7 @@ object S5p {
         var displayOrder: Int? = null,
         var mixer: JsonElement? = null,
         var name: String? = null,
-        var notes: List<Note> = listOf(),
+        var notes: List<Note?> = listOf(),
         var parameters: Parameters? = null
     )
 
