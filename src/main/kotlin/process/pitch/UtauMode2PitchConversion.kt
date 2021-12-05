@@ -33,7 +33,6 @@ private const val MIX_OVERLAP_RATIO = 0.5
 fun pitchToUtauMode2Track(pitch: Pitch?, notes: List<Note>, tempos: List<Tempo>): UtauMode2TrackPitchData? {
     pitch ?: return null
     val absolutePitch = pitch.getAbsoluteData(notes) ?: return null
-    val notePairs = notes.zipWithNext()
 
     data class NotePitchData(
         val pitch: List<Pair<Long, Double>>,
@@ -53,15 +52,13 @@ fun pitchToUtauMode2Track(pitch: Pitch?, notes: List<Note>, tempos: List<Tempo>)
                 tempos.bpmForNote(notes.first())
             )
         ), // first note
-        notePairs.map { notePair ->
-            val prev = notePair.first
-            val curr = notePair.second
+        notes.drop(1).map { note ->
             NotePitchData(
                 toRelative(
-                    absolutePitch.filter { it.first >= curr.tickOn && it.first < curr.tickOff },
-                    curr.key
-                ), (absolutePitch.firstOrNull { it.first >= curr.tickOn }?.first ?: curr.tickOn) - curr.tickOn,
-                tempos.bpmForNote(curr)
+                    absolutePitch.filter { it.first >= note.tickOn && it.first < note.tickOff },
+                    note.key
+                ), (absolutePitch.firstOrNull { it.first >= note.tickOn }?.first ?: note.tickOn) - note.tickOn,
+                tempos.bpmForNote(note)
             )
         }).flatten()
 
