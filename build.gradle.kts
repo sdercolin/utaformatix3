@@ -49,6 +49,7 @@ dependencies {
     implementation(npm("encoding-japanese", "1.0.30"))
     implementation(npm("uuid", "8.3.2"))
     implementation(npm("midi-parser-js", "4.0.4"))
+    implementation(npm("js-cookie", "2.2.1"))
 
     // Testing
     testImplementation(kotlin("test-js"))

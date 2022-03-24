@@ -1,5 +1,6 @@
 package ui
 
+import ImportParamsJson
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -20,6 +21,7 @@ import react.dom.div
 import react.setState
 import styled.css
 import styled.styledDiv
+import ui.external.Cookies
 import ui.external.materialui.FontSize
 import ui.external.materialui.Icons
 import ui.external.materialui.LabelPlacement
@@ -42,7 +44,7 @@ class Importer : RComponent<ImporterProps, ImporterState>() {
 
     override fun ImporterState.init() {
         isLoading = false
-        params = ImportParams()
+        params = loadImportParamsFromCookies() ?: ImportParams()
         snackbarError = SnackbarErrorState()
         dialogError = DialogErrorState()
     }
@@ -164,6 +166,7 @@ class Importer : RComponent<ImporterProps, ImporterState>() {
                 val project = parseFunction(files, state.params).lyricsTypeAnalysed().requireValid()
                 console.log("Project was imported successfully.")
                 console.log(project)
+                saveImportParamsToCookies(state.params)
                 props.onImported.invoke(project)
             } catch (t: Throwable) {
                 console.log(t)
@@ -193,7 +196,16 @@ class Importer : RComponent<ImporterProps, ImporterState>() {
     private fun closeErrorDialog() {
         setState { dialogError = dialogError.copy(isShowing = false) }
     }
+
+    private fun loadImportParamsFromCookies() = Cookies.get(ImportParamsCookieName)
+        ?.takeIf { it.isNotBlank() }
+        ?.let(ImportParamsJson::parse)
+
+    private fun saveImportParamsToCookies(params: ImportParams) =
+        Cookies.set(ImportParamsCookieName, ImportParamsJson.generate(params))
 }
+
+private const val ImportParamsCookieName = "import_params"
 
 external interface ImporterProps : RProps {
     var formats: List<Format>
