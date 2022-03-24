@@ -107,7 +107,7 @@ private fun List<Pair<Long, Double?>>.applyDefaultPitch(
 
             if (lastPoint?.second == null) {
                 val interpolatedPoints = (startTick until endTick step SAMPLING_INTERVAL_TICK)
-                    .map { it to (requireNotNull(base[it]) + (bendDiff[it] ?: 0.0) + (vibratoDiff[it] ?: 0.0)) }
+                    .map { it to ((base[it] ?: 0.0) + (bendDiff[it] ?: 0.0) + (vibratoDiff[it] ?: 0.0)) }
                 acc + interpolatedPoints + point
             } else {
                 acc + point
@@ -207,13 +207,11 @@ private fun getVibratoPitch(
             val key = -minusCent.toDouble() / 100
             tick to key
         }
-        .also { console.log(it) }
         .filter { it.first >= startTick && it.first < note.note.tickOff }
         .sortedBy { it.first }
         .toList()
         .interpolateLinear(1L)
         .orEmpty()
-        .also { console.log(it) }
 }.mergeSameTickPoints().orEmpty().toMap()
 
 private val Note.tickHalfStart: Long get() = tickOn + (length + 1) / 2
