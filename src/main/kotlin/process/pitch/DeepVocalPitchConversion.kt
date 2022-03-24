@@ -207,13 +207,11 @@ private fun getVibratoPitch(
             val key = -minusCent.toDouble() / 100
             tick to key
         }
-        .also { console.log(it) }
         .filter { it.first >= startTick && it.first < note.note.tickOff }
         .sortedBy { it.first }
         .toList()
         .interpolateLinear(1L)
         .orEmpty()
-        .also { console.log(it) }
 }.mergeSameTickPoints().orEmpty().toMap()
 
 private val Note.tickHalfStart: Long get() = tickOn + (length + 1) / 2
