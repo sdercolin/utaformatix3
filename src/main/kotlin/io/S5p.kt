@@ -10,6 +10,7 @@ import model.ExportNotification
 import model.ExportResult
 import model.Feature
 import model.Format
+import model.ImportParams
 import model.ImportWarning
 import model.Pitch
 import model.TimeSignature
@@ -25,7 +26,7 @@ object S5p {
     private const val TICK_RATE = 1470000L
     private const val DEFAULT_INTERVAL = 5512500L
 
-    suspend fun parse(file: File): model.Project {
+    suspend fun parse(file: File, params: ImportParams): model.Project {
         val text = file.readText().let {
             val index = it.lastIndexOf('}')
             it.take(index + 1)
@@ -49,7 +50,7 @@ object S5p {
         }.takeIf { it.isNotEmpty() } ?: listOf(model.Tempo.default).also {
             warnings.add(ImportWarning.TempoNotFound)
         }
-        val tracks = parseTracks(project)
+        val tracks = parseTracks(project, params)
         return model.Project(
             format = Format.S5p,
             inputFiles = listOf(file),
@@ -62,14 +63,15 @@ object S5p {
         )
     }
 
-    private fun parseTracks(project: Project): List<model.Track> = project.tracks.mapIndexed { index, track ->
-        model.Track(
-            id = index,
-            name = track.name ?: "Track ${index + 1}",
-            notes = parseNotes(track),
-            pitch = parsePitch(track)
-        ).validateNotes()
-    }
+    private fun parseTracks(project: Project, params: ImportParams): List<model.Track> =
+        project.tracks.mapIndexed { index, track ->
+            model.Track(
+                id = index,
+                name = track.name ?: "Track ${index + 1}",
+                notes = parseNotes(track),
+                pitch = if (params.simpleImport) null else parsePitch(track)
+            ).validateNotes()
+        }
 
     private fun parsePitch(track: Track): Pitch? {
         val pitchDelta = track.parameters?.pitchDelta ?: return Pitch(emptyList(), isAbsolute = false)

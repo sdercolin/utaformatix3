@@ -329,6 +329,16 @@ enum class Strings(val en: String, val ja: String, val zhCN: String) {
         en = "Processing…",
         ja = "処理中…",
         zhCN = "正在处理…"
+    ),
+    UseSimpleImport(
+        en = "Simple Import",
+        ja = "シンプルインポート",
+        zhCN = "简单导入"
+    ),
+    UseSimpleImportDescription(
+        en = "Ignore detail parameters to accelerate importing",
+        ja = "パラメータをインポートしないことで、より早くインポートする",
+        zhCN = "忽略参数，使导入更快"
     );
 
     fun get(language: Language): String = when (language) {

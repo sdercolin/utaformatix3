@@ -4,20 +4,32 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.css.LinearDimension
+import kotlinx.css.VerticalAlign
 import kotlinx.css.marginTop
 import kotlinx.html.js.onClickFunction
 import model.Format
+import model.ImportParams
 import model.Project
+import org.w3c.dom.HTMLInputElement
 import org.w3c.files.File
 import react.RBuilder
 import react.RComponent
 import react.RProps
 import react.RState
+import react.dom.div
 import react.setState
 import styled.css
 import styled.styledDiv
+import ui.external.materialui.FontSize
+import ui.external.materialui.Icons
+import ui.external.materialui.LabelPlacement
 import ui.external.materialui.Severity
+import ui.external.materialui.Style
 import ui.external.materialui.TypographyVariant
+import ui.external.materialui.formControlLabel
+import ui.external.materialui.formGroup
+import ui.external.materialui.switch
+import ui.external.materialui.tooltip
 import ui.external.materialui.typography
 import ui.external.react.fileDrop
 import ui.strings.Strings
@@ -30,6 +42,7 @@ class Importer : RComponent<ImporterProps, ImporterState>() {
 
     override fun ImporterState.init() {
         isLoading = false
+        params = ImportParams()
         snackbarError = SnackbarErrorState()
         dialogError = DialogErrorState()
     }
@@ -50,6 +63,8 @@ class Importer : RComponent<ImporterProps, ImporterState>() {
             }
             buildFileDrop()
         }
+
+        buildConfigurations()
 
         messageBar(
             isShowing = state.snackbarError.isShowing,
@@ -89,6 +104,41 @@ class Importer : RComponent<ImporterProps, ImporterState>() {
         }
     }
 
+    private fun RBuilder.buildConfigurations() {
+        formGroup {
+            div {
+                formControlLabel {
+                    attrs {
+                        label = string(Strings.UseSimpleImport)
+                        control = switch {
+                            attrs {
+                                checked = state.params.simpleImport
+                                onChange = {
+                                    val checked = (it.target as HTMLInputElement).checked
+                                    setState { params = params.copy(simpleImport = checked) }
+                                }
+                            }
+                        }
+                        labelPlacement = LabelPlacement.end
+                    }
+                }
+                tooltip {
+                    attrs {
+                        title = string(Strings.UseSimpleImportDescription)
+                        placement = "right"
+                        interactive = true
+                    }
+                    Icons.help {
+                        attrs.style = Style(
+                            fontSize = FontSize.initial,
+                            verticalAlign = VerticalAlign.middle
+                        )
+                    }
+                }
+            }
+        }
+    }
+
     private fun checkFilesToImport(files: List<File>) {
         val fileFormat = getFileFormat(files)
         when {
@@ -111,7 +161,7 @@ class Importer : RComponent<ImporterProps, ImporterState>() {
             try {
                 delay(100)
                 val parseFunction = format.parser
-                val project = parseFunction(files).lyricsTypeAnalysed().requireValid()
+                val project = parseFunction(files, state.params).lyricsTypeAnalysed().requireValid()
                 console.log("Project was imported successfully.")
                 console.log(project)
                 props.onImported.invoke(project)
@@ -152,6 +202,7 @@ external interface ImporterProps : RProps {
 
 external interface ImporterState : RState {
     var isLoading: Boolean
+    var params: ImportParams
     var snackbarError: SnackbarErrorState
     var dialogError: DialogErrorState
 }

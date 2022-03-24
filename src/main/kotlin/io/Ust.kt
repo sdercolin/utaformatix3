@@ -11,6 +11,7 @@ import model.ExportNotification
 import model.ExportResult
 import model.Feature
 import model.Format
+import model.ImportParams
 import model.ImportWarning
 import model.Note
 import model.Project
@@ -39,7 +40,7 @@ import util.readText
 import util.toFixed
 
 object Ust {
-    suspend fun parse(files: List<File>): Project {
+    suspend fun parse(files: List<File>, params: ImportParams): Project {
         val results = files.map {
             parseFile(it)
         }
@@ -48,14 +49,19 @@ object Ust {
             .firstOrNull()
             ?: files.first().nameWithoutExtension
         val tracks = results.mapIndexed { index, result ->
+            val pitch = when {
+                params.simpleImport -> null
+                result.isMode2 -> pitchFromUtauMode2Track(
+                    result.pitchDataMode2,
+                    result.notes
+                )
+                else -> pitchFromUtauMode1Track(result.pitchDataMode1, result.notes)
+            }
             Track(
                 id = index,
                 name = result.file.nameWithoutExtension,
                 notes = result.notes,
-                pitch = if (result.isMode2) pitchFromUtauMode2Track(
-                    result.pitchDataMode2,
-                    result.notes
-                ) else pitchFromUtauMode1Track(result.pitchDataMode1, result.notes)
+                pitch = pitch
             ).validateNotes()
         }
         val warnings = mutableListOf<ImportWarning>()
@@ -342,8 +348,11 @@ object Ust {
                 // We insert startShift in PBW and PBY with width=1, as UTAU would just ignore it
                 // Theoretically this would make all pit data moved behind by 1 tick, but hey, who can tell the difference...
                 builder.appendLine("PBW=1,${mode2Pitch?.widths?.joinToString(",") { it.toString() }}")
-                builder.appendLine("PBY=${mode2Pitch?.startShift},${mode2Pitch?.shifts
-                    ?.joinToString(",") { it.toString() }}")
+                builder.appendLine("PBY=${mode2Pitch?.startShift},${
+                    mode2Pitch?.shifts
+                        ?.joinToString(",") { it.toString() }
+                }"
+                )
                 builder.appendLine("PBM=${mode2Pitch?.curveTypes?.joinToString(",")}")
                 if (mode2Pitch?.vibratoParams != null)
                     builder.appendLine("VBR=${mode2Pitch.vibratoParams.joinToString(",")}")

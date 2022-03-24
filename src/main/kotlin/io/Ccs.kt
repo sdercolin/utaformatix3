@@ -8,6 +8,7 @@ import model.ExportNotification
 import model.ExportResult
 import model.Feature
 import model.Format
+import model.ImportParams
 import model.ImportWarning
 import model.KEY_IN_OCTAVE
 import model.Note
@@ -44,7 +45,7 @@ import util.readText
 import util.toFixed
 
 object Ccs {
-    suspend fun parse(file: File): Project {
+    suspend fun parse(file: File, params: ImportParams): Project {
         val projectName = file.nameWithoutExtension
         val text = file.readText()
         val parser = DOMParser()
@@ -69,7 +70,7 @@ object Ccs {
                 groupNodes.find { it.getAttribute("Id") == id }
             }
             val trackName = group?.getAttribute("Name")
-            parseTrack(index, unitNode, trackName)
+            parseTrack(index, unitNode, trackName, params)
         }
 
         val tracks = results.map { it.track }
@@ -149,7 +150,7 @@ object Ccs {
         return timeSignatures.toList()
     }
 
-    private fun parseTrack(index: Int, unitNode: Element, name: String?): TrackParseResult {
+    private fun parseTrack(index: Int, unitNode: Element, name: String?, params: ImportParams): TrackParseResult {
         val timeNodes = unitNode
             .getSingleElementByTagNameOrNull("Song")
             ?.getSingleElementByTagNameOrNull("Beat")
@@ -200,14 +201,16 @@ object Ccs {
                 Note(noteIndex, key, lyric, tickOn, tickOff)
             }
 
-        val pitch = unitNode
-            .getSingleElementByTagNameOrNull("Song")
-            ?.getSingleElementByTagNameOrNull("Parameter")
-            ?.getSingleElementByTagNameOrNull("LogF0")
-            ?.getElementListByTagName("Data").orEmpty()
-            .mapNotNull { parsePitchData(it) }
-            .let { CevioTrackPitchData(it, tempos, tickPrefix) }
-            .let { pitchFromCevioTrack(it) }
+        val pitch =
+            if (params.simpleImport) null
+            else unitNode
+                .getSingleElementByTagNameOrNull("Song")
+                ?.getSingleElementByTagNameOrNull("Parameter")
+                ?.getSingleElementByTagNameOrNull("LogF0")
+                ?.getElementListByTagName("Data").orEmpty()
+                .mapNotNull { parsePitchData(it) }
+                .let { CevioTrackPitchData(it, tempos, tickPrefix) }
+                .let { pitchFromCevioTrack(it) }
 
         val trackName = name ?: "Track ${index + 1}"
         val track = Track(index, trackName, notes, pitch).validateNotes()
