@@ -189,11 +189,13 @@ fun Pitch.generateForCevio(notes: List<Note>, tempos: List<Tempo>, tickPrefix: L
         val value = thisPoint.second?.keyToLoggedFrequency() ?: continue
         eventsWithFullParams.add(EventDouble(index.toDouble(), repeat.toDouble(), value)) // in ticks temporarily
     }
+    val events = denormalizeFromTick(eventsWithFullParams, tempos, tickPrefix)
+        .let(::mergeEventsIfPossible)
+        .let(::removeRedundantIndex)
+        .let(::removeRedundantRepeat)
+        .takeIf { it.isNotEmpty() } ?: return null
     return CevioTrackPitchData(
-        denormalizeFromTick(eventsWithFullParams, tempos, tickPrefix)
-            .let(::mergeEventsIfPossible)
-            .let(::removeRedundantIndex)
-            .let(::removeRedundantRepeat),
+        events,
         listOf(), // not used
         tickPrefix
     )
@@ -283,14 +285,18 @@ private fun mergeEventsIfPossible(eventsWithFullParams: List<Event>) =
     }
 
 private fun removeRedundantIndex(eventsWithFullParams: List<Event>) =
-    (listOf(null to eventsWithFullParams.first()) + eventsWithFullParams.zipWithNext())
-        .map { (lastEvent, thisEvent) ->
-            if (lastEvent == null) thisEvent
-            else {
-                val areAdjacent = lastEvent.index!! + lastEvent.repeat!! == thisEvent.index
-                if (areAdjacent) thisEvent.copy(index = null) else thisEvent
+    if (eventsWithFullParams.isEmpty()) {
+        eventsWithFullParams
+    } else {
+        (listOf(null to eventsWithFullParams.first()) + eventsWithFullParams.zipWithNext())
+            .map { (lastEvent, thisEvent) ->
+                if (lastEvent == null) thisEvent
+                else {
+                    val areAdjacent = lastEvent.index!! + lastEvent.repeat!! == thisEvent.index
+                    if (areAdjacent) thisEvent.copy(index = null) else thisEvent
+                }
             }
-        }
+    }
 
 private fun removeRedundantRepeat(events: List<Event>) =
     events.map { if (it.repeat == 1L) it.copy(repeat = null) else it }
