@@ -107,7 +107,7 @@ private fun List<Pair<Long, Double?>>.applyDefaultPitch(
 
             if (lastPoint?.second == null) {
                 val interpolatedPoints = (startTick until endTick step SAMPLING_INTERVAL_TICK)
-                    .map { it to (requireNotNull(base[it]) + (bendDiff[it] ?: 0.0) + (vibratoDiff[it] ?: 0.0)) }
+                    .map { it to ((base[it] ?: 0.0) + (bendDiff[it] ?: 0.0) + (vibratoDiff[it] ?: 0.0)) }
                 acc + interpolatedPoints + point
             } else {
                 acc + point
