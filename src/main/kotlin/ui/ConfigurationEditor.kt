@@ -68,10 +68,6 @@ class ConfigurationEditor(props: ConfigurationEditorProps) :
         val doLyricsConversion = analysedType != Unknown
         val fromLyricsType: LyricsType?
         val toLyricsType: LyricsType?
-        val isPitchReadable =
-            Feature.ConvertPitch.isAvailable(props.project)
-        val isPitchConversionAvailable =
-            props.outputFormat.availableFeaturesForGeneration.contains(Feature.ConvertPitch)
 
         if (doLyricsConversion) {
             fromLyricsType = analysedType
@@ -89,10 +85,16 @@ class ConfigurationEditor(props: ConfigurationEditorProps) :
             true,
             RESTS_FILLING_MAX_LENGTH_DENOMINATOR_DEFAULT
         )
+
+        val hasPitchData =
+            Feature.ConvertPitch.isAvailable(props.project)
+        val isPitchConversionAvailable = hasPitchData &&
+                props.outputFormat.availableFeaturesForGeneration.contains(Feature.ConvertPitch)
         pitchConversion = PitchConversionState(
-            isAvailable = isPitchReadable && isPitchConversionAvailable,
-            isOn = false
+            isAvailable = isPitchConversionAvailable,
+            isOn = isPitchConversionAvailable
         )
+
         dialogError = DialogErrorState()
     }
 

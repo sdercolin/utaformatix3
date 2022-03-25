@@ -4,6 +4,7 @@ import kotlin.math.max
 import model.ExportResult
 import model.Feature
 import model.Format
+import model.ImportParams
 import model.ImportWarning
 import model.Note
 import model.Project
@@ -34,7 +35,7 @@ import util.readAsArrayBuffer
  */
 object Dv {
 
-    suspend fun parse(file: File): Project {
+    suspend fun parse(file: File, params: ImportParams): Project {
         val reader = ArrayBufferReader(file.readAsArrayBuffer())
         val warnings = mutableListOf<ImportWarning>()
 
@@ -68,7 +69,7 @@ object Dv {
         val trackCount = reader.readInt()
         var tracks = mutableListOf<Track>()
         repeat(trackCount) {
-            parseTrack(tickPrefix, tempos, reader)?.let { track ->
+            parseTrack(tickPrefix, tempos, params, reader)?.let { track ->
                 tracks.add(track.validateNotes())
             }
         }
@@ -86,7 +87,12 @@ object Dv {
         )
     }
 
-    private fun parseTrack(tickPrefix: Long, tempos: List<Tempo>, reader: ArrayBufferReader): Track? {
+    private fun parseTrack(
+        tickPrefix: Long,
+        tempos: List<Tempo>,
+        params: ImportParams,
+        reader: ArrayBufferReader
+    ): Track? {
         val trackType = reader.readInt()
         if (trackType != 0) {
             skipRestOfInstTrack(reader)
@@ -142,15 +148,22 @@ object Dv {
                 )
             }
             reader.readBytes()
-            segmentPitchDataList.add(parsePitchData(segmentStart - tickPrefix, reader))
+            if (params.simpleImport) {
+                skipPitchData(reader)
+            } else {
+                segmentPitchDataList.add(parsePitchData(segmentStart - tickPrefix, reader))
+            }
             skipRestOfSegment(reader)
         }
         val notesWithPitchValidated = notesWithPitch.validateNotes()
+        val pitch = if (params.simpleImport) null else {
+            pitchFromDvTrack(segmentPitchDataList, notesWithPitchValidated, tempos)
+        }
         return Track(
             id = 0,
             name = trackName,
             notes = notesWithPitchValidated.map { it.note },
-            pitch = pitchFromDvTrack(segmentPitchDataList, notesWithPitchValidated, tempos)
+            pitch = pitch
         )
     }
 
@@ -167,7 +180,10 @@ object Dv {
         return data
     }
 
-    private fun parsePitchData(tickOffset: Long, reader: ArrayBufferReader): DvSegmentPitchRawData {
+    private fun parsePitchData(
+        tickOffset: Long,
+        reader: ArrayBufferReader
+    ): DvSegmentPitchRawData {
         reader.readInt()
         val pointLength = reader.readInt()
         val data = mutableListOf<Pair<Int, Int>>()
@@ -175,6 +191,12 @@ object Dv {
             data.add(reader.readInt() to reader.readInt())
         }
         return DvSegmentPitchRawData(tickOffset, data)
+    }
+
+    private fun skipPitchData(
+        reader: ArrayBufferReader
+    ) {
+        reader.readBytes()
     }
 
     private fun skipRestOfInstTrack(reader: ArrayBufferReader) {

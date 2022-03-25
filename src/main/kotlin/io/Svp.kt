@@ -11,6 +11,7 @@ import model.ExportNotification
 import model.ExportResult
 import model.Feature
 import model.Format
+import model.ImportParams
 import model.ImportWarning
 import model.Pitch
 import model.TimeSignature
@@ -27,7 +28,7 @@ import util.nameWithoutExtension
 import util.readText
 
 object Svp {
-    suspend fun parse(file: File): model.Project {
+    suspend fun parse(file: File, params: ImportParams): model.Project {
         val text = file.readText().let {
             val index = it.lastIndexOf('}')
             it.take(index + 1)
@@ -51,7 +52,7 @@ object Svp {
         }?.takeIf { it.isNotEmpty() } ?: listOf(model.Tempo.default).also {
             warnings.add(ImportWarning.TempoNotFound)
         }
-        val tracks = parseTracks(project, tempos)
+        val tracks = parseTracks(project, tempos, params)
         return model.Project(
             format = Format.Svp,
             inputFiles = listOf(file),
@@ -66,13 +67,14 @@ object Svp {
 
     private fun parseTracks(
         project: Project,
-        tempos: List<model.Tempo>
+        tempos: List<model.Tempo>,
+        params: ImportParams
     ): List<model.Track> = project.tracks.mapIndexed { index, track ->
         model.Track(
             id = index,
             name = track.name ?: "Track ${index + 1}",
             notes = parseNotes(track, project),
-            pitch = parsePitch(track, project, tempos)
+            pitch = if (params.simpleImport) null else parsePitch(track, project, tempos)
         ).validateNotes()
     }
 
