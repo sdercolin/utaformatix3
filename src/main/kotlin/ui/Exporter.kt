@@ -7,7 +7,6 @@ import kotlinx.css.padding
 import model.ExportNotification
 import model.ExportResult
 import model.Format
-import model.Project
 import react.RBuilder
 import react.RComponent
 import react.RProps
@@ -101,7 +100,6 @@ class Exporter : RComponent<ExporterProps, RState>() {
 }
 
 external interface ExporterProps : RProps {
-    var project: Project
     var format: Format
     var result: ExportResult
     var onRestart: () -> Unit

@@ -192,7 +192,7 @@ class App : RComponent<RProps, AppState>() {
                             project = info.project
                             outputFormat = info.outputFormat
                             onFinished = { result, format ->
-                                pushStage(StageInfo.Export(info.project, result, format))
+                                pushStage(StageInfo.Export(result, format))
                             }
                         }
                     }
@@ -200,7 +200,6 @@ class App : RComponent<RProps, AppState>() {
                 is StageInfo.Export -> {
                     child(Exporter::class) {
                         attrs {
-                            project = info.project
                             format = info.outputFormat
                             result = info.result
                             onRestart = { popAllStages() }
