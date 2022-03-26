@@ -7,7 +7,10 @@ import kotlinx.serialization.json.Json
 import model.Format
 import model.ImportParams
 import model.Project
+import model.Tempo
+import model.TimeSignature
 import org.w3c.files.File
+import process.validateNotes
 import util.readText
 
 object Ustx {
@@ -17,17 +20,45 @@ object Ustx {
         val yaml = JsYaml.load(yamlText)
         val jsonText = JSON.stringify(yaml)
         val project = jsonSerializer.decodeFromString(Project.serializer(), jsonText)
-        console.log(project)
+        val timeSignature = TimeSignature(0, project.beatPerBar, project.beatUnit)
+        val tempo = Tempo(0, project.bpm)
         return Project(
             format = Format.Ustx,
             inputFiles = listOf(file),
-            name = "",
-            tracks = listOf(),
-            timeSignatures = listOf(),
-            tempos = listOf(),
+            name = project.name,
+            tracks = parseTracks(project),
+            timeSignatures = listOf(timeSignature),
+            tempos = listOf(tempo),
             measurePrefix = 0,
             importWarnings = listOf()
         )
+    }
+
+    private fun parseTracks(project: Project): List<model.Track> {
+        val trackMap = List(project.tracks.size) { index: Int ->
+            model.Track(
+                id = index,
+                name = "Track ${index + 1}",
+                notes = listOf()
+            )
+        }.associateBy { it.id }.toMutableMap()
+        for (voicePart in project.voiceParts) {
+            val trackId = voicePart.trackNo
+            val track = trackMap[trackId] ?: continue
+            val tickPrefix = voicePart.position
+            val notes = voicePart.notes.map {
+                model.Note(
+                    id = 0,
+                    key = it.tone,
+                    lyric = it.lyric,
+                    tickOn = it.position + tickPrefix,
+                    tickOff = it.position + it.duration + tickPrefix
+                )
+            }
+            val newTrack = track.copy(notes = track.notes + notes)
+            trackMap[trackId] = newTrack
+        }
+        return trackMap.values.map { it.validateNotes() }
     }
 
     private val jsonSerializer = Json {
