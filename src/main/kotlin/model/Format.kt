@@ -51,6 +51,17 @@ enum class Format(
         possibleLyricsTypes = listOf(RomajiCv, RomajiVcv, KanaCv, KanaVcv),
         availableFeaturesForGeneration = listOf(ConvertPitch)
     ),
+    Ustx(
+        ".ustx",
+        multipleFile = false,
+        parser = { files, params ->
+            io.Ustx.parse(files.first(), params)
+        },
+        generator = { project, features ->
+            TODO()
+        },
+        possibleLyricsTypes = listOf(RomajiCv, RomajiVcv, KanaCv, KanaVcv)
+    ),
     Ccs(
         ".ccs",
         parser = { files, params ->
@@ -144,7 +155,7 @@ enum class Format(
     val allExtensions get() = listOf(extension) + otherExtensions
 
     companion object {
-        val importable get() = listOf(Vsqx, Vpr, Vsq, VocaloidMid, Ust, Ccs, MusicXml, Svp, S5p, Dv, Ppsf)
+        val importable get() = listOf(Vsqx, Vpr, Vsq, VocaloidMid, Ust, Ustx, Ccs, MusicXml, Svp, S5p, Dv, Ppsf)
         val exportable get() = listOf(Vsqx, Vpr, Vsq, VocaloidMid, Ust, Ccs, MusicXml, Svp, S5p, Dv)
     }
 }

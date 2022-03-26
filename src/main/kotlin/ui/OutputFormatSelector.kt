@@ -4,17 +4,7 @@ import external.Resources
 import kotlinx.css.LinearDimension
 import kotlinx.css.marginLeft
 import model.Format
-import model.Format.Ccs
-import model.Format.Dv
-import model.Format.MusicXml
-import model.Format.Ppsf
-import model.Format.S5p
-import model.Format.Svp
-import model.Format.Ust
-import model.Format.VocaloidMid
-import model.Format.Vpr
-import model.Format.Vsq
-import model.Format.Vsqx
+import model.Format.*
 import model.ImportWarning
 import model.Project
 import react.RBuilder
@@ -138,6 +128,7 @@ class OutputFormatSelector : RComponent<OutputFormatSelectorProps, RState>() {
             Vsqx -> Strings.VsqxFormatDescription
             Vpr -> Strings.VprFormatDescription
             Ust -> Strings.UstFormatDescription
+            Ustx -> null
             Ccs -> Strings.CcsFormatDescription
             Svp -> Strings.SvpFormatDescription
             S5p -> Strings.S5pFormatDescription
@@ -153,6 +144,7 @@ class OutputFormatSelector : RComponent<OutputFormatSelectorProps, RState>() {
             Vsqx -> Resources.vsqxIcon
             Vpr -> Resources.vprIcon
             Ust -> Resources.ustIcon
+            Ustx -> null
             Ccs -> Resources.ccsIcon
             Svp -> Resources.svpIcon
             S5p -> Resources.s5pIcon
