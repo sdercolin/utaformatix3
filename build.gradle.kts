@@ -50,6 +50,7 @@ dependencies {
     implementation(npm("uuid", "8.3.2"))
     implementation(npm("midi-parser-js", "4.0.4"))
     implementation(npm("js-cookie", "2.2.1"))
+    implementation(npm("js-yaml", "4.1.0"))
 
     // Testing
     testImplementation(kotlin("test-js"))
