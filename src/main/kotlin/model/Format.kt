@@ -11,7 +11,7 @@ enum class Format(
     val extension: String,
     val otherExtensions: List<String> = listOf(),
     val multipleFile: Boolean = false,
-    val parser: suspend (List<File>) -> Project,
+    val parser: suspend (List<File>, ImportParams) -> Project,
     val generator: suspend (Project, List<Feature>) -> ExportResult,
     val possibleLyricsTypes: List<LyricsType>,
     val suggestedLyricType: LyricsType? = null,
@@ -19,8 +19,8 @@ enum class Format(
 ) {
     Vsqx(
         ".vsqx",
-        parser = {
-            io.Vsqx.parse(it.first())
+        parser = { files, params ->
+            io.Vsqx.parse(files.first(), params)
         },
         generator = { project, features ->
             io.Vsqx.generate(project, features)
@@ -30,8 +30,8 @@ enum class Format(
     ),
     Vpr(
         ".vpr",
-        parser = {
-            io.Vpr.parse(it.first())
+        parser = { files, params ->
+            io.Vpr.parse(files.first(), params)
         },
         generator = { project, features ->
             io.Vpr.generate(project, features)
@@ -42,8 +42,8 @@ enum class Format(
     Ust(
         ".ust",
         multipleFile = true,
-        parser = {
-            io.Ust.parse(it)
+        parser = { files, params ->
+            io.Ust.parse(files, params)
         },
         generator = { project, features ->
             io.Ust.generate(project, features)
@@ -53,8 +53,8 @@ enum class Format(
     ),
     Ccs(
         ".ccs",
-        parser = {
-            io.Ccs.parse(it.first())
+        parser = { files, params ->
+            io.Ccs.parse(files.first(), params)
         },
         generator = { project, features ->
             io.Ccs.generate(project, features)
@@ -64,8 +64,8 @@ enum class Format(
     ),
     Svp(
         ".svp",
-        parser = {
-            io.Svp.parse(it.first())
+        parser = { files, params ->
+            io.Svp.parse(files.first(), params)
         },
         generator = { project, features ->
             io.Svp.generate(project, features)
@@ -75,8 +75,8 @@ enum class Format(
     ),
     S5p(
         ".s5p",
-        parser = {
-            io.S5p.parse(it.first())
+        parser = { files, params ->
+            io.S5p.parse(files.first(), params)
         },
         generator = { project, features ->
             io.S5p.generate(project, features)
@@ -87,8 +87,8 @@ enum class Format(
     MusicXml(
         ".musicxml",
         otherExtensions = listOf(".xml"),
-        parser = {
-            io.MusicXml.parse(it.first())
+        parser = { files, _ ->
+            io.MusicXml.parse(files.first())
         },
         generator = { project, _ ->
             io.MusicXml.generate(project)
@@ -98,8 +98,8 @@ enum class Format(
     ),
     Dv(
         ".dv",
-        parser = {
-            io.Dv.parse(it.first())
+        parser = { files, params ->
+            io.Dv.parse(files.first(), params)
         },
         generator = { project, features ->
             io.Dv.generate(project, features)
@@ -110,8 +110,8 @@ enum class Format(
     ),
     Vsq(
         ".vsq",
-        parser = {
-            io.Vsq.parse(it.first())
+        parser = { files, params ->
+            io.Vsq.parse(files.first(), params)
         },
         generator = { project, features ->
             io.Vsq.generate(project, features)
@@ -121,8 +121,8 @@ enum class Format(
     ),
     VocaloidMid(
         ".mid",
-        parser = {
-            io.VocaloidMid.parse(it.first())
+        parser = { files, params ->
+            io.VocaloidMid.parse(files.first(), params)
         },
         generator = { project, features ->
             io.VocaloidMid.generate(project, features)
@@ -132,8 +132,8 @@ enum class Format(
     ),
     Ppsf(
         ".ppsf",
-        parser = {
-            io.Ppsf.parse(it.first())
+        parser = { files, _ ->
+            io.Ppsf.parse(files.first())
         },
         generator = { _, _ ->
             TODO("Not Implemented")

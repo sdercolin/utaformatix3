@@ -6,6 +6,7 @@ import model.ExportNotification
 import model.ExportResult
 import model.Feature
 import model.Format
+import model.ImportParams
 import model.ImportWarning
 import model.Note
 import model.Pitch
@@ -78,7 +79,7 @@ object VsqLike {
         return counter.tick
     }
 
-    private fun parseTrack(trackAsText: String, trackId: Int, tickPrefix: Long): Track {
+    private fun parseTrack(trackAsText: String, trackId: Int, tickPrefix: Long, params: ImportParams): Track {
         val lines = trackAsText.linesNotBlank()
         val titleWithIndexes = lines.mapIndexed { index, line ->
             if (line.matches("\\[.*\\]")) line.drop(1).dropLast(1) to index
@@ -113,7 +114,7 @@ object VsqLike {
                 }
                 val (lyric, xSampa) = lyricsInfo?.let {
                     it[0].trim('"') to it[1].trim('"')
-                } ?: DEFAULT_LYRIC to null
+                } ?: (DEFAULT_LYRIC to null)
                 Note(
                     id = 0,
                     key = key,
@@ -124,7 +125,7 @@ object VsqLike {
                 )
             }
             .filterNotNull()
-        val pitch = parsePitchData(sectionMap, tickPrefix)
+        val pitch = if (params.simpleImport) null else parsePitchData(sectionMap, tickPrefix)
         return Track(trackId, name, notes, pitch).validateNotes()
     }
 
@@ -441,7 +442,7 @@ object VsqLike {
         return Uint8Array(bytes.toTypedArray())
     }
 
-    suspend fun getMappedTrackData(file: File, format: Format): Project {
+    suspend fun getMappedTrackData(file: File, format: Format, params: ImportParams): Project {
         val bytes = file.readAsArrayBuffer()
         val midiParser = external.require("midi-parser-js")
         val midi = midiParser.parse(Uint8Array(bytes))
@@ -458,7 +459,7 @@ object VsqLike {
         )
 
         val tracks = tracksAsText.mapIndexed { index, trackText ->
-            parseTrack(trackText, index, tickPrefix)
+            parseTrack(trackText, index, tickPrefix, params)
         }
 
         return Project(

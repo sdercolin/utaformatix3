@@ -28,8 +28,6 @@ data class UtauMode2NotePitchData(
     val vibratoParams: List<Double>? // length(%), period(msec), depth(cent), easeIn(%), easeOut(%), phase(%), shift(%)
 )
 
-private const val MAX_OVERLAP_LENGTH = 240L
-private const val MIX_OVERLAP_RATIO = 0.5
 fun pitchToUtauMode2Track(pitch: Pitch?, notes: List<Note>, tempos: List<Tempo>): UtauMode2TrackPitchData? {
     pitch ?: return null
     val absolutePitch = pitch.getAbsoluteData(notes) ?: return null

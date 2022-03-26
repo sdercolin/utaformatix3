@@ -12,6 +12,7 @@ import model.ExportNotification
 import model.ExportResult
 import model.Feature
 import model.Format
+import model.ImportParams
 import model.ImportWarning
 import model.Pitch
 import model.TickCounter
@@ -26,11 +27,11 @@ import util.nameWithoutExtension
 import util.readBinary
 
 object Vpr {
-    suspend fun parse(file: File): model.Project {
+    suspend fun parse(file: File, params: ImportParams): model.Project {
         val content = readContent(file)
         val warnings = mutableListOf<ImportWarning>()
         val tracks = content.tracks.mapIndexed { index, track ->
-            parseTrack(track, index)
+            parseTrack(track, index, params)
         }
         val timeSignatures = content.masterTrack?.timeSig?.events?.map {
             TimeSignature(
@@ -61,7 +62,7 @@ object Vpr {
         )
     }
 
-    private fun parseTrack(track: Track, trackIndex: Int): model.Track {
+    private fun parseTrack(track: Track, trackIndex: Int, params: ImportParams): model.Track {
         val notes = track.parts
             .flatMap { part -> part.notes.map { part.pos to it } }
             .mapIndexed { index, (tickOffset, note) ->
@@ -74,7 +75,7 @@ object Vpr {
                     xSampa = note.phoneme
                 )
             }
-        val pitch = parsePitchData(track)
+        val pitch = if (params.simpleImport) null else parsePitchData(track)
         return model.Track(
             id = trackIndex,
             name = track.name ?: "Track ${trackIndex + 1}",
