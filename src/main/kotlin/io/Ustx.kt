@@ -58,7 +58,7 @@ object Ustx {
             val newTrack = track.copy(notes = track.notes + notes)
             trackMap[trackId] = newTrack
         }
-        return trackMap.values.map { it.validateNotes() }
+        return trackMap.values.map { it.validateNotes() }.sortedBy { it.id }
     }
 
     private val jsonSerializer = Json {
