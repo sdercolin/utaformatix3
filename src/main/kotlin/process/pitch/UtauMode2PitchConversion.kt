@@ -90,8 +90,11 @@ fun pitchFromUtauMode2Track(pitchData: UtauMode2TrackPitchData?, notes: List<Not
         if (notePitch != null) {
             var tickPos = note.tickOn + tickFromMilliSec(notePitch.start, bpm)
             val startShift =
-                if (note.tickOn == lastNote?.tickOff) (lastNote.key - note.key).toDouble()
-                else notePitch.startShift / 10
+                if (note.tickOn == lastNote?.tickOff && notePitch.shifts.isNotEmpty()) {
+                    (lastNote.key - note.key).toDouble()
+                } else {
+                    notePitch.startShift / 10
+                }
             points.add(tickPos to startShift)
             for (index in notePitch.widths.indices) {
                 val width = notePitch.widths[index]
