@@ -11,6 +11,7 @@ import model.Format.Ppsf
 import model.Format.S5p
 import model.Format.Svp
 import model.Format.Ust
+import model.Format.Ustx
 import model.Format.VocaloidMid
 import model.Format.Vpr
 import model.Format.Vsq
@@ -138,6 +139,7 @@ class OutputFormatSelector : RComponent<OutputFormatSelectorProps, RState>() {
             Vsqx -> Strings.VsqxFormatDescription
             Vpr -> Strings.VprFormatDescription
             Ust -> Strings.UstFormatDescription
+            Ustx -> null
             Ccs -> Strings.CcsFormatDescription
             Svp -> Strings.SvpFormatDescription
             S5p -> Strings.S5pFormatDescription
@@ -153,6 +155,7 @@ class OutputFormatSelector : RComponent<OutputFormatSelectorProps, RState>() {
             Vsqx -> Resources.vsqxIcon
             Vpr -> Resources.vprIcon
             Ust -> Resources.ustIcon
+            Ustx -> null
             Ccs -> Resources.ccsIcon
             Svp -> Resources.svpIcon
             S5p -> Resources.s5pIcon

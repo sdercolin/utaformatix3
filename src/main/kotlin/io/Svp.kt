@@ -235,7 +235,8 @@ object Svp {
             ),
             mainRef = emptyTrack.mainRef!!.copy(
                 groupID = uuid
-            )
+            ),
+            dispOrder = track.id
         )
     }
 

@@ -19,7 +19,6 @@ sealed class StageInfo(
     ) : StageInfo(Stage.Configure)
 
     data class Export(
-        val project: Project,
         val result: ExportResult,
         val outputFormat: Format
     ) : StageInfo(Stage.Export)

@@ -13,12 +13,17 @@ fun <T : RichNote<T>> List<T>.validateNotes(): List<T> {
     if (isEmpty()) return this
     return this.sortedBy { it.note.tickOn }
         .let { list ->
-            list.zipWithNext()
+            list.asSequence()
+                .zipWithNext()
                 .map { (current, next) ->
                     current.copyWithNote(current.note.copy(tickOff = min(current.note.tickOff, next.note.tickOn)))
                 }
                 .filter { it.note.length > 0 }
                 .plus(list.last())
+                .mapIndexed { index, richNote ->
+                    richNote.copyWithNote(richNote.note.copy(id = index))
+                }
+                .toList()
         }
 }
 
