@@ -4,148 +4,178 @@ import io.MusicXml.MUSIC_XML_VERSION
 import ui.strings.Language.English
 import ui.strings.Language.Japanese
 import ui.strings.Language.SimplifiedChinese
+import ui.strings.Language.French
 
-enum class Strings(val en: String, val ja: String, val zhCN: String) {
+enum class Strings(val en: String, val ja: String, val zhCN: String, val fr: String) {
     LanguageDisplayName(
         en = English.displayName,
         ja = Japanese.displayName,
-        zhCN = SimplifiedChinese.displayName
+        zhCN = SimplifiedChinese.displayName,
+        fr = French.displayName
     ),
     ReportFeedbackTooltip(
         en = "Send feedback",
         ja = "フィードバックを送信",
-        zhCN = "提交反馈"
+        zhCN = "提交反馈",
+        fr = "Envoyer vos retours"
     ),
     FrequentlyAskedQuestionTooltip(
         en = "Frequently Asked Questions",
         ja = "よくある質問",
-        zhCN = "常见问题解答"
+        zhCN = "常见问题解答",
+        fr = "Questions Fréquemment Posées"
     ),
     ImportProjectCaption(
         en = "Import Project",
         ja = "プロジェクトをインポート",
-        zhCN = "导入工程"
+        zhCN = "导入工程",
+        fr = "Importation de projet"
     ),
     SelectOutputFormatCaption(
         en = "Select Output Format",
         ja = "出力形式を選ぶ",
-        zhCN = "选择输出格式"
+        zhCN = "选择输出格式",
+        fr = "Sélectionner le Format de Sortie"
     ),
     ConfigurationEditorCaption(
         en = "Configuration",
         ja = "設定",
-        zhCN = "设置"
+        zhCN = "设置",
+        fr = "Configuration"
     ),
     ExportCaption(
         en = "Export",
         ja = "エクスポート",
-        zhCN = "导出"
+        zhCN = "导出",
+        fr = "Exportation"
     ),
     ExporterTitleSuccess(
         en = "Process finished successfully.",
         ja = "処理に成功しました。",
-        zhCN = "处理已完成。"
+        zhCN = "处理已完成。",
+        fr = "Processus terminé avec succès."
     ),
     LyricsTypeUnknown(
         en = "Unknown",
         ja = "不明",
-        zhCN = "未知"
+        zhCN = "未知",
+        fr = "Inconnu"
     ),
     LyricsTypeRomajiCV(
         en = "Romaji CV",
         ja = "単独音（ローマ字）",
-        zhCN = "罗马字单独音"
+        zhCN = "罗马字单独音",
+        fr = "Romaji CV"
     ),
     LyricsTypeRomajiVCV(
         en = "Romaji VCV",
         ja = "連続音（ローマ字）",
-        zhCN = "罗马字连续音"
+        zhCN = "罗马字连续音",
+        fr = "Romaji VCV"
     ),
     LyricsTypeKanaCV(
         en = "Kana CV",
         ja = "単独音（ひらがな）",
-        zhCN = "假名单独音"
+        zhCN = "假名单独音",
+        fr = "Kana CV",
     ),
     LyricsTypeKanaVCV(
         en = "Kana VCV",
         ja = "連続音（ひらがな）",
-        zhCN = "假名连续音"
+        zhCN = "假名连续音",
+        fr = "kana VCV"
     ),
     JapaneseLyricsConversionSwitchLabel(
         en = "Cleanup and convert lyrics (only for Japanese lyrics)",
         ja = "歌詞のSuffix除去・変換（日本語歌詞のみ対応）",
-        zhCN = "清理并转换歌词（仅日语）"
+        zhCN = "清理并转换歌词（仅日语）",
+        fr = "Nettoyage et conversion des paroles (seulement pour les paroles en japonais)"
     ),
     FromLyricsTypeLabel(
         en = "Original lyrics type (analysis result: {{type}})",
         ja = "変換元の歌詞タイプを選択（分析結果：{{type}}）",
-        zhCN = "原歌词类型（分析结果为：{{type}}）"
+        zhCN = "原歌词类型（分析结果为：{{type}}）",
+        fr = "Type de paroles originales (résultat de l'analyse : {{type}})"
     ),
     ToLyricsTypeLabel(
         en = "Target lyrics type",
         ja = "変換先の歌詞タイプを選択",
-        zhCN = "目标歌词类型"
+        zhCN = "目标歌词类型",
+        fr = "Type de paroles cible"
     ),
     ConvertPitchData(
         en = "Convert pitch parameters",
         ja = "ピッチパラメータを変換",
-        zhCN = "转换音高参数"
+        zhCN = "转换音高参数",
+        fr = "Convertir les paramètres de hauteur"
     ),
     ConvertPitchDataDescription(
         en = "It may take some time to process with this option.",
         ja = "処理に時間がかかることがあります。",
-        zhCN = "该选项可能会增加处理时间。"
+        zhCN = "该选项可能会增加处理时间。",
+        fr = "Le traitement peut prendre un certain temps avec cette option."
     ),
     NextButton(
         en = "Next",
         ja = "次へ",
-        zhCN = "下一步"
+        zhCN = "下一步",
+        fr = "Suivant"
     ),
     CancelButton(
         en = "Cancel",
         ja = "キャンセル",
-        zhCN = "取消"
+        zhCN = "取消",
+        fr = "Annuler"
     ),
     ReportButton(
         en = "Report",
         ja = "問題を報告",
-        zhCN = "提交报告"
+        zhCN = "提交报告",
+        fr = "Signaler un problème"
     ),
     ImportFileDescription(
         en = "Drop files or Click to import",
         ja = "ファイルをドロップするか、クリックしてインポート",
-        zhCN = "拖放文件或点击导入"
+        zhCN = "拖放文件或点击导入",
+        fr = "Déposer les fichiers ou Cliquer pour importer"
     ),
     ImportFileSubDescription(
         en = "Supported file types: VSQX, VPR, VSQ, MID(VOCALOID), USTs, CCS, MUSICXML, XML, SVP, S5P, DV, PPSF(NT)",
         ja = "サポートされているファイル形式：VSQX、VPR、VSQ、MID（VOCALOID）、UST（複数可）、CCS、MUSICXML、XML、SVP、S5P、DV、PPSF（NT）",
-        zhCN = "支持的文件类型：VSQX、VPR、VSQ、MID（VOCALOID）、UST（允许复数个）、CCS、MUSICXML、XML、SVP、S5P、DV、PPSF（NT）"
+        zhCN = "支持的文件类型：VSQX、VPR、VSQ、MID（VOCALOID）、UST（允许复数个）、CCS、MUSICXML、XML、SVP、S5P、DV、PPSF（NT）",
+        fr = "Types de fichiers pris en charge : VSQX, VPR, VSQ, MID(VOCALOID), USTs, CCS, MUSICXML, XML, SVP, S5P, DV, PPSF(NT)"
     ),
     UnsupportedFileTypeImportError(
         en = "Unsupported file type",
         ja = "サポートされていないファイル形式です",
-        zhCN = "不支持的文件类型"
+        zhCN = "不支持的文件类型",
+        fr = "Type de fichier non supporté"
     ),
     MultipleFileImportError(
         en = "Multiple files of {{format}} could not be imported in one go",
         ja = "複数の{{format}}ファイルを一度にインポートすることはできません",
-        zhCN = "无法同时导入多个{{format}}文件"
+        zhCN = "无法同时导入多个{{format}}文件",
+        fr = "Plusieurs fichiers de {{format}} n'ont pas pu être importés en une seule fois"
     ),
     ImportErrorDialogTitle(
         en = "Failed to import the project",
         ja = "プロジェクトのインポートに失敗しました",
-        zhCN = "无法导入该工程"
+        zhCN = "无法导入该工程",
+        fr = "Échec de l'importation du projet"
     ),
     ProcessErrorDialogTitle(
         en = "An error happened during the process",
         ja = "処理中に下記のエラーが発生しました",
-        zhCN = "在处理中发生了以下错误"
+        zhCN = "在处理中发生了以下错误",
+        fr = "Une erreur s'est produite pendant le processus"
     ),
     ErrorDialogDescription(
         en = "If you find any problems, please help us collect error information" +
                 " for better performance of this application by submitting a feedback report.",
         ja = "サービス向上のためにエラー情報を収集しております。問題を発見した場合、フィードバックにご協力をお願いします。",
-        zhCN = "如您在使用中发现问题，您可以向提交反馈表单。感谢您对本应用的改善所提供的帮助！"
+        zhCN = "如您在使用中发现问题，您可以向提交反馈表单。感谢您对本应用的改善所提供的帮助！",
+        fr = "Si vous rencontrez des problèmes, aidez-nous à collecter des informations sur les erreurs" +
+                " pour une meilleure performance de cette application en soumettant un rapport de vos retours."
     ),
     ReportUrl(
         en = "https://forms.gle/3Es3ZomcYKNHWBvp6",
@@ -160,12 +190,14 @@ enum class Strings(val en: String, val ja: String, val zhCN: String) {
     ReleaseNotesUrl(
         en = "https://gist.githubusercontent.com/sdercolin/512db280480072f22cf1d462401eb1a0/raw",
         ja = "https://gist.githubusercontent.com/sdercolin/512db280480072f22cf1d462401eb1a0/raw",
-        zhCN = "https://gist.githubusercontent.com/sdercolin/512db280480072f22cf1d462401eb1a0/raw"
+        zhCN = "https://gist.githubusercontent.com/sdercolin/512db280480072f22cf1d462401eb1a0/raw",
+        fr = "https://gist.githubusercontent.com/sdercolin/512db280480072f22cf1d462401eb1a0/raw"
     ),
     ImportWarningTitle(
         en = "The following exceptions happened during the import process.",
         ja = "インポート中に下記の例外が発生しました。",
-        zhCN = "导入过程中出现了下列异常。"
+        zhCN = "导入过程中出现了下列异常。",
+        fr = "Les exceptions suivantes se sont produites pendant le processus d'importation."
     ),
     ImportWarningTempoNotFound(
         en = "- No tempo labels found in the imported project.",
@@ -345,6 +377,7 @@ enum class Strings(val en: String, val ja: String, val zhCN: String) {
         English -> en
         Japanese -> ja
         SimplifiedChinese -> zhCN
+        French -> fr
     }
 }
 
