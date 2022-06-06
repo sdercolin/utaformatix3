@@ -7,6 +7,7 @@ import external.Resources
 import io.MusicXml.MXmlMeasureContent.NoteType
 import kotlinx.coroutines.await
 import kotlinx.dom.appendText
+import model.DEFAULT_KEY
 import model.DEFAULT_LYRIC
 import model.ExportResult
 import model.Format
@@ -144,7 +145,7 @@ object MusicXml {
                     return@forEach
                 }
 
-                val key = noteNode.getSingleElementByTagName("pitch").let { pitchNode ->
+                val key = noteNode.getSingleElementByTagNameOrNull("pitch")?.let { pitchNode ->
                     val step = pitchNode.getSingleElementByTagName("step").innerValue
                     val alter = pitchNode.getSingleElementByTagNameOrNull("alter")?.innerValueOrNull?.toInt()
                     val relativeKey = when (step) {
@@ -159,7 +160,7 @@ object MusicXml {
                     } + (alter ?: 0)
                     val octave = pitchNode.getSingleElementByTagName("octave").innerValue.toInt() + 1
                     octave * KEY_IN_OCTAVE + relativeKey
-                }
+                } ?: DEFAULT_KEY
 
                 val lyric = noteNode.getSingleElementByTagNameOrNull("lyric")
                     ?.getSingleElementByTagNameOrNull("text")
