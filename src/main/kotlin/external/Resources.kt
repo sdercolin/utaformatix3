@@ -37,6 +37,9 @@ object Resources {
     val ustIcon: String
         get() = require("images/utau.png").default as String
 
+    val ustxIcon: String
+        get() = require("images/openutau.png").default as String
+
     val ccsIcon: String
         get() = require("images/cevio.png").default as String
 

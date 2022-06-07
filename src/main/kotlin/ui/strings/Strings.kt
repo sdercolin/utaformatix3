@@ -221,6 +221,11 @@ enum class Strings(val en: String, val ja: String, val zhCN: String) {
         ja = "UTAU プロジェクト",
         zhCN = "UTAU 工程"
     ),
+    UstxFormatDescription(
+        en = "Project for OpenUtau",
+        ja = "OpenUtau プロジェクト",
+        zhCN = "OpenUtau 工程"
+    ),
     CcsFormatDescription(
         en = "Project for CeVIO Creative Studio",
         ja = "CeVIO Creative Studio プロジェクト",
