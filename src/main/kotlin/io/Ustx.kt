@@ -19,6 +19,8 @@ import org.w3c.files.BlobPropertyBag
 import org.w3c.files.File
 import process.pitch.OpenUtauNotePitchData
 import process.pitch.OpenUtauPartPitchData
+import process.pitch.UtauNoteVibratoParams
+import process.pitch.pitchFromUstxPart
 import util.readText
 
 object Ustx {
@@ -69,12 +71,14 @@ object Ustx {
 
             val pitchCurve = if (params.simpleImport) null
             else voicePart.curves.find { it.abbr == "pitd" }?.let { curve ->
-                OpenUtauPartPitchData(
-                    curve.xs.zip(curve.ys).map { OpenUtauPartPitchData.Point(it.first, it.second.toInt()) }
-                ).takeIf { it.points.isNotEmpty() }
+                curve.xs.zip(curve.ys).map { OpenUtauPartPitchData.Point(it.first, it.second.toInt()) }
             }
             val pitch: model.Pitch? = if (validatedNotePitches?.isNotEmpty() == true || pitchCurve != null) {
-                TODO()
+                val partPitchData = OpenUtauPartPitchData(
+                    pitchCurve.orEmpty(),
+                    validatedNotePitches.orEmpty()
+                )
+                pitchFromUstxPart(validatedNotes, partPitchData, bpm)
             } else null
             val mergedPitch = if (track.pitch != null) {
                 track.pitch.copy(data = track.pitch.data + pitch?.data.orEmpty())
@@ -98,7 +102,7 @@ object Ustx {
             )
         }
         val vibrato = note.vibrato.let {
-            OpenUtauNotePitchData.Vibrato(
+            UtauNoteVibratoParams(
                 length = it.length,
                 period = it.period,
                 depth = it.depth,

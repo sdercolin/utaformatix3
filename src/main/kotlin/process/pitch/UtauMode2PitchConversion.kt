@@ -1,10 +1,8 @@
 package process.pitch
 
 import io.Ust
-import kotlin.math.roundToLong
 import model.Note
 import model.Pitch
-import model.TICKS_IN_BEAT
 import model.Tempo
 import process.interpolateCosineEaseIn
 import process.interpolateCosineEaseInOut
@@ -25,7 +23,7 @@ data class UtauMode2NotePitchData(
     val widths: List<Double>, // msec
     val shifts: List<Double>, // 10 cents
     val curveTypes: List<String>, // (blank)/s/r/j
-    val vibratoParams: List<Double>? // length(%), period(msec), depth(cent), easeIn(%), easeOut(%), phase(%), shift(%)
+    val vibratoParams: UtauNoteVibratoParams?
 )
 
 fun pitchToUtauMode2Track(pitch: Pitch?, notes: List<Note>, tempos: List<Tempo>): UtauMode2TrackPitchData? {
@@ -117,7 +115,7 @@ fun pitchFromUtauMode2Track(pitchData: UtauMode2TrackPitchData?, notes: List<Not
         pendingPitchPoints = points
             .fixPointsAtLastNote(note, lastNote)
             .addPointsContinuingLastNote(note, lastNote)
-            .appendVibrato(notePitch?.vibratoParams, note, bpm)
+            .appendUtauNoteVibrato(notePitch?.vibratoParams, note, bpm, SAMPLING_INTERVAL_TICK)
             .shape()
         lastNote = note
     }
@@ -229,12 +227,4 @@ private fun interpolate(
 
 private fun List<Tempo>.bpmForNote(note: Note): Double {
     return this.last { it.tickPosition <= note.tickOn }.bpm
-}
-
-private fun tickFromMilliSec(msec: Double, bpm: Double): Long {
-    return (msec * bpm * (TICKS_IN_BEAT) / 60000).roundToLong()
-}
-
-private fun milliSecFromTick(tick: Long, bpm: Double): Double {
-    return tick * 60000 / (bpm * TICKS_IN_BEAT)
 }
