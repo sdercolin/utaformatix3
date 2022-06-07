@@ -1,7 +1,6 @@
 package process.pitch
 
 import io.Ust
-import kotlin.math.roundToLong
 import model.Note
 import model.Pitch
 import model.TICKS_IN_BEAT
@@ -11,6 +10,7 @@ import process.interpolateCosineEaseInOut
 import process.interpolateCosineEaseOut
 import process.interpolateLinear
 import process.simplifyShapeTo
+import kotlin.math.roundToLong
 
 private const val SAMPLING_INTERVAL_TICK = 4L
 
@@ -20,8 +20,8 @@ data class UtauMode2TrackPitchData(
 
 data class UtauMode2NotePitchData(
     val bpm: Double?,
-    val start: Double, // msec
-    val startShift: Double, // 10 cents
+    val start: Double?, // msec, null only if the note is not applied with pitch
+    val startShift: Double?, // 10 cents
     val widths: List<Double>, // msec
     val shifts: List<Double>, // 10 cents
     val curveTypes: List<String>, // (blank)/s/r/j
@@ -87,13 +87,15 @@ fun pitchFromUtauMode2Track(pitchData: UtauMode2TrackPitchData?, notes: List<Not
     for ((note, notePitch) in notePitches) {
         val points = mutableListOf<Pair<Long, Double>>()
         if (notePitch?.bpm != null) bpm = notePitch.bpm
-        if (notePitch != null) {
+        if (notePitch?.start != null) {
             var tickPos = note.tickOn + tickFromMilliSec(notePitch.start, bpm)
             val startShift =
-                if (note.tickOn == lastNote?.tickOff && notePitch.shifts.isNotEmpty()) {
+                if (note.tickOn == lastNote?.tickOff) {
+                    // always same value as the last note
                     (lastNote.key - note.key).toDouble()
                 } else {
-                    notePitch.startShift / 10
+                    // actually in this case startShift is always 0.0
+                    (notePitch.startShift ?: 0.0) / 10
                 }
             points.add(tickPos to startShift)
             for (index in notePitch.widths.indices) {
