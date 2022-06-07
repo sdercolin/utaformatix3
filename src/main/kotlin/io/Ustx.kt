@@ -77,7 +77,7 @@ object Ustx {
             listOfNotNull(
                 if (features.contains(Feature.ConvertPitch)) ExportNotification.PitchDataExported else null,
                 if (project.tempos.count() > 1) ExportNotification.TempoChangeIgnored else null,
-                if (project.timeSignatures.count() > 1) ExportNotification.TimeSignatureIgnored else null
+                if (project.timeSignatures.count() > 1) ExportNotification.TimeSignatureChangeIgnored else null
             )
         )
     }

@@ -300,6 +300,11 @@ enum class Strings(val en: String, val ja: String, val zhCN: String) {
         ja = "拍子記号を出力することができませんでした。",
         zhCN = "未能将节拍记号导出到目标格式。"
     ),
+    ExportNotificationTimeSignatureChangeIgnored(
+        en = "Could not convert time signature changes to the target format.",
+        ja = "拍子記号の変更を出力することができませんでした。",
+        zhCN = "未能将节拍记号的变化导出到目标格式。"
+    ),
     ExportNotificationPitchDataExported(
         en = "Some pitch parameters were exported. For a higher reproduction accuracy," +
                 " you may need to turn off pitch transition and vibrato settings in the target editor.",
