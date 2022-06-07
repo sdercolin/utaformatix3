@@ -117,7 +117,7 @@ object Ust {
         // Pitch field for Mode1
         var pendingPitchBend: List<Double>? = null
         // Pitch field for Mode2
-        var pendingPBS: Pair<Double, Double>? = null
+        var pendingPBS: Pair<Double, Double?>? = null
         var pendingPBW: List<Double>? = null
         var pendingPBY: List<Double>? = null
         var pendingPBM: List<String>? = null
@@ -164,8 +164,8 @@ object Ust {
                     notePitchDataListMode2.add(
                         UtauMode2NotePitchData(
                             bpm = tempos.last().bpm,
-                            start = pendingPBS?.first ?: 0.0,
-                            startShift = pendingPBS?.second ?: 0.0,
+                            start = pendingPBS?.first,
+                            startShift = pendingPBS?.second,
                             widths = pendingPBW.orEmpty(),
                             shifts = pendingPBY.orEmpty(),
                             curveTypes = pendingPBM.orEmpty(),
@@ -211,7 +211,7 @@ object Ust {
                 line.tryGetValue("PBS")?.let {
                     val cells = it.split(';', ',')
                     val start = cells[0].toDoubleOrNull() ?: return@let
-                    val startShift = cells.getOrNull(1)?.toDoubleOrNull() ?: 0.0
+                    val startShift = cells.getOrNull(1)?.toDoubleOrNull()
                     pendingPBS = start to startShift
                 }
                 line.tryGetValue("PBW")?.let {
