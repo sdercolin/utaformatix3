@@ -16,6 +16,8 @@ import model.TimeSignature
 import org.w3c.files.Blob
 import org.w3c.files.BlobPropertyBag
 import org.w3c.files.File
+import process.pitch.OpenUtauNotePitchData
+import process.pitch.OpenUtauPartPitchData
 import process.validateNotes
 import util.readText
 
@@ -32,7 +34,7 @@ object Ustx {
             format = Format.Ustx,
             inputFiles = listOf(file),
             name = project.name,
-            tracks = parseTracks(project),
+            tracks = parseTracks(project, params, tempo.bpm),
             timeSignatures = listOf(timeSignature),
             tempos = listOf(tempo),
             measurePrefix = 0,
@@ -40,7 +42,7 @@ object Ustx {
         )
     }
 
-    private fun parseTracks(project: Project): List<model.Track> {
+    private fun parseTracks(project: Project, params: ImportParams, bpm: Double): List<model.Track> {
         val trackMap = List(project.tracks.size) { index: Int ->
             model.Track(
                 id = index,
@@ -61,10 +63,59 @@ object Ustx {
                     tickOff = it.position + it.duration + tickPrefix
                 )
             }
-            val newTrack = track.copy(notes = track.notes + notes)
+            val notePitches = if (params.simpleImport) null
+            else voicePart.notes.map { note ->
+                val points = note.pitch.data.map {
+                    OpenUtauNotePitchData.Point(
+                        x = it.x,
+                        y = it.y,
+                        shape = OpenUtauNotePitchData.Shape.values()
+                            .find { shape -> shape.textValue == it.shape }
+                            ?: OpenUtauNotePitchData.Shape.EaseInOut
+                    )
+                }
+                val vibrato = note.vibrato.let {
+                    OpenUtauNotePitchData.Vibrato(
+                        length = it.length,
+                        period = it.period,
+                        depth = it.depth,
+                        fadeIn = it.`in`,
+                        fadeOut = it.out,
+                        phaseShift = it.shift,
+                        shift = it.drift
+                    )
+                }
+                OpenUtauNotePitchData(points, vibrato)
+            }
+            val pitchCurve = if (params.simpleImport) null
+            else voicePart.curves.find { it.abbr == "pitd" }?.let { curve ->
+                OpenUtauPartPitchData(
+                    curve.xs.zip(curve.ys).map { OpenUtauPartPitchData.Point(it.first, it.second.toInt()) }
+                ).takeIf { it.points.isNotEmpty() }
+            }
+            val pitch: model.Pitch? = if (notePitches?.isNotEmpty() == true || pitchCurve != null) {
+                TODO()
+            } else null
+            val mergedPitch = if (track.pitch != null) {
+                track.pitch.copy(data = track.pitch.data + pitch?.data.orEmpty())
+            } else pitch
+            val newTrack = track.copy(notes = track.notes + notes, pitch = mergedPitch)
             trackMap[trackId] = newTrack
         }
-        return trackMap.values.map { it.validateNotes() }.sortedBy { it.id }
+        return trackMap.values.sortedBy { it.id }
+    }
+
+    private fun getValidatedNotes(
+        notes: List<model.Note>,
+        notePitches: List<OpenUtauNotePitchData>
+    ): Pair<List<model.Note>, List<OpenUtauNotePitchData>> {
+        val validatedNotes = mutableListOf<model.Note>()
+        val validatedNotePitches = mutableListOf<OpenUtauNotePitchData>()
+        var pos = -1
+        var
+        for (i in validatedNotes.indices) {
+            val note = notes
+        }
     }
 
     fun generate(project: model.Project, features: List<Feature>): ExportResult {

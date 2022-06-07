@@ -33,7 +33,7 @@ data class OpenUtauPartPitchData(
     val points: List<Point>
 ) {
     data class Point(
-        val x: Int, // tick
+        val x: Long, // tick
         val y: Int // cent
     )
 }
