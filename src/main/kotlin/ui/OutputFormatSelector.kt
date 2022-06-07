@@ -139,7 +139,7 @@ class OutputFormatSelector : RComponent<OutputFormatSelectorProps, RState>() {
             Vsqx -> Strings.VsqxFormatDescription
             Vpr -> Strings.VprFormatDescription
             Ust -> Strings.UstFormatDescription
-            Ustx -> null
+            Ustx -> Strings.UstxFormatDescription
             Ccs -> Strings.CcsFormatDescription
             Svp -> Strings.SvpFormatDescription
             S5p -> Strings.S5pFormatDescription
@@ -155,7 +155,7 @@ class OutputFormatSelector : RComponent<OutputFormatSelectorProps, RState>() {
             Vsqx -> Resources.vsqxIcon
             Vpr -> Resources.vprIcon
             Ust -> Resources.ustIcon
-            Ustx -> null
+            Ustx -> Resources.ustxIcon
             Ccs -> Resources.ccsIcon
             Svp -> Resources.svpIcon
             S5p -> Resources.s5pIcon

@@ -58,7 +58,7 @@ enum class Format(
             io.Ustx.parse(files.first(), params)
         },
         generator = { project, features ->
-            TODO()
+            io.Ustx.generate(project, features)
         },
         possibleLyricsTypes = listOf(RomajiCv, RomajiVcv, KanaCv, KanaVcv)
     ),
@@ -156,6 +156,6 @@ enum class Format(
 
     companion object {
         val importable get() = listOf(Vsqx, Vpr, Vsq, VocaloidMid, Ust, Ustx, Ccs, MusicXml, Svp, S5p, Dv, Ppsf)
-        val exportable get() = listOf(Vsqx, Vpr, Vsq, VocaloidMid, Ust, Ccs, MusicXml, Svp, S5p, Dv)
+        val exportable get() = listOf(Vsqx, Vpr, Vsq, VocaloidMid, Ust, Ustx, Ccs, MusicXml, Svp, S5p, Dv)
     }
 }

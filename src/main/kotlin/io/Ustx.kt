@@ -1,14 +1,20 @@
 package io
 
 import external.JsYaml
+import external.Resources
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
+import model.ExportNotification
+import model.ExportResult
+import model.Feature
 import model.Format
 import model.ImportParams
 import model.Project
 import model.Tempo
 import model.TimeSignature
+import org.w3c.files.Blob
+import org.w3c.files.BlobPropertyBag
 import org.w3c.files.File
 import process.validateNotes
 import util.readText
@@ -59,6 +65,85 @@ object Ustx {
             trackMap[trackId] = newTrack
         }
         return trackMap.values.map { it.validateNotes() }.sortedBy { it.id }
+    }
+
+    fun generate(project: model.Project, features: List<Feature>): ExportResult {
+        val yamlText = generateContent(project, features)
+        val blob = Blob(arrayOf(yamlText), BlobPropertyBag("application/octet-stream"))
+        val name = project.name + Format.Ustx.extension
+        return ExportResult(
+            blob,
+            name,
+            listOfNotNull(
+                if (features.contains(Feature.ConvertPitch)) ExportNotification.PitchDataExported else null,
+                if (project.tempos.count() > 1) ExportNotification.TempoChangeIgnored else null,
+                if (project.timeSignatures.count() > 1) ExportNotification.TimeSignatureChangeIgnored else null
+            )
+        )
+    }
+
+    private fun generateContent(project: model.Project, features: List<Feature>): String {
+        val templateYamlText = Resources.ustxTemplate
+        val templateYaml = JsYaml.load(templateYamlText)
+        val templateJsonText = JSON.stringify(templateYaml)
+        val template = jsonSerializer.decodeFromString(Project.serializer(), templateJsonText)
+        val trackTemplate = template.tracks.first()
+        val tracks = project.tracks.map {
+            trackTemplate.copy()
+        }
+        val voicePartTemplate = template.voiceParts.first()
+        val voiceParts = project.tracks.map {
+            generateVoicePart(voicePartTemplate, it, features)
+        }
+        val ustx = template.copy(
+            name = project.name,
+            bpm = project.tempos.first().bpm,
+            beatPerBar = project.timeSignatures.first().numerator,
+            beatUnit = project.timeSignatures.first().denominator,
+            tracks = tracks,
+            voiceParts = voiceParts
+        )
+        val jsonText = jsonSerializer.encodeToString(Project.serializer(), ustx)
+        return JsYaml.dump(JSON.parse(jsonText))
+    }
+
+    private fun generateVoicePart(template: VoicePart, track: model.Track, features: List<Feature>): VoicePart {
+        val noteTemplate = template.notes.first()
+        val notes =
+            listOfNotNull(track.notes.firstOrNull()?.let { generateNote(noteTemplate, null, it) }) +
+                    track.notes.zipWithNext().map { (lastNote, thisNote) ->
+                        generateNote(noteTemplate, lastNote, thisNote)
+                    }
+        return template.copy(
+            name = track.name,
+            trackNo = track.id,
+            position = 0L,
+            notes = notes
+        )
+    }
+
+    private fun generateNote(
+        template: Note,
+        lastNote: model.Note?,
+        thisNote: model.Note
+    ): Note {
+        val firstPitchPointValue = if (lastNote?.tickOff == thisNote.tickOn) {
+            (lastNote.key - thisNote.key) * 10.0 // the unit is 10 cents
+        } else {
+            0.0
+        }
+        val pitchPoints = template.pitch.data.mapIndexed { index: Int, datum: Datum ->
+            if (index == 0) datum.copy(y = firstPitchPointValue) else datum.copy()
+        }
+        val pitch = template.pitch.copy(data = pitchPoints)
+        return Note(
+            position = thisNote.tickOn,
+            duration = thisNote.length,
+            tone = thisNote.key,
+            pitch = pitch,
+            lyric = thisNote.lyric,
+            vibrato = template.vibrato.copy()
+        )
     }
 
     private val jsonSerializer = Json {

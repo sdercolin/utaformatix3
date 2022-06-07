@@ -19,6 +19,9 @@ config.module.rules.push({
     test: /\.ccs$/i,
     loader: 'raw-loader'
 },{
+    test: /\.ustx/i,
+    loader: 'raw-loader'
+},{
     test: /\.(png|jpe?g|gif)$/i,
     use: [
       {

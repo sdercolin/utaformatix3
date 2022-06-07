@@ -19,6 +19,9 @@ object Resources {
     val s5pTemplate: String
         get() = require("format_templates/template.s5p").default as String
 
+    val ustxTemplate: String
+        get() = require("format_templates/template.ustx").default as String
+
     val vocaloidMidIcon: String
         get() = require("images/vocaloid1.png").default as String
 
@@ -33,6 +36,9 @@ object Resources {
 
     val ustIcon: String
         get() = require("images/utau.png").default as String
+
+    val ustxIcon: String
+        get() = require("images/openutau.png").default as String
 
     val ccsIcon: String
         get() = require("images/cevio.png").default as String

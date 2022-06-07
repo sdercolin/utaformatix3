@@ -221,6 +221,11 @@ enum class Strings(val en: String, val ja: String, val zhCN: String) {
         ja = "UTAU プロジェクト",
         zhCN = "UTAU 工程"
     ),
+    UstxFormatDescription(
+        en = "Project for OpenUtau",
+        ja = "OpenUtau プロジェクト",
+        zhCN = "OpenUtau 工程"
+    ),
     CcsFormatDescription(
         en = "Project for CeVIO Creative Studio",
         ja = "CeVIO Creative Studio プロジェクト",
@@ -294,6 +299,11 @@ enum class Strings(val en: String, val ja: String, val zhCN: String) {
         en = "Could not convert time signatures to the target format.",
         ja = "拍子記号を出力することができませんでした。",
         zhCN = "未能将节拍记号导出到目标格式。"
+    ),
+    ExportNotificationTimeSignatureChangeIgnored(
+        en = "Could not convert time signature changes to the target format.",
+        ja = "拍子記号の変更を出力することができませんでした。",
+        zhCN = "未能将节拍记号的变化导出到目标格式。"
     ),
     ExportNotificationPitchDataExported(
         en = "Some pitch parameters were exported. For a higher reproduction accuracy," +
