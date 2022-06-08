@@ -37,7 +37,7 @@ fun List<Pair<Long, Double>>.appendUtauNoteVibrato(
     val easeInLength = noteLength * vibratoParams.fadeIn / 100
     val easeOutLength = noteLength * vibratoParams.fadeOut / 100
     val phase = vibratoParams.phaseShift / 100
-    val shift = depth * vibratoParams.shift / 100
+    val shift = vibratoParams.shift / 100
 
     val start = noteLength - vibratoLength
     val vibrato = { t: Double ->
@@ -48,16 +48,11 @@ fun List<Pair<Long, Double>>.appendUtauNoteVibrato(
             val easeOutFactor = ((noteLength - t) / easeOutLength).coerceIn(0.0..1.0)
                 .takeIf { !it.isNaN() } ?: 1.0
             val x = 2 * PI * (frequency * (t - start) - phase)
-            depth * easeInFactor * easeOutFactor * sin(x) + shift
+            depth * easeInFactor * easeOutFactor * (kotlin.math.sin(x) + shift)
         }
     }
 
-    val needAppendEndingPoint = lastOrNull()?.first != thisNote.tickOff
-
-    return asSequence()
-        .plus(if (needAppendEndingPoint) (thisNote.tickOff to (lastOrNull()?.second ?: 0.0)) else null)
-        .filterNotNull()
-        .map { (it.first - thisNote.tickOn) to it.second }
+    return map { (it.first - thisNote.tickOn) to it.second }
         .fold(listOf<Pair<Long, Double>>()) { acc, inputPoint ->
             val lastPoint = acc.lastOrNull()
             val newPoint = inputPoint.let { it.first to (it.second + vibrato(it.first.toDouble())) }
@@ -67,10 +62,9 @@ fun List<Pair<Long, Double>>.appendUtauNoteVibrato(
                 val interpolatedIndexes = ((lastPoint.first + 1) until inputPoint.first)
                     .filter { (it - lastPoint.first) % sampleIntervalTick == 0L }
                 val interpolatedPoints =
-                    interpolatedIndexes.map { it to (lastPoint.second + vibrato(it.toDouble())) }
+                    interpolatedIndexes.map { it to (inputPoint.second + vibrato(it.toDouble())) }
                 acc + interpolatedPoints + newPoint
             }
         }
         .map { (it.first + thisNote.tickOn) to it.second }
-        .toList()
 }

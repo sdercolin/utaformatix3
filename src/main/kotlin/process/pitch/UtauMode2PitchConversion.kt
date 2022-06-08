@@ -114,7 +114,8 @@ fun pitchFromUtauMode2Track(pitchData: UtauMode2TrackPitchData?, notes: List<Not
         pitchPoints.addAll(pendingPitchPoints.filter { it.first < (points.firstOrNull()?.first ?: Long.MAX_VALUE) })
         pendingPitchPoints = points
             .fixPointsAtLastNote(note, lastNote)
-            .addPointsContinuingLastNote(note, lastNote)
+            .appendStartPoint(note)
+            .appendEndPoint(note)
             .appendUtauNoteVibrato(notePitch?.vibratoParams, note, bpm, SAMPLING_INTERVAL_TICK)
             .shape()
         lastNote = note
@@ -134,14 +135,23 @@ private fun List<Pair<Long, Double>>.fixPointsAtLastNote(thisNote: Note, lastNot
         else fixed
     }
 
-private fun List<Pair<Long, Double>>.addPointsContinuingLastNote(thisNote: Note, lastNote: Note?) =
-    if (lastNote == null) this
-    else {
-        val firstPoint = this.firstOrNull()
-        if (firstPoint != null && firstPoint.first > thisNote.tickOn) {
-            listOf(thisNote.tickOn to firstPoint.second) + this
-        } else this
+private fun List<Pair<Long, Double>>.appendStartPoint(thisNote: Note): List<Pair<Long, Double>> {
+    val firstPoint = this.firstOrNull()
+    return when {
+        firstPoint == null -> listOf(thisNote.tickOn to 0.0)
+        firstPoint.first > thisNote.tickOn -> listOf(thisNote.tickOn to firstPoint.second) + this
+        else -> this
     }
+}
+
+private fun List<Pair<Long, Double>>.appendEndPoint(thisNote: Note): List<Pair<Long, Double>> {
+    val lastPoint = this.lastOrNull()
+    return when {
+        lastPoint == null -> listOf(thisNote.tickOff to 0.0)
+        lastPoint.first < thisNote.tickOff -> this + listOf(thisNote.tickOff to lastPoint.second)
+        else -> this
+    }
+}
 
 private fun List<Pair<Long, Double>>.shape() =
     this.sortedBy { it.first }
