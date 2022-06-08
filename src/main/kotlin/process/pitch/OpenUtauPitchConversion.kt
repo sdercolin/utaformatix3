@@ -39,16 +39,14 @@ data class OpenUtauPartPitchData(
 }
 
 fun pitchFromUstxPart(notes: List<Note>, pitchData: OpenUtauPartPitchData, bpm: Double): Pitch? {
-    // Extract pitch points in notes
+    // Extract pitch points from notes
     val notePointsList = mutableListOf<List<Pair<Long, Double>>>()
-    var lastNote: Note? = null
     for ((note, notePitch) in notes.zip(pitchData.notes)) {
         val points = mutableListOf<Pair<Long, Double>>()
         var lastPointShape = OpenUtauNotePitchData.Shape.EaseInOut
         for (rawPoint in notePitch.points) {
             val x = note.tickOn + tickFromMilliSec(rawPoint.x, bpm)
-            val baseKey = if (lastNote != null && x < lastNote.tickOff) lastNote.key - note.key else 0
-            val y = rawPoint.y / 10 - baseKey
+            val y = rawPoint.y / 10
             val thisPoint = x to y
             val lastPoint = points.lastOrNull()
             if (thisPoint.second != lastPoint?.second && lastPoint != null) {
@@ -66,7 +64,64 @@ fun pitchFromUstxPart(notes: List<Note>, pitchData: OpenUtauPartPitchData, bpm: 
             .appendUtauNoteVibrato(notePitch.vibrato, note, bpm, SAMPLING_INTERVAL_TICK)
         val pointsWithVibrato = pointsBefore + pointsInNoteWithVibrato + pointsAfter
         notePointsList.add(pointsWithVibrato.resampled(SAMPLING_INTERVAL_TICK))
-        lastNote = note
+    }
+
+    // Divide note with points into sections,
+    // where adjacent notes are put into the same section
+    var currentSection = mutableListOf<Pair<Note, List<Pair<Long, Double>>>>()
+    val notePitchSections = mutableListOf(currentSection)
+    for (noteWithPoints in notes.zip(notePointsList)) {
+        if (currentSection.isEmpty()) {
+            currentSection.add(noteWithPoints)
+            continue
+        }
+        val lastNote = currentSection.last().first
+        if (lastNote.tickOff < noteWithPoints.first.tickOn) {
+            // not adjacent
+            currentSection = mutableListOf(noteWithPoints)
+            notePitchSections.add(currentSection)
+        } else {
+            // adjacent
+            currentSection.add(noteWithPoints)
+        }
+    }
+
+    // Merge points in notes by section
+    var sectionBorder = 0L
+    val allPointsFromNote = mutableListOf<Pair<Long, Double>>()
+    for (section in notePitchSections) {
+        if (section.isEmpty()) continue
+
+        var lastNote: Note? = null
+        val pointsByNote = mutableListOf<List<Pair<Long, Double>>>()
+        for (pair in section) {
+            val note = pair.first
+            var points = pair.second
+
+            // Adjust y
+            // If before this note's start point, use the previous note as base
+            val prevNote = lastNote
+            points = points.map { (x, y) ->
+                val baseY = if (prevNote != null && x < note.tickOn) prevNote.key - note.key else 0
+                x to (y - baseY)
+            }
+
+            pointsByNote.add(points)
+            lastNote = note
+        }
+        val nextSectionBorder = section.last().first.tickOff
+
+        // Merge points from all notes in the section
+        val pointsInSection = pointsByNote
+            .reduce { acc, list -> acc + list }
+            .groupBy { it.first }
+            .filter { it.key in sectionBorder..nextSectionBorder }
+            .map { (tick, points) ->
+                tick to points.sumByDouble { it.second }
+            }
+
+        allPointsFromNote.addAll(pointsInSection)
+        sectionBorder = nextSectionBorder
     }
 
     // Extract curve points
@@ -75,8 +130,7 @@ fun pitchFromUstxPart(notes: List<Note>, pitchData: OpenUtauPartPitchData, bpm: 
         .resampled(SAMPLING_INTERVAL_TICK)
 
     // Merge points from all notes and curve
-    val pitchPoints = (notePointsList + listOf(curvePoints))
-        .reduce { acc, list -> acc + list }
+    val pitchPoints = (allPointsFromNote + curvePoints)
         .groupBy { it.first }
         .map { (tick, points) ->
             tick to points.sumByDouble { it.second }
