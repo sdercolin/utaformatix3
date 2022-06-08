@@ -148,7 +148,7 @@ enum class Strings(val en: String, val ja: String, val zhCN: String) {
         en = "If you find any problems, please help us collect error information" +
                 " for better performance of this application by submitting a feedback report.",
         ja = "サービス向上のためにエラー情報を収集しております。問題を発見した場合、フィードバックにご協力をお願いします。",
-        zhCN = "如您在使用中发现问题，您可以向提交反馈表单。感谢您对本应用的改善所提供的帮助！"
+        zhCN = "如您在使用中发现问题，您可以向我们提交反馈表单。感谢您对本应用的改善所提供的帮助！"
     ),
     ReportUrl(
         en = "https://forms.gle/3Es3ZomcYKNHWBvp6",

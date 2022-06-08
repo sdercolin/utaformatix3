@@ -34,14 +34,23 @@ class CustomFooter : RComponent<CustomFooterProps, RState>() {
                     variant = TypographyVariant.body2
                     color = Color.inherit
                 }
-                +"UtaFormatix © 2015 - 2021　|　"
+                +"UtaFormatix © 2015 - 2022　|　"
                 link {
                     attrs {
                         href = "https://github.com/sdercolin/utaformatix3"
                         target = "_blank"
                         color = Color.inherit
                     }
-                    +"View Source Code on GitHub"
+                    +"GitHub"
+                }
+                +"　|　"
+                link {
+                    attrs {
+                        href = "https://discord.gg/TyEcQ6P73y"
+                        target = "_blank"
+                        color = Color.inherit
+                    }
+                    +"Discord"
                 }
                 +"　|　"
                 link {
