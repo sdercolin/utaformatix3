@@ -46,6 +46,15 @@ class CustomFooter : RComponent<CustomFooterProps, RState>() {
                 +"　|　"
                 link {
                     attrs {
+                        href = "https://discord.gg/TyEcQ6P73y"
+                        target = "_blank"
+                        color = Color.inherit
+                    }
+                    +"Join us on Discord"
+                }
+                +"　|　"
+                link {
+                    attrs {
                         onClick = { props.onOpenEmbeddedPage(Strings.ReleaseNotesUrl) }
                         color = Color.inherit
                     }
