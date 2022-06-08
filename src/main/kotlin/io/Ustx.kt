@@ -121,7 +121,7 @@ object Ustx {
         val validatedNotes = mutableListOf<model.Note>()
         val validatedNotePitches = if (notePitches != null) mutableListOf<OpenUtauNotePitchData>() else null
         var pos = 0L
-        for (i in validatedNotes.indices) {
+        for (i in notes.indices) {
             val note = notes[i]
             if (note.tickOn >= pos) {
                 validatedNotes.add(note)

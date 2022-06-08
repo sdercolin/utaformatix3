@@ -47,7 +47,7 @@ fun pitchFromUstxPart(notes: List<Note>, pitchData: OpenUtauPartPitchData, bpm: 
         var lastPointShape = OpenUtauNotePitchData.Shape.EaseInOut
         for (rawPoint in notePitch.points) {
             val x = note.tickOn + tickFromMilliSec(rawPoint.x, bpm)
-            val baseKey = if (lastNote != null && x < lastNote.tickOff) lastNote.key else note.key
+            val baseKey = if (lastNote != null && x < lastNote.tickOff) lastNote.key - note.key else 0
             val y = rawPoint.y / 10 - baseKey
             val thisPoint = x to y
             val lastPoint = points.lastOrNull()
@@ -173,7 +173,7 @@ private fun MutableList<Pair<Long, Double>>.appendStartAndEndPoint(note: Note) {
 }
 
 private fun List<Pair<Long, Double>>.resampled(interval: Long): List<Pair<Long, Double>> =
-    groupBy { it.first / interval }
+    groupBy { it.first / interval * interval }
         .map { (mergedTick, points) ->
             mergedTick to points.map { it.second }.average()
         }
