@@ -163,7 +163,7 @@ private fun List<Pair<Long, Double>>.appendVibrato(
     val easeInLength = noteLength * (vibratoParams.getOrNull(3) ?: 0.0) / 100
     val easeOutLength = noteLength * (vibratoParams.getOrNull(4) ?: 0.0) / 100
     val phase = (vibratoParams.getOrNull(5) ?: 0.0) / 100
-    val shift = depth * (vibratoParams.getOrNull(6) ?: 0.0) / 100
+    val shift = (vibratoParams.getOrNull(6) ?: 0.0) / 100
 
     val start = noteLength - vibratoLength
     val vibrato = { t: Double ->
@@ -174,7 +174,7 @@ private fun List<Pair<Long, Double>>.appendVibrato(
             val easeOutFactor = ((noteLength - t) / easeOutLength).coerceIn(0.0..1.0)
                 .takeIf { !it.isNaN() } ?: 1.0
             val x = 2 * kotlin.math.PI * (frequency * (t - start) - phase)
-            depth * easeInFactor * easeOutFactor * kotlin.math.sin(x) + shift
+            depth * easeInFactor * easeOutFactor * (kotlin.math.sin(x) + shift)
         }
     }
 
