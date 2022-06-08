@@ -143,62 +143,6 @@ private fun List<Pair<Long, Double>>.addPointsContinuingLastNote(thisNote: Note,
         } else this
     }
 
-private fun List<Pair<Long, Double>>.appendVibrato(
-    vibratoParams: List<Double>?,
-    thisNote: Note,
-    bpm: Double
-): List<Pair<Long, Double>> {
-    vibratoParams?.takeIf { it.isNotEmpty() } ?: return this
-
-    // x-axis: tick, y-axis: 100cents
-    val noteLength = thisNote.length
-    val vibratoLength = noteLength * vibratoParams[0] / 100
-    if (vibratoLength <= 0) return this
-    val frequency = 1.0 / tickFromMilliSec(vibratoParams[1], bpm)
-    if (frequency.isNaN()) return this
-    val depth = (vibratoParams.getOrNull(2) ?: 0.0) / 100
-    if (depth <= 0) return this
-    val easeInLength = noteLength * (vibratoParams.getOrNull(3) ?: 0.0) / 100
-    val easeOutLength = noteLength * (vibratoParams.getOrNull(4) ?: 0.0) / 100
-    val phase = (vibratoParams.getOrNull(5) ?: 0.0) / 100
-    val shift = depth * (vibratoParams.getOrNull(6) ?: 0.0) / 100
-
-    val start = noteLength - vibratoLength
-    val vibrato = { t: Double ->
-        if (t < start) 0.0
-        else {
-            val easeInFactor = ((t - start) / easeInLength).coerceIn(0.0..1.0)
-                .takeIf { !it.isNaN() } ?: 1.0
-            val easeOutFactor = ((noteLength - t) / easeOutLength).coerceIn(0.0..1.0)
-                .takeIf { !it.isNaN() } ?: 1.0
-            val x = 2 * kotlin.math.PI * (frequency * (t - start) - phase)
-            depth * easeInFactor * easeOutFactor * kotlin.math.sin(x) + shift
-        }
-    }
-
-    val needAppendEndingPoint = this.lastOrNull()?.first != thisNote.tickOff
-
-    return this
-        .asSequence()
-        .plus(if (needAppendEndingPoint) (thisNote.tickOff to (this.lastOrNull()?.second ?: 0.0)) else null)
-        .filterNotNull()
-        .map { (it.first - thisNote.tickOn) to it.second }
-        .fold(listOf<Pair<Long, Double>>()) { acc, inputPoint ->
-            val lastPoint = acc.lastOrNull()
-            val newPoint = inputPoint.let { it.first to (it.second + vibrato(it.first.toDouble())) }
-            if (lastPoint == null) {
-                acc + newPoint
-            } else {
-                val interpolatedIndexes = ((lastPoint.first + 1) until inputPoint.first)
-                    .filter { (it - lastPoint.first) % SAMPLING_INTERVAL_TICK == 0L }
-                val interpolatedPoints = interpolatedIndexes.map { it to (lastPoint.second + vibrato(it.toDouble())) }
-                acc + interpolatedPoints + newPoint
-            }
-        }
-        .map { (it.first + thisNote.tickOn) to it.second }
-        .toList()
-}
-
 private fun List<Pair<Long, Double>>.shape() =
     this.sortedBy { it.first }
         .fold(listOf<Pair<Long, Double>>()) { acc, point ->
