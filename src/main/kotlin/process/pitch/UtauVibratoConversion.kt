@@ -48,7 +48,7 @@ fun List<Pair<Long, Double>>.appendUtauNoteVibrato(
             val easeOutFactor = ((noteLength - t) / easeOutLength).coerceIn(0.0..1.0)
                 .takeIf { !it.isNaN() } ?: 1.0
             val x = 2 * PI * (frequency * (t - start) - phase)
-            depth * easeInFactor * easeOutFactor * (kotlin.math.sin(x) + shift)
+            depth * easeInFactor * easeOutFactor * (sin(x) + shift)
         }
     }
 
