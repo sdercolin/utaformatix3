@@ -39,6 +39,7 @@ data class OpenUtauPartPitchData(
 }
 
 fun pitchFromUstxPart(notes: List<Note>, pitchData: OpenUtauPartPitchData, bpm: Double): Pitch? {
+    // Extract pitch points in notes
     val notePointsList = mutableListOf<List<Pair<Long, Double>>>()
     var lastNote: Note? = null
     for ((note, notePitch) in notes.zip(pitchData.notes)) {
@@ -68,15 +69,34 @@ fun pitchFromUstxPart(notes: List<Note>, pitchData: OpenUtauPartPitchData, bpm: 
         lastNote = note
     }
 
-    // Merge points from all notes
-    val pitchPoints = notePointsList.reduce { acc, list -> acc + list }
+    // Extract curve points
+    val curvePoints = pitchData.points
+        .map { it.x to (it.y.toDouble() / 100) }
+        .resampled(SAMPLING_INTERVAL_TICK)
+
+    // Merge points from all notes and curve
+    val pitchPoints = (notePointsList + listOf(curvePoints))
+        .reduce { acc, list -> acc + list }
         .groupBy { it.first }
         .map { (tick, points) ->
             tick to points.sumByDouble { it.second }
         }
         .sortedBy { it.first }
 
-    return Pitch(pitchPoints, isAbsolute = false)
+    return if (pitchPoints.isEmpty()) null else Pitch(pitchPoints, isAbsolute = false)
+}
+
+fun mergePitchFromParts(first: Pitch?, second: Pitch?): Pitch? {
+    if (first == null) return second
+    if (second == null) return first
+    val data = (first.data + second.data)
+        .mapNotNull { point -> point.second?.let { point.first to it } }
+        .groupBy { it.first }
+        .map { (tick, points) ->
+            tick to points.sumByDouble { it.second }
+        }
+        .sortedBy { it.first }
+    return first.copy(data = data)
 }
 
 private fun interpolate(

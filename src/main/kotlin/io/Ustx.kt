@@ -20,6 +20,7 @@ import org.w3c.files.File
 import process.pitch.OpenUtauNotePitchData
 import process.pitch.OpenUtauPartPitchData
 import process.pitch.UtauNoteVibratoParams
+import process.pitch.mergePitchFromParts
 import process.pitch.pitchFromUstxPart
 import util.readText
 
@@ -71,7 +72,7 @@ object Ustx {
 
             val pitchCurve = if (params.simpleImport) null
             else voicePart.curves.find { it.abbr == "pitd" }?.let { curve ->
-                curve.xs.zip(curve.ys).map { OpenUtauPartPitchData.Point(it.first, it.second.toInt()) }
+                curve.xs.zip(curve.ys).map { OpenUtauPartPitchData.Point(it.first + tickPrefix, it.second.toInt()) }
             }
             val pitch: model.Pitch? = if (validatedNotePitches?.isNotEmpty() == true || pitchCurve != null) {
                 val partPitchData = OpenUtauPartPitchData(
@@ -80,9 +81,7 @@ object Ustx {
                 )
                 pitchFromUstxPart(validatedNotes, partPitchData, bpm)
             } else null
-            val mergedPitch = if (track.pitch != null) {
-                track.pitch.copy(data = track.pitch.data + pitch?.data.orEmpty())
-            } else pitch
+            val mergedPitch = mergePitchFromParts(track.pitch, pitch)
             val newTrack = track.copy(notes = track.notes + validatedNotes, pitch = mergedPitch)
             trackMap[trackId] = newTrack
         }
