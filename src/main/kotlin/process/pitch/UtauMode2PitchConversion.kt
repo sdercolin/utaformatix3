@@ -116,7 +116,8 @@ fun pitchFromUtauMode2Track(pitchData: UtauMode2TrackPitchData?, notes: List<Not
         pitchPoints.addAll(pendingPitchPoints.filter { it.first < (points.firstOrNull()?.first ?: Long.MAX_VALUE) })
         pendingPitchPoints = points
             .fixPointsAtLastNote(note, lastNote)
-            .addPointsContinuingLastNote(note, lastNote)
+            .appendStartPoint(note)
+            .appendEndPoint(note)
             .appendVibrato(notePitch?.vibratoParams, note, bpm)
             .shape()
         lastNote = note
@@ -136,14 +137,23 @@ private fun List<Pair<Long, Double>>.fixPointsAtLastNote(thisNote: Note, lastNot
         else fixed
     }
 
-private fun List<Pair<Long, Double>>.addPointsContinuingLastNote(thisNote: Note, lastNote: Note?) =
-    if (lastNote == null) this
-    else {
-        val firstPoint = this.firstOrNull()
-        if (firstPoint != null && firstPoint.first > thisNote.tickOn) {
-            listOf(thisNote.tickOn to firstPoint.second) + this
-        } else this
+private fun List<Pair<Long, Double>>.appendStartPoint(thisNote: Note): List<Pair<Long, Double>> {
+    val firstPoint = this.firstOrNull()
+    return when {
+        firstPoint == null -> listOf(thisNote.tickOn to 0.0)
+        firstPoint.first > thisNote.tickOn -> listOf(thisNote.tickOn to firstPoint.second) + this
+        else -> this
     }
+}
+
+private fun List<Pair<Long, Double>>.appendEndPoint(thisNote: Note): List<Pair<Long, Double>> {
+    val lastPoint = this.lastOrNull()
+    return when {
+        lastPoint == null -> listOf(thisNote.tickOff to 0.0)
+        lastPoint.first < thisNote.tickOff -> this + listOf(thisNote.tickOff to lastPoint.second)
+        else -> this
+    }
+}
 
 private fun List<Pair<Long, Double>>.appendVibrato(
     vibratoParams: List<Double>?,
@@ -163,7 +173,7 @@ private fun List<Pair<Long, Double>>.appendVibrato(
     val easeInLength = noteLength * (vibratoParams.getOrNull(3) ?: 0.0) / 100
     val easeOutLength = noteLength * (vibratoParams.getOrNull(4) ?: 0.0) / 100
     val phase = (vibratoParams.getOrNull(5) ?: 0.0) / 100
-    val shift = depth * (vibratoParams.getOrNull(6) ?: 0.0) / 100
+    val shift = (vibratoParams.getOrNull(6) ?: 0.0) / 100
 
     val start = noteLength - vibratoLength
     val vibrato = { t: Double ->
@@ -174,17 +184,11 @@ private fun List<Pair<Long, Double>>.appendVibrato(
             val easeOutFactor = ((noteLength - t) / easeOutLength).coerceIn(0.0..1.0)
                 .takeIf { !it.isNaN() } ?: 1.0
             val x = 2 * kotlin.math.PI * (frequency * (t - start) - phase)
-            depth * easeInFactor * easeOutFactor * kotlin.math.sin(x) + shift
+            depth * easeInFactor * easeOutFactor * (kotlin.math.sin(x) + shift)
         }
     }
 
-    val needAppendEndingPoint = this.lastOrNull()?.first != thisNote.tickOff
-
-    return this
-        .asSequence()
-        .plus(if (needAppendEndingPoint) (thisNote.tickOff to (this.lastOrNull()?.second ?: 0.0)) else null)
-        .filterNotNull()
-        .map { (it.first - thisNote.tickOn) to it.second }
+    return this.map { (it.first - thisNote.tickOn) to it.second }
         .fold(listOf<Pair<Long, Double>>()) { acc, inputPoint ->
             val lastPoint = acc.lastOrNull()
             val newPoint = inputPoint.let { it.first to (it.second + vibrato(it.first.toDouble())) }
@@ -193,7 +197,7 @@ private fun List<Pair<Long, Double>>.appendVibrato(
             } else {
                 val interpolatedIndexes = ((lastPoint.first + 1) until inputPoint.first)
                     .filter { (it - lastPoint.first) % SAMPLING_INTERVAL_TICK == 0L }
-                val interpolatedPoints = interpolatedIndexes.map { it to (lastPoint.second + vibrato(it.toDouble())) }
+                val interpolatedPoints = interpolatedIndexes.map { it to (inputPoint.second + vibrato(it.toDouble())) }
                 acc + interpolatedPoints + newPoint
             }
         }
