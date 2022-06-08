@@ -116,7 +116,8 @@ fun pitchFromUtauMode2Track(pitchData: UtauMode2TrackPitchData?, notes: List<Not
         pitchPoints.addAll(pendingPitchPoints.filter { it.first < (points.firstOrNull()?.first ?: Long.MAX_VALUE) })
         pendingPitchPoints = points
             .fixPointsAtLastNote(note, lastNote)
-            .addPointsContinuingLastNote(note, lastNote)
+            .appendStartPoint(note)
+            .appendEndPoint(note)
             .appendVibrato(notePitch?.vibratoParams, note, bpm)
             .shape()
         lastNote = note
@@ -136,14 +137,23 @@ private fun List<Pair<Long, Double>>.fixPointsAtLastNote(thisNote: Note, lastNot
         else fixed
     }
 
-private fun List<Pair<Long, Double>>.addPointsContinuingLastNote(thisNote: Note, lastNote: Note?) =
-    if (lastNote == null) this
-    else {
-        val firstPoint = this.firstOrNull()
-        if (firstPoint != null && firstPoint.first > thisNote.tickOn) {
-            listOf(thisNote.tickOn to firstPoint.second) + this
-        } else this
+private fun List<Pair<Long, Double>>.appendStartPoint(thisNote: Note): List<Pair<Long, Double>> {
+    val firstPoint = this.firstOrNull()
+    return when {
+        firstPoint == null -> listOf(thisNote.tickOn to 0.0)
+        firstPoint.first > thisNote.tickOn -> listOf(thisNote.tickOn to firstPoint.second) + this
+        else -> this
     }
+}
+
+private fun List<Pair<Long, Double>>.appendEndPoint(thisNote: Note): List<Pair<Long, Double>> {
+    val lastPoint = this.lastOrNull()
+    return when {
+        lastPoint == null -> listOf(thisNote.tickOff to 0.0)
+        lastPoint.first < thisNote.tickOff -> this + listOf(thisNote.tickOff to lastPoint.second)
+        else -> this
+    }
+}
 
 private fun List<Pair<Long, Double>>.appendVibrato(
     vibratoParams: List<Double>?,
@@ -178,13 +188,7 @@ private fun List<Pair<Long, Double>>.appendVibrato(
         }
     }
 
-    val needAppendEndingPoint = this.lastOrNull()?.first != thisNote.tickOff
-
-    return this
-        .asSequence()
-        .plus(if (needAppendEndingPoint) (thisNote.tickOff to (this.lastOrNull()?.second ?: 0.0)) else null)
-        .filterNotNull()
-        .map { (it.first - thisNote.tickOn) to it.second }
+    return this.map { (it.first - thisNote.tickOn) to it.second }
         .fold(listOf<Pair<Long, Double>>()) { acc, inputPoint ->
             val lastPoint = acc.lastOrNull()
             val newPoint = inputPoint.let { it.first to (it.second + vibrato(it.first.toDouble())) }
