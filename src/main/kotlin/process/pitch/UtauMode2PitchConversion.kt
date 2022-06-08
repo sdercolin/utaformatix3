@@ -193,7 +193,7 @@ private fun List<Pair<Long, Double>>.appendVibrato(
             } else {
                 val interpolatedIndexes = ((lastPoint.first + 1) until inputPoint.first)
                     .filter { (it - lastPoint.first) % SAMPLING_INTERVAL_TICK == 0L }
-                val interpolatedPoints = interpolatedIndexes.map { it to (lastPoint.second + vibrato(it.toDouble())) }
+                val interpolatedPoints = interpolatedIndexes.map { it to (inputPoint.second + vibrato(it.toDouble())) }
                 acc + interpolatedPoints + newPoint
             }
         }
