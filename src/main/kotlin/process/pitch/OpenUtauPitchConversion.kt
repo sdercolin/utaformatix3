@@ -192,7 +192,7 @@ private fun MutableList<Pair<Long, Double>>.appendStartAndEndPoint(note: Note) {
             }
             lastTick < start -> {
                 // Same as note
-                add(0, start to 0.0)
+                add(start to 0.0)
             }
             else -> {
                 // In this case, firstTick < start, lastTick > end
@@ -213,7 +213,7 @@ private fun MutableList<Pair<Long, Double>>.appendStartAndEndPoint(note: Note) {
     if (!hasEndPoint) {
         when {
             firstTick > end -> add(0, end to first().second)
-            lastTick < end -> add(0, end to 0.0)
+            lastTick < end -> add(end to 0.0)
             else -> {
                 val lastPointBefore = last { it.first < end }
                 val firstPointAfter = first { it.first > end }
