@@ -20,8 +20,9 @@ import org.w3c.files.File
 import process.pitch.OpenUtauNotePitchData
 import process.pitch.OpenUtauPartPitchData
 import process.pitch.UtauNoteVibratoParams
-import process.pitch.mergePitchFromParts
+import process.pitch.mergePitchFromUstxParts
 import process.pitch.pitchFromUstxPart
+import process.pitch.reduceRepeatedPitchPointsInUstxTrack
 import util.readText
 
 object Ustx {
@@ -81,12 +82,17 @@ object Ustx {
                 )
                 pitchFromUstxPart(validatedNotes, partPitchData, bpm)
             } else null
-            val mergedPitch = mergePitchFromParts(track.pitch, pitch)
+            val mergedPitch = mergePitchFromUstxParts(track.pitch, pitch)
             val newTrack = track.copy(notes = track.notes + validatedNotes, pitch = mergedPitch)
             trackMap[trackId] = newTrack
         }
         return trackMap.values
-            .map { it.copy(notes = it.notes.mapIndexed { index, note -> note.copy(id = index) }) }
+            .map {
+                it.copy(
+                    notes = it.notes.mapIndexed { index, note -> note.copy(id = index) },
+                    pitch = it.pitch.reduceRepeatedPitchPointsInUstxTrack()
+                )
+            }
             .sortedBy { it.id }
     }
 

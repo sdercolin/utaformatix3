@@ -140,7 +140,7 @@ fun pitchFromUstxPart(notes: List<Note>, pitchData: OpenUtauPartPitchData, bpm: 
     return if (pitchPoints.isEmpty()) null else Pitch(pitchPoints, isAbsolute = false)
 }
 
-fun mergePitchFromParts(first: Pitch?, second: Pitch?): Pitch? {
+fun mergePitchFromUstxParts(first: Pitch?, second: Pitch?): Pitch? {
     if (first == null) return second
     if (second == null) return first
     val data = (first.data + second.data)
@@ -151,6 +151,34 @@ fun mergePitchFromParts(first: Pitch?, second: Pitch?): Pitch? {
         }
         .sortedBy { it.first }
     return first.copy(data = data)
+}
+
+fun Pitch?.reduceRepeatedPitchPointsInUstxTrack(): Pitch? {
+    this ?: return null
+    val toBeRemoved = mutableSetOf<Pair<Long, Double?>>()
+    var currentRepeatedValue: Double? = null
+    var prevPoint: Pair<Long, Double?>? = null
+    for (point in data) {
+        if (prevPoint == null) {
+            prevPoint = point
+            continue
+        }
+        if (currentRepeatedValue == null) {
+            if (prevPoint.second == point.second) {
+                currentRepeatedValue = point.second
+            }
+            prevPoint = point
+            continue
+        }
+        if (currentRepeatedValue == point.second) {
+            toBeRemoved.add(prevPoint)
+        } else {
+            currentRepeatedValue = null
+        }
+
+        prevPoint = point
+    }
+    return copy(data = data.minus(toBeRemoved))
 }
 
 private fun interpolate(
@@ -230,4 +258,14 @@ private fun List<Pair<Long, Double>>.resampled(interval: Long): List<Pair<Long, 
     groupBy { it.first / interval * interval }
         .map { (mergedTick, points) ->
             mergedTick to points.map { it.second }.average()
+        }
+        .sortedBy { it.first }
+        .fold(listOf()) { acc, point ->
+            val lastPoint = acc.lastOrNull()
+            if (lastPoint == null) {
+                listOf(point)
+            } else {
+                val interpolated = listOf(lastPoint, point).interpolateLinear(interval).orEmpty()
+                acc + interpolated.drop(1)
+            }
         }
