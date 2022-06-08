@@ -41,7 +41,7 @@ class CustomFooter : RComponent<CustomFooterProps, RState>() {
                         target = "_blank"
                         color = Color.inherit
                     }
-                    +"View Source Code on GitHub"
+                    +"GitHub"
                 }
                 +"　|　"
                 link {
@@ -50,7 +50,7 @@ class CustomFooter : RComponent<CustomFooterProps, RState>() {
                         target = "_blank"
                         color = Color.inherit
                     }
-                    +"Join us on Discord"
+                    +"Discord"
                 }
                 +"　|　"
                 link {
