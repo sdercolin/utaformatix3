@@ -21,10 +21,8 @@ import org.w3c.files.File
 import process.pitch.OpenUtauNotePitchData
 import process.pitch.OpenUtauPartPitchData
 import process.pitch.UtauNoteVibratoParams
-import process.pitch.appendPitchPointsForOpenUtauOutput
 import process.pitch.mergePitchFromUstxParts
 import process.pitch.pitchFromUstxPart
-import process.pitch.reduceRepeatedPitchPoints
 import process.pitch.reduceRepeatedPitchPointsFromUstxTrack
 import process.pitch.toOpenUtauPitchData
 import util.readText
