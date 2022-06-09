@@ -6,6 +6,7 @@ import process.interpolateCosineEaseIn
 import process.interpolateCosineEaseInOut
 import process.interpolateCosineEaseOut
 import process.interpolateLinear
+import kotlin.math.roundToInt
 
 private const val SAMPLING_INTERVAL_TICK = 5L
 
@@ -160,7 +161,9 @@ fun Pitch?.reduceRepeatedPitchPointsFromUstxTrack(): Pitch? {
 
 fun Pitch?.toOpenUtauPitchData(): List<Pair<Long, Double>> {
     this ?: return listOf()
-    return data.map { it.first to it.second!! }.appendPitchPointsForOpenUtauOutput().reduceRepeatedPitchPoints()
+    return data.map { it.first to (it.second!! * 100).roundToInt().toDouble() }
+        .appendPitchPointsForOpenUtauOutput()
+        .reduceRepeatedPitchPoints()
 }
 
 private fun interpolate(

@@ -2,7 +2,6 @@ package io
 
 import external.JsYaml
 import external.Resources
-import kotlin.math.roundToInt
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
@@ -195,7 +194,7 @@ object Ustx {
             val points = track.pitch?.toOpenUtauPitchData().orEmpty()
             if (points.isNotEmpty()) {
                 val xs = points.map { it.first }
-                val ys = points.map { (it.second * 100).roundToInt().toDouble() }
+                val ys = points.map { it.second }
                 val curve = Curve(xs, ys, PITCH_CURVE_ABBR)
                 curves.add(curve)
             }
