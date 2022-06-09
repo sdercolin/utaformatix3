@@ -181,4 +181,4 @@ private fun List<Pair<Long, Double>>.removeRedundantPoints() =
 
 fun List<Pair<Long, Double>>.appendPitchPointsForSvpOutput() =
     appendPitchPointsForInterpolation(this, SAMPLING_INTERVAL_TICK)
-        .let { it.reduceRepeatedPitchPoints() }
+        .reduceRepeatedPitchPoints()
