@@ -60,7 +60,8 @@ enum class Format(
         generator = { project, features ->
             io.Ustx.generate(project, features)
         },
-        possibleLyricsTypes = listOf(RomajiCv, RomajiVcv, KanaCv, KanaVcv)
+        possibleLyricsTypes = listOf(RomajiCv, RomajiVcv, KanaCv, KanaVcv),
+        availableFeaturesForGeneration = listOf(ConvertPitch)
     ),
     Ccs(
         ".ccs",

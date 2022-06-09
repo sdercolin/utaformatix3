@@ -153,32 +153,14 @@ fun mergePitchFromUstxParts(first: Pitch?, second: Pitch?): Pitch? {
     return first.copy(data = data)
 }
 
-fun Pitch?.reduceRepeatedPitchPointsInUstxTrack(): Pitch? {
+fun Pitch?.reduceRepeatedPitchPointsFromUstxTrack(): Pitch? {
     this ?: return null
-    val toBeRemoved = mutableSetOf<Pair<Long, Double?>>()
-    var currentRepeatedValue: Double? = null
-    var prevPoint: Pair<Long, Double?>? = null
-    for (point in data) {
-        if (prevPoint == null) {
-            prevPoint = point
-            continue
-        }
-        if (currentRepeatedValue == null) {
-            if (prevPoint.second == point.second) {
-                currentRepeatedValue = point.second
-            }
-            prevPoint = point
-            continue
-        }
-        if (currentRepeatedValue == point.second) {
-            toBeRemoved.add(prevPoint)
-        } else {
-            currentRepeatedValue = null
-        }
+    return copy(data = data.map { it.first to it.second!! }.reduceRepeatedPitchPoints())
+}
 
-        prevPoint = point
-    }
-    return copy(data = data.minus(toBeRemoved))
+fun Pitch?.toOpenUtauPitchData(): List<Pair<Long, Double>> {
+    this ?: return listOf()
+    return data.map { it.first to it.second!! }.appendPitchPointsForOpenUtauOutput().reduceRepeatedPitchPoints()
 }
 
 private fun interpolate(
@@ -269,3 +251,7 @@ private fun List<Pair<Long, Double>>.resampled(interval: Long): List<Pair<Long, 
                 acc + interpolated.drop(1)
             }
         }
+
+
+fun List<Pair<Long, Double>>.appendPitchPointsForOpenUtauOutput() =
+    appendPitchPointsForInterpolation(this, SAMPLING_INTERVAL_TICK)

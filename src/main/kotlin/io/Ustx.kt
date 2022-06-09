@@ -2,6 +2,7 @@ package io
 
 import external.JsYaml
 import external.Resources
+import kotlin.math.roundToInt
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
@@ -20,12 +21,17 @@ import org.w3c.files.File
 import process.pitch.OpenUtauNotePitchData
 import process.pitch.OpenUtauPartPitchData
 import process.pitch.UtauNoteVibratoParams
+import process.pitch.appendPitchPointsForOpenUtauOutput
 import process.pitch.mergePitchFromUstxParts
 import process.pitch.pitchFromUstxPart
-import process.pitch.reduceRepeatedPitchPointsInUstxTrack
+import process.pitch.reduceRepeatedPitchPoints
+import process.pitch.reduceRepeatedPitchPointsFromUstxTrack
+import process.pitch.toOpenUtauPitchData
 import util.readText
 
 object Ustx {
+
+    private const val PITCH_CURVE_ABBR = "pitd"
 
     suspend fun parse(file: File, params: ImportParams): model.Project {
         val yamlText = file.readText()
@@ -72,7 +78,7 @@ object Ustx {
             val (validatedNotes, validatedNotePitches) = getValidatedNotes(notes, notePitches)
 
             val pitchCurve = if (params.simpleImport) null
-            else voicePart.curves.find { it.abbr == "pitd" }?.let { curve ->
+            else voicePart.curves.find { it.abbr == PITCH_CURVE_ABBR }?.let { curve ->
                 curve.xs.zip(curve.ys).map { OpenUtauPartPitchData.Point(it.first + tickPrefix, it.second.toInt()) }
             }
             val pitch: model.Pitch? = if (validatedNotePitches?.isNotEmpty() == true || pitchCurve != null) {
@@ -90,7 +96,7 @@ object Ustx {
             .map {
                 it.copy(
                     notes = it.notes.mapIndexed { index, note -> note.copy(id = index) },
-                    pitch = it.pitch.reduceRepeatedPitchPointsInUstxTrack()
+                    pitch = it.pitch.reduceRepeatedPitchPointsFromUstxTrack()
                 )
             }
             .sortedBy { it.id }
@@ -185,11 +191,23 @@ object Ustx {
                     track.notes.zipWithNext().map { (lastNote, thisNote) ->
                         generateNote(noteTemplate, lastNote, thisNote)
                     }
+
+        val curves = mutableListOf<Curve>()
+        if (features.contains(Feature.ConvertPitch)) {
+            val points = track.pitch?.toOpenUtauPitchData().orEmpty()
+            if (points.isNotEmpty()) {
+                val xs = points.map { it.first }
+                val ys = points.map { (it.second * 100).roundToInt().toDouble() }
+                val curve = Curve(xs, ys, PITCH_CURVE_ABBR)
+                curves.add(curve)
+            }
+        }
         return template.copy(
             name = track.name,
             trackNo = track.id,
             position = 0L,
-            notes = notes
+            notes = notes,
+            curves = curves
         )
     }
 
