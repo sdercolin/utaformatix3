@@ -9,7 +9,7 @@ import csstype.Length
 import csstype.Margin
 import csstype.NamedColor
 import csstype.Position
-import csstype.pct
+import csstype.number
 import csstype.px
 import csstype.rem
 import csstype.vh
@@ -37,6 +37,7 @@ import mui.material.Tooltip
 import mui.material.Typography
 import mui.material.styles.ThemeProvider
 import mui.material.styles.TypographyVariant
+import mui.system.sx
 import react.ChildrenBuilder
 import react.FC
 import react.Props
@@ -103,23 +104,19 @@ private fun ChildrenBuilder.buildAppBar(pushStage: (StageInfo) -> Unit) {
     AppBar {
         position = AppBarPosition.fixed
         Toolbar {
-            div {
-                css {
-                    minWidth = 100.pct
-                }
-                Typography {
-                    variant = TypographyVariant.h6
-                    +APP_NAME
-                    span {
-                        css {
-                            fontSize = 0.8.rem
-                            marginLeft = 5.px
-                            fontWeight = FontWeight.bold
-                            color = NamedColor.lightgrey
-                        }
-                        +"v$APP_VERSION"
+            Typography {
+                variant = TypographyVariant.h6
+                +APP_NAME
+                span {
+                    css {
+                        fontSize = 0.8.rem
+                        marginLeft = 5.px
+                        fontWeight = FontWeight.bold
+                        color = NamedColor.lightgrey
                     }
+                    +"v$APP_VERSION"
                 }
+                sx { flexGrow = number(1.0) }
             }
             Tooltip {
                 title = ReactNode(string(Strings.FrequentlyAskedQuestionTooltip))
