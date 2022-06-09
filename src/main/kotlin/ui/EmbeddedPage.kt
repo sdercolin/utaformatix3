@@ -1,58 +1,53 @@
 package ui
 
+import csstype.px
 import kotlinx.browser.window
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.await
 import kotlinx.coroutines.launch
-import kotlinx.css.LinearDimension
-import kotlinx.css.marginBottom
-import kotlinx.css.marginTop
-import react.RBuilder
-import react.RComponent
-import react.RProps
-import react.RState
-import react.setState
-import styled.css
-import styled.styledDiv
-import ui.external.react.markdown
+import react.FC
+import react.Props
+import react.css.css
+import react.dom.html.ReactHTML.div
+import react.useState
+import ui.external.react.Markdown
 
-class EmbeddedPage : RComponent<EmbeddedPageProps, EmbeddedPageState>() {
+val EmbeddedPage = FC<EmbeddedPageProps> { props ->
+    var url: String? by useState()
+    var content: String? by useState()
 
-    override fun RBuilder.render() {
-        val content = state.content
-        if (content == null || state.url != props.url) {
-            state.url = props.url
-            fetch()
-        } else {
-            styledDiv {
-                css {
-                    marginTop = LinearDimension("32px")
-                    marginBottom = LinearDimension("48px")
-                }
-                markdown {
-                    +content
-                }
-            }
-        }
-    }
-
-    private fun fetch() {
+    fun fetch() {
         GlobalScope.launch {
             val result = try {
-                window.fetch(props.url).await().text().await()
+                window.fetch(url).await().text().await()
             } catch (t: Throwable) {
                 t.toString()
             }
-            setState { content = result }
+            content = result
+        }
+    }
+
+    if (content == null || url != props.url) {
+        url = props.url
+        fetch()
+    } else {
+        div {
+            css {
+                marginTop = 32.px
+                marginBottom = 48.px
+            }
+            Markdown {
+                +content.orEmpty()
+            }
         }
     }
 }
 
-external interface EmbeddedPageProps : RProps {
+external interface EmbeddedPageProps : Props {
     var url: String
 }
 
-external interface EmbeddedPageState : RState {
-    var url: String
+private class EmbeddedPageState(
+    var url: String,
     var content: String?
-}
+)

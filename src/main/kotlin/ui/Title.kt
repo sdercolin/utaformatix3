@@ -1,21 +1,21 @@
 package ui
 
-import kotlinx.css.LinearDimension
-import kotlinx.css.margin
-import react.RBuilder
-import styled.css
-import styled.styledDiv
-import ui.external.materialui.TypographyVariant
-import ui.external.materialui.typography
+import csstype.Margin
+import csstype.px
+import mui.material.Typography
+import mui.material.styles.TypographyVariant
+import react.ChildrenBuilder
+import react.css.css
+import react.dom.html.ReactHTML.div
 import ui.strings.Strings
 import ui.strings.string
 
-fun RBuilder.title(titleKey: Strings) = styledDiv {
+fun ChildrenBuilder.title(titleKey: Strings) = div {
     css {
-        margin(vertical = LinearDimension("20px"))
+        Margin(vertical = 20.px, horizontal = 0.px)
     }
-    typography {
-        attrs.variant = TypographyVariant.h3
+    Typography {
+        variant = TypographyVariant.h3
         +string(titleKey)
     }
 }

@@ -252,6 +252,5 @@ private fun List<Pair<Long, Double>>.resampled(interval: Long): List<Pair<Long, 
             }
         }
 
-
 fun List<Pair<Long, Double>>.appendPitchPointsForOpenUtauOutput() =
     appendPitchPointsForInterpolation(this, SAMPLING_INTERVAL_TICK)

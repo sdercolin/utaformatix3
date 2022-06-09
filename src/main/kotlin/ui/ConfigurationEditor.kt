@@ -1,15 +1,14 @@
 package ui
 
+import csstype.Length
+import csstype.Margin
+import csstype.VerticalAlign
+import csstype.em
+import csstype.px
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlinx.css.LinearDimension
-import kotlinx.css.VerticalAlign
-import kotlinx.css.margin
-import kotlinx.css.marginTop
-import kotlinx.css.minWidth
-import kotlinx.css.paddingBottom
-import kotlinx.css.width
+import kotlinx.js.jso
 import model.ExportResult
 import model.Feature
 import model.Format
@@ -21,49 +20,46 @@ import model.LyricsType.RomajiVcv
 import model.LyricsType.Unknown
 import model.Project
 import model.TICKS_IN_FULL_NOTE
-import org.w3c.dom.HTMLInputElement
+import mui.icons.material.ErrorOutline
+import mui.icons.material.HelpOutline
+import mui.material.Button
+import mui.material.ButtonColor
+import mui.material.ButtonVariant
+import mui.material.FormControl
+import mui.material.FormControlLabel
+import mui.material.FormControlMargin
+import mui.material.FormGroup
+import mui.material.FormLabel
+import mui.material.InputLabel
+import mui.material.LabelPlacement
+import mui.material.MenuItem
+import mui.material.Paper
+import mui.material.Radio
+import mui.material.RadioGroup
+import mui.material.Select
+import mui.material.Switch
+import mui.material.Tooltip
+import mui.material.TooltipPlacement
+import mui.material.Typography
+import mui.material.styles.TypographyVariant
 import process.RESTS_FILLING_MAX_LENGTH_DENOMINATOR_DEFAULT
 import process.fillRests
 import process.lyrics.convert
 import process.restsFillingMaxLengthDenominatorOptions
-import react.RBuilder
-import react.RComponent
-import react.RProps
-import react.RState
-import react.dom.div
-import react.setState
-import styled.css
-import styled.styledDiv
-import ui.external.materialui.ButtonVariant
-import ui.external.materialui.Color
-import ui.external.materialui.FontSize
-import ui.external.materialui.FormControlMargin
-import ui.external.materialui.Icons
-import ui.external.materialui.LabelPlacement
-import ui.external.materialui.Style
-import ui.external.materialui.TypographyVariant
-import ui.external.materialui.button
-import ui.external.materialui.formControl
-import ui.external.materialui.formControlLabel
-import ui.external.materialui.formGroup
-import ui.external.materialui.formLabel
-import ui.external.materialui.inputLabel
-import ui.external.materialui.menuItem
-import ui.external.materialui.paper
-import ui.external.materialui.radio
-import ui.external.materialui.radioGroup
-import ui.external.materialui.select
-import ui.external.materialui.switch
-import ui.external.materialui.tooltip
-import ui.external.materialui.typography
+import react.ChildrenBuilder
+import react.FC
+import react.Props
+import react.ReactNode
+import react.create
+import react.css.css
+import react.dom.html.ReactHTML.div
+import react.useState
 import ui.strings.Strings
 import ui.strings.string
 
-class ConfigurationEditor(props: ConfigurationEditorProps) :
-    RComponent<ConfigurationEditorProps, ConfigurationEditorState>(props) {
-
-    override fun ConfigurationEditorState.init(props: ConfigurationEditorProps) {
-        isProcessing = false
+val ConfigurationEditor = FC<ConfigurationEditorProps> { props ->
+    var isProcessing by useState(false)
+    var lyricsConversion: LyricsConversionState by useState {
         val analysedType = props.project.lyricsType
         val doLyricsConversion = analysedType != Unknown
         val fromLyricsType: LyricsType?
@@ -76,395 +72,376 @@ class ConfigurationEditor(props: ConfigurationEditorProps) :
             fromLyricsType = null
             toLyricsType = null
         }
-        lyricsConversion = LyricsConversionState(
+        LyricsConversionState(
             doLyricsConversion,
             fromLyricsType,
             toLyricsType
         )
-        slightRestsFilling = SlightRestsFillingState(
+    }
+    var slightRestsFilling: SlightRestsFillingState by useState {
+        SlightRestsFillingState(
             true,
             RESTS_FILLING_MAX_LENGTH_DENOMINATOR_DEFAULT
         )
-
-        val hasPitchData =
-            Feature.ConvertPitch.isAvailable(props.project)
+    }
+    var pitchConversion: PitchConversionState by useState {
+        val hasPitchData = Feature.ConvertPitch.isAvailable(props.project)
         val isPitchConversionAvailable = hasPitchData &&
                 props.outputFormat.availableFeaturesForGeneration.contains(Feature.ConvertPitch)
-        pitchConversion = PitchConversionState(
+        PitchConversionState(
             isAvailable = isPitchConversionAvailable,
             isOn = isPitchConversionAvailable
         )
+    }
+    var dialogError by useState(DialogErrorState())
 
-        dialogError = DialogErrorState()
+    fun closeErrorDialog() {
+        dialogError = dialogError.copy(isShowing = false)
     }
 
-    override fun RBuilder.render() {
-        title(Strings.ConfigurationEditorCaption)
-        buildLyricsBlock()
-        buildRestsFillingBlock()
-        if (state.pitchConversion.isAvailable) buildPitchConversion()
-        buildNextButton()
+    title(Strings.ConfigurationEditorCaption)
+    buildLyricsBlock(props, lyricsConversion) { lyricsConversion = it }
+    buildRestsFillingBlock(slightRestsFilling) { slightRestsFilling = it }
+    if (pitchConversion.isAvailable) buildPitchConversion(pitchConversion) { pitchConversion = it }
+    buildNextButton(
+        props,
+        isEnabled = lyricsConversion.isReady,
+        lyricsConversion,
+        slightRestsFilling,
+        pitchConversion,
+        setProcessing = { isProcessing = it },
+        onDialogError = { dialogError = it }
+    )
 
-        errorDialog(
-            isShowing = state.dialogError.isShowing,
-            title = state.dialogError.title,
-            errorMessage = state.dialogError.message,
-            close = { closeErrorDialog() }
-        )
+    errorDialog(
+        isShowing = dialogError.isShowing,
+        title = dialogError.title,
+        errorMessage = dialogError.message,
+        close = { closeErrorDialog() }
+    )
 
-        progress(isShowing = state.isProcessing)
-    }
+    progress(isShowing = isProcessing)
+}
 
-    private fun RBuilder.buildLyricsBlock() {
-        formGroup {
-            formControlLabel {
-                attrs {
-                    label = string(Strings.JapaneseLyricsConversionSwitchLabel)
-                    control = switch {
-                        attrs {
-                            checked = state.lyricsConversion.isOn
-                            onChange = {
-                                val checked = (it.target as HTMLInputElement).checked
-                                setState {
-                                    lyricsConversion = lyricsConversion.copy(
-                                        isOn = checked
-                                    )
-                                }
-                            }
-                        }
-                    }
-                    labelPlacement = LabelPlacement.end
+private fun ChildrenBuilder.buildLyricsBlock(
+    props: ConfigurationEditorProps,
+    lyricsConversion: LyricsConversionState,
+    onChangeLyricsConversion: (LyricsConversionState) -> Unit
+) {
+    FormGroup {
+        FormControlLabel {
+            label = ReactNode(string(Strings.JapaneseLyricsConversionSwitchLabel))
+            control = Switch.create {
+                checked = lyricsConversion.isOn
+                onChange = { event, _ ->
+                    val checked = event.target.checked
+                    onChangeLyricsConversion(lyricsConversion.copy(isOn = checked))
                 }
             }
-        }
-
-        if (state.lyricsConversion.isOn) buildLyricsDetail()
-    }
-
-    private fun RBuilder.buildLyricsDetail() {
-        styledDiv {
-            css {
-                margin(horizontal = LinearDimension("40px"))
-                width = LinearDimension.maxContent
-            }
-            paper {
-                attrs.elevation = 0
-                styledDiv {
-                    css {
-                        margin(
-                            horizontal = LinearDimension("24px"),
-                            top = LinearDimension("16px"),
-                            bottom = LinearDimension("24px")
-                        )
-                    }
-                    formGroup {
-                        buildFromLyricsTypeControl()
-                        buildToLyricsTypeControl()
-                    }
-                }
-            }
+            labelPlacement = LabelPlacement.end
         }
     }
 
-    private fun RBuilder.buildFromLyricsTypeControl() {
-        formControl {
-            attrs.margin = FormControlMargin.normal
-            formLabel {
-                attrs.focused = false
-                +string(Strings.FromLyricsTypeLabel, "type" to props.project.lyricsType.displayName)
-            }
-            radioGroup {
-                attrs {
-                    row = true
-                    value = state.lyricsConversion.fromType?.name.orEmpty()
-                    onChange = {
-                        val value = (it.target as HTMLInputElement).value
-                        setState {
-                            lyricsConversion = lyricsConversion.copy(
-                                fromType = LyricsType.valueOf(value)
-                            )
-                        }
-                    }
-                }
-                listOf(RomajiCv, RomajiVcv, KanaCv, KanaVcv).forEach { lyricsType ->
-                    formControlLabel {
-                        attrs {
-                            value = lyricsType.name
-                            control = radio {}
-                            label = typography {
-                                attrs.variant = TypographyVariant.subtitle2
-                                +lyricsType.displayName
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
+    if (lyricsConversion.isOn) buildLyricsDetail(props, lyricsConversion, onChangeLyricsConversion)
+}
 
-    private fun RBuilder.buildToLyricsTypeControl() {
-        formControl {
-            attrs.margin = FormControlMargin.normal
-            formLabel {
-                attrs.focused = false
-                +string(Strings.ToLyricsTypeLabel)
-            }
-            radioGroup {
-                attrs {
-                    row = true
-                    value = state.lyricsConversion.toType?.name.orEmpty()
-                    onChange = {
-                        val value = (it.target as HTMLInputElement).value
-                        setState {
-                            lyricsConversion = lyricsConversion.copy(
-                                toType = LyricsType.valueOf(value)
-                            )
-                        }
-                    }
-                }
-                props.outputFormat.possibleLyricsTypes.forEach { lyricsType ->
-                    formControlLabel {
-                        attrs {
-                            value = lyricsType.name
-                            control = radio {}
-                            label = typography {
-                                attrs.variant = TypographyVariant.subtitle2
-                                +lyricsType.displayName
-                            }
-                        }
-                    }
-                }
-            }
+private fun ChildrenBuilder.buildLyricsDetail(
+    props: ConfigurationEditorProps,
+    lyricsConversion: LyricsConversionState,
+    onChangeLyricsConversion: (LyricsConversionState) -> Unit
+) {
+    div {
+        css {
+            Margin(horizontal = 40.px, vertical = 0.px)
+            width = Length.maxContent
         }
-    }
-
-    private fun RBuilder.buildRestsFillingBlock() {
-        formGroup {
+        Paper {
+            elevation = 0
             div {
-                formControlLabel {
-                    attrs {
-                        label = string(Strings.SlightRestsFillingSwitchLabel)
-                        control = switch {
-                            attrs {
-                                checked = state.slightRestsFilling.isOn
-                                onChange = {
-                                    val checked = (it.target as HTMLInputElement).checked
-                                    setState { slightRestsFilling = slightRestsFilling.copy(isOn = checked) }
-                                }
-                            }
-                        }
-                        labelPlacement = LabelPlacement.end
-                    }
+                css {
+                    Margin(
+                        horizontal = 24.px,
+                        top = 16.px,
+                        bottom = 24.px
+                    )
                 }
-                tooltip {
-                    attrs {
-                        title = string(Strings.SlightRestsFillingDescription)
-                        placement = "right"
-                        interactive = true
-                    }
-                    Icons.help {
-                        attrs.style = Style(
-                            fontSize = FontSize.initial,
-                            verticalAlign = VerticalAlign.middle
-                        )
-                    }
-                }
-            }
-        }
+                FormGroup {
+                    buildLyricsTypeControl(
+                        lyricsConversion,
+                        onChangeLyricsConversion,
+                        labelText = string(
+                            Strings.FromLyricsTypeLabel,
+                            "type" to props.project.lyricsType.displayName
+                        ),
+                        displayedTypeSelector = { it.fromType },
+                        lyricsConversionUpdater = { current, value ->
+                            current.copy(fromType = LyricsType.valueOf(value))
+                        },
+                        lyricTypeOptions = listOf(RomajiCv, RomajiVcv, KanaCv, KanaVcv)
+                    )
 
-        if (state.slightRestsFilling.isOn) buildRestsFillingDetail()
-    }
-
-    private fun RBuilder.buildRestsFillingDetail() {
-        styledDiv {
-            css {
-                margin(horizontal = LinearDimension("40px"))
-                width = LinearDimension.maxContent
-            }
-            paper {
-                attrs.elevation = 0
-                styledDiv {
-                    css {
-                        margin(
-                            horizontal = LinearDimension("24px"),
-                            vertical = LinearDimension("16px")
-                        )
-                        paddingBottom = LinearDimension("8px")
-                        minWidth = LinearDimension("20em")
-                    }
-                    formControl {
-                        attrs {
-                            margin = FormControlMargin.normal
-                            focused = false
-                        }
-                        inputLabel {
-                            attrs {
-                                style = Style(width = "max-content")
-                                id = slightRestsFillingLabelId
-                                focused = false
-                            }
-                            +string(Strings.SlightRestsFillingThresholdLabel)
-                        }
-                        select {
-                            attrs {
-                                labelId = slightRestsFillingLabelId
-                                value = state.slightRestsFilling.excludedMaxLengthDenominator.toString()
-                                onChange = { event ->
-                                    val value = event.target.asDynamic().value as String
-                                    setState {
-                                        slightRestsFilling = slightRestsFilling.copy(
-                                            excludedMaxLengthDenominator = value.toInt()
-                                        )
-                                    }
-                                }
-                            }
-                            restsFillingMaxLengthDenominatorOptions.forEach { denominator ->
-                                menuItem {
-                                    attrs.value = denominator.toString()
-                                    +string(
-                                        Strings.SlightRestsFillingThresholdItem,
-                                        "denominator" to denominator.toString()
-                                    )
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    private fun RBuilder.buildPitchConversion() {
-        formGroup {
-            div {
-                formControlLabel {
-                    attrs {
-                        label = string(Strings.ConvertPitchData)
-                        control = switch {
-                            attrs {
-                                checked = state.pitchConversion.isOn
-                                onChange = {
-                                    val checked = (it.target as HTMLInputElement).checked
-                                    setState { pitchConversion = pitchConversion.copy(isOn = checked) }
-                                }
-                            }
-                        }
-                        labelPlacement = LabelPlacement.end
-                    }
-                }
-                tooltip {
-                    attrs {
-                        title = string(Strings.ConvertPitchDataDescription)
-                        placement = "right"
-                        interactive = true
-                    }
-                    Icons.warning {
-                        attrs.style = Style(
-                            fontSize = FontSize.initial,
-                            verticalAlign = VerticalAlign.middle
-                        )
-                    }
-                }
-            }
-        }
-    }
-
-    private fun RBuilder.buildNextButton() {
-        styledDiv {
-            css {
-                marginTop = LinearDimension("48px")
-            }
-            button {
-                attrs {
-                    color = Color.primary
-                    variant = ButtonVariant.contained
-                    disabled = !state.canGoNext
-                    onClick = { process() }
-                }
-                +string(Strings.NextButton)
-            }
-        }
-    }
-
-    private fun process() {
-        setState { isProcessing = true }
-        GlobalScope.launch {
-            try {
-                val format = props.outputFormat
-                val lyricsConversionState = state.lyricsConversion
-                val fromType = lyricsConversionState.fromType
-                val toType = lyricsConversionState.toType
-                val slightRestsFillingState = state.slightRestsFilling
-
-                val project = props.project
-                    .let {
-                        if (lyricsConversionState.isOn && fromType != null && toType != null) {
-                            convert(it.copy(lyricsType = fromType), toType, format)
-                        } else it
-                    }
-                    .let {
-                        if (slightRestsFillingState.isOn) {
-                            it.copy(
-                                tracks = it.tracks.map { track ->
-                                    track.fillRests(slightRestsFillingState.excludedMaxLength)
-                                }
-                            )
-                        } else it
-                    }
-
-                delay(100)
-                val availableFeatures = Feature.values().filter {
-                    it.isAvailable.invoke(project) &&
-                            format.availableFeaturesForGeneration.contains(it)
-                }.let(::removeUncheckedFeatures)
-
-                val result = format.generator.invoke(project, availableFeatures)
-                console.log(result.blob)
-                props.onFinished.invoke(result, format)
-            } catch (t: Throwable) {
-                console.log(t)
-                setState {
-                    isProcessing = false
-                    dialogError = DialogErrorState(
-                        isShowing = true,
-                        title = string(Strings.ProcessErrorDialogTitle),
-                        message = t.message ?: t.toString()
+                    buildLyricsTypeControl(
+                        lyricsConversion,
+                        onChangeLyricsConversion,
+                        labelText = string(Strings.ToLyricsTypeLabel),
+                        displayedTypeSelector = { it.toType },
+                        lyricsConversionUpdater = { current, value ->
+                            current.copy(toType = LyricsType.valueOf(value))
+                        },
+                        lyricTypeOptions = props.outputFormat.possibleLyricsTypes
                     )
                 }
             }
         }
     }
+}
 
-    private fun removeUncheckedFeatures(featureList: List<Feature>): List<Feature> {
-        return featureList.filter {
-            when (it) {
-                Feature.ConvertPitch -> state.pitchConversion.isOn
+private fun ChildrenBuilder.buildLyricsTypeControl(
+    lyricsConversion: LyricsConversionState,
+    onChangeLyricsConversion: (LyricsConversionState) -> Unit,
+    labelText: String,
+    displayedTypeSelector: (LyricsConversionState) -> LyricsType?,
+    lyricsConversionUpdater: (LyricsConversionState, String) -> LyricsConversionState,
+    lyricTypeOptions: List<LyricsType>
+) {
+    FormControl {
+        margin = FormControlMargin.normal
+        FormLabel {
+            focused = false
+            +labelText
+        }
+        RadioGroup {
+            row = true
+            value = displayedTypeSelector(lyricsConversion)?.name.orEmpty()
+            onChange = { event, _ ->
+                val value = event.target.value
+                onChangeLyricsConversion(lyricsConversionUpdater(lyricsConversion, value))
+            }
+            lyricTypeOptions.forEach { lyricsType ->
+                FormControlLabel {
+                    value = lyricsType.name
+                    control = Radio.create()
+                    label = Typography.create {
+                        variant = TypographyVariant.subtitle2
+                        +lyricsType.displayName
+                    }
+                }
+            }
+        }
+    }
+}
+
+fun ChildrenBuilder.buildRestsFillingBlock(
+    slightRestsFilling: SlightRestsFillingState,
+    onChangeSlightRestsFilling: (SlightRestsFillingState) -> Unit
+) {
+    FormGroup {
+        div {
+            FormControlLabel {
+                label = ReactNode(string(Strings.SlightRestsFillingSwitchLabel))
+                control = Switch.create {
+                    checked = slightRestsFilling.isOn
+                    onChange = { event, _ ->
+                        val checked = event.target.checked
+                        onChangeSlightRestsFilling(slightRestsFilling.copy(isOn = checked))
+                    }
+                }
+                labelPlacement = LabelPlacement.end
+            }
+            Tooltip {
+                title = ReactNode(string(Strings.SlightRestsFillingDescription))
+                placement = TooltipPlacement.right
+                disableInteractive = false
+                HelpOutline {
+                    style = jso {
+                        verticalAlign = VerticalAlign.middle
+                    }
+                }
             }
         }
     }
 
-    private val ConfigurationEditorState.canGoNext: Boolean
-        get() = lyricsConversion.isReady
-
-    private fun closeErrorDialog() {
-        setState { dialogError = dialogError.copy(isShowing = false) }
-    }
-
-    private val slightRestsFillingLabelId = "slight-rests-filling"
+    if (slightRestsFilling.isOn) buildRestsFillingDetail(slightRestsFilling, onChangeSlightRestsFilling)
 }
 
-external interface ConfigurationEditorProps : RProps {
+private fun ChildrenBuilder.buildRestsFillingDetail(
+    slightRestsFilling: SlightRestsFillingState,
+    onChangeSlightRestsFilling: (SlightRestsFillingState) -> Unit
+) {
+    div {
+        css {
+            Margin(horizontal = 40.px, vertical = 0.px)
+            width = Length.maxContent
+        }
+        Paper {
+            elevation = 0
+            div {
+                css {
+                    Margin(
+                        horizontal = 24.px,
+                        vertical = 16.px
+                    )
+                    paddingBottom = 8.px
+                    minWidth = 20.em
+                }
+                FormControl {
+                    margin = FormControlMargin.normal
+                    focused = false
+                    InputLabel {
+                        style = jso { width = Length.maxContent }
+                        id = SlightRestsFillingLabelId
+                        focused = false
+                        +string(Strings.SlightRestsFillingThresholdLabel)
+                    }
+                    Select {
+                        labelId = SlightRestsFillingLabelId
+                        value = slightRestsFilling.excludedMaxLengthDenominator.toString().unsafeCast<Nothing?>()
+                        onChange = { event, _ ->
+                            val value = event.target.value
+                            onChangeSlightRestsFilling(
+                                slightRestsFilling.copy(
+                                    excludedMaxLengthDenominator = value.toInt()
+                                )
+                            )
+                        }
+                        restsFillingMaxLengthDenominatorOptions.forEach { denominator ->
+                            MenuItem {
+                                value = denominator.toString()
+                                +string(
+                                    Strings.SlightRestsFillingThresholdItem,
+                                    "denominator" to denominator.toString()
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+private fun ChildrenBuilder.buildPitchConversion(
+    pitchConversion: PitchConversionState,
+    onChangePitchConversion: (PitchConversionState) -> Unit
+) {
+    FormGroup {
+        div {
+            FormControlLabel {
+                label = ReactNode(string(Strings.ConvertPitchData))
+                control = Switch.create {
+                    checked = pitchConversion.isOn
+                    onChange = { event, _ ->
+                        val checked = event.target.checked
+                        onChangePitchConversion(pitchConversion.copy(isOn = checked))
+                    }
+                }
+                labelPlacement = LabelPlacement.end
+            }
+            Tooltip {
+                title = ReactNode(string(Strings.ConvertPitchDataDescription))
+                placement = TooltipPlacement.right
+                disableInteractive = false
+                ErrorOutline {
+                    style = jso {
+                        verticalAlign = VerticalAlign.middle
+                    }
+                }
+            }
+        }
+    }
+}
+
+private fun ChildrenBuilder.buildNextButton(
+    props: ConfigurationEditorProps,
+    isEnabled: Boolean,
+    lyricsConversion: LyricsConversionState,
+    slightRestsFilling: SlightRestsFillingState,
+    pitchConversion: PitchConversionState,
+    setProcessing: (Boolean) -> Unit,
+    onDialogError: (DialogErrorState) -> Unit
+) {
+    div {
+        css {
+            marginTop = 48.px
+        }
+        Button {
+            color = ButtonColor.primary
+            variant = ButtonVariant.contained
+            disabled = !isEnabled
+            onClick = {
+                process(props, lyricsConversion, slightRestsFilling, pitchConversion, setProcessing, onDialogError)
+            }
+            +string(Strings.NextButton)
+        }
+    }
+}
+
+private fun process(
+    props: ConfigurationEditorProps,
+    lyricsConversion: LyricsConversionState,
+    slightRestsFilling: SlightRestsFillingState,
+    pitchConversion: PitchConversionState,
+    setProcessing: (Boolean) -> Unit,
+    onDialogError: (DialogErrorState) -> Unit
+) {
+    setProcessing(true)
+    GlobalScope.launch {
+        try {
+            val format = props.outputFormat
+            val fromType = lyricsConversion.fromType
+            val toType = lyricsConversion.toType
+
+            val project = props.project
+                .let {
+                    if (lyricsConversion.isOn && fromType != null && toType != null) {
+                        convert(it.copy(lyricsType = fromType), toType, format)
+                    } else it
+                }
+                .let {
+                    if (slightRestsFilling.isOn) {
+                        it.copy(
+                            tracks = it.tracks.map { track ->
+                                track.fillRests(slightRestsFilling.excludedMaxLength)
+                            }
+                        )
+                    } else it
+                }
+
+            delay(100)
+            val availableFeatures = Feature.values()
+                .filter {
+                    it.isAvailable.invoke(project) &&
+                            format.availableFeaturesForGeneration.contains(it)
+                }
+                .filter {
+                    when (it) {
+                        Feature.ConvertPitch -> pitchConversion.isOn
+                    }
+                }
+
+            val result = format.generator.invoke(project, availableFeatures)
+            console.log(result.blob)
+            props.onFinished.invoke(result, format)
+        } catch (t: Throwable) {
+            console.log(t)
+            setProcessing(false)
+            onDialogError(
+                DialogErrorState(
+                    isShowing = true,
+                    title = string(Strings.ProcessErrorDialogTitle),
+                    message = t.message ?: t.toString()
+                )
+            )
+        }
+    }
+}
+
+private const val SlightRestsFillingLabelId = "slight-rests-filling"
+
+external interface ConfigurationEditorProps : Props {
     var project: Project
     var outputFormat: Format
     var onFinished: (ExportResult, Format) -> Unit
-}
-
-external interface ConfigurationEditorState : RState {
-    var isProcessing: Boolean
-    var lyricsConversion: LyricsConversionState
-    var slightRestsFilling: SlightRestsFillingState
-    var pitchConversion: PitchConversionState
-    var dialogError: DialogErrorState
 }
 
 data class LyricsConversionState(

@@ -1,106 +1,90 @@
 package ui
 
+import csstype.px
 import external.saveAs
-import kotlinx.css.LinearDimension
-import kotlinx.css.marginTop
-import kotlinx.css.padding
+import kotlinx.js.jso
 import model.ExportNotification
 import model.ExportResult
 import model.Format
-import react.RBuilder
-import react.RComponent
-import react.RProps
-import react.RState
-import react.dom.div
-import styled.css
-import styled.styledDiv
-import ui.external.materialui.ButtonVariant
-import ui.external.materialui.Color
-import ui.external.materialui.Icons
-import ui.external.materialui.Severity
-import ui.external.materialui.Style
-import ui.external.materialui.alert
-import ui.external.materialui.button
+import mui.icons.material.Refresh
+import mui.icons.material.SaveAlt
+import mui.material.Alert
+import mui.material.AlertColor
+import mui.material.Button
+import mui.material.ButtonColor
+import mui.material.ButtonVariant
+import react.ChildrenBuilder
+import react.FC
+import react.Props
+import react.css.css
+import react.dom.html.ReactHTML.div
 import ui.strings.Strings
 import ui.strings.string
 
-class Exporter : RComponent<ExporterProps, RState>() {
-
-    override fun RBuilder.render() {
-        title(Strings.ExporterTitleSuccess)
-        buildExportInfo()
-        buildButtons()
-    }
-
-    private fun RBuilder.buildExportInfo() {
-        val notifications = props.result.notifications
-        if (notifications.isEmpty()) return
-
-        alert {
-            attrs.severity = Severity.warning
-            notifications.map { it.text }
-                .forEach {
-                    div { +it }
-                }
-        }
-    }
-
-    private fun RBuilder.buildButtons() {
-        styledDiv {
-            css {
-                marginTop = LinearDimension("32px")
-            }
-            button {
-                attrs {
-                    variant = ButtonVariant.contained
-                    onClick = { download() }
-                }
-                Icons.save {}
-                styledDiv {
-                    css {
-                        padding = "8px"
-                    }
-                    +string(Strings.ExportButton)
-                }
-            }
-            button {
-                attrs {
-                    style = Style(marginLeft = "16px")
-                    variant = ButtonVariant.contained
-                    color = Color.primary
-                    onClick = { props.onRestart() }
-                }
-                Icons.refresh {}
-                styledDiv {
-                    css {
-                        padding = "8px"
-                    }
-                    +string(Strings.RestartButton)
-                }
-            }
-        }
-    }
-
-    private fun download() {
-        saveAs(props.result.blob, props.result.fileName)
-    }
-
-    private val ExportNotification.text: String
-        get() = string(
-            when (this) {
-                ExportNotification.PhonemeResetRequiredVSQ -> Strings.ExportNotificationPhonemeResetRequiredVSQ
-                ExportNotification.PhonemeResetRequiredV4 -> Strings.ExportNotificationPhonemeResetRequiredV4
-                ExportNotification.PhonemeResetRequiredV5 -> Strings.ExportNotificationPhonemeResetRequiredV5
-                ExportNotification.TempoChangeIgnored -> Strings.ExportNotificationTempoChangeIgnored
-                ExportNotification.TimeSignatureIgnored -> Strings.ExportNotificationTimeSignatureIgnored
-                ExportNotification.TimeSignatureChangeIgnored -> Strings.ExportNotificationTimeSignatureIgnored
-                ExportNotification.PitchDataExported -> Strings.ExportNotificationPitchDataExported
-                ExportNotification.DataOverLengthLimitIgnored -> Strings.ExportNotificationDataOverLengthLimitIgnored
-            }
-        )
+val Exporter = FC<ExporterProps> { props ->
+    title(Strings.ExporterTitleSuccess)
+    buildExportInfo(props)
+    buildButtons(props)
 }
 
-external interface ExporterProps : RProps {
+private fun ChildrenBuilder.buildExportInfo(props: ExporterProps) {
+    val notifications = props.result.notifications
+    if (notifications.isEmpty()) return
+
+    Alert {
+        severity = AlertColor.warning
+        notifications.map { it.text }.forEach { div { +it } }
+    }
+}
+
+private fun ChildrenBuilder.buildButtons(props: ExporterProps) {
+    div {
+        css {
+            marginTop = 32.px
+        }
+        Button {
+            variant = ButtonVariant.contained
+            onClick = { download(props) }
+            SaveAlt()
+            div {
+                css { padding = 8.px }
+                +string(Strings.ExportButton)
+            }
+        }
+        Button {
+
+            style = jso { marginLeft = 16.px }
+            variant = ButtonVariant.contained
+            color = ButtonColor.primary
+            onClick = { props.onRestart() }
+            Refresh()
+            div {
+                css { padding = 8.px }
+                +string(Strings.RestartButton)
+            }
+        }
+    }
+}
+
+private fun download(props: ExporterProps) {
+    saveAs(props.result.blob, props.result.fileName)
+}
+
+private val ExportNotification.text: String
+    get() = string(
+        when (this) {
+            ExportNotification.PhonemeResetRequiredVSQ -> Strings.ExportNotificationPhonemeResetRequiredVSQ
+            ExportNotification.PhonemeResetRequiredV4 -> Strings.ExportNotificationPhonemeResetRequiredV4
+            ExportNotification.PhonemeResetRequiredV5 -> Strings.ExportNotificationPhonemeResetRequiredV5
+            ExportNotification.TempoChangeIgnored -> Strings.ExportNotificationTempoChangeIgnored
+            ExportNotification.TimeSignatureIgnored -> Strings.ExportNotificationTimeSignatureIgnored
+            ExportNotification.TimeSignatureChangeIgnored -> Strings.ExportNotificationTimeSignatureIgnored
+            ExportNotification.PitchDataExported -> Strings.ExportNotificationPitchDataExported
+            ExportNotification.DataOverLengthLimitIgnored -> Strings.ExportNotificationDataOverLengthLimitIgnored
+        }
+    )
+
+external interface ExporterProps : Props {
     var format: Format
     var result: ExportResult
     var onRestart: () -> Unit

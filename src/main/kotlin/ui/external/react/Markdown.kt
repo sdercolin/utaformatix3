@@ -1,8 +1,8 @@
 package ui.external.react
 
-import react.RClass
-import react.RProps
+import react.ComponentClass
+import react.Props
 
 @JsModule("react-markdown")
 @JsNonModule
-external val markdown: RClass<RProps>
+external val Markdown: ComponentClass<Props>

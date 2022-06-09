@@ -2,73 +2,61 @@ package ui
 
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import mui.icons.material.Language
+import mui.material.Button
+import mui.material.ButtonColor
+import mui.material.Menu
+import mui.material.MenuItem
 import org.w3c.dom.Element
-import react.RBuilder
-import react.RComponent
-import react.RProps
-import react.RState
-import react.setState
-import ui.external.materialui.Color
-import ui.external.materialui.Icons
-import ui.external.materialui.button
-import ui.external.materialui.menu
-import ui.external.materialui.menuItem
-import ui.external.react.findDOMNode
-import ui.strings.Language
+import react.FC
+import react.Props
+import react.dom.findDOMNode
+import react.useState
 import ui.strings.changeLanguage
 
-class LanguageSelector : RComponent<LanguageSelectorProps, LanguageSelectorState>() {
-    override fun LanguageSelectorState.init() {
+typealias MyLanguage = ui.strings.Language
+
+val LanguageSelector = FC<LanguageSelectorProps> { props ->
+    var anchorElement: Element? by useState()
+
+    fun Props.openMenu() {
+        anchorElement = findDOMNode(this)
+    }
+
+    fun closeMenu() {
         anchorElement = null
     }
 
-    override fun RBuilder.render() {
-        button {
-            attrs {
-                color = Color.inherit
-                onClick = { openMenu() }
-            }
-            Icons.language {}
-        }
-        menu {
-            attrs {
-                keepMounted = false
-                anchorEl = state.anchorElement
-                open = state.anchorElement != null
-                onClose = { setState { anchorElement = null } }
-            }
-            Language.values().forEach {
-                menuItem {
-                    attrs.onClick = {
-                        selectLanguage(it)
-                        closeMenu()
-                    }
-                    +it.displayName
-                }
-            }
-        }
-    }
-
-    private fun selectLanguage(language: Language) {
+    fun selectLanguage(language: MyLanguage) {
         GlobalScope.launch {
             changeLanguage(language.code)
             props.onChangeLanguage()
         }
     }
 
-    private fun openMenu() {
-        setState { anchorElement = findDOMNode(this@LanguageSelector) }
+    Button {
+        color = ButtonColor.inherit
+        onClick = { openMenu() }
+        Language()
     }
 
-    private fun closeMenu() {
-        setState { anchorElement = null }
+    Menu {
+        keepMounted = false
+        anchorEl = anchorElement?.let { { it } }
+        open = anchorElement != null
+        onClose = { closeMenu() }
+        MyLanguage.values().forEach { language ->
+            MenuItem {
+                onClick = {
+                    selectLanguage(language)
+                    closeMenu()
+                }
+                +language.displayName
+            }
+        }
     }
 }
 
-external interface LanguageSelectorProps : RProps {
+external interface LanguageSelectorProps : Props {
     var onChangeLanguage: () -> Unit
-}
-
-external interface LanguageSelectorState : RState {
-    var anchorElement: Element?
 }

@@ -1,55 +1,53 @@
 package ui
 
+import csstype.px
 import kotlinx.browser.window
-import react.RBuilder
-import react.dom.div
-import ui.external.materialui.Severity
-import ui.external.materialui.Style
-import ui.external.materialui.alert
-import ui.external.materialui.button
-import ui.external.materialui.dialog
-import ui.external.materialui.dialogActions
-import ui.external.materialui.dialogContent
-import ui.external.materialui.dialogContentText
-import ui.external.materialui.dialogTitle
+import kotlinx.js.jso
+import mui.material.Alert
+import mui.material.AlertColor
+import mui.material.Button
+import mui.material.Dialog
+import mui.material.DialogActions
+import mui.material.DialogContent
+import mui.material.DialogContentText
+import mui.material.DialogTitle
+import react.ChildrenBuilder
+import react.dom.html.ReactHTML.div
 import ui.strings.Strings
 import ui.strings.string
 
-fun RBuilder.errorDialog(
+fun ChildrenBuilder.errorDialog(
     isShowing: Boolean,
     close: () -> Unit,
     title: String,
     errorMessage: String
 ) {
-    dialog {
-        attrs {
-            open = isShowing
-            onClose = close
-        }
-        dialogTitle {
+    Dialog {
+
+        open = isShowing
+        onClose = { _, _ -> close() }
+        DialogTitle {
             +title
         }
-        alert {
-            attrs {
-                severity = Severity.error
-                style = Style(borderRadius = "0px")
-            }
+        Alert {
+            severity = AlertColor.error
+            style = jso { borderRadius = 0.px }
             +errorMessage
         }
         div {
-            dialogContent {
-                dialogContentText {
+            DialogContent {
+                DialogContentText {
                     +string(Strings.ErrorDialogDescription)
                 }
             }
         }
-        dialogActions {
-            button {
-                attrs.onClick = { close() }
+        DialogActions {
+            Button {
+                onClick = { close() }
                 +string(Strings.CancelButton)
             }
-            button {
-                attrs.onClick = {
+            Button {
+                onClick = {
                     close()
                     window.open(string(Strings.ReportUrl), target = "_blank")
                 }
