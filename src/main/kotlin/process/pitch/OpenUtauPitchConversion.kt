@@ -1,12 +1,12 @@
 package process.pitch
 
+import kotlin.math.roundToInt
 import model.Note
 import model.Pitch
 import process.interpolateCosineEaseIn
 import process.interpolateCosineEaseInOut
 import process.interpolateCosineEaseOut
 import process.interpolateLinear
-import kotlin.math.roundToInt
 
 private const val SAMPLING_INTERVAL_TICK = 5L
 
