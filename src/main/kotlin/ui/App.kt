@@ -3,7 +3,6 @@ package ui
 import APP_NAME
 import APP_VERSION
 import csstype.Auto
-import csstype.ClassName
 import csstype.FontWeight
 import csstype.Length
 import csstype.Margin
@@ -29,7 +28,6 @@ import mui.material.Fab
 import mui.material.FabColor
 import mui.material.Size
 import mui.material.Step
-import mui.material.StepIcon
 import mui.material.StepLabel
 import mui.material.Stepper
 import mui.material.Toolbar
@@ -42,7 +40,6 @@ import react.ChildrenBuilder
 import react.FC
 import react.Props
 import react.ReactNode
-import react.create
 import react.css.css
 import react.dom.html.ReactHTML.div
 import react.dom.html.ReactHTML.span
@@ -150,16 +147,10 @@ private fun ChildrenBuilder.buildStepper(stageIndex: Int) {
     Stepper {
         style = jso { background = NamedColor.transparent }
         activeStep = stageIndex
-        Stage.forStepper.forEach { stage ->
+        Stage.forStepper.forEachIndexed { index, stage ->
             Step {
+                completed = stageIndex > index
                 StepLabel {
-                    icon = StepIcon.create {
-                        classes = jso {
-                            root = ClassName("main-stepper-icon")
-                            active = ClassName("main-stepper-icon-active")
-                            completed = ClassName("main-stepper-icon-completed")
-                        }
-                    }
                     stage.displayName?.let { +it }
                 }
             }
