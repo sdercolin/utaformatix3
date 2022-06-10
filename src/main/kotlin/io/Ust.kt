@@ -25,6 +25,7 @@ import process.pitch.UtauMode1NotePitchData
 import process.pitch.UtauMode1TrackPitchData
 import process.pitch.UtauMode2NotePitchData
 import process.pitch.UtauMode2TrackPitchData
+import process.pitch.UtauNoteVibratoParams
 import process.pitch.pitchFromUtauMode1Track
 import process.pitch.pitchFromUtauMode2Track
 import process.pitch.pitchToUtauMode1Track
@@ -169,7 +170,18 @@ object Ust {
                             widths = pendingPBW.orEmpty(),
                             shifts = pendingPBY.orEmpty(),
                             curveTypes = pendingPBM.orEmpty(),
-                            vibratoParams = pendingVBR
+                            vibratoParams = pendingVBR?.takeIf { it.isNotEmpty() }?.let {
+                                // length(%), period(msec), depth(cent), easeIn(%), easeOut(%), phase(%), shift(%)
+                                UtauNoteVibratoParams(
+                                    length = it[0],
+                                    period = it[1],
+                                    depth = it.getOrNull(2) ?: 0.0,
+                                    fadeIn = it.getOrNull(3) ?: 0.0,
+                                    fadeOut = it.getOrNull(4) ?: 0.0,
+                                    phaseShift = it.getOrNull(5) ?: 0.0,
+                                    shift = it.getOrNull(6) ?: 0.0
+                                )
+                            }
                         )
                     )
                     notePitchDataListMode1.add(
@@ -354,8 +366,12 @@ object Ust {
                 }"
                 )
                 builder.appendLine("PBM=${mode2Pitch?.curveTypes?.joinToString(",")}")
-                if (mode2Pitch?.vibratoParams != null)
-                    builder.appendLine("VBR=${mode2Pitch.vibratoParams.joinToString(",")}")
+                if (mode2Pitch?.vibratoParams != null) {
+                    val vibratoText = mode2Pitch.vibratoParams.let {
+                        listOf(it.length, it.period, it.depth, it.fadeIn, it.fadeOut, it.phaseShift, it.shift)
+                    }.joinToString(",")
+                    builder.appendLine(vibratoText)
+                }
             }
 
             tickPos = note.tickOff

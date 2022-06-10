@@ -179,17 +179,6 @@ private fun List<Pair<Long, Double>>.removeRedundantPoints() =
         if (point.second != previousValue) acc + point else acc
     }
 
-fun appendPitchPointsForSvpOutput(points: List<Pair<Long, Double>>) =
-    listOfNotNull(points.firstOrNull()) +
-            points.zipWithNext()
-                .flatMap { (lastPoint, thisPoint) ->
-                    val tickDiff = thisPoint.first - lastPoint.first
-                    val newPoint = when {
-                        tickDiff < SAMPLING_INTERVAL_TICK -> null
-                        tickDiff < 2 * SAMPLING_INTERVAL_TICK ->
-                            ((thisPoint.first + lastPoint.first) / 2) to lastPoint.second
-                        else ->
-                            thisPoint.first - SAMPLING_INTERVAL_TICK to lastPoint.second
-                    }
-                    listOfNotNull(newPoint, thisPoint)
-                }
+fun List<Pair<Long, Double>>.appendPitchPointsForSvpOutput() =
+    appendPitchPointsForInterpolation(this, SAMPLING_INTERVAL_TICK)
+        .reduceRepeatedPitchPoints()

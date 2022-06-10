@@ -10,16 +10,25 @@ import model.ExportResult
 import model.Feature
 import model.Format
 import model.ImportParams
+import model.Note
 import model.Project
 import model.Tempo
 import model.TimeSignature
 import org.w3c.files.Blob
 import org.w3c.files.BlobPropertyBag
 import org.w3c.files.File
-import process.validateNotes
+import process.pitch.OpenUtauNotePitchData
+import process.pitch.OpenUtauPartPitchData
+import process.pitch.UtauNoteVibratoParams
+import process.pitch.mergePitchFromUstxParts
+import process.pitch.pitchFromUstxPart
+import process.pitch.reduceRepeatedPitchPointsFromUstxTrack
+import process.pitch.toOpenUtauPitchData
 import util.readText
 
 object Ustx {
+
+    private const val PITCH_CURVE_ABBR = "pitd"
 
     suspend fun parse(file: File, params: ImportParams): model.Project {
         val yamlText = file.readText()
@@ -32,7 +41,7 @@ object Ustx {
             format = Format.Ustx,
             inputFiles = listOf(file),
             name = project.name,
-            tracks = parseTracks(project),
+            tracks = parseTracks(project, params, tempo.bpm),
             timeSignatures = listOf(timeSignature),
             tempos = listOf(tempo),
             measurePrefix = 0,
@@ -40,7 +49,7 @@ object Ustx {
         )
     }
 
-    private fun parseTracks(project: Project): List<model.Track> {
+    private fun parseTracks(project: Project, params: ImportParams, bpm: Double): List<model.Track> {
         val trackMap = List(project.tracks.size) { index: Int ->
             model.Track(
                 id = index,
@@ -53,7 +62,7 @@ object Ustx {
             val track = trackMap[trackId] ?: continue
             val tickPrefix = voicePart.position
             val notes = voicePart.notes.map {
-                model.Note(
+                Note(
                     id = 0,
                     key = it.tone,
                     lyric = it.lyric,
@@ -61,10 +70,75 @@ object Ustx {
                     tickOff = it.position + it.duration + tickPrefix
                 )
             }
-            val newTrack = track.copy(notes = track.notes + notes)
+            val notePitches = if (params.simpleImport) null
+            else voicePart.notes.map { note -> parseNotePitch(note) }
+            val (validatedNotes, validatedNotePitches) = getValidatedNotes(notes, notePitches)
+
+            val pitchCurve = if (params.simpleImport) null
+            else voicePart.curves.find { it.abbr == PITCH_CURVE_ABBR }?.let { curve ->
+                curve.xs.zip(curve.ys).map { OpenUtauPartPitchData.Point(it.first + tickPrefix, it.second.toInt()) }
+            }
+            val pitch: model.Pitch? = if (validatedNotePitches?.isNotEmpty() == true || pitchCurve != null) {
+                val partPitchData = OpenUtauPartPitchData(
+                    pitchCurve.orEmpty(),
+                    validatedNotePitches.orEmpty()
+                )
+                pitchFromUstxPart(validatedNotes, partPitchData, bpm)
+            } else null
+            val mergedPitch = mergePitchFromUstxParts(track.pitch, pitch)
+            val newTrack = track.copy(notes = track.notes + validatedNotes, pitch = mergedPitch)
             trackMap[trackId] = newTrack
         }
-        return trackMap.values.map { it.validateNotes() }.sortedBy { it.id }
+        return trackMap.values
+            .map {
+                it.copy(
+                    notes = it.notes.mapIndexed { index, note -> note.copy(id = index) },
+                    pitch = it.pitch.reduceRepeatedPitchPointsFromUstxTrack()
+                )
+            }
+            .sortedBy { it.id }
+    }
+
+    private fun parseNotePitch(note: Note): OpenUtauNotePitchData {
+        val points = note.pitch.data.map {
+            OpenUtauNotePitchData.Point(
+                x = it.x,
+                y = it.y,
+                shape = OpenUtauNotePitchData.Shape.values()
+                    .find { shape -> shape.textValue == it.shape }
+                    ?: OpenUtauNotePitchData.Shape.EaseInOut
+            )
+        }
+        val vibrato = note.vibrato.let {
+            UtauNoteVibratoParams(
+                length = it.length,
+                period = it.period,
+                depth = it.depth,
+                fadeIn = it.`in`,
+                fadeOut = it.out,
+                phaseShift = it.shift,
+                shift = it.drift
+            )
+        }
+        return OpenUtauNotePitchData(points, vibrato)
+    }
+
+    private fun getValidatedNotes(
+        notes: List<model.Note>,
+        notePitches: List<OpenUtauNotePitchData>?
+    ): Pair<List<model.Note>, List<OpenUtauNotePitchData>?> {
+        val validatedNotes = mutableListOf<model.Note>()
+        val validatedNotePitches = if (notePitches != null) mutableListOf<OpenUtauNotePitchData>() else null
+        var pos = 0L
+        for (i in notes.indices) {
+            val note = notes[i]
+            if (note.tickOn >= pos) {
+                validatedNotes.add(note)
+                notePitches?.get(i)?.let { validatedNotePitches?.add(it) }
+                pos = note.tickOff
+            }
+        }
+        return validatedNotes to validatedNotePitches
     }
 
     fun generate(project: model.Project, features: List<Feature>): ExportResult {
@@ -114,11 +188,23 @@ object Ustx {
                     track.notes.zipWithNext().map { (lastNote, thisNote) ->
                         generateNote(noteTemplate, lastNote, thisNote)
                     }
+
+        val curves = mutableListOf<Curve>()
+        if (features.contains(Feature.ConvertPitch)) {
+            val points = track.pitch?.toOpenUtauPitchData().orEmpty()
+            if (points.isNotEmpty()) {
+                val xs = points.map { it.first }
+                val ys = points.map { it.second }
+                val curve = Curve(xs, ys, PITCH_CURVE_ABBR)
+                curves.add(curve)
+            }
+        }
         return template.copy(
             name = track.name,
             trackNo = track.id,
             position = 0L,
-            notes = notes
+            notes = notes,
+            curves = curves
         )
     }
 
