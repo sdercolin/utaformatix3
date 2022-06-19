@@ -96,6 +96,29 @@ enum class Strings(val en: String, val ja: String, val zhCN: String) {
         ja = "処理に時間がかかることがあります。",
         zhCN = "该选项可能会增加处理时间。"
     ),
+    ProjectZoom(
+        en = "Zoom in/out project",
+        ja = "プロジェクトをズームイン・ズームアウト",
+        zhCN = "缩放工程"
+    ),
+    ProjectZoomDescription(
+        en = "Change Bpm and notes in parallel so that the actual singing speed is kept. For example," +
+                "with factor 2, 60 bpm becomes 120 bpm and all notes become twice the length",
+        ja = "実際の速度を変更しないようBpmやノートなどを同時に変更します。例えば、60 bmpの曲に因子2をかけると、" +
+                "120 bpm になり、すべてのノートの長さも二倍になります。",
+        zhCN = "在不改变实际曲速的前提下同时改变Bpm数值与音符长度。例如，在60 bpm的乐曲中使用2倍的缩放，则乐曲变为120bpm，" +
+                "同时所有音符的长度也翻倍。"
+    ),
+    ProjectZoomWarning(
+        en = "Current settings may be destructive because some time signatures have to be moved to measure heads.",
+        ja = "この設定ではプロジェクトを適切に変換できないことがあります。一部の拍子記号を小節の始まりに移動させることになります。",
+        zhCN = "该设定可能无法正确转换本工程。一部分的节拍记号将被移动到最近的小节的开始位置。"
+    ),
+    ProjectZooLabel(
+        en = "Factor (can be demical or fraction)",
+        ja = "因子（小数・分数可）",
+        zhCN = "系数（可为小数或分数）"
+    ),
     NextButton(
         en = "Next",
         ja = "次へ",
