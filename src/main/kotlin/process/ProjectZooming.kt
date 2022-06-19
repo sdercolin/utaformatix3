@@ -4,6 +4,7 @@ import kotlin.math.ceil
 import kotlin.math.roundToInt
 import kotlin.math.roundToLong
 import model.Project
+import model.TimeSignature
 import model.Track
 
 fun Project.needWarningZoom(factor: Double): Boolean {
@@ -18,9 +19,21 @@ fun Project.zoom(factor: Double): Project {
     val tempos = tempos.map {
         it.copy(tickPosition = (it.tickPosition * factor).roundToLong(), bpm = it.bpm * factor)
     }
-    val timeSignatures = timeSignatures.map {
-        it.copy(measurePosition = (measurePrefix * factor).roundToInt())
-    }
+    val timeSignatures = timeSignatures
+        .map { it.copy(measurePosition = (measurePrefix * factor).roundToInt()) }
+        .fold(listOf<TimeSignature>()) { acc, timeSignature ->
+            if (acc.isEmpty()) {
+                listOf(timeSignature)
+            } else {
+                val prev = acc.last()
+                if (prev.measurePosition == timeSignature.measurePosition) {
+                    acc
+                } else {
+                    acc + timeSignature
+                }
+            }
+        }
+
     return copy(tracks = tracks, tempos = tempos, timeSignatures = timeSignatures)
 }
 
