@@ -115,7 +115,7 @@ enum class Strings(val en: String, val ja: String, val zhCN: String) {
         zhCN = "该设定可能无法正确转换本工程。一部分的节拍记号将被移动到最近的小节的开始位置。"
     ),
     ProjectZooLabel(
-        en = "Factor (can be demical or fraction)",
+        en = "Factor (can be decimal or fraction)",
         ja = "因子（小数・分数可）",
         zhCN = "系数（可为小数或分数）"
     ),
