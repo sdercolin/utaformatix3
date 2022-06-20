@@ -44,9 +44,13 @@ import mui.material.TooltipPlacement
 import mui.material.Typography
 import mui.material.styles.TypographyVariant
 import process.RESTS_FILLING_MAX_LENGTH_DENOMINATOR_DEFAULT
+import process.evalFractionOrNull
 import process.fillRests
 import process.lyrics.convert
+import process.needWarningZoom
+import process.projectZoomFactorOptions
 import process.restsFillingMaxLengthDenominatorOptions
+import process.zoom
 import react.ChildrenBuilder
 import react.FC
 import react.Props
@@ -94,6 +98,13 @@ val ConfigurationEditor = FC<ConfigurationEditorProps> { props ->
             isOn = isPitchConversionAvailable
         )
     }
+    var projectZoom: ProjectZoomState by useState {
+        ProjectZoomState(
+            isOn = false,
+            factor = projectZoomFactorOptions.first(),
+            hasWarning = false
+        )
+    }
     var dialogError by useState(DialogErrorState())
 
     fun closeErrorDialog() {
@@ -104,12 +115,14 @@ val ConfigurationEditor = FC<ConfigurationEditorProps> { props ->
     buildLyricsBlock(props, lyricsConversion) { lyricsConversion = it }
     buildRestsFillingBlock(slightRestsFilling) { slightRestsFilling = it }
     if (pitchConversion.isAvailable) buildPitchConversion(pitchConversion) { pitchConversion = it }
+    buildProjectZoom(props.project, projectZoom) { projectZoom = it }
     buildNextButton(
         props,
         isEnabled = lyricsConversion.isReady,
         lyricsConversion,
         slightRestsFilling,
         pitchConversion,
+        projectZoom,
         setProcessing = { isProcessing = it },
         onDialogError = { dialogError = it }
     )
@@ -355,12 +368,106 @@ private fun ChildrenBuilder.buildPitchConversion(
     }
 }
 
+private fun ChildrenBuilder.buildProjectZoom(
+    project: Project,
+    projectZoom: ProjectZoomState,
+    onChangeProjectZoom: (ProjectZoomState) -> Unit
+) {
+    FormGroup {
+        div {
+            FormControlLabel {
+                label = ReactNode(string(Strings.ProjectZoom))
+                control = Switch.create {
+                    checked = projectZoom.isOn
+                    onChange = { event, _ ->
+                        val checked = event.target.checked
+                        onChangeProjectZoom(projectZoom.copy(isOn = checked))
+                    }
+                }
+                labelPlacement = LabelPlacement.end
+            }
+            Tooltip {
+                title = ReactNode(string(Strings.ProjectZoomDescription))
+                placement = TooltipPlacement.right
+                disableInteractive = false
+                HelpOutline {
+                    style = jso {
+                        verticalAlign = VerticalAlign.middle
+                    }
+                }
+            }
+            if (project.needWarningZoom(projectZoom.factorValue)) {
+                Tooltip {
+                    title = ReactNode(string(Strings.ProjectZoomWarning))
+                    placement = TooltipPlacement.right
+                    disableInteractive = false
+                    ErrorOutline {
+                        style = jso {
+                            verticalAlign = VerticalAlign.middle
+                        }
+                    }
+                }
+            }
+        }
+    }
+    if (projectZoom.isOn) buildProjectZoomDetail(projectZoom, onChangeProjectZoom)
+}
+
+private fun ChildrenBuilder.buildProjectZoomDetail(
+    projectZoom: ProjectZoomState, onChangeProjectZoom: (ProjectZoomState) -> Unit
+) {
+    div {
+        css {
+            Margin(horizontal = 40.px, vertical = 0.px)
+            width = Length.maxContent
+        }
+        Paper {
+            elevation = 0
+            div {
+                css {
+                    Margin(
+                        horizontal = 24.px,
+                        vertical = 16.px
+                    )
+                    paddingBottom = 8.px
+                    minWidth = 20.em
+                }
+                FormControl {
+                    margin = FormControlMargin.normal
+                    focused = false
+                    InputLabel {
+                        style = jso { width = Length.maxContent }
+                        id = ProjectZoomLabelId
+                        focused = false
+                        +string(Strings.SlightRestsFillingThresholdLabel)
+                    }
+                    Select {
+                        labelId = ProjectZoomLabelId
+                        value = projectZoom.factor.unsafeCast<Nothing?>()
+                        onChange = { event, _ ->
+                            val value = event.target.value
+                            onChangeProjectZoom(projectZoom.copy(factor = value))
+                        }
+                        projectZoomFactorOptions.forEach { factor ->
+                            MenuItem {
+                                value = factor
+                                +(factor)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
 private fun ChildrenBuilder.buildNextButton(
     props: ConfigurationEditorProps,
     isEnabled: Boolean,
     lyricsConversion: LyricsConversionState,
     slightRestsFilling: SlightRestsFillingState,
     pitchConversion: PitchConversionState,
+    projectZoom: ProjectZoomState,
     setProcessing: (Boolean) -> Unit,
     onDialogError: (DialogErrorState) -> Unit
 ) {
@@ -373,7 +480,15 @@ private fun ChildrenBuilder.buildNextButton(
             variant = ButtonVariant.contained
             disabled = !isEnabled
             onClick = {
-                process(props, lyricsConversion, slightRestsFilling, pitchConversion, setProcessing, onDialogError)
+                process(
+                    props,
+                    lyricsConversion,
+                    slightRestsFilling,
+                    pitchConversion,
+                    projectZoom,
+                    setProcessing,
+                    onDialogError
+                )
             }
             +string(Strings.NextButton)
         }
@@ -385,6 +500,7 @@ private fun process(
     lyricsConversion: LyricsConversionState,
     slightRestsFilling: SlightRestsFillingState,
     pitchConversion: PitchConversionState,
+    projectZoom: ProjectZoomState,
     setProcessing: (Boolean) -> Unit,
     onDialogError: (DialogErrorState) -> Unit
 ) {
@@ -408,6 +524,11 @@ private fun process(
                                 track.fillRests(slightRestsFilling.excludedMaxLength)
                             }
                         )
+                    } else it
+                }
+                .let {
+                    if (projectZoom.isOn) {
+                        it.zoom(projectZoom.factorValue)
                     } else it
                 }
 
@@ -441,6 +562,7 @@ private fun process(
 }
 
 private const val SlightRestsFillingLabelId = "slight-rests-filling"
+private const val ProjectZoomLabelId = "project-zoom"
 
 external interface ConfigurationEditorProps : Props {
     var project: Project
@@ -471,3 +593,12 @@ data class PitchConversionState(
     val isAvailable: Boolean,
     val isOn: Boolean
 )
+
+data class ProjectZoomState(
+    val isOn: Boolean,
+    val factor: String,
+    val hasWarning: Boolean
+) {
+    val factorValue: Double
+        get() = factor.evalFractionOrNull()!!
+}
