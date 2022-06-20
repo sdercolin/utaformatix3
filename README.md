@@ -8,8 +8,8 @@ The current version `3.x` is built with [Kotlin for JavaScript](https://kotlinla
 
 ## Features
 
-- Supported importing formats: `.vsqx(3/4)`, `.vpr`, `.vsq`, `.mid(VOCALOID)`, `.ust`, `.ccs`,`.xml(MusicXML)`, `.musicxml`, `.svp`, `.s5p`, `.dv`, `.ppsf(NT)`
-- Supported exporting formats: `.vsqx(4)`, `.vpr`, `.vsq`, `.mid(VOCALOID)`, `.ust`, `.ccs`, `.xml(MusicXML)`, `.svp`, `.s5p`, `.dv`
+- Supported importing formats: `.vsqx(3/4)`, `.vpr`, `.vsq`, `.mid(VOCALOID)`, `.ust`, `.ustx`, `.ccs`,`.xml(MusicXML)`, `.musicxml`, `.svp`, `.s5p`, `.dv`, `.ppsf(NT)`
+- Supported exporting formats: `.vsqx(4)`, `.vpr`, `.vsq`, `.mid(VOCALOID)`, `.ust`, `.ustx`, `.ccs`, `.xml(MusicXML)`, `.svp`, `.s5p`, `.dv`
 - Keep information including: tracks, notes, tempo labels, time signatures
 - Detect and convert Japanese lyrics types
   - between CV and VCV
@@ -21,6 +21,7 @@ The current version `3.x` is built with [Kotlin for JavaScript](https://kotlinla
   | VSQ/VSQX/VPR/MID(V1) |       ✓      |                |       ✓      |
   |      UST(mode2)      |       ✓      |        ✓       |       ✓      |
   |      UST(mode1)      |       ✓      |       N/A      |       ✓      |
+  |         USTX         |       ✓      |        ✓       |       ✓      |
   |         CCS          |       ✓      |                |       ✓      |
   |         SVP          |       ✓      |        ✓       |       ✓      |
   |         S5P          |       ✓      |                |       ✓      |

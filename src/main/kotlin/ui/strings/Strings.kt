@@ -96,6 +96,29 @@ enum class Strings(val en: String, val ja: String, val zhCN: String) {
         ja = "処理に時間がかかることがあります。",
         zhCN = "该选项可能会增加处理时间。"
     ),
+    ProjectZoom(
+        en = "Zoom in/out project",
+        ja = "プロジェクトをズームイン・ズームアウト",
+        zhCN = "缩放工程"
+    ),
+    ProjectZoomDescription(
+        en = "Change Bpm and notes in parallel so that the actual singing speed is kept. For example," +
+                "with factor 2, 60 bpm becomes 120 bpm and all notes become twice the length",
+        ja = "実際の速度を変更しないようBpmやノートなどを同時に変更します。例えば、60 bmpの曲に因子2をかけると、" +
+                "120 bpm になり、すべてのノートの長さも二倍になります。",
+        zhCN = "在不改变实际曲速的前提下同时改变Bpm数值与音符长度。例如，在60 bpm的乐曲中使用2倍的缩放，则乐曲变为120bpm，" +
+                "同时所有音符的长度也翻倍。"
+    ),
+    ProjectZoomWarning(
+        en = "Current settings may be destructive because some time signatures have to be moved to measure heads.",
+        ja = "この設定ではプロジェクトを適切に変換できないことがあります。一部の拍子記号を小節の始まりに移動させることになります。",
+        zhCN = "该设定可能无法正确转换本工程。一部分的节拍记号将被移动到最近的小节的开始位置。"
+    ),
+    ProjectZooLabel(
+        en = "Factor (can be decimal or fraction)",
+        ja = "因子（小数・分数可）",
+        zhCN = "系数（可为小数或分数）"
+    ),
     NextButton(
         en = "Next",
         ja = "次へ",
@@ -117,9 +140,12 @@ enum class Strings(val en: String, val ja: String, val zhCN: String) {
         zhCN = "拖放文件或点击导入"
     ),
     ImportFileSubDescription(
-        en = "Supported file types: VSQX, VPR, VSQ, MID(VOCALOID), USTs, CCS, MUSICXML, XML, SVP, S5P, DV, PPSF(NT)",
-        ja = "サポートされているファイル形式：VSQX、VPR、VSQ、MID（VOCALOID）、UST（複数可）、CCS、MUSICXML、XML、SVP、S5P、DV、PPSF（NT）",
-        zhCN = "支持的文件类型：VSQX、VPR、VSQ、MID（VOCALOID）、UST（允许复数个）、CCS、MUSICXML、XML、SVP、S5P、DV、PPSF（NT）"
+        en = "Supported file types: VSQX, VPR, VSQ, MID(VOCALOID), USTs," +
+                " USTX, CCS, MUSICXML, XML, SVP, S5P, DV, PPSF(NT)",
+        ja = "サポートされているファイル形式：VSQX、VPR、VSQ、MID（VOCALOID）、UST（複数可）、" +
+                "USTX、CCS、MUSICXML、XML、SVP、S5P、DV、PPSF（NT）",
+        zhCN = "支持的文件类型：VSQX、VPR、VSQ、MID（VOCALOID）、UST（允许复数个）、" +
+                "USTX、CCS、MUSICXML、XML、SVP、S5P、DV、PPSF（NT）"
     ),
     UnsupportedFileTypeImportError(
         en = "Unsupported file type",
@@ -218,6 +244,11 @@ enum class Strings(val en: String, val ja: String, val zhCN: String) {
         ja = "UTAU プロジェクト",
         zhCN = "UTAU 工程"
     ),
+    UstxFormatDescription(
+        en = "Project for OpenUtau",
+        ja = "OpenUtau プロジェクト",
+        zhCN = "OpenUtau 工程"
+    ),
     CcsFormatDescription(
         en = "Project for CeVIO Creative Studio",
         ja = "CeVIO Creative Studio プロジェクト",
@@ -291,6 +322,11 @@ enum class Strings(val en: String, val ja: String, val zhCN: String) {
         en = "Could not convert time signatures to the target format.",
         ja = "拍子記号を出力することができませんでした。",
         zhCN = "未能将节拍记号导出到目标格式。"
+    ),
+    ExportNotificationTimeSignatureChangeIgnored(
+        en = "Could not convert time signature changes to the target format.",
+        ja = "拍子記号の変更を出力することができませんでした。",
+        zhCN = "未能将节拍记号的变化导出到目标格式。"
     ),
     ExportNotificationPitchDataExported(
         en = "Some pitch parameters were exported. For a higher reproduction accuracy," +

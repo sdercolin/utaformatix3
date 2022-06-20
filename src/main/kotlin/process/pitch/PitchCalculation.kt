@@ -89,3 +89,55 @@ private fun List<Pair<Long, Double?>>.appendPointsAtBorders(
         }
     return result
 }
+
+/**
+ * Append points in our pitch data to be used in some formats e.g. svp, ustx
+ * where points are interpolated
+ * In our data format, [(0,0), (3,6)] means [(0,0), (1,0), (2,0), (3,6)]
+ * But it will be processed to [(0,0), (1,2), (2,4), (3,6)] in those cases
+ * Therefore we have to append points to make it like [(0,0), (2,0), (3,6)]
+ */
+fun appendPitchPointsForInterpolation(points: List<Pair<Long, Double>>, intervalTick: Long) =
+    listOfNotNull(points.firstOrNull()) +
+            points.zipWithNext()
+                .flatMap { (lastPoint, thisPoint) ->
+                    val tickDiff = thisPoint.first - lastPoint.first
+                    val newPoint = when {
+                        tickDiff < intervalTick -> null
+                        tickDiff < 2 * intervalTick ->
+                            ((thisPoint.first + lastPoint.first) / 2) to lastPoint.second
+                        else ->
+                            thisPoint.first - intervalTick to lastPoint.second
+                    }
+                    listOfNotNull(newPoint, thisPoint)
+                }
+
+/**
+ * Reduce a series of adjacent points with same value to two points
+ */
+fun List<Pair<Long, Double>>.reduceRepeatedPitchPoints(): List<Pair<Long, Double>> {
+    val toBeRemoved = mutableSetOf<Pair<Long, Double>>()
+    var currentRepeatedValue: Double? = null
+    var prevPoint: Pair<Long, Double>? = null
+    for (point in this) {
+        if (prevPoint == null) {
+            prevPoint = point
+            continue
+        }
+        if (currentRepeatedValue == null) {
+            if (prevPoint.second == point.second) {
+                currentRepeatedValue = point.second
+            }
+            prevPoint = point
+            continue
+        }
+        if (currentRepeatedValue == point.second) {
+            toBeRemoved.add(prevPoint)
+        } else {
+            currentRepeatedValue = null
+        }
+
+        prevPoint = point
+    }
+    return minus(toBeRemoved)
+}

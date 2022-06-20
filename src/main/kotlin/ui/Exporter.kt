@@ -7,7 +7,6 @@ import kotlinx.css.padding
 import model.ExportNotification
 import model.ExportResult
 import model.Format
-import model.Project
 import react.RBuilder
 import react.RComponent
 import react.RProps
@@ -92,8 +91,9 @@ class Exporter : RComponent<ExporterProps, RState>() {
                 ExportNotification.PhonemeResetRequiredVSQ -> Strings.ExportNotificationPhonemeResetRequiredVSQ
                 ExportNotification.PhonemeResetRequiredV4 -> Strings.ExportNotificationPhonemeResetRequiredV4
                 ExportNotification.PhonemeResetRequiredV5 -> Strings.ExportNotificationPhonemeResetRequiredV5
-                ExportNotification.TempoChangeIgnored -> Strings.ExportNotificationTimeSignatureIgnored
-                ExportNotification.TimeSignatureIgnored -> Strings.ExportNotificationTempoChangeIgnored
+                ExportNotification.TempoChangeIgnored -> Strings.ExportNotificationTempoChangeIgnored
+                ExportNotification.TimeSignatureIgnored -> Strings.ExportNotificationTimeSignatureIgnored
+                ExportNotification.TimeSignatureChangeIgnored -> Strings.ExportNotificationTimeSignatureIgnored
                 ExportNotification.PitchDataExported -> Strings.ExportNotificationPitchDataExported
                 ExportNotification.DataOverLengthLimitIgnored -> Strings.ExportNotificationDataOverLengthLimitIgnored
             }
@@ -101,7 +101,6 @@ class Exporter : RComponent<ExporterProps, RState>() {
 }
 
 external interface ExporterProps : RProps {
-    var project: Project
     var format: Format
     var result: ExportResult
     var onRestart: () -> Unit

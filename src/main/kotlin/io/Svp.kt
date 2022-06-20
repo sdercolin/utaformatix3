@@ -235,14 +235,15 @@ object Svp {
             ),
             mainRef = emptyTrack.mainRef!!.copy(
                 groupID = uuid
-            )
+            ),
+            dispOrder = track.id
         )
     }
 
     private fun generatePitchData(track: model.Track, features: List<Feature>): PitchDelta? {
         if (!features.contains(Feature.ConvertPitch)) return null
         val data = track.pitch?.getRelativeData(track.notes)
-            ?.let(::appendPitchPointsForSvpOutput)
+            ?.appendPitchPointsForSvpOutput()
             ?.map { (it.first * TICK_RATE) to (it.second * 100) }
             ?: return null
         return PitchDelta(mode = "cosine", points = data.flatMap { listOf(it.first.toDouble(), it.second) })
