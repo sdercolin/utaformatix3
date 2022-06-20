@@ -23,9 +23,13 @@ import model.Project
 import model.TICKS_IN_FULL_NOTE
 import org.w3c.dom.HTMLInputElement
 import process.RESTS_FILLING_MAX_LENGTH_DENOMINATOR_DEFAULT
+import process.evalFractionOrNull
 import process.fillRests
 import process.lyrics.convert
+import process.needWarningZoom
+import process.projectZoomFactorOptions
 import process.restsFillingMaxLengthDenominatorOptions
+import process.zoom
 import react.RBuilder
 import react.RComponent
 import react.RProps
@@ -95,6 +99,12 @@ class ConfigurationEditor(props: ConfigurationEditorProps) :
             isOn = isPitchConversionAvailable
         )
 
+        projectZoom = ProjectZoomState(
+            isOn = false,
+            factor = projectZoomFactorOptions.first(),
+            hasWarning = false
+        )
+
         dialogError = DialogErrorState()
     }
 
@@ -103,6 +113,7 @@ class ConfigurationEditor(props: ConfigurationEditorProps) :
         buildLyricsBlock()
         buildRestsFillingBlock()
         if (state.pitchConversion.isAvailable) buildPitchConversion()
+        buildProjectZoom()
         buildNextButton()
 
         errorDialog(
@@ -369,6 +380,111 @@ class ConfigurationEditor(props: ConfigurationEditorProps) :
         }
     }
 
+    private fun RBuilder.buildProjectZoom() {
+        formGroup {
+            div {
+                formControlLabel {
+                    attrs {
+                        label = string(Strings.ProjectZoom)
+                        control = switch {
+                            attrs {
+                                checked = state.projectZoom.isOn
+                                onChange = {
+                                    val checked = (it.target as HTMLInputElement).checked
+                                    setState { projectZoom = projectZoom.copy(isOn = checked) }
+                                }
+                            }
+                        }
+                        labelPlacement = LabelPlacement.end
+                    }
+                }
+                tooltip {
+                    attrs {
+                        title = string(Strings.ProjectZoomDescription)
+                        placement = "right"
+                        interactive = true
+                    }
+                    Icons.help {
+                        attrs.style = Style(
+                            fontSize = FontSize.initial,
+                            verticalAlign = VerticalAlign.middle
+                        )
+                    }
+                }
+                if (props.project.needWarningZoom(state.projectZoom.factorValue)) {
+                    tooltip {
+                        attrs {
+                            title = string(Strings.ProjectZoomWarning)
+                            placement = "right"
+                            interactive = true
+                        }
+                        Icons.warning {
+                            attrs.style = Style(
+                                fontSize = FontSize.initial,
+                                verticalAlign = VerticalAlign.middle
+                            )
+                        }
+                    }
+                }
+            }
+        }
+        if (state.projectZoom.isOn) buildProjectZoomDetail()
+    }
+
+    private fun RBuilder.buildProjectZoomDetail() {
+        styledDiv {
+            css {
+                margin(horizontal = LinearDimension("40px"))
+                width = LinearDimension.maxContent
+            }
+            paper {
+                attrs.elevation = 0
+                styledDiv {
+                    css {
+                        margin(
+                            horizontal = LinearDimension("24px"),
+                            vertical = LinearDimension("16px")
+                        )
+                        paddingBottom = LinearDimension("8px")
+                        minWidth = LinearDimension("20em")
+                    }
+                    formControl {
+                        attrs {
+                            margin = FormControlMargin.normal
+                            focused = false
+                        }
+                        inputLabel {
+                            attrs {
+                                style = Style(width = "max-content")
+                                id = projectZoomLabelId
+                                focused = false
+                            }
+                            +string(Strings.ProjectZooLabel)
+                        }
+                        select {
+                            attrs {
+                                labelId = projectZoomLabelId
+                                value = state.projectZoom.factor
+                                onChange = { event ->
+                                    val value = event.target.asDynamic().value as String
+                                    setState {
+                                        projectZoom = projectZoom.copy(factor = value)
+                                    }
+                                }
+                            }
+                            projectZoomFactorOptions.forEach { factor ->
+                                menuItem {
+                                    attrs.value = factor
+                                    +(factor)
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     private fun RBuilder.buildNextButton() {
         styledDiv {
             css {
@@ -411,6 +527,11 @@ class ConfigurationEditor(props: ConfigurationEditorProps) :
                             )
                         } else it
                     }
+                    .let {
+                        if (state.projectZoom.isOn) {
+                            it.zoom(state.projectZoom.factorValue)
+                        } else it
+                    }
 
                 delay(100)
                 val availableFeatures = Feature.values().filter {
@@ -451,6 +572,7 @@ class ConfigurationEditor(props: ConfigurationEditorProps) :
     }
 
     private val slightRestsFillingLabelId = "slight-rests-filling"
+    private val projectZoomLabelId = "project-zoom"
 }
 
 external interface ConfigurationEditorProps : RProps {
@@ -464,6 +586,7 @@ external interface ConfigurationEditorState : RState {
     var lyricsConversion: LyricsConversionState
     var slightRestsFilling: SlightRestsFillingState
     var pitchConversion: PitchConversionState
+    var projectZoom: ProjectZoomState
     var dialogError: DialogErrorState
 }
 
@@ -490,3 +613,12 @@ data class PitchConversionState(
     val isAvailable: Boolean,
     val isOn: Boolean
 )
+
+data class ProjectZoomState(
+    val isOn: Boolean,
+    val factor: String,
+    val hasWarning: Boolean
+) {
+    val factorValue: Double
+        get() = factor.evalFractionOrNull()!!
+}
