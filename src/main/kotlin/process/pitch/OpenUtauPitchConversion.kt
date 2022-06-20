@@ -1,5 +1,6 @@
 package process.pitch
 
+import kotlin.math.roundToInt
 import model.Note
 import model.Pitch
 import process.interpolateCosineEaseIn
@@ -160,7 +161,9 @@ fun Pitch?.reduceRepeatedPitchPointsFromUstxTrack(): Pitch? {
 
 fun Pitch?.toOpenUtauPitchData(): List<Pair<Long, Double>> {
     this ?: return listOf()
-    return data.map { it.first to it.second!! }.appendPitchPointsForOpenUtauOutput().reduceRepeatedPitchPoints()
+    return data.map { it.first to (it.second!! * 100).roundToInt().toDouble() }
+        .appendPitchPointsForOpenUtauOutput()
+        .reduceRepeatedPitchPoints()
 }
 
 private fun interpolate(

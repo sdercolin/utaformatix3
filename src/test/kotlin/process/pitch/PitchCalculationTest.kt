@@ -7,6 +7,26 @@ class PitchCalculationTest {
 
     @Test
     fun testAppendPitchPointsForInterpolation() {
+
+        val input = listOf(
+            0L to 0.0,
+            3L to 6.0,
+            10L to 20.0,
+            50L to 100.0
+        )
+        val interval = 4L
+
+        val expected = listOf(
+            0L to 0.0,
+            3L to 6.0,
+            6L to 6.0,
+            10L to 20.0,
+            46L to 20.0,
+            50L to 100.0
+        )
+        val actual = appendPitchPointsForInterpolation(input, interval)
+
+        assertEquals(expected, actual)
     }
 
     @Test

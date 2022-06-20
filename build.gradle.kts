@@ -68,6 +68,16 @@ kotlin {
             commonWebpackConfig {
                 cssSupport.enabled = true
             }
+            runTask {
+                cssSupport.enabled = true
+            }
+            testTask {
+                useKarma {
+                    enabled = System.getenv("GRADLE_TEST_DISABLED") != "true"
+                    useChromeHeadless()
+                    webpackConfig.cssSupport.enabled = true
+                }
+            }
         }
     }
 }
