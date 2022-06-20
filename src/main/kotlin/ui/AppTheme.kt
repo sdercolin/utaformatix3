@@ -21,7 +21,7 @@ val appTheme = createTheme(
             }
             background = jso{
                 default = "#303030"
-                paper = "#303030"
+                paper = "#3b3b3b"
             }
         }
     }

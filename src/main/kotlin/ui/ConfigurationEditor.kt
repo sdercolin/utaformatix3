@@ -38,6 +38,7 @@ import mui.material.Radio
 import mui.material.RadioGroup
 import mui.material.Select
 import mui.material.Switch
+import mui.material.SwitchColor
 import mui.material.Tooltip
 import mui.material.TooltipPlacement
 import mui.material.Typography
@@ -132,6 +133,7 @@ private fun ChildrenBuilder.buildLyricsBlock(
         FormControlLabel {
             label = ReactNode(string(Strings.JapaneseLyricsConversionSwitchLabel))
             control = Switch.create {
+                color = SwitchColor.secondary
                 checked = lyricsConversion.isOn
                 onChange = { event, _ ->
                     val checked = event.target.checked
@@ -240,6 +242,7 @@ fun ChildrenBuilder.buildRestsFillingBlock(
             FormControlLabel {
                 label = ReactNode(string(Strings.SlightRestsFillingSwitchLabel))
                 control = Switch.create {
+                    color = SwitchColor.secondary
                     checked = slightRestsFilling.isOn
                     onChange = { event, _ ->
                         val checked = event.target.checked
@@ -329,6 +332,7 @@ private fun ChildrenBuilder.buildPitchConversion(
             FormControlLabel {
                 label = ReactNode(string(Strings.ConvertPitchData))
                 control = Switch.create {
+                    color = SwitchColor.secondary
                     checked = pitchConversion.isOn
                     onChange = { event, _ ->
                         val checked = event.target.checked

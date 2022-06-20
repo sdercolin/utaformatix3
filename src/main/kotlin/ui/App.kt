@@ -3,7 +3,6 @@ package ui
 import APP_NAME
 import APP_VERSION
 import csstype.Auto
-import csstype.FontWeight
 import csstype.Length
 import csstype.Margin
 import csstype.NamedColor
@@ -100,15 +99,20 @@ val App = FC<Props> {
 private fun ChildrenBuilder.buildAppBar(pushStage: (StageInfo) -> Unit) {
     AppBar {
         position = AppBarPosition.fixed
+        style = jso {
+            background = appTheme.palette.primary.main
+        }
         Toolbar {
             Typography {
+                css {
+                    color = appTheme.palette.primary.contrastText
+                }
                 variant = TypographyVariant.h6
                 +APP_NAME
                 span {
                     css {
                         fontSize = 0.8.rem
                         marginLeft = 5.px
-                        fontWeight = FontWeight.bold
                         color = NamedColor.lightgrey
                     }
                     +"v$APP_VERSION"
@@ -145,7 +149,12 @@ private fun ChildrenBuilder.buildAppBar(pushStage: (StageInfo) -> Unit) {
 private fun ChildrenBuilder.buildStepper(stageIndex: Int) {
     if (stageIndex < 0) return
     Stepper {
-        style = jso { background = NamedColor.transparent }
+        css {
+            margin = Margin(horizontal = 0.px, vertical = 24.px)
+        }
+        style = jso {
+            background = NamedColor.transparent
+        }
         activeStep = stageIndex
         Stage.forStepper.forEachIndexed { index, stage ->
             Step {

@@ -16,6 +16,7 @@ import mui.material.FormControlLabel
 import mui.material.FormGroup
 import mui.material.LabelPlacement
 import mui.material.Switch
+import mui.material.SwitchColor
 import mui.material.Tooltip
 import mui.material.TooltipPlacement
 import mui.material.Typography
@@ -136,6 +137,7 @@ private fun ChildrenBuilder.buildConfigurations(params: ImportParams, onNewParam
             FormControlLabel {
                 label = ReactNode(string(Strings.UseSimpleImport))
                 control = Switch.create() {
+                    color = SwitchColor.secondary
                     checked = params.simpleImport
                     onChange = { event, _ ->
                         val checked = event.target.checked

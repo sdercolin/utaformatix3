@@ -52,7 +52,6 @@ private fun ChildrenBuilder.buildButtons(props: ExporterProps) {
             }
         }
         Button {
-
             style = jso { marginLeft = 16.px }
             variant = ButtonVariant.contained
             color = ButtonColor.primary
