@@ -75,7 +75,7 @@ object Ustx {
             val (validatedNotes, validatedNotePitches) = getValidatedNotes(notes, notePitches)
 
             val pitchCurve = if (params.simpleImport) null
-            else voicePart.curves.find { it.abbr == PITCH_CURVE_ABBR }?.let { curve ->
+            else voicePart.curves.orEmpty().find { it.abbr == PITCH_CURVE_ABBR }?.let { curve ->
                 curve.xs.zip(curve.ys).map { OpenUtauPartPitchData.Point(it.first + tickPrefix, it.second.toInt()) }
             }
             val pitch: model.Pitch? = if (validatedNotePitches?.isNotEmpty() == true || pitchCurve != null) {
@@ -281,7 +281,7 @@ object Ustx {
         @SerialName("track_no") val trackNo: Int,
         val position: Long,
         val notes: List<Note>,
-        val curves: List<Curve>
+        val curves: List<Curve>? = null
     )
 
     @Serializable
