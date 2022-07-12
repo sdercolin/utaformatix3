@@ -3,8 +3,8 @@ package ui.strings
 import io.MusicXml.MUSIC_XML_VERSION
 import ui.strings.Language.English
 import ui.strings.Language.Japanese
-import ui.strings.Language.SimplifiedChinese
 import ui.strings.Language.Russian
+import ui.strings.Language.SimplifiedChinese
 
 enum class Strings(val en: String, val ja: String, val zhCN: String, val ru: String) {
     LanguageDisplayName(
@@ -128,15 +128,15 @@ enum class Strings(val en: String, val ja: String, val zhCN: String, val ru: Str
                 "120 bpm になり、すべてのノートの長さも二倍になります。",
         zhCN = "在不改变实际曲速的前提下同时改变Bpm数值与音符长度。例如，在60 bpm的乐曲中使用2倍的缩放，则乐曲变为120bpm，" +
                 "同时所有音符的长度也翻倍。",
-        ru = "Изменение частоты ударов в минуту и нот параллельно, чтобы сохранить фактическую скорость пения." + 
-                " Например, с коэффициентом 2 60 ударов в минуту становятся 120 ударов в минуту," + 
+        ru = "Изменение частоты ударов в минуту и нот параллельно, чтобы сохранить фактическую скорость пения." +
+                " Например, с коэффициентом 2 60 ударов в минуту становятся 120 ударов в минуту," +
                 " и все ноты становятся в два раза длиннее"
     ),
     ProjectZoomWarning(
         en = "Current settings may be destructive because some time signatures have to be moved to measure heads.",
         ja = "この設定ではプロジェクトを適切に変換できないことがあります。一部の拍子記号を小節の始まりに移動させることになります。",
         zhCN = "该设定可能无法正确转换本工程。一部分的节拍记号将被移动到最近的小节的开始位置。",
-        ru = "Текущие настройки могут быть разрушительными," + 
+        ru = "Текущие настройки могут быть разрушительными," +
                 " поскольку для измерения головок необходимо переместить некоторые временные сигнатуры."
     ),
     ProjectZooLabel(
@@ -361,7 +361,7 @@ enum class Strings(val en: String, val ja: String, val zhCN: String, val ru: Str
         en = "Phonemes of all notes were set to \"a\". Please reset them to make it sound correctly.",
         ja = "全てのノートの発音記号が\"a\"に設定されました。正確に発音させるには発音記号をリセットしてください。",
         zhCN = "所有音符的音素都被设为了\"a\"。请重置音素以使其正确发音。",
-        ru = "Фонемы всех нот были установлены на \"a\"." + 
+        ru = "Фонемы всех нот были установлены на \"a\"." +
                 " Пожалуйста, сбросьте их, чтобы они звучали правильно."
     ),
     ExportNotificationPhonemeResetRequiredV4(
