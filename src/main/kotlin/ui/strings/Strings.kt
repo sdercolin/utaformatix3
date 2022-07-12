@@ -212,7 +212,8 @@ enum class Strings(val en: String, val ja: String, val zhCN: String, val ru: Str
     ReportUrl(
         en = "https://forms.gle/3Es3ZomcYKNHWBvp6",
         ja = "https://forms.gle/kDY9chZBjGATXqpE8",
-        zhCN = "https://forms.gle/nJVdrsfwMhbNXEYUA"
+        zhCN = "https://forms.gle/nJVdrsfwMhbNXEYUA",
+        ru = "https://forms.gle/vTNUE78QzURB7YcBA"
     ),
     FaqUrl(
         en = "https://gist.githubusercontent.com/sdercolin/4d835e7e201a39504f5321f67d254209/raw",
@@ -401,33 +402,42 @@ enum class Strings(val en: String, val ja: String, val zhCN: String, val ru: Str
                 " you may need to turn off pitch transition and vibrato settings in the target editor.",
         ja = "ピッチパラメータが出力されました。出力側のエディターでピッチ推移やビブラートなどの設定を削除することで、より高い精度でピッチを" +
                 "再現できる場合があります。",
-        zhCN = "生成的文件中带有音高参数。您可能需要在对象编辑器中关闭音高平滑设置及颤音设置以达到更高的重现精度。"
+        zhCN = "生成的文件中带有音高参数。您可能需要在对象编辑器中关闭音高平滑设置及颤音设置以达到更高的重现精度。",
+        ru = "Некоторые параметры высоты тона были экспортированы. Для более высокой точности" +
+                "воспроизведения, возможно вам потребуется отключить настройки высоты тона и" +
+                " вибрато в целевом редакторе."
     ),
     ExportNotificationDataOverLengthLimitIgnored(
         en = "Data exceeding length limit ignored. Please check if your output includes all your intended data.",
         ja = "一部のデータが長さ制限を超えているため、すべてのデータを出力することができませんでした。意図したデータが出力結果にすべて" +
                 "入っているかどうかを確認してください。",
-        zhCN = "部分数据超过了长度限制而被忽略，请检查生成的文件是否完整包含您所需要的数据。"
+        zhCN = "部分数据超过了长度限制而被忽略，请检查生成的文件是否完整包含您所需要的数据。",
+        ru = "Данные, превышающие предельную длину, игнорируются. Пожалуйста, проверьте," +
+                " включает ли ваш вывод все предполагаемые данные."
     ),
     SlightRestsFillingSwitchLabel(
         en = "Fill short rests",
         ja = "短い休符を埋める",
-        zhCN = "填充短休止符"
+        zhCN = "填充短休止符",
+        ru = "Заполнить короткие промежутки"
     ),
     SlightRestsFillingDescription(
         en = "Extend note to fill the short rest between it and its next note",
         ja = "ノート同士の間に短い休符が挟まっている場合、前のノートを伸ばして隙間を埋めます",
-        zhCN = "当音符之间存在较短的休止符时，将前一个音符延长来填充休止符"
+        zhCN = "当音符之间存在较短的休止符时，将前一个音符延长来填充休止符",
+        ru = "Расширить ноту, чтобы заполнить короткий промежуток между ней и следующей нотой"
     ),
     SlightRestsFillingThresholdLabel(
         en = "Max length to be processed (exclusive)",
         ja = "長さが入力値未満の場合処理",
-        zhCN = "适用该处理的最大长度（不含）"
+        zhCN = "适用该处理的最大长度（不含）",
+        ru = "Максимальная длина, подлежащая обработке (исключительная)"
     ),
     SlightRestsFillingThresholdItem(
         en = "1/{{denominator}} note",
         ja = "{{denominator}}分音符",
-        zhCN = "{{denominator}}分音符"
+        zhCN = "{{denominator}}分音符",
+        ru = "1/{{denominator}} ноты"
     ),
     ProcessingOverlay(
         en = "Processing…",
@@ -451,7 +461,7 @@ enum class Strings(val en: String, val ja: String, val zhCN: String, val ru: Str
     fun get(language: Language): String = when (language) {
         English -> en
         Japanese -> ja
-        SimplifiedChinese -> zhCN,
+        SimplifiedChinese -> zhCN
         Russian -> ru
     }
 }
