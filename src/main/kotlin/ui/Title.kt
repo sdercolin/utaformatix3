@@ -10,7 +10,7 @@ import ui.strings.string
 
 fun ChildrenBuilder.title(titleKey: Strings) = Typography {
     style = jso {
-        marginTop = 30.px
+        marginTop = 45.px
         marginBottom = 20.px
     }
     variant = TypographyVariant.h3
