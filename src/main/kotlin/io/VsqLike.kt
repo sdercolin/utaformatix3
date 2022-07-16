@@ -171,11 +171,11 @@ object VsqLike {
         }
         tickEventPairs.sortBy { it.first }
         val deltaEventPairs = listOf(0L to tickEventPairs.first().second) +
-                tickEventPairs
-                    .zipWithNext()
-                    .map { (previous, current) ->
-                        (current.first - previous.first) to current.second
-                    }
+            tickEventPairs
+                .zipWithNext()
+                .map { (previous, current) ->
+                    (current.first - previous.first) to current.second
+                }
         for ((delta, event) in deltaEventPairs) {
             bytes.addIntVariableLengthBigEndian(delta.toInt())
             when (event) {

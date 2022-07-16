@@ -2,256 +2,224 @@ package ui
 
 import APP_NAME
 import APP_VERSION
+import csstype.Auto
+import csstype.Length
+import csstype.Margin
+import csstype.NamedColor
+import csstype.Position
+import csstype.number
+import csstype.px
+import csstype.rem
+import csstype.vh
 import kotlinx.browser.window
-import kotlinx.css.FontWeight
-import kotlinx.css.LinearDimension
-import kotlinx.css.color
-import kotlinx.css.fontSize
-import kotlinx.css.fontWeight
-import kotlinx.css.height
-import kotlinx.css.margin
-import kotlinx.css.marginLeft
-import kotlinx.css.minHeight
-import kotlinx.css.width
+import kotlinx.js.jso
 import model.Format
-import react.RBuilder
-import react.RComponent
-import react.RProps
-import react.RState
-import react.setState
-import styled.css
-import styled.styledDiv
-import styled.styledSpan
-import ui.external.materialui.Breakpoint
-import ui.external.materialui.Color
-import ui.external.materialui.Icons
-import ui.external.materialui.Position
-import ui.external.materialui.StepIconProps
-import ui.external.materialui.StepIconPropsClasses
-import ui.external.materialui.Style
-import ui.external.materialui.TypographyVariant
-import ui.external.materialui.appBar
-import ui.external.materialui.button
-import ui.external.materialui.container
-import ui.external.materialui.cssBaseline
-import ui.external.materialui.fab
-import ui.external.materialui.step
-import ui.external.materialui.stepLabel
-import ui.external.materialui.stepper
-import ui.external.materialui.toolbar
-import ui.external.materialui.tooltip
-import ui.external.materialui.typography
+import mui.icons.material.ArrowBack
+import mui.icons.material.Feedback
+import mui.icons.material.LiveHelp
+import mui.material.AppBar
+import mui.material.AppBarPosition
+import mui.material.Button
+import mui.material.ButtonColor
+import mui.material.Container
+import mui.material.CssBaseline
+import mui.material.Fab
+import mui.material.FabColor
+import mui.material.Size
+import mui.material.Step
+import mui.material.StepLabel
+import mui.material.Stepper
+import mui.material.Toolbar
+import mui.material.Tooltip
+import mui.material.Typography
+import mui.material.styles.ThemeProvider
+import mui.material.styles.TypographyVariant
+import mui.system.sx
+import react.ChildrenBuilder
+import react.FC
+import react.Props
+import react.ReactNode
+import react.css.css
+import react.dom.html.ReactHTML.div
+import react.dom.html.ReactHTML.span
+import react.useState
 import ui.model.Stage
 import ui.model.StageInfo
+import ui.strings.Language
 import ui.strings.Strings
 import ui.strings.string
 
-class App : RComponent<RProps, AppState>() {
+val App = FC<Props> {
+    var stageInfoStack: List<StageInfo> by useState(listOf(StageInfo.Import))
 
-    override fun AppState.init() {
-        stageInfoStack = listOf(StageInfo.Import)
-    }
+    @Suppress("ASSIGNED_BUT_NEVER_ACCESSED_VARIABLE")
+    var language: Language? by useState(null)
 
-    override fun RBuilder.render() {
-        cssBaseline {}
-        styledDiv {
-            css {
-                height = LinearDimension("100vh")
-            }
-            styledDiv {
-                css {
-                    height = LinearDimension.fitContent
-                    minHeight = LinearDimension("95vh")
-                }
-                container {
-                    attrs.maxWidth = Breakpoint.lg
-                    buildAppBar()
-                    buildStepper()
-                    buildBody()
-                }
-            }
-            child(CustomFooter::class) {
-                attrs.onOpenEmbeddedPage = { urlKey -> pushStage(StageInfo.ExtraPage(urlKey)) }
-            }
-            buildBackButton()
-        }
-    }
-
-    private fun RBuilder.buildAppBar() {
-        appBar {
-            attrs.position = Position.fixed
-            toolbar {
-                styledDiv {
-                    css {
-                        width = LinearDimension.fillAvailable
-                    }
-                    typography {
-                        attrs {
-                            variant = TypographyVariant.h6
-                            color = Color.inherit
-                        }
-                        +APP_NAME
-                        styledSpan {
-                            css {
-                                fontSize = LinearDimension("0.8rem")
-                                marginLeft = LinearDimension("5px")
-                                fontWeight = FontWeight("400")
-                                color = kotlinx.css.Color.lightGrey
-                            }
-                            +"v$APP_VERSION"
-                        }
-                    }
-                }
-                tooltip {
-                    attrs {
-                        title = string(Strings.FrequentlyAskedQuestionTooltip)
-                        interactive = false
-                    }
-                    button {
-                        attrs {
-                            color = Color.inherit
-                            onClick = { pushStage(StageInfo.ExtraPage(Strings.FaqUrl)) }
-                        }
-                        Icons.liveHelp {}
-                    }
-                }
-                tooltip {
-                    attrs {
-                        title = string(Strings.ReportFeedbackTooltip)
-                        interactive = false
-                    }
-                    button {
-                        attrs {
-                            color = Color.inherit
-                            onClick = { window.open(string(Strings.ReportUrl), target = "_blank") }
-                        }
-                        Icons.feedback {}
-                    }
-                }
-                child(LanguageSelector::class) {
-                    attrs.onChangeLanguage = { setState { } }
-                }
-            }
-        }
-        // Append toolbar for fixing style problems
-        toolbar {}
-    }
-
-    private fun RBuilder.buildStepper() {
-        val stageIndex = state.stageInfo.stage.index
-        if (stageIndex < 0) return
-        stepper {
-            attrs {
-                style = Style(backgroundColor = Color.transparent)
-                activeStep = state.stageInfo.stage.index
-            }
-            Stage.forStepper.forEach { stage ->
-                step {
-                    attrs.key = stage.name
-                    stepLabel {
-                        attrs.StepIconProps = StepIconProps(
-                            StepIconPropsClasses(
-                                root = "main-stepper-icon",
-                                active = "main-stepper-icon-active",
-                                completed = "main-stepper-icon-completed"
-                            )
-                        )
-                        stage.displayName?.let { +it }
-                    }
-                }
-            }
-        }
-    }
-
-    private fun RBuilder.buildBody() {
-        styledDiv {
-            css {
-                margin(horizontal = LinearDimension("24px"))
-            }
-            when (val info = state.stageInfo) {
-                is StageInfo.Import -> {
-                    child(Importer::class) {
-                        attrs {
-                            formats = Format.importable
-                            onImported = { pushStage(StageInfo.SelectOutputFormat(it)) }
-                        }
-                    }
-                }
-                is StageInfo.SelectOutputFormat -> {
-                    child(OutputFormatSelector::class) {
-                        attrs {
-                            formats = Format.exportable
-                            project = info.project
-                            onSelected = { pushStage(StageInfo.Configure(info.project, it)) }
-                        }
-                    }
-                }
-                is StageInfo.Configure -> {
-                    child(ConfigurationEditor::class) {
-                        attrs {
-                            project = info.project
-                            outputFormat = info.outputFormat
-                            onFinished = { result, format ->
-                                pushStage(StageInfo.Export(result, format))
-                            }
-                        }
-                    }
-                }
-                is StageInfo.Export -> {
-                    child(Exporter::class) {
-                        attrs {
-                            format = info.outputFormat
-                            result = info.result
-                            onRestart = { popAllStages() }
-                        }
-                    }
-                }
-                is StageInfo.ExtraPage -> {
-                    child(EmbeddedPage::class) {
-                        attrs.url = string(info.urlKey)
-                    }
-                }
-            }
-        }
-    }
-
-    private fun RBuilder.buildBackButton() {
-        if (state.stageInfoStack.count() <= 1) return
-        fab {
-            attrs {
-                size = "large"
-                color = Color.primary
-                onClick = { popStage() }
-                style = Style(
-                    position = "fixed",
-                    top = "auto",
-                    left = "auto",
-                    bottom = "32px",
-                    right = "32px"
-                )
-            }
-            Icons.arrowBack {}
-        }
-    }
-
-    private fun pushStage(stageInfo: StageInfo) = setState {
+    fun pushStage(stageInfo: StageInfo) {
+        val stack = stageInfoStack.toMutableList()
         if (stageInfoStack.last().stage == stageInfo.stage) {
-            stageInfoStack = stageInfoStack.dropLast(1)
+            stack.removeAt(stack.lastIndex)
         }
-        stageInfoStack = stageInfoStack + stageInfo
+        stack.add(stageInfo)
+        stageInfoStack = stack
     }
 
-    private fun popStage() = setState {
+    fun popStage() {
         stageInfoStack = stageInfoStack.dropLast(1)
     }
 
-    private fun popAllStages() = setState {
+    fun popAllStages() {
         stageInfoStack = stageInfoStack.take(1)
     }
 
-    private val AppState.stageInfo get() = stageInfoStack.last()
+    fun getStageInfo() = stageInfoStack.last()
+
+    ThemeProvider {
+        theme = appTheme
+        CssBaseline {}
+        div {
+            css {
+                height = 100.vh
+            }
+            div {
+                css {
+                    height = Length.fitContent
+                    minHeight = 95.vh
+                }
+
+                Container {
+                    maxWidth = "xl"
+                    buildAppBar(pushStage = { pushStage(it) }, onChangeLanguage = { language = it })
+                    buildStepper(getStageInfo().stage.index)
+                    buildBody(getStageInfo(), pushStage = { pushStage(it) }, popAllStages = { popAllStages() })
+                }
+            }
+            CustomFooter {
+                onOpenEmbeddedPage = { urlKey -> pushStage(StageInfo.ExtraPage(urlKey)) }
+            }
+            buildBackButton(stageInfoStack, onClickBackButton = { popStage() })
+        }
+    }
 }
 
-external interface AppState : RState {
-    var stageInfoStack: List<StageInfo>
+private fun ChildrenBuilder.buildAppBar(pushStage: (StageInfo) -> Unit, onChangeLanguage: (Language) -> Unit) {
+    AppBar {
+        position = AppBarPosition.fixed
+        style = jso {
+            background = appTheme.palette.primary.main
+        }
+        Toolbar {
+            Typography {
+                css {
+                    color = appTheme.palette.primary.contrastText
+                }
+                variant = TypographyVariant.h6
+                +APP_NAME
+                span {
+                    css {
+                        fontSize = 0.8.rem
+                        marginLeft = 5.px
+                        color = NamedColor.lightgrey
+                    }
+                    +"v$APP_VERSION"
+                }
+                sx { flexGrow = number(1.0) }
+            }
+            Tooltip {
+                title = ReactNode(string(Strings.FrequentlyAskedQuestionTooltip))
+                disableInteractive = true
+                Button {
+                    color = ButtonColor.inherit
+                    onClick = { pushStage(StageInfo.ExtraPage(Strings.FaqUrl)) }
+                    LiveHelp()
+                }
+            }
+            Tooltip {
+                title = ReactNode(string(Strings.ReportFeedbackTooltip))
+                disableInteractive = true
+                Button {
+                    color = ButtonColor.inherit
+                    onClick = { window.open(string(Strings.ReportUrl), target = "_blank") }
+                    Feedback()
+                }
+            }
+            LanguageSelector {
+                this.onChangeLanguage = onChangeLanguage
+            }
+        }
+    }
+    // Append toolbar for fixing style problems
+    Toolbar {}
+}
+
+private fun ChildrenBuilder.buildStepper(stageIndex: Int) {
+    if (stageIndex < 0) return
+    Stepper {
+        css {
+            margin = Margin(horizontal = 0.px, vertical = 24.px)
+        }
+        style = jso {
+            background = NamedColor.transparent
+        }
+        activeStep = stageIndex
+        Stage.forStepper.forEachIndexed { index, stage ->
+            Step {
+                completed = stageIndex > index
+                StepLabel {
+                    stage.displayName?.let { +it }
+                }
+            }
+        }
+    }
+}
+
+private fun ChildrenBuilder.buildBody(stageInfo: StageInfo, pushStage: (StageInfo) -> Unit, popAllStages: () -> Unit) {
+    div {
+        css {
+            margin = Margin(horizontal = 24.px, vertical = 0.px)
+        }
+        when (val info = stageInfo) {
+            is StageInfo.Import -> Importer {
+                formats = Format.importable
+                onImported = { pushStage(StageInfo.SelectOutputFormat(it)) }
+            }
+            is StageInfo.SelectOutputFormat -> OutputFormatSelector {
+                formats = Format.exportable
+                project = info.project
+                onSelected = { pushStage(StageInfo.Configure(info.project, it)) }
+            }
+            is StageInfo.Configure -> ConfigurationEditor {
+                project = info.project
+                outputFormat = info.outputFormat
+                onFinished = { result, format ->
+                    pushStage(StageInfo.Export(result, format))
+                }
+            }
+            is StageInfo.Export -> Exporter {
+                format = info.outputFormat
+                result = info.result
+                onRestart = { popAllStages() }
+            }
+            is StageInfo.ExtraPage -> EmbeddedPage {
+                url = string(info.urlKey)
+            }
+        }
+    }
+}
+
+private fun ChildrenBuilder.buildBackButton(stageInfoStack: List<StageInfo>, onClickBackButton: () -> Unit) {
+    if (stageInfoStack.count() <= 1) return
+    Fab {
+        size = Size.large
+        color = FabColor.primary
+        onClick = { onClickBackButton() }
+        style = jso {
+            position = Position.fixed
+            top = Auto.auto
+            left = Auto.auto
+            bottom = 32.px
+            right = 32.px
+        }
+        ArrowBack()
+    }
 }

@@ -49,7 +49,10 @@ fun simplifyShape(pointList: List<Point>, epsilon: Double): List<Point> {
     val end = pointList.size - 1
     for (i in 1 until end) {
         val d = perpendicularDistance(pointList[i], pointList[0], pointList[end])
-        if (d > dmax) { index = i; dmax = d }
+        if (d > dmax) {
+            index = i
+            dmax = d
+        }
     }
 
     // If max distance is greater than epsilon, recursively simplify

@@ -1,30 +1,30 @@
 package ui
 
-import react.RBuilder
-import ui.external.materialui.SnackbarAnchorOrigin
-import ui.external.materialui.alert
-import ui.external.materialui.snackbar
+import kotlinx.js.jso
+import mui.material.Alert
+import mui.material.AlertColor
+import mui.material.AlertVariant
+import mui.material.Snackbar
+import mui.material.SnackbarOriginHorizontal
+import mui.material.SnackbarOriginVertical
+import react.ChildrenBuilder
 
-fun RBuilder.messageBar(
+fun ChildrenBuilder.messageBar(
     isShowing: Boolean,
     message: String,
     close: () -> Unit,
-    severityString: String
-) = snackbar {
-    attrs {
-        anchorOrigin = SnackbarAnchorOrigin(
-            vertical = "bottom",
-            horizontal = "center"
-        )
-        autoHideDuration = 5000 // ms
-        open = isShowing
-        onClose = close
+    color: AlertColor
+) = Snackbar {
+    anchorOrigin = jso {
+        vertical = SnackbarOriginVertical.bottom
+        horizontal = SnackbarOriginHorizontal.center
     }
-    alert {
-        attrs {
-            severity = severityString
-            variant = "filled"
-        }
+    autoHideDuration = 5000 // ms
+    open = isShowing
+    onClose = { _, _ -> close() }
+    Alert {
+        severity = color
+        variant = AlertVariant.filled
         +message
     }
 }

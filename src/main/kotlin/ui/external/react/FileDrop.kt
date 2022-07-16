@@ -5,12 +5,12 @@ package ui.external.react
 
 import org.w3c.dom.events.Event
 import org.w3c.files.FileList
-import react.RClass
-import react.RProps
+import react.ComponentClass
+import react.Props
 
 @JsName("FileDrop")
-external val fileDrop: RClass<FileDropProps>
+external val FileDrop: ComponentClass<FileDropProps>
 
-external interface FileDropProps : RProps {
+external interface FileDropProps : Props {
     var onDrop: (FileList, Event) -> Unit
 }

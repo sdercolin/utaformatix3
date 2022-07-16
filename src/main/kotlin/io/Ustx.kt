@@ -185,9 +185,9 @@ object Ustx {
         val noteTemplate = template.notes.first()
         val notes =
             listOfNotNull(track.notes.firstOrNull()?.let { generateNote(noteTemplate, null, it) }) +
-                    track.notes.zipWithNext().map { (lastNote, thisNote) ->
-                        generateNote(noteTemplate, lastNote, thisNote)
-                    }
+                track.notes.zipWithNext().map { (lastNote, thisNote) ->
+                    generateNote(noteTemplate, lastNote, thisNote)
+                }
 
         val curves = mutableListOf<Curve>()
         if (features.contains(Feature.ConvertPitch)) {
