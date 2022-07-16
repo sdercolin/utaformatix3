@@ -393,6 +393,7 @@ private val ProjectZoomBlock = subFC<ProjectZoomProps, ProjectZoomState> { props
             FormControlLabel {
                 label = ReactNode(string(Strings.ProjectZoom))
                 control = Switch.create {
+                    color = SwitchColor.secondary
                     checked = state.isOn
                     onChange = { event, _ ->
                         val checked = event.target.checked
