@@ -5,7 +5,7 @@ import csstype.Margin
 import csstype.VerticalAlign
 import csstype.em
 import csstype.px
-import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.js.jso
@@ -67,8 +67,9 @@ import react.dom.html.ReactHTML.div
 import react.useState
 import ui.strings.Strings
 import ui.strings.string
+import util.runCatchingCancellable
 
-val ConfigurationEditor = FC<ConfigurationEditorProps> { props ->
+val ConfigurationEditor = scopedFC<ConfigurationEditorProps> { props, scope ->
     var isProcessing by useState(false)
     val (lyricsConversion, setLyricsConversion) = useState {
         val analysedType = props.project.lyricsType
@@ -138,6 +139,7 @@ val ConfigurationEditor = FC<ConfigurationEditorProps> { props ->
         submitState = setProjectZoom
     }
     buildNextButton(
+        scope,
         props,
         isEnabled = lyricsConversion.isReady,
         lyricsConversion,
@@ -493,6 +495,7 @@ private fun ChildrenBuilder.buildProjectZoomDetail(
 }
 
 private fun ChildrenBuilder.buildNextButton(
+    scope: CoroutineScope,
     props: ConfigurationEditorProps,
     isEnabled: Boolean,
     lyricsConversion: LyricsConversionState,
@@ -512,6 +515,7 @@ private fun ChildrenBuilder.buildNextButton(
             disabled = !isEnabled
             onClick = {
                 process(
+                    scope,
                     props,
                     lyricsConversion,
                     slightRestsFilling,
@@ -527,6 +531,7 @@ private fun ChildrenBuilder.buildNextButton(
 }
 
 private fun process(
+    scope: CoroutineScope,
     props: ConfigurationEditorProps,
     lyricsConversion: LyricsConversionState,
     slightRestsFilling: SlightRestsFillingState,
@@ -536,8 +541,8 @@ private fun process(
     onDialogError: (DialogErrorState) -> Unit
 ) {
     setProcessing(true)
-    GlobalScope.launch {
-        try {
+    scope.launch {
+        runCatchingCancellable {
             val format = props.outputFormat
             val fromType = lyricsConversion.fromType
             val toType = lyricsConversion.toType
@@ -563,7 +568,6 @@ private fun process(
                     } else it
                 }
 
-            delay(100)
             val availableFeatures = Feature.values()
                 .filter {
                     it.isAvailable.invoke(project) &&
@@ -575,10 +579,11 @@ private fun process(
                     }
                 }
 
+            delay(100)
             val result = format.generator.invoke(project, availableFeatures)
             console.log(result.blob)
             props.onFinished.invoke(result, format)
-        } catch (t: Throwable) {
+        }.onFailure { t ->
             console.log(t)
             setProcessing(false)
             onDialogError(
