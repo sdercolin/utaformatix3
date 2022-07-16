@@ -3,7 +3,7 @@ package ui
 import ImportParamsJson
 import csstype.VerticalAlign
 import csstype.px
-import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.js.jso
@@ -23,7 +23,6 @@ import mui.material.Typography
 import mui.material.styles.TypographyVariant
 import org.w3c.files.File
 import react.ChildrenBuilder
-import react.FC
 import react.Props
 import react.ReactNode
 import react.create
@@ -35,10 +34,11 @@ import ui.external.react.FileDrop
 import ui.strings.Strings
 import ui.strings.string
 import util.extensionName
+import util.runCatchingCancellable
 import util.toList
 import util.waitFileSelection
 
-val Importer = FC<ImporterProps> { props ->
+val Importer = scopedFC<ImporterProps> { props, scope ->
     var isLoading by useState(false)
     var params by useState { loadImportParamsFromCookies() ?: ImportParams() }
     var snackbarError by useState(SnackbarErrorState())
@@ -57,6 +57,7 @@ val Importer = FC<ImporterProps> { props ->
                 )
             }
             else -> import(
+                scope,
                 files,
                 fileFormat,
                 setLoading = { isLoading = it },
@@ -82,7 +83,7 @@ val Importer = FC<ImporterProps> { props ->
             marginTop = 40.px
         }
         onClick = {
-            GlobalScope.launch {
+            scope.launch {
                 val accept = props.formats.joinToString(",") { it.extension }
                 val files = waitFileSelection(accept = accept, multiple = true)
                 checkFilesToImport(files)
@@ -162,6 +163,7 @@ private fun ChildrenBuilder.buildConfigurations(params: ImportParams, onNewParam
 }
 
 private fun import(
+    scope: CoroutineScope,
     files: List<File>,
     format: Format,
     setLoading: (Boolean) -> Unit,
@@ -170,8 +172,8 @@ private fun import(
     params: ImportParams
 ) {
     setLoading(true)
-    GlobalScope.launch {
-        try {
+    scope.launch {
+        runCatchingCancellable {
             delay(100)
             val parseFunction = format.parser
             val project = parseFunction(files, params).lyricsTypeAnalysed().requireValid()
@@ -179,7 +181,7 @@ private fun import(
             console.log(project)
             saveImportParamsToCookies(params)
             props.onImported.invoke(project)
-        } catch (t: Throwable) {
+        }.onFailure { t ->
             console.log(t)
             setLoading(false)
             onDialogError(
