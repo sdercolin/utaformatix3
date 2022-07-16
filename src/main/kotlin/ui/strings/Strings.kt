@@ -123,21 +123,21 @@ enum class Strings(val en: String, val ja: String, val zhCN: String, val ru: Str
     ),
     ProjectZoomDescription(
         en = "Change Bpm and notes in parallel so that the actual singing speed is kept. For example," +
-                "with factor 2, 60 bpm becomes 120 bpm and all notes become twice the length",
+            "with factor 2, 60 bpm becomes 120 bpm and all notes become twice the length",
         ja = "実際の速度を変更しないようBpmやノートなどを同時に変更します。例えば、60 bmpの曲に因子2をかけると、" +
-                "120 bpm になり、すべてのノートの長さも二倍になります。",
+            "120 bpm になり、すべてのノートの長さも二倍になります。",
         zhCN = "在不改变实际曲速的前提下同时改变Bpm数值与音符长度。例如，在60 bpm的乐曲中使用2倍的缩放，则乐曲变为120bpm，" +
-                "同时所有音符的长度也翻倍。",
+            "同时所有音符的长度也翻倍。",
         ru = "Изменение частоты ударов в минуту и нот параллельно, чтобы сохранить фактическую скорость пения." +
-                " Например, с коэффициентом 2 60 ударов в минуту становятся 120 ударов в минуту," +
-                " и все ноты становятся в два раза длиннее"
+            " Например, с коэффициентом 2 60 ударов в минуту становятся 120 ударов в минуту," +
+            " и все ноты становятся в два раза длиннее"
     ),
     ProjectZoomWarning(
         en = "Current settings may be destructive because some time signatures have to be moved to measure heads.",
         ja = "この設定ではプロジェクトを適切に変換できないことがあります。一部の拍子記号を小節の始まりに移動させることになります。",
         zhCN = "该设定可能无法正确转换本工程。一部分的节拍记号将被移动到最近的小节的开始位置。",
         ru = "Текущие настройки могут быть разрушительными," +
-                " поскольку для измерения головок необходимо переместить некоторые временные сигнатуры."
+            " поскольку для измерения головок необходимо переместить некоторые временные сигнатуры."
     ),
     ProjectZooLabel(
         en = "Factor",
@@ -171,13 +171,13 @@ enum class Strings(val en: String, val ja: String, val zhCN: String, val ru: Str
     ),
     ImportFileSubDescription(
         en = "Supported file types: VSQX, VPR, VSQ, MID(VOCALOID), USTs," +
-                " USTX, CCS, MUSICXML, XML, SVP, S5P, DV, PPSF(NT)",
+            " USTX, CCS, MUSICXML, XML, SVP, S5P, DV, PPSF(NT)",
         ja = "サポートされているファイル形式：VSQX、VPR、VSQ、MID（VOCALOID）、UST（複数可）、" +
-                "USTX、CCS、MUSICXML、XML、SVP、S5P、DV、PPSF（NT）",
+            "USTX、CCS、MUSICXML、XML、SVP、S5P、DV、PPSF（NT）",
         zhCN = "支持的文件类型：VSQX、VPR、VSQ、MID（VOCALOID）、UST（允许复数个）、" +
-                "USTX、CCS、MUSICXML、XML、SVP、S5P、DV、PPSF（NT）",
+            "USTX、CCS、MUSICXML、XML、SVP、S5P、DV、PPSF（NT）",
         ru = "Поддерживаемые форматы файлов: VSQx, VPR, VSQ, MID (VOCALOID), UST," +
-                " USTX, CCS, MusicXML, XML, SVP, S5P, DV, PPSF(NT)"
+            " USTX, CCS, MusicXML, XML, SVP, S5P, DV, PPSF(NT)"
     ),
     UnsupportedFileTypeImportError(
         en = "Unsupported file type",
@@ -205,11 +205,11 @@ enum class Strings(val en: String, val ja: String, val zhCN: String, val ru: Str
     ),
     ErrorDialogDescription(
         en = "If you find any problems, please help us collect error information" +
-                " for better performance of this application by submitting a feedback report.",
+            " for better performance of this application by submitting a feedback report.",
         ja = "サービス向上のためにエラー情報を収集しております。問題を発見した場合、フィードバックにご協力をお願いします。",
         zhCN = "如您在使用中发现问题，您可以向我们提交反馈表单。感谢您对本应用的改善所提供的帮助！",
         ru = "Если вы обнаружите какие-либо проблемы, пожалуйста, помогите нам собрать информацию об ошибках" +
-                "  для повышения производительности этого приложения, отправив отчет об обратной связи."
+            "  для повышения производительности этого приложения, отправив отчет об обратной связи."
     ),
     ReportUrl(
         en = "https://forms.gle/3Es3ZomcYKNHWBvp6",
@@ -267,11 +267,11 @@ enum class Strings(val en: String, val ja: String, val zhCN: String, val ru: Str
     ),
     ImportWarningTimeSignatureIgnoredInTrack(
         en = "- Time signature label ({{timeSignature}}) at measure {{measure}}" +
-                " in Track {{number}}: [{{name}}] was ignored.",
+            " in Track {{number}}: [{{name}}] was ignored.",
         ja = "- トラック{{number}}：[{{name}}]の小節{{measure}}にある拍子記号（{{timeSignature}}）を読み込めませんでした。",
         zhCN = "- 未能读取音轨{{number}}: [{{name}}]中小节{{measure}}处的节拍记号（{{timeSignature}}）。",
         ru = "- Метка временной сигнатуры ({{TimeSignature}}) при измерении {{measure}}" +
-                " в треке {{number}}: [{{name}}] была проигнорирована."
+            " в треке {{number}}: [{{name}}] была проигнорирована."
     ),
     ImportWarningTimeSignatureIgnoredInPreMeasure(
         en = "- Time signature label ({{timeSignature}}) in pre-measures was ignored.",
@@ -362,26 +362,26 @@ enum class Strings(val en: String, val ja: String, val zhCN: String, val ru: Str
         ja = "全てのノートの発音記号が\"a\"に設定されました。正確に発音させるには発音記号をリセットしてください。",
         zhCN = "所有音符的音素都被设为了\"a\"。请重置音素以使其正确发音。",
         ru = "Фонемы всех нот были установлены на \"a\"." +
-                " Пожалуйста, сбросьте их, чтобы они звучали правильно."
+            " Пожалуйста, сбросьте их, чтобы они звучали правильно."
     ),
     ExportNotificationPhonemeResetRequiredV4(
         en = "Phonemes of all notes were set to \"a\"." +
-                " Please use \"Lyrics\" -> \"Convert Phonemes\" in the menu of VOCALOID4 to reset them.",
+            " Please use \"Lyrics\" -> \"Convert Phonemes\" in the menu of VOCALOID4 to reset them.",
         ja = "全てのノートの発音記号が\"a\"に設定されました。" +
-                "VOCALOID4のメニューから「歌詞」->「発音記号変換」機能で発音記号をリセットしてください。",
+            "VOCALOID4のメニューから「歌詞」->「発音記号変換」機能で発音記号をリセットしてください。",
         zhCN = "所有音符的音素都被设为了\"a\"。请使用VOCALOID4菜单中的「歌词」->「音位变换」功能来重置音素。",
         ru = "Фонемы всех нот были установлены на \"a\"." +
-                " Пожалуйста, воспользуйтесь \"Lyrics\" -> \"Convert Phonemes\" в меню VOCALOID4 чтобы сбросить их."
+            " Пожалуйста, воспользуйтесь \"Lyrics\" -> \"Convert Phonemes\" в меню VOCALOID4 чтобы сбросить их."
     ),
     ExportNotificationPhonemeResetRequiredV5(
         en = "Phonemes of all notes were set to \"a\". Please use \"Job\" -> \"Convert Phonemes to Match Languages\"" +
-                " in the menu of VOCALOID5 to reset them.",
+            " in the menu of VOCALOID5 to reset them.",
         ja = "全てのノートの発音記号が\"a\"に設定されました。" +
-                "VOCALOID5のメニューから「ジョブ」->「発音記号を言語に合わせて変換」機能で発音記号をリセットしてください。",
+            "VOCALOID5のメニューから「ジョブ」->「発音記号を言語に合わせて変換」機能で発音記号をリセットしてください。",
         zhCN = "所有音符的音素都被设为了\"a\"。请使用VOCALOID5菜单中的「任务」->「发音符号匹配」功能来重置音素。",
         ru = "Фонемы всех нот были установлены на \"a\"." +
-                " Пожалуйста, воспользуйтесь \"Job\" -> \"Convert Phonemes to Match Languages\"" +
-                " в меню VOCALOID5 чтобы сбросить их."
+            " Пожалуйста, воспользуйтесь \"Job\" -> \"Convert Phonemes to Match Languages\"" +
+            " в меню VOCALOID5 чтобы сбросить их."
     ),
     ExportNotificationTempoChangeIgnored(
         en = "Could not convert tempo changes to the target format.",
@@ -403,21 +403,21 @@ enum class Strings(val en: String, val ja: String, val zhCN: String, val ru: Str
     ),
     ExportNotificationPitchDataExported(
         en = "Some pitch parameters were exported. For a higher reproduction accuracy," +
-                " you may need to turn off pitch transition and vibrato settings in the target editor.",
+            " you may need to turn off pitch transition and vibrato settings in the target editor.",
         ja = "ピッチパラメータが出力されました。出力側のエディターでピッチ推移やビブラートなどの設定を削除することで、より高い精度でピッチを" +
-                "再現できる場合があります。",
+            "再現できる場合があります。",
         zhCN = "生成的文件中带有音高参数。您可能需要在对象编辑器中关闭音高平滑设置及颤音设置以达到更高的重现精度。",
         ru = "Некоторые параметры высоты тона были экспортированы. Для более высокой точности" +
-                "воспроизведения, возможно вам потребуется отключить настройки высоты тона и" +
-                " вибрато в целевом редакторе."
+            "воспроизведения, возможно вам потребуется отключить настройки высоты тона и" +
+            " вибрато в целевом редакторе."
     ),
     ExportNotificationDataOverLengthLimitIgnored(
         en = "Data exceeding length limit ignored. Please check if your output includes all your intended data.",
         ja = "一部のデータが長さ制限を超えているため、すべてのデータを出力することができませんでした。意図したデータが出力結果にすべて" +
-                "入っているかどうかを確認してください。",
+            "入っているかどうかを確認してください。",
         zhCN = "部分数据超过了长度限制而被忽略，请检查生成的文件是否完整包含您所需要的数据。",
         ru = "Данные, превышающие предельную длину, игнорируются. Пожалуйста, проверьте," +
-                " включает ли ваш вывод все предполагаемые данные."
+            " включает ли ваш вывод все предполагаемые данные."
     ),
     SlightRestsFillingSwitchLabel(
         en = "Fill short rests",

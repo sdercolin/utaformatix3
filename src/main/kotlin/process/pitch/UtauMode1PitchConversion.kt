@@ -44,14 +44,16 @@ fun pitchFromUtauMode1Track(pitchData: UtauMode1TrackPitchData?, notes: List<Not
 
 fun pitchToUtauMode1Track(pitch: Pitch?, notes: List<Note>): UtauMode1TrackPitchData? {
     pitch ?: return null
-    return UtauMode1TrackPitchData(notes.map { note ->
-        UtauMode1NotePitchData(
-            pitch
-                .getAbsoluteData(notes)
-                ?.filter { it.first >= note.tickOn && it.first < note.tickOff }
-                ?.dotResampled(Ust.MODE1_PITCH_SAMPLING_INTERVAL_TICK)
-                ?.map { Pair(it.first, it.second ?: note.key.toDouble()) }
-                ?.map { (it.second - note.key) * 100 }
-        )
-    })
+    return UtauMode1TrackPitchData(
+        notes.map { note ->
+            UtauMode1NotePitchData(
+                pitch
+                    .getAbsoluteData(notes)
+                    ?.filter { it.first >= note.tickOn && it.first < note.tickOff }
+                    ?.dotResampled(Ust.MODE1_PITCH_SAMPLING_INTERVAL_TICK)
+                    ?.map { Pair(it.first, it.second ?: note.key.toDouble()) }
+                    ?.map { (it.second - note.key) * 100 }
+            )
+        }
+    )
 }

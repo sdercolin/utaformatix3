@@ -13,7 +13,7 @@ repositories {
 }
 
 configure<org.jlleitschuh.gradle.ktlint.KtlintExtension> {
-    version.set("0.36.0")
+    version.set("0.45.2")
 }
 
 fun kotlinw(target: String): String =

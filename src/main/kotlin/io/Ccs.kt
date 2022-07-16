@@ -193,7 +193,7 @@ object Ccs {
             .mapIndexed { noteIndex, element ->
                 val tickOn = (element.getRequiredAttributeAsLong("Clock") / TICK_RATE).toLong().minus(tickPrefix)
                 val tickOff = tickOn +
-                        (element.getRequiredAttributeAsLong("Duration") / TICK_RATE).toLong()
+                    (element.getRequiredAttributeAsLong("Duration") / TICK_RATE).toLong()
                 val pitchStep = element.getRequiredAttributeAsInteger("PitchStep")
                 val pitchOctave = element.getRequiredAttributeAsInteger("PitchOctave") - OCTAVE_OFFSET
                 val key = pitchStep + pitchOctave * KEY_IN_OCTAVE

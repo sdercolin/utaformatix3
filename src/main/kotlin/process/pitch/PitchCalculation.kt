@@ -99,18 +99,18 @@ private fun List<Pair<Long, Double?>>.appendPointsAtBorders(
  */
 fun appendPitchPointsForInterpolation(points: List<Pair<Long, Double>>, intervalTick: Long) =
     listOfNotNull(points.firstOrNull()) +
-            points.zipWithNext()
-                .flatMap { (lastPoint, thisPoint) ->
-                    val tickDiff = thisPoint.first - lastPoint.first
-                    val newPoint = when {
-                        tickDiff < intervalTick -> null
-                        tickDiff < 2 * intervalTick ->
-                            ((thisPoint.first + lastPoint.first) / 2) to lastPoint.second
-                        else ->
-                            thisPoint.first - intervalTick to lastPoint.second
-                    }
-                    listOfNotNull(newPoint, thisPoint)
+        points.zipWithNext()
+            .flatMap { (lastPoint, thisPoint) ->
+                val tickDiff = thisPoint.first - lastPoint.first
+                val newPoint = when {
+                    tickDiff < intervalTick -> null
+                    tickDiff < 2 * intervalTick ->
+                        ((thisPoint.first + lastPoint.first) / 2) to lastPoint.second
+                    else ->
+                        thisPoint.first - intervalTick to lastPoint.second
                 }
+                listOfNotNull(newPoint, thisPoint)
+            }
 
 /**
  * Reduce a series of adjacent points with same value to two points

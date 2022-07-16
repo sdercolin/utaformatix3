@@ -215,7 +215,7 @@ private fun MutableList<Pair<Long, Double>>.appendStartAndEndPoint(note: Note) {
 
                 // Linear interpolation
                 val k = (firstPointAfter.second - lastPointBefore.second) /
-                        (firstPointAfter.first - lastPointBefore.first)
+                    (firstPointAfter.first - lastPointBefore.first)
                 val y = lastPointBefore.second + (start - lastPointBefore.first) * k
                 add(indexOf(firstPointAfter), start to y)
             }
@@ -231,7 +231,7 @@ private fun MutableList<Pair<Long, Double>>.appendStartAndEndPoint(note: Note) {
                 val lastPointBefore = last { it.first < end }
                 val firstPointAfter = first { it.first > end }
                 val k = (firstPointAfter.second - lastPointBefore.second) /
-                        (firstPointAfter.first - lastPointBefore.first)
+                    (firstPointAfter.first - lastPointBefore.first)
                 val y = lastPointBefore.second + (end - lastPointBefore.first) * k
                 add(indexOf(firstPointAfter), end to y)
             }

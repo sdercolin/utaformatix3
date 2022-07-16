@@ -127,8 +127,10 @@ private fun getBasePitch(
     result.addAll(portamento)
 
     if (lastNote != null) {
-        val lastNoteTail = (lastNote.note.tickHalfStart until
-                (portamento.firstOrNull()?.first ?: lastNote.note.tickOff))
+        val lastNoteTail = (
+            lastNote.note.tickHalfStart until
+                (portamento.firstOrNull()?.first ?: lastNote.note.tickOff)
+            )
             .map { it to lastNote.note.key.toDouble() }
         result.addAll(lastNoteTail)
     }

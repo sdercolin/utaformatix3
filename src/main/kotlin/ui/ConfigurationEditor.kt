@@ -98,7 +98,7 @@ val ConfigurationEditor = FC<ConfigurationEditorProps> { props ->
     val (pitchConversion, setPitchConversion) = useState {
         val hasPitchData = Feature.ConvertPitch.isAvailable(props.project)
         val isPitchConversionAvailable = hasPitchData &&
-                props.outputFormat.availableFeaturesForGeneration.contains(Feature.ConvertPitch)
+            props.outputFormat.availableFeaturesForGeneration.contains(Feature.ConvertPitch)
         PitchConversionState(
             isAvailable = isPitchConversionAvailable,
             isOn = isPitchConversionAvailable
@@ -127,7 +127,6 @@ val ConfigurationEditor = FC<ConfigurationEditorProps> { props ->
     SlightRestsFillingBlock {
         initialState = slightRestsFilling
         submitState = setSlightRestsFilling
-
     }
     if (pitchConversion.isAvailable) PitchConversionBlock {
         initialState = pitchConversion
@@ -361,7 +360,6 @@ private fun ChildrenBuilder.buildRestsFillingDetail(
     }
 }
 
-
 external interface PitchConversionProps : SubProps<PitchConversionState>
 
 private val PitchConversionBlock = subFC<PitchConversionProps, PitchConversionState> { _, state, editState ->
@@ -392,7 +390,6 @@ private val PitchConversionBlock = subFC<PitchConversionProps, PitchConversionSt
         }
     }
 }
-
 
 external interface ProjectZoomProps : SubProps<ProjectZoomState> {
     var project: Project
@@ -570,7 +567,7 @@ private fun process(
             val availableFeatures = Feature.values()
                 .filter {
                     it.isAvailable.invoke(project) &&
-                            format.availableFeaturesForGeneration.contains(it)
+                        format.availableFeaturesForGeneration.contains(it)
                 }
                 .filter {
                     when (it) {
