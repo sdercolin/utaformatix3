@@ -167,14 +167,14 @@ private fun ChildrenBuilder.buildLyricsDetail(
 ) {
     div {
         css {
-            Margin(horizontal = 40.px, vertical = 0.px)
+            margin = Margin(horizontal = 40.px, vertical = 0.px)
             width = Length.maxContent
         }
         Paper {
             elevation = 0
             div {
                 css {
-                    Margin(
+                    margin = Margin(
                         horizontal = 24.px,
                         top = 16.px,
                         bottom = 24.px
@@ -286,14 +286,14 @@ private fun ChildrenBuilder.buildRestsFillingDetail(
 ) {
     div {
         css {
-            Margin(horizontal = 40.px, vertical = 0.px)
+            margin = Margin(horizontal = 40.px, vertical = 0.px)
             width = Length.maxContent
         }
         Paper {
             elevation = 0
             div {
                 css {
-                    Margin(
+                    margin = Margin(
                         horizontal = 24.px,
                         vertical = 16.px
                     )
@@ -418,14 +418,14 @@ private fun ChildrenBuilder.buildProjectZoomDetail(
 ) {
     div {
         css {
-            Margin(horizontal = 40.px, vertical = 0.px)
+            margin = Margin(horizontal = 40.px, vertical = 0.px)
             width = Length.maxContent
         }
         Paper {
             elevation = 0
             div {
                 css {
-                    Margin(
+                    margin = Margin(
                         horizontal = 24.px,
                         vertical = 16.px
                     )
