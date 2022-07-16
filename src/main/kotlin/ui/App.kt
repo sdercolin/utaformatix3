@@ -47,7 +47,6 @@ import ui.model.Stage
 import ui.model.StageInfo
 import ui.strings.Language
 import ui.strings.Strings
-import ui.strings.i18next
 import ui.strings.string
 
 val App = FC<Props> {
@@ -89,7 +88,7 @@ val App = FC<Props> {
                 }
 
                 Container {
-                    maxWidth = "lg"
+                    maxWidth = "xl"
                     buildAppBar(pushStage = { pushStage(it) }, onChangeLanguage = { language = it })
                     buildStepper(getStageInfo().stage.index)
                     buildBody(getStageInfo(), pushStage = { pushStage(it) }, popAllStages = { popAllStages() })
