@@ -1,5 +1,6 @@
 package ui
 
+import csstype.Color
 import csstype.px
 import external.saveAs
 import kotlinx.js.jso
@@ -13,6 +14,7 @@ import mui.material.AlertColor
 import mui.material.Button
 import mui.material.ButtonColor
 import mui.material.ButtonVariant
+import mui.system.sx
 import react.ChildrenBuilder
 import react.FC
 import react.Props
@@ -44,6 +46,8 @@ private fun ChildrenBuilder.buildButtons(props: ExporterProps) {
         }
         Button {
             variant = ButtonVariant.contained
+            color = ButtonColor.secondary
+            sx { backgroundColor = Color("#e0e0e0") }
             onClick = { download(props) }
             SaveAlt()
             div {
