@@ -13,13 +13,14 @@ import react.useState
 import ui.external.react.Markdown
 
 val EmbeddedPage = FC<EmbeddedPageProps> { props ->
-    var url: String? by useState()
+    var url: String? by useState { props.url }
     var content: String? by useState()
 
-    fun fetch() {
-        GlobalScope.launch {
+    GlobalScope.launch {
+        if (content == null || url != props.url) {
+            url = props.url
             val result = try {
-                window.fetch(url).await().text().await()
+                window.fetch(props.url).await().text().await()
             } catch (t: Throwable) {
                 t.toString()
             }
@@ -27,18 +28,13 @@ val EmbeddedPage = FC<EmbeddedPageProps> { props ->
         }
     }
 
-    if (content == null || url != props.url) {
-        url = props.url
-        fetch()
-    } else {
-        div {
-            css {
-                marginTop = 32.px
-                marginBottom = 48.px
-            }
-            Markdown {
-                +content.orEmpty()
-            }
+    div {
+        css {
+            marginTop = 32.px
+            marginBottom = 48.px
+        }
+        Markdown {
+            +content.orEmpty()
         }
     }
 }
@@ -46,8 +42,3 @@ val EmbeddedPage = FC<EmbeddedPageProps> { props ->
 external interface EmbeddedPageProps : Props {
     var url: String
 }
-
-private class EmbeddedPageState(
-    var url: String,
-    var content: String?
-)

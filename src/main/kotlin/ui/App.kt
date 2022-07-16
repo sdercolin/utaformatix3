@@ -52,10 +52,12 @@ val App = FC<Props> {
     var stageInfoStack: List<StageInfo> by useState(listOf(StageInfo.Import))
 
     fun pushStage(stageInfo: StageInfo) {
+        val stack = stageInfoStack.toMutableList()
         if (stageInfoStack.last().stage == stageInfo.stage) {
-            stageInfoStack = stageInfoStack.dropLast(1)
+            stack.removeAt(stack.lastIndex)
         }
-        stageInfoStack = stageInfoStack + stageInfo
+        stack.add(stageInfo)
+        stageInfoStack = stack
     }
 
     fun popStage() {
