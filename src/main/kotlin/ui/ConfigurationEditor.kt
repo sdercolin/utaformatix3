@@ -22,28 +22,32 @@ import model.Project
 import model.TICKS_IN_FULL_NOTE
 import mui.icons.material.ErrorOutline
 import mui.icons.material.HelpOutline
+import mui.material.BaseTextFieldProps
+import mui.material.Box
 import mui.material.Button
 import mui.material.ButtonColor
 import mui.material.ButtonVariant
 import mui.material.FormControl
 import mui.material.FormControlLabel
 import mui.material.FormControlMargin
+import mui.material.FormControlVariant
 import mui.material.FormGroup
 import mui.material.FormLabel
-import mui.material.InputLabel
 import mui.material.LabelPlacement
 import mui.material.MenuItem
 import mui.material.Paper
 import mui.material.Radio
 import mui.material.RadioColor
 import mui.material.RadioGroup
-import mui.material.Select
+import mui.material.StandardTextFieldProps
 import mui.material.Switch
 import mui.material.SwitchColor
+import mui.material.TextField
 import mui.material.Tooltip
 import mui.material.TooltipPlacement
 import mui.material.Typography
 import mui.material.styles.TypographyVariant
+import mui.system.sx
 import process.RESTS_FILLING_MAX_LENGTH_DENOMINATOR_DEFAULT
 import process.evalFractionOrNull
 import process.fillRests
@@ -309,29 +313,36 @@ private fun ChildrenBuilder.buildRestsFillingDetail(
         }
         Paper {
             elevation = 0
-            div {
-                css {
+            Box {
+                style = jso {
                     margin = Margin(
-                        horizontal = 24.px,
-                        vertical = 16.px
+                        left = 24.px,
+                        right = 48.px,
+                        top = 16.px,
+                        bottom = 16.px
                     )
                     paddingBottom = 8.px
-                    minWidth = 20.em
                 }
+                sx { minWidth = 15.em }
                 FormControl {
                     margin = FormControlMargin.normal
+                    variant = FormControlVariant.standard
                     focused = false
-                    InputLabel {
-                        style = jso { width = Length.maxContent }
-                        id = SlightRestsFillingLabelId
+                    FormLabel {
                         focused = false
-                        +string(Strings.SlightRestsFillingThresholdLabel)
+                        Typography {
+                            variant = TypographyVariant.caption
+                            +string(Strings.SlightRestsFillingThresholdLabel)
+                        }
                     }
-                    Select {
-                        labelId = SlightRestsFillingLabelId
+                    TextField {
+                        style = jso { minWidth = 5.em }
+                        select = true
                         value = state.excludedMaxLengthDenominator.toString().unsafeCast<Nothing?>()
-                        onChange = { event, _ ->
-                            val value = event.target.value
+                        (this.unsafeCast<BaseTextFieldProps>()).variant = FormControlVariant.standard
+                        (this.unsafeCast<StandardTextFieldProps>()).onChange = { event ->
+                            val value = event.target.asDynamic().value as String
+                            console.log(event.target)
                             editState { copy(excludedMaxLengthDenominator = value.toInt()) }
                         }
                         restsFillingMaxLengthDenominatorOptions.forEach { denominator ->
@@ -440,29 +451,35 @@ private fun ChildrenBuilder.buildProjectZoomDetail(
         }
         Paper {
             elevation = 0
-            div {
-                css {
+            Box {
+                style = jso {
                     margin = Margin(
-                        horizontal = 24.px,
-                        vertical = 16.px
+                        left = 24.px,
+                        right = 48.px,
+                        top = 16.px,
+                        bottom = 16.px
                     )
                     paddingBottom = 8.px
-                    minWidth = 20.em
                 }
+                sx { minWidth = 15.em }
                 FormControl {
-                    margin = FormControlMargin.normal
-                    focused = false
-                    InputLabel {
-                        style = jso { width = Length.maxContent }
-                        id = ProjectZoomLabelId
+                    FormLabel {
                         focused = false
-                        +string(Strings.SlightRestsFillingThresholdLabel)
+                        Typography {
+                            variant = TypographyVariant.caption
+                            +string(Strings.ProjectZooLabel)
+                        }
                     }
-                    Select {
-                        labelId = ProjectZoomLabelId
+                    margin = FormControlMargin.normal
+                    variant = FormControlVariant.standard
+                    focused = false
+                    TextField {
+                        style = jso { minWidth = 5.em }
+                        select = true
                         value = state.factor.unsafeCast<Nothing?>()
-                        onChange = { event, _ ->
-                            val value = event.target.value
+                        (this.unsafeCast<BaseTextFieldProps>()).variant = FormControlVariant.standard
+                        (this.unsafeCast<StandardTextFieldProps>()).onChange = { event ->
+                            val value = event.target.asDynamic().value as String
                             editState { copy(factor = value) }
                         }
                         projectZoomFactorOptions.forEach { factor ->
@@ -577,9 +594,6 @@ private fun process(
         }
     }
 }
-
-private const val SlightRestsFillingLabelId = "slight-rests-filling"
-private const val ProjectZoomLabelId = "project-zoom"
 
 external interface ConfigurationEditorProps : Props {
     var project: Project

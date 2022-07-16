@@ -140,10 +140,10 @@ enum class Strings(val en: String, val ja: String, val zhCN: String, val ru: Str
                 " поскольку для измерения головок необходимо переместить некоторые временные сигнатуры."
     ),
     ProjectZooLabel(
-        en = "Factor (can be decimal or fraction)",
-        ja = "因子（小数・分数可）",
-        zhCN = "系数（可为小数或分数）",
-        ru = "Коэффицент (может быть десятичным или дробным)"
+        en = "Factor",
+        ja = "因子",
+        zhCN = "系数",
+        ru = "Коэффицент"
     ),
     NextButton(
         en = "Next",
