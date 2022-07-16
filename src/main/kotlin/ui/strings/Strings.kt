@@ -443,12 +443,6 @@ enum class Strings(val en: String, val ja: String, val zhCN: String, val ru: Str
         zhCN = "{{denominator}}分音符",
         ru = "1/{{denominator}} ноты"
     ),
-    ProcessingOverlay(
-        en = "Processing…",
-        ja = "処理中…",
-        zhCN = "正在处理…",
-        ru = "Обработка..."
-    ),
     UseSimpleImport(
         en = "Simple Import",
         ja = "シンプルインポート",
