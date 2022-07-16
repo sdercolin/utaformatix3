@@ -45,11 +45,16 @@ import react.dom.html.ReactHTML.span
 import react.useState
 import ui.model.Stage
 import ui.model.StageInfo
+import ui.strings.Language
 import ui.strings.Strings
+import ui.strings.i18next
 import ui.strings.string
 
 val App = FC<Props> {
     var stageInfoStack: List<StageInfo> by useState(listOf(StageInfo.Import))
+
+    @Suppress("ASSIGNED_BUT_NEVER_ACCESSED_VARIABLE")
+    var language: Language? by useState(null)
 
     fun pushStage(stageInfo: StageInfo) {
         val stack = stageInfoStack.toMutableList()
@@ -85,7 +90,7 @@ val App = FC<Props> {
 
                 Container {
                     maxWidth = "lg"
-                    buildAppBar(pushStage = { pushStage(it) })
+                    buildAppBar(pushStage = { pushStage(it) }, onChangeLanguage = { language = it })
                     buildStepper(getStageInfo().stage.index)
                     buildBody(getStageInfo(), pushStage = { pushStage(it) }, popAllStages = { popAllStages() })
                 }
@@ -98,7 +103,7 @@ val App = FC<Props> {
     }
 }
 
-private fun ChildrenBuilder.buildAppBar(pushStage: (StageInfo) -> Unit) {
+private fun ChildrenBuilder.buildAppBar(pushStage: (StageInfo) -> Unit, onChangeLanguage: (Language) -> Unit) {
     AppBar {
         position = AppBarPosition.fixed
         style = jso {
@@ -140,7 +145,7 @@ private fun ChildrenBuilder.buildAppBar(pushStage: (StageInfo) -> Unit) {
                 }
             }
             LanguageSelector {
-                onChangeLanguage = { }
+                this.onChangeLanguage = onChangeLanguage
             }
         }
     }
