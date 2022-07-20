@@ -1,58 +1,47 @@
 package ui
 
+import csstype.px
 import kotlinx.browser.window
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.await
 import kotlinx.coroutines.launch
-import kotlinx.css.LinearDimension
-import kotlinx.css.marginBottom
-import kotlinx.css.marginTop
-import react.RBuilder
-import react.RComponent
-import react.RProps
-import react.RState
-import react.setState
-import styled.css
-import styled.styledDiv
-import ui.external.react.markdown
+import react.Props
+import react.css.css
+import react.dom.html.ReactHTML.div
+import react.useEffect
+import react.useState
+import ui.external.react.Markdown
+import util.runCatchingCancellable
 
-class EmbeddedPage : RComponent<EmbeddedPageProps, EmbeddedPageState>() {
+val EmbeddedPage = scopedFC<EmbeddedPageProps> { props, scope ->
+    var url: String? by useState { props.url }
+    var content: String? by useState()
 
-    override fun RBuilder.render() {
-        val content = state.content
-        if (content == null || state.url != props.url) {
-            state.url = props.url
-            fetch()
-        } else {
-            styledDiv {
-                css {
-                    marginTop = LinearDimension("32px")
-                    marginBottom = LinearDimension("48px")
-                }
-                markdown {
-                    +content
+    useEffect {
+        scope.launch {
+            if (content == null || url != props.url) {
+                url = props.url
+                runCatchingCancellable {
+                    window.fetch(props.url).await().text().await()
+                }.onFailure { t ->
+                    t.toString()
+                }.onSuccess {
+                    content = it
                 }
             }
         }
     }
 
-    private fun fetch() {
-        GlobalScope.launch {
-            val result = try {
-                window.fetch(props.url).await().text().await()
-            } catch (t: Throwable) {
-                t.toString()
-            }
-            setState { content = result }
+    div {
+        css {
+            marginTop = 32.px
+            marginBottom = 48.px
+        }
+        Markdown {
+            +content.orEmpty()
         }
     }
 }
 
-external interface EmbeddedPageProps : RProps {
+external interface EmbeddedPageProps : Props {
     var url: String
-}
-
-external interface EmbeddedPageState : RState {
-    var url: String
-    var content: String?
 }

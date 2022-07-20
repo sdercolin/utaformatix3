@@ -93,7 +93,7 @@ private fun List<Pair<Long, Double>>.appendVibrato(
             val lastNoteEndTick = acc.lastOrNull()?.first?.last ?: 0L
             if (lastNoteEndTick < note.noteStartTick) {
                 acc + ((lastNoteEndTick until note.noteStartTick) to null) +
-                        ((note.noteStartTick until note.noteEndTick) to note)
+                    ((note.noteStartTick until note.noteEndTick) to note)
             } else {
                 acc + ((note.noteStartTick until note.noteEndTick) to note)
             }

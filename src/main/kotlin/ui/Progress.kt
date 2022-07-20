@@ -1,36 +1,27 @@
 package ui
 
-import kotlinx.css.Align
-import kotlinx.css.Display
-import kotlinx.css.JustifyContent
-import kotlinx.css.alignItems
-import kotlinx.css.display
-import kotlinx.css.justifyContent
-import react.RBuilder
-import styled.css
-import styled.styledDiv
-import ui.external.materialui.Style
-import ui.external.materialui.TypographyVariant
-import ui.external.materialui.backdrop
-import ui.external.materialui.typography
-import ui.strings.Strings
-import ui.strings.string
+import csstype.AlignItems
+import csstype.Display
+import csstype.JustifyContent
+import mui.material.Backdrop
+import mui.material.CircularProgress
+import mui.material.CircularProgressColor
+import react.ChildrenBuilder
+import react.css.css
+import react.dom.html.ReactHTML.div
 
-fun RBuilder.progress(isShowing: Boolean) {
-    backdrop {
-        attrs {
-            open = isShowing
-            style = Style(zIndex = 1201) // just over drawer: 1200
-        }
-        styledDiv {
+fun ChildrenBuilder.progress(isShowing: Boolean) {
+    Backdrop {
+        open = isShowing
+        div {
             css {
                 display = Display.flex
-                alignItems = Align.center
+                alignItems = AlignItems.center
                 justifyContent = JustifyContent.center
             }
-            typography {
-                attrs.variant = TypographyVariant.h3
-                +string(Strings.ProcessingOverlay)
+            CircularProgress {
+                color = CircularProgressColor.secondary
+                disableShrink = true
             }
         }
     }

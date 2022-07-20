@@ -1,222 +1,219 @@
 package ui
 
 import ImportParamsJson
-import kotlinx.coroutines.GlobalScope
+import csstype.VerticalAlign
+import csstype.px
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlinx.css.LinearDimension
-import kotlinx.css.VerticalAlign
-import kotlinx.css.marginTop
-import kotlinx.html.js.onClickFunction
+import kotlinx.js.jso
 import model.Format
 import model.ImportParams
 import model.Project
-import org.w3c.dom.HTMLInputElement
+import mui.icons.material.HelpOutline
+import mui.material.AlertColor
+import mui.material.FormControlLabel
+import mui.material.FormGroup
+import mui.material.LabelPlacement
+import mui.material.Switch
+import mui.material.SwitchColor
+import mui.material.Tooltip
+import mui.material.TooltipPlacement
+import mui.material.Typography
+import mui.material.styles.TypographyVariant
 import org.w3c.files.File
-import react.RBuilder
-import react.RComponent
-import react.RProps
-import react.RState
-import react.dom.div
-import react.setState
-import styled.css
-import styled.styledDiv
+import react.ChildrenBuilder
+import react.Props
+import react.ReactNode
+import react.create
+import react.css.css
+import react.dom.html.ReactHTML.div
+import react.useState
 import ui.external.Cookies
-import ui.external.materialui.FontSize
-import ui.external.materialui.Icons
-import ui.external.materialui.LabelPlacement
-import ui.external.materialui.Severity
-import ui.external.materialui.Style
-import ui.external.materialui.TypographyVariant
-import ui.external.materialui.formControlLabel
-import ui.external.materialui.formGroup
-import ui.external.materialui.switch
-import ui.external.materialui.tooltip
-import ui.external.materialui.typography
-import ui.external.react.fileDrop
+import ui.external.react.FileDrop
 import ui.strings.Strings
 import ui.strings.string
 import util.extensionName
+import util.runCatchingCancellable
 import util.toList
 import util.waitFileSelection
 
-class Importer : RComponent<ImporterProps, ImporterState>() {
+val Importer = scopedFC<ImporterProps> { props, scope ->
+    var isLoading by useState(false)
+    var params by useState { loadImportParamsFromCookies() ?: ImportParams() }
+    var snackbarError by useState(SnackbarErrorState())
+    var dialogError by useState(DialogErrorState())
 
-    override fun ImporterState.init() {
-        isLoading = false
-        params = loadImportParamsFromCookies() ?: ImportParams()
-        snackbarError = SnackbarErrorState()
-        dialogError = DialogErrorState()
-    }
-
-    override fun RBuilder.render() {
-        title(Strings.ImportProjectCaption)
-
-        styledDiv {
-            css {
-                marginTop = LinearDimension("40px")
-            }
-            attrs.onClickFunction = {
-                GlobalScope.launch {
-                    val accept = props.formats.joinToString(",") { it.extension }
-                    val files = waitFileSelection(accept = accept, multiple = true)
-                    checkFilesToImport(files)
-                }
-            }
-            buildFileDrop()
-        }
-
-        buildConfigurations()
-
-        messageBar(
-            isShowing = state.snackbarError.isShowing,
-            message = state.snackbarError.message,
-            close = { closeMessageBar() },
-            severityString = Severity.error
-        )
-
-        errorDialog(
-            isShowing = state.dialogError.isShowing,
-            title = state.dialogError.title,
-            errorMessage = state.dialogError.message,
-            close = { closeErrorDialog() }
-        )
-
-        progress(isShowing = state.isLoading)
-    }
-
-    private fun RBuilder.buildFileDrop() {
-        fileDrop {
-            attrs.onDrop = { files, _ ->
-                checkFilesToImport(files.toList())
-            }
-            typography {
-                attrs.variant = TypographyVariant.h5
-                +string(Strings.ImportFileDescription)
-            }
-            styledDiv {
-                css {
-                    marginTop = LinearDimension("5px")
-                }
-                typography {
-                    attrs.variant = TypographyVariant.body2
-                    +string(Strings.ImportFileSubDescription)
-                }
-            }
-        }
-    }
-
-    private fun RBuilder.buildConfigurations() {
-        formGroup {
-            div {
-                formControlLabel {
-                    attrs {
-                        label = string(Strings.UseSimpleImport)
-                        control = switch {
-                            attrs {
-                                checked = state.params.simpleImport
-                                onChange = {
-                                    val checked = (it.target as HTMLInputElement).checked
-                                    setState { params = params.copy(simpleImport = checked) }
-                                }
-                            }
-                        }
-                        labelPlacement = LabelPlacement.end
-                    }
-                }
-                tooltip {
-                    attrs {
-                        title = string(Strings.UseSimpleImportDescription)
-                        placement = "right"
-                        interactive = true
-                    }
-                    Icons.help {
-                        attrs.style = Style(
-                            fontSize = FontSize.initial,
-                            verticalAlign = VerticalAlign.middle
-                        )
-                    }
-                }
-            }
-        }
-    }
-
-    private fun checkFilesToImport(files: List<File>) {
-        val fileFormat = getFileFormat(files)
+    fun checkFilesToImport(files: List<File>) {
+        val fileFormat = getFileFormat(files, props)
         when {
-            fileFormat == null -> setState {
+            fileFormat == null -> {
                 snackbarError = SnackbarErrorState(true, string(Strings.UnsupportedFileTypeImportError))
             }
-            !fileFormat.multipleFile && files.count() > 1 -> setState {
+            !fileFormat.multipleFile && files.count() > 1 -> {
                 snackbarError = SnackbarErrorState(
                     true,
                     string(Strings.MultipleFileImportError, "format" to fileFormat.name)
                 )
             }
-            else -> import(files, fileFormat)
+            else -> import(
+                scope,
+                files,
+                fileFormat,
+                setLoading = { isLoading = it },
+                onDialogError = { dialogError = it },
+                props,
+                params
+            )
         }
     }
 
-    private fun import(files: List<File>, format: Format) {
-        setState { isLoading = true }
-        GlobalScope.launch {
-            try {
-                delay(100)
-                val parseFunction = format.parser
-                val project = parseFunction(files, state.params).lyricsTypeAnalysed().requireValid()
-                console.log("Project was imported successfully.")
-                console.log(project)
-                saveImportParamsToCookies(state.params)
-                props.onImported.invoke(project)
-            } catch (t: Throwable) {
-                console.log(t)
-                setState {
-                    isLoading = false
-                    dialogError = DialogErrorState(
-                        isShowing = true,
-                        title = string(Strings.ImportErrorDialogTitle),
-                        message = t.message ?: t.toString()
-                    )
+    fun closeMessageBar() {
+        snackbarError = snackbarError.copy(isShowing = false)
+    }
+
+    fun closeErrorDialog() {
+        dialogError = dialogError.copy(isShowing = false)
+    }
+
+    title(Strings.ImportProjectCaption)
+
+    div {
+        css {
+            marginTop = 40.px
+        }
+        onClick = {
+            scope.launch {
+                val accept = props.formats.joinToString(",") { it.extension }
+                val files = waitFileSelection(accept = accept, multiple = true)
+                checkFilesToImport(files)
+            }
+        }
+        buildFileDrop { checkFilesToImport(it) }
+    }
+
+    buildConfigurations(params) { params = it }
+
+    messageBar(
+        isShowing = snackbarError.isShowing,
+        message = snackbarError.message,
+        close = { closeMessageBar() },
+        color = AlertColor.error
+    )
+
+    errorDialog(
+        isShowing = dialogError.isShowing,
+        title = dialogError.title,
+        errorMessage = dialogError.message,
+        close = { closeErrorDialog() }
+    )
+
+    progress(isShowing = isLoading)
+}
+
+private fun ChildrenBuilder.buildFileDrop(onFiles: (List<File>) -> Unit) {
+    FileDrop {
+        onDrop = { files, _ ->
+            onFiles(files.toList())
+        }
+        Typography {
+            variant = TypographyVariant.h5
+            +string(Strings.ImportFileDescription)
+        }
+        div {
+            css {
+                marginTop = 5.px
+            }
+            Typography {
+                variant = TypographyVariant.body2
+                +string(Strings.ImportFileSubDescription)
+            }
+        }
+    }
+}
+
+private fun ChildrenBuilder.buildConfigurations(params: ImportParams, onNewParams: (ImportParams) -> Unit) {
+    FormGroup {
+        div {
+            FormControlLabel {
+                label = ReactNode(string(Strings.UseSimpleImport))
+                control = Switch.create() {
+                    color = SwitchColor.secondary
+                    checked = params.simpleImport
+                    onChange = { event, _ ->
+                        val checked = event.target.checked
+                        onNewParams(params.copy(simpleImport = checked))
+                    }
+                }
+                labelPlacement = LabelPlacement.end
+            }
+            Tooltip {
+                title = ReactNode(string(Strings.UseSimpleImportDescription))
+                placement = TooltipPlacement.right
+                disableInteractive = false
+
+                HelpOutline {
+                    style = jso {
+                        verticalAlign = VerticalAlign.middle
+                    }
                 }
             }
         }
     }
-
-    private fun getFileFormat(files: List<File>): Format? {
-        val extensions = files.map { it.extensionName }.distinct()
-
-        return if (extensions.count() > 1) null
-        else props.formats.find { it.allExtensions.contains(".${extensions.first()}") }
-    }
-
-    private fun closeMessageBar() {
-        setState { snackbarError = snackbarError.copy(isShowing = false) }
-    }
-
-    private fun closeErrorDialog() {
-        setState { dialogError = dialogError.copy(isShowing = false) }
-    }
-
-    private fun loadImportParamsFromCookies() = Cookies.get(ImportParamsCookieName)
-        ?.takeIf { it.isNotBlank() }
-        ?.let(ImportParamsJson::parse)
-
-    private fun saveImportParamsToCookies(params: ImportParams) =
-        Cookies.set(ImportParamsCookieName, ImportParamsJson.generate(params))
 }
+
+private fun import(
+    scope: CoroutineScope,
+    files: List<File>,
+    format: Format,
+    setLoading: (Boolean) -> Unit,
+    onDialogError: (DialogErrorState) -> Unit,
+    props: ImporterProps,
+    params: ImportParams
+) {
+    setLoading(true)
+    scope.launch {
+        runCatchingCancellable {
+            delay(100)
+            val parseFunction = format.parser
+            val project = parseFunction(files, params).lyricsTypeAnalysed().requireValid()
+            console.log("Project was imported successfully.")
+            console.log(project)
+            saveImportParamsToCookies(params)
+            props.onImported.invoke(project)
+        }.onFailure { t ->
+            console.log(t)
+            setLoading(false)
+            onDialogError(
+                DialogErrorState(
+                    isShowing = true,
+                    title = string(Strings.ImportErrorDialogTitle),
+                    message = t.stackTraceToString()
+                )
+            )
+        }
+    }
+}
+
+private fun getFileFormat(files: List<File>, props: ImporterProps): Format? {
+    val extensions = files.map { it.extensionName }.distinct()
+
+    return if (extensions.count() > 1) null
+    else props.formats.find { it.allExtensions.contains(".${extensions.first()}") }
+}
+
+private fun loadImportParamsFromCookies() = Cookies.get(ImportParamsCookieName)
+    ?.takeIf { it.isNotBlank() }
+    ?.let(ImportParamsJson::parse)
+
+private fun saveImportParamsToCookies(params: ImportParams) =
+    Cookies.set(ImportParamsCookieName, ImportParamsJson.generate(params))
 
 private const val ImportParamsCookieName = "import_params"
 
-external interface ImporterProps : RProps {
+external interface ImporterProps : Props {
     var formats: List<Format>
     var onImported: (Project) -> Unit
-}
-
-external interface ImporterState : RState {
-    var isLoading: Boolean
-    var params: ImportParams
-    var snackbarError: SnackbarErrorState
-    var dialogError: DialogErrorState
 }
 
 data class SnackbarErrorState(

@@ -1,6 +1,6 @@
 package external
 
-import kotlinext.js.Object
+import kotlinx.js.Object
 
 @JsModule("js-yaml")
 @JsNonModule

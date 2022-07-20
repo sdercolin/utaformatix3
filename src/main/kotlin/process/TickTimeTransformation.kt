@@ -25,7 +25,7 @@ class TickTimeTransformer(
             } else {
                 val lastParams = acc.last()
                 val offset = lastParams.offset +
-                        (lastParams.range.last - lastParams.range.first) * lastParams.secPerTick
+                    (lastParams.range.last - lastParams.range.first) * lastParams.secPerTick
                 Segment(range, offset, rate)
             }
             acc + thisResult

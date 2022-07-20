@@ -53,26 +53,30 @@ fun pitchToUtauMode2Track(pitch: Pitch?, notes: List<Note>, tempos: List<Tempo>)
                 toRelative(
                     absolutePitch.filter { it.first >= note.tickOn && it.first < note.tickOff },
                     note.key
-                ), (absolutePitch.firstOrNull { it.first >= note.tickOn }?.first ?: note.tickOn) - note.tickOn,
+                ),
+                (absolutePitch.firstOrNull { it.first >= note.tickOn }?.first ?: note.tickOn) - note.tickOn,
                 tempos.bpmForNote(note)
             )
-        }).flatten()
+        }
+    ).flatten()
 
     val dotPitDataSimplified = dotPitData.map {
         NotePitchData(simplifyShapeTo(it.pitch, Ust.MODE2_PITCH_MAX_POINT_COUNT), it.offset, it.bpm)
     }
 
-    return UtauMode2TrackPitchData(dotPitDataSimplified.map { currNote ->
-        if (currNote.pitch.isEmpty()) null else UtauMode2NotePitchData(
-            currNote.bpm,
-            milliSecFromTick(currNote.offset, currNote.bpm),
-            currNote.pitch.first().second * 10, // *10 = semitone -> 10 cents
-            currNote.pitch.zipWithNext().map { milliSecFromTick(it.second.first - it.first.first, currNote.bpm) },
-            currNote.pitch.drop(1).unzip().second.map { it * 10 },
-            List(currNote.pitch.size - 1) { "" },
-            null
-        )
-    })
+    return UtauMode2TrackPitchData(
+        dotPitDataSimplified.map { currNote ->
+            if (currNote.pitch.isEmpty()) null else UtauMode2NotePitchData(
+                currNote.bpm,
+                milliSecFromTick(currNote.offset, currNote.bpm),
+                currNote.pitch.first().second * 10, // *10 = semitone -> 10 cents
+                currNote.pitch.zipWithNext().map { milliSecFromTick(it.second.first - it.first.first, currNote.bpm) },
+                currNote.pitch.drop(1).unzip().second.map { it * 10 },
+                List(currNote.pitch.size - 1) { "" },
+                null
+            )
+        }
+    )
 }
 
 fun pitchFromUtauMode2Track(pitchData: UtauMode2TrackPitchData?, notes: List<Note>): Pitch? {
