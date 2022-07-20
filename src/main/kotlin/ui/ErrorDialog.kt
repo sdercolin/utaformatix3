@@ -6,6 +6,7 @@ import kotlinx.js.jso
 import mui.material.Alert
 import mui.material.AlertColor
 import mui.material.Button
+import mui.material.ButtonColor
 import mui.material.Dialog
 import mui.material.DialogActions
 import mui.material.DialogContent
@@ -44,6 +45,7 @@ fun ChildrenBuilder.errorDialog(
         DialogActions {
             Button {
                 onClick = { close() }
+                color = ButtonColor.inherit
                 +string(Strings.CancelButton)
             }
             Button {
@@ -51,6 +53,7 @@ fun ChildrenBuilder.errorDialog(
                     close()
                     window.open(string(Strings.ReportUrl), target = "_blank")
                 }
+                color = ButtonColor.inherit
                 +string(Strings.ReportButton)
             }
         }
