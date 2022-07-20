@@ -191,7 +191,7 @@ object Ustx {
 
         val curves = mutableListOf<Curve>()
         if (features.contains(Feature.ConvertPitch)) {
-            val points = track.pitch?.toOpenUtauPitchData().orEmpty()
+            val points = track.pitch?.toOpenUtauPitchData(track.notes).orEmpty()
             if (points.isNotEmpty()) {
                 val xs = points.map { it.first }
                 val ys = points.map { it.second }

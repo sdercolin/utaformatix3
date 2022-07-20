@@ -159,9 +159,9 @@ fun Pitch?.reduceRepeatedPitchPointsFromUstxTrack(): Pitch? {
     return copy(data = data.map { it.first to it.second!! }.reduceRepeatedPitchPoints())
 }
 
-fun Pitch?.toOpenUtauPitchData(): List<Pair<Long, Double>> {
-    this ?: return listOf()
-    return data.map { it.first to (it.second!! * 100).roundToInt().toDouble() }
+fun Pitch?.toOpenUtauPitchData(notes: List<Note>): List<Pair<Long, Double>> {
+    val data = this?.getRelativeData(notes) ?: return listOf()
+    return data.map { it.first to (it.second * 100).roundToInt().toDouble() }
         .appendPitchPointsForOpenUtauOutput()
         .reduceRepeatedPitchPoints()
 }
