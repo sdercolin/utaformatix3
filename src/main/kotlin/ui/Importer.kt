@@ -188,7 +188,7 @@ private fun import(
                 DialogErrorState(
                     isShowing = true,
                     title = string(Strings.ImportErrorDialogTitle),
-                    message = t.message ?: t.toString()
+                    message = t.stackTraceToString()
                 )
             )
         }

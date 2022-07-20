@@ -590,7 +590,7 @@ private fun process(
                 DialogErrorState(
                     isShowing = true,
                     title = string(Strings.ProcessErrorDialogTitle),
-                    message = t.message ?: t.toString()
+                    message = t.stackTraceToString()
                 )
             )
         }
