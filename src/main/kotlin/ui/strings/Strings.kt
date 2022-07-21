@@ -7,7 +7,7 @@ import ui.strings.Language.Japanese
 import ui.strings.Language.Russian
 import ui.strings.Language.SimplifiedChinese
 
-enum class Strings(val en: String, val fr: String, val ja: String, val zhCN: String, val ru: String) {
+enum class Strings(val en: String, val ja: String, val zhCN: String, val ru: String, val fr: String) {
     LanguageDisplayName(
         en = English.displayName,
         ja = Japanese.displayName,
@@ -132,13 +132,13 @@ enum class Strings(val en: String, val fr: String, val ja: String, val zhCN: Str
         ja = "処理に時間がかかることがあります。",
         zhCN = "该选项可能会增加处理时间。",
         ru = "Обработка с помощью этого параметра может занять некоторое время.",
-        fr = "Le traitement peut prendre un certain temps avec cette option."
+        fr = "Le traitement peut prendre un certain temps avec cette option.",
     ),
     ProjectZoom(
         en = "Zoom in/out project",
         ja = "プロジェクトをズームイン・ズームアウト",
         zhCN = "缩放工程",
-        ru = "Приблизить/отдалить проект"
+        ru = "Приблизить/отдалить проект",
         fr = "Zoom avant/arrière du projet"
     ),
     ProjectZoomDescription(
@@ -281,13 +281,13 @@ enum class Strings(val en: String, val fr: String, val ja: String, val zhCN: Str
         ja = "- テンポ記号が見つかりませんでした。",
         zhCN = "- 在导入的工程中未找到速度记号。",
         ru = "- Метки темпа не найдены в импортированном проекте.",
-        fr = "- Aucun tempo n'a été trouvée dans le projet importé."
+        fr = "- Aucun tempo n'a été trouvée dans le projet importé.",
     ),
     ImportWarningTempoIgnoredInFile(
         en = "- Tempo label ({{bpm}}) at tick {{tick}} in file [{{file}}] was ignored.",
         ja = "- ファイル[{{file}}]の tick {{tick}} にあるテンポ記号（{{bpm}}）を読み込めませんでした。",
         zhCN = "- 未能读取文件[{{file}}]中 tick {{tick}} 处的速度记号（{{bpm}}）。",
-        ru = "- Метка темпа ({{bpm}}) на отметке {{tick}} в файле [{{file}}] была проигнорирована."
+        ru = "- Метка темпа ({{bpm}}) на отметке {{tick}} в файле [{{file}}] была проигнорирована.",
         fr = "- Le tempo ({{bpm}}) au tick {{tick}} du fichier [{{file}}] a été ignorée."
     ),
     ImportWarningTempoIgnoredInTrack(
@@ -309,7 +309,7 @@ enum class Strings(val en: String, val fr: String, val ja: String, val zhCN: Str
         ja = "- 拍子記号が見つかりませんでした。",
         zhCN = "- 在导入的工程中未找到节拍记号。",
         ru = "- В импортированном проекте не найдено меток временных сигнатур.",
-        fr = "- Aucune signature rythmique n'a trouvé dans le projet importé".
+        fr = "- Aucune signature rythmique n'a trouvé dans le projet importé."
     ),
     ImportWarningTimeSignatureIgnoredInTrack(
         en = "- Time signature label ({{timeSignature}}) at measure {{measure}}" +
@@ -402,7 +402,7 @@ enum class Strings(val en: String, val fr: String, val ja: String, val zhCN: Str
         ja = "VOCALOID1 プロジェクト",
         zhCN = "VOCALOID1 工程",
         ru = "Проект для VOCALOID1",
-        fr = "Projet pour VOCALOID1
+        fr = "Projet pour VOCALOID1"
     ),
     ExportButton(
         en = "Export",
@@ -448,14 +448,14 @@ enum class Strings(val en: String, val fr: String, val ja: String, val zhCN: Str
             " Пожалуйста, воспользуйтесь \"Job\" -> \"Convert Phonemes to Match Languages\"" +
             " в меню VOCALOID5 чтобы сбросить их.",
         fr = "Les phonèmes de toutes les notes ont été réglés sur \"a\". Veuillez utiliser \"Lyrics\" ->" +
-            " \"Convert Phonemes to Match Languages\" dans le menu de VOCALOID5 pour les réinitialiser.
+            " \"Convert Phonemes to Match Languages\" dans le menu de VOCALOID5 pour les réinitialiser."
     ),
     ExportNotificationTempoChangeIgnored(
         en = "Could not convert tempo changes to the target format.",
         ja = "テンポの変更を出力することができませんでした。",
         zhCN = "未能将速度的变化导出到目标格式。",
         ru = "Невозможно конвертировать изменения темпа в целевой формат.",
-        fr =Impossible de convertir les changements de tempo au format cible."
+        fr = " Impossible de convertir les changements de tempo au format cible."
     ),
     ExportNotificationTimeSignatureIgnored(
         en = "Could not convert time signatures to the target format.",
@@ -520,7 +520,7 @@ enum class Strings(val en: String, val fr: String, val ja: String, val zhCN: Str
         ja = "{{denominator}}分音符",
         zhCN = "{{denominator}}分音符",
         ru = "1/{{denominator}} ноты",
-        fr = "1/{{denominator}} note
+        fr = "1/{{denominator}} note"
     ),
     UseSimpleImport(
         en = "Simple Import",
@@ -539,7 +539,7 @@ enum class Strings(val en: String, val fr: String, val ja: String, val zhCN: Str
 
     fun get(language: Language): String = when (language) {
         English -> en
-        Français -> fr
+        French -> fr
         Japanese -> ja
         SimplifiedChinese -> zhCN
         Russian -> ru
