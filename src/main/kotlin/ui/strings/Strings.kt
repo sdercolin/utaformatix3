@@ -260,7 +260,7 @@ enum class Strings(val en: String, val ja: String, val zhCN: String, val ru: Str
         ja = "https://gist.githubusercontent.com/sdercolin/f1de7c1f7a894f1fc8f77b17f3e8f77d/raw",
         zhCN = "https://gist.githubusercontent.com/sdercolin/1a940a1357e2a6a5c10561482536bdba/raw",
         ru = "https://gist.githubusercontent.com/KagamineP/d5837aa5f1b3be3b05aed5cd63b2afe2/raw",
-        fr = "https://gist.githubusercontent.com/Exorcism0666/977e99b6d538acf68ea09ef433504dbb/raw"
+        fr = "https://gist.githubusercontent.com/Exorcism0666/29e1c09eb471bccc270cc0a02992a0b1/raw"
     ),
     ReleaseNotesUrl(
         en = "https://gist.githubusercontent.com/sdercolin/512db280480072f22cf1d462401eb1a0/raw",
