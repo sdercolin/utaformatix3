@@ -7,7 +7,7 @@ import ui.strings.Language.Japanese
 import ui.strings.Language.Russian
 import ui.strings.Language.SimplifiedChinese
 
-enum class Strings(val en: String, val ja: String, val zhCN: String, val ru: String) {
+enum class Strings(val en: String, val fr: String, val ja: String, val zhCN: String, val ru: String) {
     LanguageDisplayName(
         en = English.displayName,
         ja = Japanese.displayName,
@@ -260,7 +260,7 @@ enum class Strings(val en: String, val ja: String, val zhCN: String, val ru: Str
         ja = "https://gist.githubusercontent.com/sdercolin/f1de7c1f7a894f1fc8f77b17f3e8f77d/raw",
         zhCN = "https://gist.githubusercontent.com/sdercolin/1a940a1357e2a6a5c10561482536bdba/raw",
         ru = "https://gist.githubusercontent.com/KagamineP/d5837aa5f1b3be3b05aed5cd63b2afe2/raw",
-        fr = " "
+        fr = "https://gist.githubusercontent.com/Exorcism0666/977e99b6d538acf68ea09ef433504dbb/raw"
     ),
     ReleaseNotesUrl(
         en = "https://gist.githubusercontent.com/sdercolin/512db280480072f22cf1d462401eb1a0/raw",
@@ -539,10 +539,10 @@ enum class Strings(val en: String, val ja: String, val zhCN: String, val ru: Str
 
     fun get(language: Language): String = when (language) {
         English -> en
+        Français -> fr
         Japanese -> ja
         SimplifiedChinese -> zhCN
         Russian -> ru
-        Français -> fr
     }
 }
 
