@@ -29,13 +29,29 @@ The current version `3.x` is built with [Kotlin for JavaScript](https://kotlinla
   
 ## Contributors
 
-[sdercolin](https://github.com/sdercolin), [ghosrt](https://github.com/ghosrt), [shine5402](https://github.com/shine5402), [時雨ゆん](https://twitter.com/Yun_Shigure)
+[sdercolin](https://github.com/sdercolin), [ghosrt](https://github.com/ghosrt), [shine5402](https://github.com/shine5402), 
+
+## Localization help
+
+[時雨ゆん](https://twitter.com/Yun_Shigure), [KagamineP](https://github.com/KagamineP)
 
 ## Get started for development
 1. Install [IntelliJ IDEA](https://www.jetbrains.com/idea/)
 2. Clone and import as a Gradle project
 3. Configure IDEA's Gradle settings with `JDK 11` and `Use Gradle from: gradle-wrapper.properties file`
 4. Run by `./gradlew run` or Gradle Task `other/run`
+
+## Contribution
+Code contribution is welcomed. Basically, please cut your branch from `develop` and make Pull Requests towards `develop` branch. 
+
+#### Adding a format support
+Please check [Format.kt](https://github.com/sdercolin/utaformatix3/blob/master/src/main/kotlin/model/Format.kt) and its usages.
+
+#### Adding a Language
+Please check [Strings.kt](https://github.com/sdercolin/utaformatix3/blob/master/src/main/kotlin/ui/strings/Strings.kt).
+
+#### Adding a configurable process
+Please check [ConfigurationEditor.kt](https://github.com/sdercolin/utaformatix3/blob/master/src/main/kotlin/ui/ConfigurationEditor.kt) about how the existing processes work.
 
 ## License
 [Apache License, Version 2.0](https://github.com/sdercolin/utaformatix3/blob/master/LICENSE.md)
