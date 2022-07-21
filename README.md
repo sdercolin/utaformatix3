@@ -29,7 +29,7 @@ The current version `3.x` is built with [Kotlin for JavaScript](https://kotlinla
   
 ## Contributors
 
-[sdercolin](https://github.com/sdercolin), [ghosrt](https://github.com/ghosrt), [shine5402](https://github.com/shine5402), 
+[sdercolin](https://github.com/sdercolin), [ghosrt](https://github.com/ghosrt), [shine5402](https://github.com/shine5402)
 
 ## Localization help
 
