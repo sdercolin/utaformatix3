@@ -152,7 +152,8 @@ enum class Strings(val en: String, val ja: String, val zhCN: String, val ru: Str
             " Например, с коэффициентом 2 60 ударов в минуту становятся 120 ударов в минуту," +
             " и все ноты становятся в два раза длиннее",
         fr = "Changez les bpm et les notes en parallèle afin de conserver la vitesse réelle du chant." +
-            " Par exemple, avec le facteur 2, 60 bpm devient 120 bpm et toutes les notes deviennent deux fois plus longues."
+            " Par exemple, avec le facteur 2, 60 bpm devient 120 bpm," +
+            " et toutes les notes deviennent deux fois plus longues."
     ),
     ProjectZoomWarning(
         en = "Current settings may be destructive because some time signatures have to be moved to measure heads.",
@@ -160,7 +161,7 @@ enum class Strings(val en: String, val ja: String, val zhCN: String, val ru: Str
         zhCN = "该设定可能无法正确转换本工程。一部分的节拍记号将被移动到最近的小节的开始位置。",
         ru = "Текущие настройки могут быть разрушительными," +
             " поскольку для измерения головок необходимо переместить некоторые временные сигнатуры.",
-        fr = "Les paramètres actuels peuvent être destructeurs,"+
+        fr = "Les paramètres actuels peuvent être destructeurs," +
             " car certaines signatures temporelles seront déplacées au début de la mesure."
     ),
     ProjectZooLabel(
@@ -246,7 +247,8 @@ enum class Strings(val en: String, val ja: String, val zhCN: String, val ru: Str
         ru = "Если вы обнаружите какие-либо проблемы, пожалуйста, помогите нам собрать информацию об ошибках" +
             "  для повышения производительности этого приложения, отправив отчет об обратной связи.",
         fr = "Si vous rencontrez des problèmes, aidez-nous à collecter des informations sur les erreurs" +
-                " pour une meilleure performance de cette application en soumettant un rapport de vos retours. (SEULEMENT EN ANGLAIS)"
+            " pour une meilleure performance de cette application en soumettant" +
+            " un rapport de vos retours. (SEULEMENT EN ANGLAIS)"
     ),
     ReportUrl(
         en = "https://forms.gle/3Es3ZomcYKNHWBvp6",
@@ -318,7 +320,8 @@ enum class Strings(val en: String, val ja: String, val zhCN: String, val ru: Str
         zhCN = "- 未能读取音轨{{number}}: [{{name}}]中小节{{measure}}处的节拍记号（{{timeSignature}}）。",
         ru = "- Метка временной сигнатуры ({{TimeSignature}}) при измерении {{measure}}" +
             " в треке {{number}}: [{{name}}] была проигнорирована.",
-        fr = "La signature rythmique ({{timeSignature}}) à la mesure {{measure}} de la piste {{number}} : [{{name}}]] a été ignoré."
+        fr = "La signature rythmique ({{timeSignature}}) à la mesure {{measure}}" +
+             " de la piste {{number}} : [{{name}}]] a été ignoré."
     ),
     ImportWarningTimeSignatureIgnoredInPreMeasure(
         en = "- Time signature label ({{timeSignature}}) in pre-measures was ignored.",
