@@ -321,7 +321,7 @@ enum class Strings(val en: String, val ja: String, val zhCN: String, val ru: Str
         ru = "- Метка временной сигнатуры ({{TimeSignature}}) при измерении {{measure}}" +
             " в треке {{number}}: [{{name}}] была проигнорирована.",
         fr = "La signature rythmique ({{timeSignature}}) à la mesure {{measure}}" +
-             " de la piste {{number}} : [{{name}}]] a été ignoré."
+            " de la piste {{number}} : [{{name}}]] a été ignoré."
     ),
     ImportWarningTimeSignatureIgnoredInPreMeasure(
         en = "- Time signature label ({{timeSignature}}) in pre-measures was ignored.",
