@@ -53,5 +53,13 @@ Please check [Strings.kt](https://github.com/sdercolin/utaformatix3/blob/master/
 #### Adding a configurable process
 Please check [ConfigurationEditor.kt](https://github.com/sdercolin/utaformatix3/blob/master/src/main/kotlin/ui/ConfigurationEditor.kt) about how the existing processes work.
 
+#### Build/Format check
+Pull requests require build check to be merged. Besides normal building of the project, a format check is conducted.
+Please confirm that the `build` and `ktlintCheck` Gradle tasks pass before submitting your code.
+
+You may find `ktlintFormat` task helpful, which helps fix most format problems.
+
+If your IDE's formatter is conflicting with `ktlint`, please import format settings from [.editorconfig](https://github.com/sdercolin/utaformatix3/blob/master/.editorconfig) (IntelliJ IDEA uses it by default).
+
 ## License
 [Apache License, Version 2.0](https://github.com/sdercolin/utaformatix3/blob/master/LICENSE.md)
