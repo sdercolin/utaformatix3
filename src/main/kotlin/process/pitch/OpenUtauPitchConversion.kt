@@ -118,7 +118,7 @@ fun pitchFromUstxPart(notes: List<Note>, pitchData: OpenUtauPartPitchData, bpm: 
             .groupBy { it.first }
             .filter { it.key in sectionBorder..nextSectionBorder }
             .map { (tick, points) ->
-                tick to points.sumByDouble { it.second }
+                tick to points.sumOf { it.second }
             }
 
         allPointsFromNote.addAll(pointsInSection)
@@ -134,7 +134,7 @@ fun pitchFromUstxPart(notes: List<Note>, pitchData: OpenUtauPartPitchData, bpm: 
     val pitchPoints = (allPointsFromNote + curvePoints)
         .groupBy { it.first }
         .map { (tick, points) ->
-            tick to points.sumByDouble { it.second }
+            tick to points.sumOf { it.second }
         }
         .sortedBy { it.first }
 
@@ -148,7 +148,7 @@ fun mergePitchFromUstxParts(first: Pitch?, second: Pitch?): Pitch? {
         .mapNotNull { point -> point.second?.let { point.first to it } }
         .groupBy { it.first }
         .map { (tick, points) ->
-            tick to points.sumByDouble { it.second }
+            tick to points.sumOf { it.second }
         }
         .sortedBy { it.first }
     return first.copy(data = data)
