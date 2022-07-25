@@ -74,6 +74,30 @@ enum class Format(
         possibleLyricsTypes = listOf(KanaCv),
         availableFeaturesForGeneration = listOf(ConvertPitch)
     ),
+    ),
+    Ccst(
+        ".ccst",
+        parser = { files, params ->
+            io.Ccst.parse(files.first(), params)
+        },
+        generator = { project, features ->
+            io.Ccst.generate(project, features)
+        },
+        possibleLyricsTypes = listOf(KanaCv),
+        availableFeaturesForGeneration = listOf(ConvertPitch)
+    ),
+    ),
+    Tssln(
+        ".tssln",
+        parser = { files, params ->
+            io.Tssln.parse(files.first(), params)
+        },
+        generator = { project, features ->
+            io.Tssln.generate(project, features)
+        },
+        possibleLyricsTypes = listOf(KanaCv),
+        availableFeaturesForGeneration = listOf(ConvertPitch)
+    ),
     Svp(
         ".svp",
         parser = { files, params ->
@@ -156,7 +180,7 @@ enum class Format(
     val allExtensions get() = listOf(extension) + otherExtensions
 
     companion object {
-        val importable get() = listOf(Vsqx, Vpr, Vsq, VocaloidMid, Ust, Ustx, Ccs, MusicXml, Svp, S5p, Dv, Ppsf)
-        val exportable get() = listOf(Vsqx, Vpr, Vsq, VocaloidMid, Ust, Ustx, Ccs, MusicXml, Svp, S5p, Dv)
+        val importable get() = listOf(Vsqx, Vpr, Vsq, VocaloidMid, Ust, Ustx, Ccs, Ccst, Tssln, MusicXml, Svp, S5p, Dv, Ppsf)
+        val exportable get() = listOf(Vsqx, Vpr, Vsq, VocaloidMid, Ust, Ustx, Ccs, Ccst, Tssln, MusicXml, Svp, S5p, Dv)
     }
 }
