@@ -4,6 +4,7 @@ import model.Format
 import model.Note
 import model.Project
 import model.Track
+import util.runIf
 
 data class LyricsReplacementRequest(
     val items: List<Item> = listOf(Item()),
@@ -11,8 +12,8 @@ data class LyricsReplacementRequest(
 
     val isValid get() = items.all { it.isValid }
 
-    fun update(newIndex: Int, updater: Item.() -> Item) = copy(
-        items = items.mapIndexed { index, item -> if (index == newIndex) item.updater() else item }
+    fun update(editIndex: Int, updater: Item.() -> Item) = copy(
+        items = items.mapIndexed { index, item -> item.runIf(index == editIndex) { updater() } }
     )
 
     fun moveUp(index: Int) = move(index, -1)

@@ -41,6 +41,8 @@ import ui.configuration.SlightRestsFillingBlock
 import ui.strings.Strings
 import ui.strings.string
 import util.runCatchingCancellable
+import util.runIf
+import util.runIfAllNotNull
 
 val ConfigurationEditor = scopedFC<ConfigurationEditorProps> { props, scope ->
     var isProcessing by useState(false)
@@ -205,29 +207,19 @@ private fun process(
             val toType = lyricsConversion.toType
 
             val project = props.project
-                .let {
-                    if (lyricsConversion.isOn && fromType != null && toType != null) {
-                        convert(it.copy(lyricsType = fromType), toType, format)
-                    } else it
+                .runIf(lyricsConversion.isOn) {
+                    runIfAllNotNull(fromType, toType) { fromType, toType ->
+                        convert(copy(lyricsType = fromType), toType, format)
+                    }
                 }
-                .let {
-                    if (lyricsReplacement.isOn) {
-                        it.replaceLyrics(lyricsReplacement.request)
-                    } else it
+                .runIf(lyricsReplacement.isOn) {
+                    replaceLyrics(lyricsReplacement.request)
                 }
-                .let {
-                    if (slightRestsFilling.isOn) {
-                        it.copy(
-                            tracks = it.tracks.map { track ->
-                                track.fillRests(slightRestsFilling.excludedMaxLength)
-                            }
-                        )
-                    } else it
+                .runIf(slightRestsFilling.isOn) {
+                    fillRests(slightRestsFilling.excludedMaxLength)
                 }
-                .let {
-                    if (projectZoom.isOn) {
-                        it.zoom(projectZoom.factorValue)
-                    } else it
+                .runIf(projectZoom.isOn) {
+                    zoom(projectZoom.factorValue)
                 }
 
             val availableFeatures = Feature.values()

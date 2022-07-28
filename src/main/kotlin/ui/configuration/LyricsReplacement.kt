@@ -106,7 +106,7 @@ private fun ChildrenBuilder.buildLyricsReplacementItem(
     }
 
     fun editItem(block: LyricsReplacementRequest.Item.() -> LyricsReplacementRequest.Item) {
-        editRequest { copy(items = items.mapIndexed { i, it -> if (i == index) block(it) else it }) }
+        editRequest { update(index, block) }
     }
     ReactHTML.div {
         css {
