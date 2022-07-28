@@ -18,7 +18,6 @@ fun convert(project: Project, targetType: LyricsType, targetFormat: Format): Pro
         !sourceType.isCV && targetType.isCV -> tracks = convertVCVToCV(tracks)
     }
     if (targetFormat == Format.Ust) tracks = convertVowelConnections(tracks, targetType)
-    tracks = postCleanup(tracks, targetFormat)
     return project.copy(tracks = tracks)
 }
 
