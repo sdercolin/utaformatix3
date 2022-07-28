@@ -131,10 +131,20 @@ enum class Strings(
         ja = "歌詞を置き換える",
         zhCN = "替换歌词"
     ),
+    LyricsReplacementDescription(
+        en = "Replace lyrics that pass the filter.\n- Presets are loaded according to original format and " +
+            "target format.\n- If you use \"{{regex}}\" as the \"{{matchType}}\", " +
+            "you can use placeholders like \"\$1\", \"$2\", etc. in \"{{to}}\" to fill in the captured groups.",
+        ja = "フィルターに合致する歌詞を置き換える。\n・一部のフォーマットではプリセットが自動的に適用されます。\n" +
+            "・「{{matchType}}」で「{{regex}}」使用する場合、「{{to}}」に「$1」、「$2」などのプレースホルダーを用いて、" +
+            "キャプチャされたグループを入れることができます。",
+        zhCN = "替换可通过过滤器的歌词。\n・转换部分格式时，预设将会被加载。\n・在使用「{{regex}}」的「{{matchType}}」时" +
+            "，您可以在「{{to}}」中使用「$1」、「$2」等占位符来填充被捕获的组。"
+    ),
     LyricsReplacementItemLabel(
         en = "#{{number}}",
         ja = "#{{number}}",
-        zhCN = "#{{number}}",
+        zhCN = "#{{number}}"
     ),
     LyricsReplacementAddItemButton(
         en = "Add replacement rule",

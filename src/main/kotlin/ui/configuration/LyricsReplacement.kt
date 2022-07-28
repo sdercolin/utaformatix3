@@ -4,12 +4,15 @@ import csstype.AlignSelf
 import csstype.Display
 import csstype.Length
 import csstype.Margin
+import csstype.VerticalAlign
+import csstype.WhiteSpace
 import csstype.em
 import csstype.px
 import kotlinx.js.jso
 import mui.icons.material.AddCircle
 import mui.icons.material.ArrowDownward
 import mui.icons.material.ArrowUpward
+import mui.icons.material.HelpOutline
 import mui.icons.material.RemoveCircle
 import mui.material.BaseTextFieldProps
 import mui.material.Button
@@ -25,12 +28,15 @@ import mui.material.MenuItem
 import mui.material.Paper
 import mui.material.StandardTextFieldProps
 import mui.material.TextField
+import mui.material.Tooltip
+import mui.material.TooltipPlacement
 import mui.material.Typography
 import mui.material.styles.TypographyVariant
 import mui.system.sx
 import process.lyrics.LyricsReplacementRequest
 import react.ChildrenBuilder
 import react.ElementType
+import react.create
 import react.css.css
 import react.dom.html.ReactHTML.div
 import ui.LyricsReplacementState
@@ -45,11 +51,32 @@ external interface LyricsReplacementProps : SubProps<LyricsReplacementState>
 
 val LyricsReplacementBlock = subFC<LyricsReplacementProps, LyricsReplacementState> { _, state, editState ->
     FormGroup {
-        configurationSwitch(
-            isOn = state.isOn,
-            onSwitched = { editState { copy(isOn = it) } },
-            labelStrings = Strings.LyricsReplacement
-        )
+        div {
+            configurationSwitch(
+                isOn = state.isOn,
+                onSwitched = { editState { copy(isOn = it) } },
+                labelStrings = Strings.LyricsReplacement
+            )
+            Tooltip {
+                val text = string(
+                    Strings.LyricsReplacementDescription,
+                    "regex" to string(Strings.LyricsReplacementMatchTypeRegex),
+                    "matchType" to string(Strings.LyricsReplacementMatchTypeLabel),
+                    "to" to string(Strings.LyricsReplacementToTextLabel),
+                )
+                title = div.create {
+                    css { whiteSpace = WhiteSpace.preLine }
+                    +text
+                }
+                placement = TooltipPlacement.right
+                disableInteractive = false
+                HelpOutline {
+                    style = jso {
+                        verticalAlign = VerticalAlign.middle
+                    }
+                }
+            }
+        }
     }
 
     if (state.isOn) buildLyricsReplacementDetail(state, editState)
