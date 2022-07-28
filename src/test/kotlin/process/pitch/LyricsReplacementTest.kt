@@ -43,4 +43,23 @@ class LyricsReplacementTest {
         val expected = listOf("a_as_aas", "ad", "f_af_faf", "qqw", "f_af_Rr")
         assertEquals(expected, result)
     }
+
+    @Test
+    fun testRegex2() {
+        val lyrics = listOf("あ", "i あ", "e か")
+        val request = LyricsReplacementRequest(
+            listOf(
+                LyricsReplacementRequest.Item(
+                    filterType = LyricsReplacementRequest.FilterType.None,
+                    filter = "",
+                    matchType = LyricsReplacementRequest.MatchType.Regex,
+                    from = """^. (.+)$""",
+                    to = "$1"
+                )
+            )
+        )
+        val result = lyrics.map { request.doReplace(it) }
+        val expected = listOf("あ", "あ", "か")
+        assertEquals(expected, result)
+    }
 }
