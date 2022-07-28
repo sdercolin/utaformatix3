@@ -166,7 +166,7 @@ private fun ChildrenBuilder.buildLyricsReplacementItem(
                 }
             }
             TextField {
-                sx { minWidth = 5.em }
+                sx { minWidth = 8.em }
                 select = true
                 value = item.filterType.unsafeCast<Nothing?>()
                 (this.unsafeCast<BaseTextFieldProps>()).variant = FormControlVariant.standard
@@ -224,7 +224,7 @@ private fun ChildrenBuilder.buildLyricsReplacementItem(
                 }
             }
             TextField {
-                sx { minWidth = 5.em }
+                sx { minWidth = 8.em }
                 select = true
                 value = item.matchType.unsafeCast<Nothing?>()
                 (this.unsafeCast<BaseTextFieldProps>()).variant = FormControlVariant.standard
