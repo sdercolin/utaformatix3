@@ -3,6 +3,7 @@ package ui
 import csstype.FontWeight
 import csstype.px
 import external.Resources
+import kotlinx.browser.window
 import kotlinx.js.jso
 import model.Format
 import model.Format.Ccs
@@ -35,6 +36,7 @@ import react.ReactNode
 import react.create
 import react.css.css
 import react.dom.html.ReactHTML.div
+import ui.common.title
 import ui.strings.Strings
 import ui.strings.string
 
@@ -63,10 +65,12 @@ private fun ChildrenBuilder.buildFormatList(props: OutputFormatSelectorProps) {
         for (format in props.formats) {
             ListItem {
                 ListItemButton {
-                    onClick = { props.onSelected(format) }
+                    onClick = {
+                        window.localStorage.clear()
+                        props.onSelected(format)
+                    }
                     style = jso { padding = 24.px }
                     Avatar {
-
                         style = jso {
                             width = 96.px
                             height = 96.px

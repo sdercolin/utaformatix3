@@ -7,7 +7,13 @@ import ui.strings.Language.Japanese
 import ui.strings.Language.Russian
 import ui.strings.Language.SimplifiedChinese
 
-enum class Strings(val en: String, val ja: String, val zhCN: String, val ru: String, val fr: String) {
+enum class Strings(
+    val en: String,
+    val ja: String,
+    val zhCN: String,
+    val ru: String = en,
+    val fr: String = en
+) {
     LanguageDisplayName(
         en = English.displayName,
         ja = Japanese.displayName,
@@ -99,7 +105,7 @@ enum class Strings(val en: String, val ja: String, val zhCN: String, val ru: Str
         ru = "Кана VCV",
         fr = "Kana VCV"
     ),
-    JapaneseLyricsConversionSwitchLabel(
+    JapaneseLyricsConversion(
         en = "Cleanup and convert lyrics (only for Japanese lyrics)",
         ja = "歌詞のSuffix除去・変換（日本語歌詞のみ対応）",
         zhCN = "清理并转换歌词（仅日语）",
@@ -119,6 +125,101 @@ enum class Strings(val en: String, val ja: String, val zhCN: String, val ru: Str
         zhCN = "目标歌词类型",
         ru = "Целевой тип текстов",
         fr = "Type de paroles cible"
+    ),
+    LyricsReplacement(
+        en = "Replace lyrics",
+        ja = "歌詞を置き換える",
+        zhCN = "替换歌词"
+    ),
+    LyricsReplacementDescription(
+        en = "Replace lyrics that pass the filter.\n- Presets are loaded according to original format and " +
+            "target format.\n- If you use \"{{regex}}\" as the \"{{matchType}}\", " +
+            "you can use placeholders like \"\$1\", \"$2\", etc. in \"{{to}}\" to fill in the captured groups.",
+        ja = "フィルターに合致する歌詞を置き換える。\n・一部のフォーマットではプリセットが自動的に適用されます。\n" +
+            "・「{{matchType}}」で「{{regex}}」使用する場合、「{{to}}」に「$1」、「$2」などのプレースホルダーを用いて、" +
+            "キャプチャされたグループを入れることができます。",
+        zhCN = "替换可通过过滤器的歌词。\n・转换部分格式时，预设将会被加载。\n・在使用「{{regex}}」的「{{matchType}}」时" +
+            "，您可以在「{{to}}」中使用「$1」、「$2」等占位符来填充被捕获的组。"
+    ),
+    LyricsReplacementItemLabel(
+        en = "#{{number}}",
+        ja = "#{{number}}",
+        zhCN = "#{{number}}"
+    ),
+    LyricsReplacementAddItemButton(
+        en = "Add replacement rule",
+        ja = "置換ルールを追加",
+        zhCN = "添加替换规则"
+    ),
+    LyricsReplacementFilterTypeLabel(
+        en = "Filter type",
+        ja = "フィルタータイプ",
+        zhCN = "过滤器类型"
+    ),
+    LyricsReplacementFilterTypeNone(
+        en = "None",
+        ja = "なし",
+        zhCN = "无"
+    ),
+    LyricsReplacementFilterTypeExact(
+        en = "Exact",
+        ja = "完全一致",
+        zhCN = "完全匹配"
+    ),
+    LyricsReplacementFilterTypeContaining(
+        en = "Containing",
+        ja = "含む",
+        zhCN = "包含"
+    ),
+    LyricsReplacementFilterTypePrefix(
+        en = "Prefix",
+        ja = "前方一致",
+        zhCN = "前缀"
+    ),
+    LyricsReplacementFilterTypeSuffix(
+        en = "Suffix",
+        ja = "後方一致",
+        zhCN = "后缀"
+    ),
+    LyricsReplacementFilterTypeRegex(
+        en = "Regex",
+        ja = "正規表現",
+        zhCN = "正则表达式"
+    ),
+    LyricsReplacementFilterTextLabel(
+        en = "Filter",
+        ja = "フィルター",
+        zhCN = "过滤器"
+    ),
+    LyricsReplacementMatchTypeLabel(
+        en = "Match type",
+        ja = "マッチタイプ",
+        zhCN = "匹配类型"
+    ),
+    LyricsReplacementMatchTypeAll(
+        en = "All",
+        ja = "全部",
+        zhCN = "全部"
+    ),
+    LyricsReplacementMatchTypeExact(
+        en = "Exact",
+        ja = "完全一致",
+        zhCN = "完全匹配"
+    ),
+    LyricsReplacementMatchTypeRegex(
+        en = "Regex",
+        ja = "正規表現",
+        zhCN = "正则表达式"
+    ),
+    LyricsReplacementFromTextLabel(
+        en = "From",
+        ja = "置換元",
+        zhCN = "替换源"
+    ),
+    LyricsReplacementToTextLabel(
+        en = "To",
+        ja = "置換先",
+        zhCN = "替换为"
     ),
     ConvertPitchData(
         en = "Convert pitch parameters",
@@ -497,7 +598,7 @@ enum class Strings(val en: String, val ja: String, val zhCN: String, val ru: Str
         fr = "Les données dépassant la limite de longueur sont ignorées." +
             " Veuillez vérifier que votre exportation inclut toutes les données prévues."
     ),
-    SlightRestsFillingSwitchLabel(
+    SlightRestsFilling(
         en = "Fill short rests",
         ja = "短い休符を埋める",
         zhCN = "填充短休止符",

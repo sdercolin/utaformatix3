@@ -6,6 +6,7 @@ import process.TickTimeTransformer
 import process.bpmToSecPerTick
 import process.interpolateCosineEaseInOut
 import process.interpolateLinear
+import util.runIf
 
 private const val SAMPLING_INTERVAL_TICK = 4L
 private const val SVP_VIBRATO_DEFAULT_START_SEC = 0.25
@@ -154,9 +155,8 @@ private fun List<Pair<Long, Double>>.appendVibratoInNote(
     return this
         .asSequence()
         .ifEmpty { sequenceOf(note.noteStartTick to 0.0, note.noteEndTick to 0.0) }
-        .let {
-            if (it.last().first != note.noteEndTick) it + (note.noteEndTick to it.last().second)
-            else it
+        .runIf({ last().first != note.noteEndTick }) {
+            this + (note.noteEndTick to last().second)
         }
         .fold(listOf<Pair<Long, Double>>()) { acc, inputPoint ->
             val lastPoint = acc.lastOrNull()

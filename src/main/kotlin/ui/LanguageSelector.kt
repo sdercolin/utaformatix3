@@ -11,6 +11,7 @@ import org.w3c.dom.HTMLButtonElement
 import react.Props
 import react.dom.html.ReactHTML.div
 import react.useState
+import ui.common.scopedFC
 import ui.strings.Language
 import ui.strings.changeLanguage
 

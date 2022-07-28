@@ -9,6 +9,7 @@ import react.css.css
 import react.dom.html.ReactHTML.div
 import react.useEffect
 import react.useState
+import ui.common.scopedFC
 import ui.external.react.Markdown
 import util.runCatchingCancellable
 

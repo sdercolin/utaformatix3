@@ -178,30 +178,30 @@ private fun ChildrenBuilder.buildBody(stageInfo: StageInfo, pushStage: (StageInf
         css {
             margin = Margin(horizontal = 24.px, vertical = 0.px)
         }
-        when (val info = stageInfo) {
+        when (stageInfo) {
             is StageInfo.Import -> Importer {
                 formats = Format.importable
                 onImported = { pushStage(StageInfo.SelectOutputFormat(it)) }
             }
             is StageInfo.SelectOutputFormat -> OutputFormatSelector {
                 formats = Format.exportable
-                project = info.project
-                onSelected = { pushStage(StageInfo.Configure(info.project, it)) }
+                project = stageInfo.project
+                onSelected = { pushStage(StageInfo.Configure(stageInfo.project, it)) }
             }
             is StageInfo.Configure -> ConfigurationEditor {
-                project = info.project
-                outputFormat = info.outputFormat
+                project = stageInfo.project
+                outputFormat = stageInfo.outputFormat
                 onFinished = { result, format ->
                     pushStage(StageInfo.Export(result, format))
                 }
             }
             is StageInfo.Export -> Exporter {
-                format = info.outputFormat
-                result = info.result
+                format = stageInfo.outputFormat
+                result = stageInfo.result
                 onRestart = { popAllStages() }
             }
             is StageInfo.ExtraPage -> EmbeddedPage {
-                url = string(info.urlKey)
+                url = string(stageInfo.urlKey)
             }
         }
     }

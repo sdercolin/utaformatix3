@@ -108,11 +108,9 @@ object Vsqx {
                     denominator = denomi
                 )
             }
-            .let {
-                if (it.isEmpty()) {
-                    warnings.add(ImportWarning.TimeSignatureNotFound)
-                    listOf(TimeSignature.default)
-                } else it
+            .ifEmpty {
+                warnings.add(ImportWarning.TimeSignatureNotFound)
+                listOf(TimeSignature.default)
             }
 
         // Calculate before time signatures are cleaned up
@@ -163,11 +161,9 @@ object Vsqx {
                     bpm = bpm
                 )
             }
-            .let {
-                if (it.isEmpty()) {
-                    warnings.add(ImportWarning.TempoNotFound)
-                    listOf(Tempo.default)
-                } else it
+            .ifEmpty {
+                warnings.add(ImportWarning.TempoNotFound)
+                listOf(Tempo.default)
             }
             .toMutableList()
 
