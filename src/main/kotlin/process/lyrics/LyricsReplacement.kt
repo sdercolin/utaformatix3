@@ -1,5 +1,6 @@
 package process.lyrics
 
+import kotlinx.serialization.Serializable
 import model.Format
 import model.Note
 import model.Project
@@ -7,6 +8,7 @@ import model.Track
 import process.validateNotes
 import util.runIf
 
+@Serializable
 data class LyricsReplacementRequest(
     val items: List<Item> = listOf(Item()),
 ) {
@@ -34,6 +36,7 @@ data class LyricsReplacementRequest(
         return copy(items = items)
     }
 
+    @Serializable
     data class Item(
         val filterType: FilterType = FilterType.Exact,
         val filter: String = "",

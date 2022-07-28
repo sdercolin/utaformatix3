@@ -1,9 +1,15 @@
 package ui
 
 import csstype.px
+import kotlinx.browser.window
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.modules.SerializersModule
 import model.ExportResult
 import model.Feature
 import model.Format
@@ -14,6 +20,7 @@ import model.TICKS_IN_FULL_NOTE
 import mui.material.Button
 import mui.material.ButtonColor
 import mui.material.ButtonVariant
+import org.w3c.dom.get
 import process.RESTS_FILLING_MAX_LENGTH_DENOMINATOR_DEFAULT
 import process.evalFractionOrNull
 import process.fillRests
@@ -47,6 +54,10 @@ import util.runIfAllNotNull
 val ConfigurationEditor = scopedFC<ConfigurationEditorProps> { props, scope ->
     var isProcessing by useState(false)
     val (lyricsConversion, setLyricsConversion) = useState {
+        getStateFromLocalStorage<LyricsConversionState>("lyricsConversion")?.let {
+            return@useState it
+        }
+
         val analysedType = props.project.lyricsType
         val doLyricsConversion = analysedType != Unknown
         val fromLyricsType: LyricsType?
@@ -66,6 +77,10 @@ val ConfigurationEditor = scopedFC<ConfigurationEditorProps> { props, scope ->
         )
     }
     val (lyricsReplacement, setLyricsReplacement) = useState {
+        getStateFromLocalStorage<LyricsReplacementState>("lyricsReplacement")?.let {
+            return@useState it
+        }
+
         val preset = LyricsReplacementRequest.getPreset(props.project.format, props.outputFormat)
         if (preset == null) {
             LyricsReplacementState(false, LyricsReplacementRequest())
@@ -74,12 +89,18 @@ val ConfigurationEditor = scopedFC<ConfigurationEditorProps> { props, scope ->
         }
     }
     val (slightRestsFilling, setSlightRestsFilling) = useState {
+        getStateFromLocalStorage<SlightRestsFillingState>("slightRestsFilling")?.let {
+            return@useState it
+        }
         SlightRestsFillingState(
             true,
             RESTS_FILLING_MAX_LENGTH_DENOMINATOR_DEFAULT
         )
     }
     val (pitchConversion, setPitchConversion) = useState {
+        getStateFromLocalStorage<PitchConversionState>("pitchConversion")?.let {
+            return@useState it
+        }
         val hasPitchData = Feature.ConvertPitch.isAvailable(props.project)
         val isPitchConversionAvailable = hasPitchData &&
             props.outputFormat.availableFeaturesForGeneration.contains(Feature.ConvertPitch)
@@ -89,6 +110,9 @@ val ConfigurationEditor = scopedFC<ConfigurationEditorProps> { props, scope ->
         )
     }
     val (projectZoom, setProjectZoom) = useState {
+        getStateFromLocalStorage<ProjectZoomState>("projectZoom")?.let {
+            return@useState it
+        }
         ProjectZoomState(
             isOn = false,
             factor = projectZoomFactorOptions.first(),
@@ -148,6 +172,17 @@ val ConfigurationEditor = scopedFC<ConfigurationEditorProps> { props, scope ->
     )
 
     progress(isShowing = isProcessing)
+}
+
+private inline fun <reified T> ChildrenBuilder.getStateFromLocalStorage(name: String): T? {
+    runCatching {
+        window.localStorage[name]?.let {
+            return json.decodeFromString(it)
+        }
+    }.onFailure {
+        console.log(it)
+    }
+    return null
 }
 
 private fun ChildrenBuilder.buildNextButton(
@@ -233,6 +268,15 @@ private fun process(
             delay(100)
             val result = format.generator.invoke(project, availableFeatures)
             console.log(result.blob)
+            listOf(
+                "lyricsConversion" to lyricsConversion,
+                "lyricsReplacement" to lyricsReplacement,
+                "slightRestsFilling" to slightRestsFilling,
+                "pitchConversion" to pitchConversion,
+                "projectZoom" to projectZoom
+            ).forEach {
+                window.localStorage.setItem(it.first, json.encodeToString(it.second))
+            }
             props.onFinished.invoke(result, format)
         }.onFailure { t ->
             console.log(t)
@@ -248,46 +292,62 @@ private fun process(
     }
 }
 
+private val json = Json {
+    ignoreUnknownKeys = true
+    serializersModule = SerializersModule {
+        polymorphic(SubState::class, LyricsConversionState::class, LyricsConversionState.serializer())
+        polymorphic(SubState::class, LyricsReplacementState::class, LyricsReplacementState.serializer())
+        polymorphic(SubState::class, SlightRestsFillingState::class, SlightRestsFillingState.serializer())
+        polymorphic(SubState::class, PitchConversionState::class, PitchConversionState.serializer())
+        polymorphic(SubState::class, ProjectZoomState::class, ProjectZoomState.serializer())
+    }
+}
+
 external interface ConfigurationEditorProps : Props {
     var project: Project
     var outputFormat: Format
     var onFinished: (ExportResult, Format) -> Unit
 }
 
+@Serializable
 data class LyricsConversionState(
     val isOn: Boolean,
     val fromType: LyricsType?,
     val toType: LyricsType?
-) : SubState {
-    val isReady: Boolean = if (isOn) fromType != null && toType != null else true
+) : SubState() {
+    val isReady: Boolean get() = if (isOn) fromType != null && toType != null else true
 }
 
+@Serializable
 data class LyricsReplacementState(
     val isOn: Boolean,
     val request: LyricsReplacementRequest
-) : SubState {
-    val isReady: Boolean = if (isOn) request.isValid else true
+) : SubState() {
+    val isReady: Boolean get() = if (isOn) request.isValid else true
 }
 
+@Serializable
 data class SlightRestsFillingState(
     val isOn: Boolean,
     val excludedMaxLengthDenominator: Int
-) : SubState {
+) : SubState() {
 
     val excludedMaxLength: Long
         get() = (TICKS_IN_FULL_NOTE / excludedMaxLengthDenominator).toLong()
 }
 
+@Serializable
 data class PitchConversionState(
     val isAvailable: Boolean,
     val isOn: Boolean
-) : SubState
+) : SubState()
 
+@Serializable
 data class ProjectZoomState(
     val isOn: Boolean,
     val factor: String,
     val hasWarning: Boolean
-) : SubState {
+) : SubState() {
     val factorValue: Double
         get() = factor.evalFractionOrNull()!!
 }
