@@ -30,7 +30,7 @@ import process.projectZoomFactorOptions
 import react.ChildrenBuilder
 import react.ReactNode
 import react.css.css
-import react.dom.html.ReactHTML
+import react.dom.html.ReactHTML.div
 import ui.ProjectZoomState
 import ui.common.SubProps
 import ui.common.configurationSwitch
@@ -44,7 +44,7 @@ external interface ProjectZoomProps : SubProps<ProjectZoomState> {
 
 val ProjectZoomBlock = subFC<ProjectZoomProps, ProjectZoomState> { props, state, editState ->
     FormGroup {
-        ReactHTML.div {
+        div {
             configurationSwitch(
                 isOn = state.isOn,
                 onSwitched = { editState { copy(isOn = it) } },
@@ -81,7 +81,7 @@ private fun ChildrenBuilder.buildProjectZoomDetail(
     state: ProjectZoomState,
     editState: (ProjectZoomState.() -> ProjectZoomState) -> Unit
 ) {
-    ReactHTML.div {
+    div {
         css {
             margin = Margin(horizontal = 40.px, vertical = 0.px)
             width = Length.maxContent

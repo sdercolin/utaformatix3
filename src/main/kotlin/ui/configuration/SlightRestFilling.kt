@@ -27,7 +27,7 @@ import process.restsFillingMaxLengthDenominatorOptions
 import react.ChildrenBuilder
 import react.ReactNode
 import react.css.css
-import react.dom.html.ReactHTML
+import react.dom.html.ReactHTML.div
 import ui.SlightRestsFillingState
 import ui.common.SubProps
 import ui.common.configurationSwitch
@@ -39,7 +39,7 @@ external interface SlightRestsFillingProps : SubProps<SlightRestsFillingState>
 
 val SlightRestsFillingBlock = subFC<SlightRestsFillingProps, SlightRestsFillingState> { _, state, editState ->
     FormGroup {
-        ReactHTML.div {
+        div {
             configurationSwitch(
                 isOn = state.isOn,
                 onSwitched = { editState { copy(isOn = it) } },
@@ -65,7 +65,7 @@ private fun ChildrenBuilder.buildRestsFillingDetail(
     state: SlightRestsFillingState,
     editState: (SlightRestsFillingState.() -> SlightRestsFillingState) -> Unit
 ) {
-    ReactHTML.div {
+    div {
         css {
             margin = Margin(horizontal = 40.px, vertical = 0.px)
             width = Length.maxContent

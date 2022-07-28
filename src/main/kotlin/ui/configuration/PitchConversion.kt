@@ -7,7 +7,7 @@ import mui.material.FormGroup
 import mui.material.Tooltip
 import mui.material.TooltipPlacement
 import react.ReactNode
-import react.dom.html.ReactHTML
+import react.dom.html.ReactHTML.div
 import ui.PitchConversionState
 import ui.common.SubProps
 import ui.common.configurationSwitch
@@ -19,7 +19,7 @@ external interface PitchConversionProps : SubProps<PitchConversionState>
 
 val PitchConversionBlock = subFC<PitchConversionProps, PitchConversionState> { _, state, editState ->
     FormGroup {
-        ReactHTML.div {
+        div {
             configurationSwitch(
                 isOn = state.isOn,
                 onSwitched = { editState { copy(isOn = it) } },

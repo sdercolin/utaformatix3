@@ -130,7 +130,6 @@ data class LyricsReplacementRequest(
 
             return LyricsReplacementRequest(items).takeIf { it.items.isNotEmpty() }
         }
-
     }
 }
 

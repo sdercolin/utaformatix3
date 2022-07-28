@@ -20,7 +20,7 @@ import mui.material.styles.TypographyVariant
 import react.ChildrenBuilder
 import react.create
 import react.css.css
-import react.dom.html.ReactHTML
+import react.dom.html.ReactHTML.div
 import ui.LyricsConversionState
 import ui.common.SubProps
 import ui.common.configurationSwitch
@@ -58,14 +58,14 @@ private fun ChildrenBuilder.buildLyricsDetail(
     toLyricsType: LyricsType?,
     setToLyricsType: (LyricsType) -> Unit
 ) {
-    ReactHTML.div {
+    div {
         css {
             margin = Margin(horizontal = 40.px, vertical = 0.px)
             width = Length.maxContent
         }
         Paper {
             elevation = 0
-            ReactHTML.div {
+            div {
                 css {
                     margin = Margin(
                         horizontal = 24.px,

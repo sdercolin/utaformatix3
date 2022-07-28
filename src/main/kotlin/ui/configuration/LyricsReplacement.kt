@@ -32,7 +32,7 @@ import process.lyrics.LyricsReplacementRequest
 import react.ChildrenBuilder
 import react.ElementType
 import react.css.css
-import react.dom.html.ReactHTML
+import react.dom.html.ReactHTML.div
 import ui.LyricsReplacementState
 import ui.appTheme
 import ui.common.SubProps
@@ -59,14 +59,14 @@ private fun ChildrenBuilder.buildLyricsReplacementDetail(
     state: LyricsReplacementState,
     editState: (LyricsReplacementState.() -> LyricsReplacementState) -> Unit
 ) {
-    ReactHTML.div {
+    div {
         css {
             margin = Margin(horizontal = 40.px, vertical = 0.px)
             width = Length.maxContent
         }
         Paper {
             elevation = 0
-            ReactHTML.div {
+            div {
                 css {
                     margin = Margin(
                         horizontal = 24.px,
@@ -79,13 +79,13 @@ private fun ChildrenBuilder.buildLyricsReplacementDetail(
                 state.request.items.forEachIndexed { index, item ->
                     buildLyricsReplacementItem(index, item, editState)
                 }
-                ReactHTML.div {
+                div {
                     Button {
                         color = ButtonColor.secondary
                         variant = ButtonVariant.text
                         AddCircle()
                         onClick = { editState { copy(request = request.add()) } }
-                        ReactHTML.div {
+                        div {
                             css { padding = 8.px }
                             +string(Strings.LyricsReplacementAddItemButton)
                         }
@@ -108,7 +108,7 @@ private fun ChildrenBuilder.buildLyricsReplacementItem(
     fun editItem(block: LyricsReplacementRequest.Item.() -> LyricsReplacementRequest.Item) {
         editRequest { update(index, block) }
     }
-    ReactHTML.div {
+    div {
         css {
             display = Display.flex
             marginBottom = 16.px
