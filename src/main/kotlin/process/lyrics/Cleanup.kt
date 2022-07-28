@@ -24,7 +24,7 @@ private fun String.cleanupAsRomajiCV(): String {
     result = result.trim()
     result = result.trimStart('?')
 
-    val maxLength = romajis.map { it.length }.maxOrNull() ?: 0
+    val maxLength = romajis.maxOfOrNull { it.length } ?: 0
     for (length in maxLength downTo 1) {
         val text = result.take(length)
         if (text.isRomaji) result = text
@@ -47,7 +47,7 @@ private fun String.cleanupAsRomajiVCV(): String {
     val blankPos = result.indexOf(" ")
     var body = ""
 
-    val maxLength = romajis.map { it.length }.maxOrNull() ?: 0
+    val maxLength = romajis.maxOfOrNull { it.length } ?: 0
     for (length in 1..maxLength) {
         val startPos = blankPos + 1
         val endPos = startPos + length
