@@ -1,5 +1,7 @@
 package ui
 
+import csstype.AlignSelf
+import csstype.Display
 import csstype.Length
 import csstype.Margin
 import csstype.VerticalAlign
@@ -20,8 +22,12 @@ import model.LyricsType.RomajiVcv
 import model.LyricsType.Unknown
 import model.Project
 import model.TICKS_IN_FULL_NOTE
+import mui.icons.material.AddCircle
+import mui.icons.material.ArrowDownward
+import mui.icons.material.ArrowUpward
 import mui.icons.material.ErrorOutline
 import mui.icons.material.HelpOutline
+import mui.icons.material.RemoveCircle
 import mui.material.BaseTextFieldProps
 import mui.material.Box
 import mui.material.Button
@@ -33,6 +39,8 @@ import mui.material.FormControlMargin
 import mui.material.FormControlVariant
 import mui.material.FormGroup
 import mui.material.FormLabel
+import mui.material.IconButton
+import mui.material.IconButtonColor
 import mui.material.LabelPlacement
 import mui.material.MenuItem
 import mui.material.Paper
@@ -51,12 +59,15 @@ import mui.system.sx
 import process.RESTS_FILLING_MAX_LENGTH_DENOMINATOR_DEFAULT
 import process.evalFractionOrNull
 import process.fillRests
+import process.lyrics.LyricsReplacementRequest
 import process.lyrics.convert
+import process.lyrics.replaceLyrics
 import process.needWarningZoom
 import process.projectZoomFactorOptions
 import process.restsFillingMaxLengthDenominatorOptions
 import process.zoom
 import react.ChildrenBuilder
+import react.ElementType
 import react.FC
 import react.Props
 import react.ReactNode
@@ -90,6 +101,14 @@ val ConfigurationEditor = scopedFC<ConfigurationEditorProps> { props, scope ->
             toLyricsType
         )
     }
+    val (lyricsReplacement, setLyricsReplacement) = useState {
+        val preset = LyricsReplacementRequest.getPreset(props.outputFormat)
+        if (preset == null) {
+            LyricsReplacementState(false, LyricsReplacementRequest())
+        } else {
+            LyricsReplacementState(true, preset)
+        }
+    }
     val (slightRestsFilling, setSlightRestsFilling) = useState {
         SlightRestsFillingState(
             true,
@@ -114,6 +133,8 @@ val ConfigurationEditor = scopedFC<ConfigurationEditorProps> { props, scope ->
     }
     var dialogError by useState(DialogErrorState())
 
+    fun isReady() = lyricsConversion.isReady && lyricsReplacement.isReady
+
     fun closeErrorDialog() {
         dialogError = dialogError.copy(isShowing = false)
     }
@@ -124,6 +145,10 @@ val ConfigurationEditor = scopedFC<ConfigurationEditorProps> { props, scope ->
         this.outputFormat = props.outputFormat
         initialState = lyricsConversion
         submitState = setLyricsConversion
+    }
+    LyricsReplacementBlock {
+        initialState = lyricsReplacement
+        submitState = setLyricsReplacement
     }
     SlightRestsFillingBlock {
         initialState = slightRestsFilling
@@ -141,8 +166,9 @@ val ConfigurationEditor = scopedFC<ConfigurationEditorProps> { props, scope ->
     buildNextButton(
         scope,
         props,
-        isEnabled = lyricsConversion.isReady,
+        isEnabled = isReady(),
         lyricsConversion,
+        lyricsReplacement,
         slightRestsFilling,
         pitchConversion,
         projectZoom,
@@ -167,18 +193,11 @@ external interface LyricsConversionProps : SubProps<LyricsConversionState> {
 
 private val LyricsConversionBlock = subFC<LyricsConversionProps, LyricsConversionState> { props, state, editState ->
     FormGroup {
-        FormControlLabel {
-            label = ReactNode(string(Strings.JapaneseLyricsConversionSwitchLabel))
-            control = Switch.create {
-                color = SwitchColor.secondary
-                checked = state.isOn
-                onChange = { event, _ ->
-                    val checked = event.target.checked
-                    editState { copy(isOn = checked) }
-                }
-            }
-            labelPlacement = LabelPlacement.end
-        }
+        buildFeatureSwitch(
+            isOn = state.isOn,
+            onSwitched = { editState { copy(isOn = it) } },
+            labelStrings = Strings.JapaneseLyricsConversion
+        )
     }
 
     if (state.isOn) buildLyricsDetail(
@@ -270,23 +289,276 @@ private fun ChildrenBuilder.buildLyricsTypeControl(
     }
 }
 
+external interface LyricsReplacementProps : SubProps<LyricsReplacementState>
+
+private val LyricsReplacementBlock = subFC<LyricsReplacementProps, LyricsReplacementState> { _, state, editState ->
+    FormGroup {
+        buildFeatureSwitch(
+            isOn = state.isOn,
+            onSwitched = { editState { copy(isOn = it) } },
+            labelStrings = Strings.LyricsReplacement
+        )
+    }
+
+    if (state.isOn) buildLyricsReplacementDetail(state, editState)
+}
+
+private fun ChildrenBuilder.buildLyricsReplacementDetail(
+    state: LyricsReplacementState,
+    editState: (LyricsReplacementState.() -> LyricsReplacementState) -> Unit
+) {
+    div {
+        css {
+            margin = Margin(horizontal = 40.px, vertical = 0.px)
+            width = Length.maxContent
+        }
+        Paper {
+            elevation = 0
+            div {
+                css {
+                    margin = Margin(
+                        horizontal = 24.px,
+                        top = 16.px,
+                        bottom = 24.px
+                    )
+                    paddingTop = 8.px
+                    paddingBottom = 8.px
+                }
+                state.request.items.forEachIndexed { index, item ->
+                    buildLyricsReplacementItem(index, item, editState)
+                }
+                div {
+                    Button {
+                        color = ButtonColor.secondary
+                        variant = ButtonVariant.text
+                        AddCircle()
+                        onClick = { editState { copy(request = request.add()) } }
+                        div {
+                            css { padding = 8.px }
+                            +string(Strings.LyricsReplacementAddItemButton)
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+private fun ChildrenBuilder.buildLyricsReplacementItem(
+    index: Int,
+    item: LyricsReplacementRequest.Item,
+    editState: (LyricsReplacementState.() -> LyricsReplacementState) -> Unit
+) {
+    fun editRequest(block: LyricsReplacementRequest.() -> LyricsReplacementRequest) {
+        editState { copy(request = request.block()) }
+    }
+
+    fun editItem(block: LyricsReplacementRequest.Item.() -> LyricsReplacementRequest.Item) {
+        editRequest { copy(items = items.mapIndexed { i, it -> if (i == index) block(it) else it }) }
+    }
+    div {
+        css {
+            display = Display.flex
+            marginBottom = 16.px
+        }
+        Typography {
+            css {
+                color = appTheme.palette.secondary.main
+                alignSelf = AlignSelf.center
+            }
+            variant = TypographyVariant.subtitle2
+            component = "span".asDynamic().unsafeCast<ElementType<*>>()
+            +string(Strings.LyricsReplacementItemLabel, "number" to (index + 1).toString())
+        }
+        FormControl {
+            style = jso {
+                marginLeft = 2.em
+                marginTop = 8.px
+                marginBottom = 8.px
+            }
+            variant = FormControlVariant.standard
+            focused = false
+            FormLabel {
+                focused = false
+                Typography {
+                    variant = TypographyVariant.caption
+                    +string(Strings.LyricsReplacementFilterTypeLabel)
+                }
+            }
+            TextField {
+                sx { minWidth = 5.em }
+                select = true
+                value = item.filterType.unsafeCast<Nothing?>()
+                (this.unsafeCast<BaseTextFieldProps>()).variant = FormControlVariant.standard
+                (this.unsafeCast<StandardTextFieldProps>()).onChange = { event ->
+                    val value = event.target.asDynamic().value as String
+                    editItem { copy(filterType = LyricsReplacementRequest.FilterType.valueOf(value)) }
+                }
+                LyricsReplacementRequest.FilterType.values().forEach { type ->
+                    MenuItem {
+                        value = type.toString()
+                        +string(type.strings)
+                    }
+                }
+            }
+        }
+        FormControl {
+            style = jso {
+                marginLeft = 2.em
+                marginTop = 8.px
+                marginBottom = 8.px
+            }
+
+            focused = false
+            FormLabel {
+                focused = false
+                Typography {
+                    variant = TypographyVariant.caption
+                    +string(Strings.LyricsReplacementFilterTextLabel)
+                }
+            }
+            TextField {
+                sx { width = 8.em }
+                value = item.filter
+                disabled = item.filterType.needsFilter().not()
+                (this.unsafeCast<BaseTextFieldProps>()).variant = FormControlVariant.standard
+                (this.unsafeCast<StandardTextFieldProps>()).onChange = { event ->
+                    val value = event.target.asDynamic().value as String
+                    editItem { copy(filter = value) }
+                }
+            }
+        }
+        FormControl {
+            style = jso {
+                marginLeft = 2.em
+                marginTop = 8.px
+                marginBottom = 8.px
+            }
+            variant = FormControlVariant.standard
+            focused = false
+            FormLabel {
+                focused = false
+                Typography {
+                    variant = TypographyVariant.caption
+                    +string(Strings.LyricsReplacementMatchTypeLabel)
+                }
+            }
+            TextField {
+                sx { minWidth = 5.em }
+                select = true
+                value = item.matchType.unsafeCast<Nothing?>()
+                (this.unsafeCast<BaseTextFieldProps>()).variant = FormControlVariant.standard
+                (this.unsafeCast<StandardTextFieldProps>()).onChange = { event ->
+                    val value = event.target.asDynamic().value as String
+                    editItem { copy(matchType = LyricsReplacementRequest.MatchType.valueOf(value)) }
+                }
+                LyricsReplacementRequest.MatchType.values().forEach { type ->
+                    MenuItem {
+                        value = type.toString()
+                        +string(type.strings)
+                    }
+                }
+            }
+        }
+        FormControl {
+            style = jso {
+                marginLeft = 2.em
+                marginTop = 8.px
+                marginBottom = 8.px
+            }
+            focused = false
+            FormLabel {
+                focused = false
+                Typography {
+                    variant = TypographyVariant.caption
+                    +string(Strings.LyricsReplacementFromTextLabel)
+                }
+            }
+            TextField {
+                sx { width = 8.em }
+                value = item.from
+                disabled = item.matchType.needsFrom().not()
+                (this.unsafeCast<BaseTextFieldProps>()).variant = FormControlVariant.standard
+                (this.unsafeCast<StandardTextFieldProps>()).onChange = { event ->
+                    val value = event.target.asDynamic().value as String
+                    editItem { copy(from = value) }
+                }
+            }
+        }
+        FormControl {
+            style = jso {
+                marginLeft = 2.em
+                marginTop = 8.px
+                marginBottom = 8.px
+            }
+            focused = false
+            FormLabel {
+                focused = false
+                Typography {
+                    variant = TypographyVariant.caption
+                    +string(Strings.LyricsReplacementToTextLabel)
+                }
+            }
+            TextField {
+                sx { width = 8.em }
+                value = item.to
+                (this.unsafeCast<BaseTextFieldProps>()).variant = FormControlVariant.standard
+                (this.unsafeCast<StandardTextFieldProps>()).onChange = { event ->
+                    val value = event.target.asDynamic().value as String
+                    editItem { copy(to = value) }
+                }
+            }
+        }
+        IconButton {
+            color = IconButtonColor.inherit
+            style = jso {
+                margin = 5.px
+                marginLeft = 20.px
+                height = Length.fitContent
+                alignSelf = AlignSelf.center
+            }
+            onClick = {
+                editRequest { moveUp(index) }
+            }
+            ArrowUpward()
+        }
+        IconButton {
+            color = IconButtonColor.inherit
+            style = jso {
+                margin = 5.px
+                height = Length.fitContent
+                alignSelf = AlignSelf.center
+            }
+            onClick = {
+                editRequest { moveDown(index) }
+            }
+            ArrowDownward()
+        }
+        IconButton {
+            color = IconButtonColor.secondary
+            style = jso {
+                margin = 5.px
+                height = Length.fitContent
+                alignSelf = AlignSelf.center
+            }
+            onClick = {
+                editRequest { remove(index) }
+            }
+            RemoveCircle()
+        }
+    }
+}
+
 external interface SlightRestsFillingProps : SubProps<SlightRestsFillingState>
 
 private val SlightRestsFillingBlock = subFC<SlightRestsFillingProps, SlightRestsFillingState> { _, state, editState ->
     FormGroup {
         div {
-            FormControlLabel {
-                label = ReactNode(string(Strings.SlightRestsFillingSwitchLabel))
-                control = Switch.create {
-                    color = SwitchColor.secondary
-                    checked = state.isOn
-                    onChange = { event, _ ->
-                        val checked = event.target.checked
-                        editState { copy(isOn = checked) }
-                    }
-                }
-                labelPlacement = LabelPlacement.end
-            }
+            buildFeatureSwitch(
+                isOn = state.isOn,
+                onSwitched = { editState { copy(isOn = it) } },
+                labelStrings = Strings.SlightRestsFilling
+            )
             Tooltip {
                 title = ReactNode(string(Strings.SlightRestsFillingDescription))
                 placement = TooltipPlacement.right
@@ -343,7 +615,6 @@ private fun ChildrenBuilder.buildRestsFillingDetail(
                         (this.unsafeCast<BaseTextFieldProps>()).variant = FormControlVariant.standard
                         (this.unsafeCast<StandardTextFieldProps>()).onChange = { event ->
                             val value = event.target.asDynamic().value as String
-                            console.log(event.target)
                             editState { copy(excludedMaxLengthDenominator = value.toInt()) }
                         }
                         restsFillingMaxLengthDenominatorOptions.forEach { denominator ->
@@ -367,18 +638,11 @@ external interface PitchConversionProps : SubProps<PitchConversionState>
 private val PitchConversionBlock = subFC<PitchConversionProps, PitchConversionState> { _, state, editState ->
     FormGroup {
         div {
-            FormControlLabel {
-                label = ReactNode(string(Strings.ConvertPitchData))
-                control = Switch.create {
-                    color = SwitchColor.secondary
-                    checked = state.isOn
-                    onChange = { event, _ ->
-                        val checked = event.target.checked
-                        editState { copy(isOn = checked) }
-                    }
-                }
-                labelPlacement = LabelPlacement.end
-            }
+            buildFeatureSwitch(
+                isOn = state.isOn,
+                onSwitched = { editState { copy(isOn = it) } },
+                labelStrings = Strings.ConvertPitchData
+            )
             Tooltip {
                 title = ReactNode(string(Strings.ConvertPitchDataDescription))
                 placement = TooltipPlacement.right
@@ -400,18 +664,11 @@ external interface ProjectZoomProps : SubProps<ProjectZoomState> {
 private val ProjectZoomBlock = subFC<ProjectZoomProps, ProjectZoomState> { props, state, editState ->
     FormGroup {
         div {
-            FormControlLabel {
-                label = ReactNode(string(Strings.ProjectZoom))
-                control = Switch.create {
-                    color = SwitchColor.secondary
-                    checked = state.isOn
-                    onChange = { event, _ ->
-                        val checked = event.target.checked
-                        editState { copy(isOn = checked) }
-                    }
-                }
-                labelPlacement = LabelPlacement.end
-            }
+            buildFeatureSwitch(
+                isOn = state.isOn,
+                onSwitched = { editState { copy(isOn = it) } },
+                labelStrings = Strings.ProjectZoom
+            )
             Tooltip {
                 title = ReactNode(string(Strings.ProjectZoomDescription))
                 placement = TooltipPlacement.right
@@ -494,11 +751,31 @@ private fun ChildrenBuilder.buildProjectZoomDetail(
     }
 }
 
+private fun ChildrenBuilder.buildFeatureSwitch(
+    isOn: Boolean,
+    onSwitched: (Boolean) -> Unit,
+    labelStrings: Strings
+) {
+    FormControlLabel {
+        label = ReactNode(string(labelStrings))
+        control = Switch.create {
+            color = SwitchColor.secondary
+            checked = isOn
+            onChange = { event, _ ->
+                val checked = event.target.checked
+                onSwitched(checked)
+            }
+        }
+        labelPlacement = LabelPlacement.end
+    }
+}
+
 private fun ChildrenBuilder.buildNextButton(
     scope: CoroutineScope,
     props: ConfigurationEditorProps,
     isEnabled: Boolean,
     lyricsConversion: LyricsConversionState,
+    lyricsReplacement: LyricsReplacementState,
     slightRestsFilling: SlightRestsFillingState,
     pitchConversion: PitchConversionState,
     projectZoom: ProjectZoomState,
@@ -518,6 +795,7 @@ private fun ChildrenBuilder.buildNextButton(
                     scope,
                     props,
                     lyricsConversion,
+                    lyricsReplacement,
                     slightRestsFilling,
                     pitchConversion,
                     projectZoom,
@@ -534,6 +812,7 @@ private fun process(
     scope: CoroutineScope,
     props: ConfigurationEditorProps,
     lyricsConversion: LyricsConversionState,
+    lyricsReplacement: LyricsReplacementState,
     slightRestsFilling: SlightRestsFillingState,
     pitchConversion: PitchConversionState,
     projectZoom: ProjectZoomState,
@@ -554,6 +833,11 @@ private fun process(
                     } else it
                 }
                 .let {
+                    if (lyricsReplacement.isOn) {
+                        it.replaceLyrics(lyricsReplacement.request)
+                    } else it
+                }
+                .let {
                     if (slightRestsFilling.isOn) {
                         it.copy(
                             tracks = it.tracks.map { track ->
@@ -569,10 +853,7 @@ private fun process(
                 }
 
             val availableFeatures = Feature.values()
-                .filter {
-                    it.isAvailable.invoke(project) &&
-                        format.availableFeaturesForGeneration.contains(it)
-                }
+                .filter { it.isAvailable.invoke(project) && format.availableFeaturesForGeneration.contains(it) }
                 .filter {
                     when (it) {
                         Feature.ConvertPitch -> pitchConversion.isOn
@@ -627,9 +908,14 @@ data class LyricsConversionState(
     val fromType: LyricsType?,
     val toType: LyricsType?
 ) : SubState {
-    val isReady: Boolean =
-        if (isOn) fromType != null && toType != null
-        else true
+    val isReady: Boolean = if (isOn) fromType != null && toType != null else true
+}
+
+data class LyricsReplacementState(
+    val isOn: Boolean,
+    val request: LyricsReplacementRequest
+) : SubState {
+    val isReady: Boolean = if (isOn) request.isValid else true
 }
 
 data class SlightRestsFillingState(
