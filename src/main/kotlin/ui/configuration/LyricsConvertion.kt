@@ -77,7 +77,7 @@ private fun ChildrenBuilder.buildLyricsDetail(
                     buildLyricsTypeControl(
                         labelText = string(
                             Strings.FromLyricsTypeLabel,
-                            "type" to props.project.lyricsType.displayName
+                            "type" to props.project.lyricsType.text
                         ),
                         type = fromLyricsType,
                         setType = setFromLyricsType,
@@ -128,10 +128,21 @@ private fun ChildrenBuilder.buildLyricsTypeControl(
                     }
                     label = Typography.create {
                         variant = TypographyVariant.subtitle2
-                        +lyricsType.displayName
+                        +lyricsType.text
                     }
                 }
             }
         }
     }
 }
+
+private val LyricsType.text get() = string(strings)
+
+private val LyricsType.strings
+    get() = when (this) {
+        LyricsType.RomajiCv -> Strings.LyricsTypeRomajiCV
+        LyricsType.RomajiVcv -> Strings.LyricsTypeRomajiVCV
+        LyricsType.KanaCv -> Strings.LyricsTypeKanaCV
+        LyricsType.KanaVcv -> Strings.LyricsTypeKanaVCV
+        LyricsType.Unknown -> Strings.LyricsTypeUnknown
+    }
