@@ -66,7 +66,7 @@ val ConfigurationEditor = scopedFC<ConfigurationEditorProps> { props, scope ->
         )
     }
     val (lyricsReplacement, setLyricsReplacement) = useState {
-        val preset = LyricsReplacementRequest.getPreset(props.outputFormat)
+        val preset = LyricsReplacementRequest.getPreset(props.project.format, props.outputFormat)
         if (preset == null) {
             LyricsReplacementState(false, LyricsReplacementRequest())
         } else {

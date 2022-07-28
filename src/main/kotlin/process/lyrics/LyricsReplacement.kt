@@ -4,6 +4,7 @@ import model.Format
 import model.Note
 import model.Project
 import model.Track
+import process.validateNotes
 import util.runIf
 
 data class LyricsReplacementRequest(
@@ -88,9 +89,24 @@ data class LyricsReplacementRequest(
 
     companion object {
 
-        fun getPreset(targetFormat: Format): LyricsReplacementRequest? = when (targetFormat) {
-            Format.Ccs -> LyricsReplacementRequest(
-                listOf(
+        fun getPreset(fromFormat: Format, toFormat: Format): LyricsReplacementRequest? {
+            val items = mutableListOf<Item>()
+
+            when (fromFormat) {
+                Format.Ust -> items.add(
+                    Item(
+                        filterType = FilterType.Regex,
+                        filter = ".*R$",
+                        matchType = MatchType.All,
+                        from = "",
+                        to = ""
+                    )
+                )
+                else -> Unit
+            }
+
+            when (toFormat) {
+                Format.Ccs -> items.add(
                     Item(
                         filterType = FilterType.Exact,
                         filter = "-",
@@ -99,9 +115,8 @@ data class LyricsReplacementRequest(
                         to = "ー"
                     )
                 )
-            )
-            Format.Ustx -> LyricsReplacementRequest(
-                listOf(
+
+                Format.Ustx -> items.add(
                     Item(
                         filterType = FilterType.Exact,
                         filter = "-",
@@ -110,9 +125,12 @@ data class LyricsReplacementRequest(
                         to = "+"
                     )
                 )
-            )
-            else -> null
+                else -> Unit
+            }
+
+            return LyricsReplacementRequest(items).takeIf { it.items.isNotEmpty() }
         }
+
     }
 }
 
@@ -120,8 +138,9 @@ fun Project.replaceLyrics(request: LyricsReplacementRequest) = copy(
     tracks = tracks.map { it.replaceLyrics(request) }
 )
 
-private fun Track.replaceLyrics(request: LyricsReplacementRequest) = copy(
-    notes = notes.map { it.replaceLyrics(request) }
+fun Track.replaceLyrics(request: LyricsReplacementRequest) = copy(
+    notes = notes.mapNotNull { note -> note.replaceLyrics(request).takeIf { it.lyric.isNotEmpty() } }
+        .validateNotes()
 )
 
 private fun Note.replaceLyrics(request: LyricsReplacementRequest) = copy(
