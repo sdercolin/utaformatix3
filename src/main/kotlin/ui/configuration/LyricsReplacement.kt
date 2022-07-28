@@ -300,3 +300,20 @@ private fun ChildrenBuilder.buildLyricsReplacementItem(
         }
     }
 }
+
+private val LyricsReplacementRequest.FilterType.strings
+    get() = when (this) {
+        LyricsReplacementRequest.FilterType.None -> Strings.LyricsReplacementFilterTypeNone
+        LyricsReplacementRequest.FilterType.Exact -> Strings.LyricsReplacementFilterTypeExact
+        LyricsReplacementRequest.FilterType.Containing -> Strings.LyricsReplacementFilterTypeContaining
+        LyricsReplacementRequest.FilterType.Prefix -> Strings.LyricsReplacementFilterTypePrefix
+        LyricsReplacementRequest.FilterType.Suffix -> Strings.LyricsReplacementFilterTypeSuffix
+        LyricsReplacementRequest.FilterType.Regex -> Strings.LyricsReplacementFilterTypeRegex
+    }
+
+private val LyricsReplacementRequest.MatchType.strings
+    get() = when (this) {
+        LyricsReplacementRequest.MatchType.All -> Strings.LyricsReplacementMatchTypeAll
+        LyricsReplacementRequest.MatchType.Exact -> Strings.LyricsReplacementMatchTypeExact
+        LyricsReplacementRequest.MatchType.Regex -> Strings.LyricsReplacementMatchTypeRegex
+    }

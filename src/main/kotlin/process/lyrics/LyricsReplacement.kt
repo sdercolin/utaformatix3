@@ -4,7 +4,6 @@ import model.Format
 import model.Note
 import model.Project
 import model.Track
-import ui.strings.Strings
 
 data class LyricsReplacementRequest(
     val items: List<Item> = listOf(Item()),
@@ -63,21 +62,21 @@ data class LyricsReplacementRequest(
         }
     }
 
-    enum class FilterType(val strings: Strings) {
-        None(Strings.LyricsReplacementFilterTypeNone),
-        Exact(Strings.LyricsReplacementFilterTypeExact),
-        Containing(Strings.LyricsReplacementFilterTypeContaining),
-        Prefix(Strings.LyricsReplacementFilterTypePrefix),
-        Suffix(Strings.LyricsReplacementFilterTypeSuffix),
-        Regex(Strings.LyricsReplacementFilterTypeRegex);
+    enum class FilterType {
+        None,
+        Exact,
+        Containing,
+        Prefix,
+        Suffix,
+        Regex;
 
         fun needsFilter(): Boolean = this != None
     }
 
-    enum class MatchType(val strings: Strings) {
-        All(Strings.LyricsReplacementMatchTypeAll),
-        Exact(Strings.LyricsReplacementMatchTypeExact),
-        Regex(Strings.LyricsReplacementMatchTypeRegex);
+    enum class MatchType {
+        All,
+        Exact,
+        Regex;
 
         fun needsFrom(): Boolean = this != All
     }
