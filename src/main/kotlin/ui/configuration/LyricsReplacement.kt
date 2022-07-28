@@ -103,8 +103,8 @@ private fun ChildrenBuilder.buildLyricsReplacementDetail(
                     paddingTop = 8.px
                     paddingBottom = 8.px
                 }
-                state.request.items.forEachIndexed { index, item ->
-                    buildLyricsReplacementItem(index, item, editState)
+                state.request.items.indices.forEach { index ->
+                    buildLyricsReplacementItem(index, state.request, editState)
                 }
                 div {
                     Button {
@@ -125,9 +125,10 @@ private fun ChildrenBuilder.buildLyricsReplacementDetail(
 
 private fun ChildrenBuilder.buildLyricsReplacementItem(
     index: Int,
-    item: LyricsReplacementRequest.Item,
+    request: LyricsReplacementRequest,
     editState: (LyricsReplacementState.() -> LyricsReplacementState) -> Unit
 ) {
+    val item = request.items[index]
     fun editRequest(block: LyricsReplacementRequest.() -> LyricsReplacementRequest) {
         editState { copy(request = request.block()) }
     }
@@ -290,6 +291,7 @@ private fun ChildrenBuilder.buildLyricsReplacementItem(
         }
         IconButton {
             color = IconButtonColor.inherit
+            disabled = index == 0
             style = jso {
                 margin = 5.px
                 marginLeft = 20.px
@@ -303,6 +305,7 @@ private fun ChildrenBuilder.buildLyricsReplacementItem(
         }
         IconButton {
             color = IconButtonColor.inherit
+            disabled = index == request.items.size - 1
             style = jso {
                 margin = 5.px
                 height = Length.fitContent
