@@ -95,8 +95,8 @@ data class LyricsReplacementRequest(
             when (fromFormat) {
                 Format.Ust -> items.add(
                     Item(
-                        filterType = FilterType.Regex,
-                        filter = ".*R$",
+                        filterType = FilterType.Suffix,
+                        filter = "R",
                         matchType = MatchType.All,
                         from = "",
                         to = ""
