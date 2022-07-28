@@ -35,6 +35,7 @@ import react.ReactNode
 import react.create
 import react.css.css
 import react.dom.html.ReactHTML.div
+import ui.common.title
 import ui.strings.Strings
 import ui.strings.string
 
