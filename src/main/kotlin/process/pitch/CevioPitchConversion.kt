@@ -173,11 +173,13 @@ fun Pitch.generateForCevio(notes: List<Note>, tempos: List<Tempo>, tickPrefix: L
     for ((thisPoint, nextPoint) in data.zipWithNext() + (data.last() to null)) {
         val index = thisPoint.first
         if (nextIndex != null && nextIndex > index) {
-            val lastEvent = eventsWithFullParams.last()
-            eventsWithFullParams.remove(lastEvent)
-            val lastEventRepeat = index - lastEvent.index!!
-            if (lastEventRepeat >= 1) {
-                eventsWithFullParams.add(lastEvent.copy(repeat = lastEventRepeat))
+            val lastEvent = eventsWithFullParams.lastOrNull()
+            if (lastEvent != null) {
+                eventsWithFullParams.remove(lastEvent)
+                val lastEventRepeat = index - lastEvent.index!!
+                if (lastEventRepeat >= 1) {
+                    eventsWithFullParams.add(lastEvent.copy(repeat = lastEventRepeat))
+                }
             }
         }
 
