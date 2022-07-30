@@ -227,7 +227,7 @@ enum class Strings(
     LyricsReplacementMatchTypeRegex(
         en = "Regex",
         ja = "正規表現",
-        zhCN = "正则表达式"
+        zhCN = "正则表达式",
         fr = "Regex"
     ),
     LyricsReplacementFromTextLabel(
