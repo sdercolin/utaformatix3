@@ -8,3 +8,7 @@ open class UnsupportedFileFormatError(override val message: String) : Exception(
 class UnsupportedStandardMidiError : UnsupportedFileFormatError(
     string(Strings.UnsupportedStandardMidiError)
 )
+
+class UnsupportedLegacyPpsfError : UnsupportedFileFormatError(
+    string(Strings.UnsupportedLegacyPpsfError)
+)

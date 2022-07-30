@@ -324,6 +324,11 @@ enum class Strings(
         ja = "Standard MIDIファイル形式はサポートされていません",
         zhCN = "不支持标准MIDI文件格式"
     ),
+    UnsupportedLegacyPpsfError(
+        en = "Legacy ppsf file format is not supported (only ppsf for Piapro Studio NT is supported)",
+        ja = "レガシー ppsf ファイル形式はサポートされていません（Piapro Studio NTのみサポートされています）",
+        zhCN = "不支持旧版ppsf文件格式（仅支持 ppsf for Piapro Studio NT）"
+    ),
     MultipleFileImportError(
         en = "Multiple files of {{format}} could not be imported in one go",
         ja = "複数の{{format}}ファイルを一度にインポートすることはできません",
