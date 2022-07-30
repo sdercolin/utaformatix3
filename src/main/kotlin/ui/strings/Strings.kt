@@ -12,7 +12,7 @@ enum class Strings(
     val ja: String,
     val zhCN: String,
     val ru: String = en,
-    val fr: String = en
+    val fr: String
 ) {
     LanguageDisplayName(
         en = English.displayName,
@@ -129,7 +129,8 @@ enum class Strings(
     LyricsReplacement(
         en = "Replace lyrics",
         ja = "歌詞を置き換える",
-        zhCN = "替换歌词"
+        zhCN = "替换歌词",
+        fr = "Remplacer les paroles"
     ),
     LyricsReplacementDescription(
         en = "Replace lyrics that pass the filter.\n- Presets are loaded according to original format and " +
@@ -139,87 +140,107 @@ enum class Strings(
             "・「{{matchType}}」で「{{regex}}」使用する場合、「{{to}}」に「$1」、「$2」などのプレースホルダーを用いて、" +
             "キャプチャされたグループを入れることができます。",
         zhCN = "替换可通过过滤器的歌词。\n・转换部分格式时，预设将会被加载。\n・在使用「{{regex}}」的「{{matchType}}」时" +
-            "，您可以在「{{to}}」中使用「$1」、「$2」等占位符来填充被捕获的组。"
+            "，您可以在「{{to}}」中使用「$1」、「$2」等占位符来填充被捕获的组。",
+        fr = "Remplacez les paroles qui passent le filtre.\n- Les préréglages sont chargés en fonction " + 
+            "du format d'origine et du format cible. Si vous utilisez \"{{regex}}\" comme \"{{matchType}}\", " +
+            "vous pouvez utiliser des caractères de remplacement comme \"\$1\", \"$2\", etc. dans \"{{to}}\" " +
+            "pour remplir les groupes capturés."
     ),
     LyricsReplacementItemLabel(
         en = "#{{number}}",
         ja = "#{{number}}",
-        zhCN = "#{{number}}"
+        zhCN = "#{{number}}",
+        fr = "#{{number}}"
     ),
     LyricsReplacementAddItemButton(
         en = "Add replacement rule",
         ja = "置換ルールを追加",
-        zhCN = "添加替换规则"
+        zhCN = "添加替换规则",
+        fr = "Ajouter une règle de remplacement"
     ),
     LyricsReplacementFilterTypeLabel(
         en = "Filter type",
         ja = "フィルタータイプ",
-        zhCN = "过滤器类型"
+        zhCN = "过滤器类型",
+        fr = "Type de filtre"
     ),
     LyricsReplacementFilterTypeNone(
         en = "None",
         ja = "なし",
-        zhCN = "无"
+        zhCN = "无",
+        fr = "Aucun"
     ),
     LyricsReplacementFilterTypeExact(
         en = "Exact",
         ja = "完全一致",
-        zhCN = "完全匹配"
+        zhCN = "完全匹配",
+        fr = "Exact"
     ),
     LyricsReplacementFilterTypeContaining(
         en = "Containing",
         ja = "含む",
-        zhCN = "包含"
+        zhCN = "包含",
+        fr = "Contenant"
     ),
     LyricsReplacementFilterTypePrefix(
         en = "Prefix",
         ja = "前方一致",
-        zhCN = "前缀"
+        zhCN = "前缀",
+        fr = "Préfixe"
     ),
     LyricsReplacementFilterTypeSuffix(
         en = "Suffix",
         ja = "後方一致",
-        zhCN = "后缀"
+        zhCN = "后缀",
+        fr = "Suffixe"
     ),
     LyricsReplacementFilterTypeRegex(
         en = "Regex",
         ja = "正規表現",
-        zhCN = "正则表达式"
+        zhCN = "正则表达式",
+        fr = "Regex"
     ),
     LyricsReplacementFilterTextLabel(
         en = "Filter",
         ja = "フィルター",
-        zhCN = "过滤器"
+        zhCN = "过滤器",
+        fr = "Filtre"
     ),
     LyricsReplacementMatchTypeLabel(
         en = "Match type",
         ja = "マッチタイプ",
-        zhCN = "匹配类型"
+        zhCN = "匹配类型",
+        fr = "Type de match"
     ),
     LyricsReplacementMatchTypeAll(
         en = "All",
         ja = "全部",
-        zhCN = "全部"
+        zhCN = "全部",
+        fr = "Tout"
     ),
     LyricsReplacementMatchTypeExact(
         en = "Exact",
         ja = "完全一致",
-        zhCN = "完全匹配"
+        zhCN = "完全匹配",
+        fr = "Exact"
     ),
     LyricsReplacementMatchTypeRegex(
         en = "Regex",
         ja = "正規表現",
         zhCN = "正则表达式"
+        fr = "Regex"
     ),
     LyricsReplacementFromTextLabel(
         en = "From",
         ja = "置換元",
-        zhCN = "替换源"
+        zhCN = "替换源",
+        fr = "De"
     ),
     LyricsReplacementToTextLabel(
         en = "To",
         ja = "置換先",
-        zhCN = "替换为"
+        zhCN = "替换为",
+        fr = "À"
     ),
     ConvertPitchData(
         en = "Convert pitch parameters",
@@ -462,7 +483,7 @@ enum class Strings(
         ja = "OpenUtau プロジェクト",
         zhCN = "OpenUtau 工程",
         ru = "Проект для OpenUtau",
-        fr = "projet pour OpenUtau"
+        fr = "Projet pour OpenUtau"
     ),
     CcsFormatDescription(
         en = "Project for CeVIO Creative Studio",
