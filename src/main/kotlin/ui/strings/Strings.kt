@@ -319,6 +319,11 @@ enum class Strings(
         ru = "Неподдерживаемый формат файла",
         fr = "Type de fichier non supporté"
     ),
+    UnsupportedStandardMidiError(
+        en = "Standard MIDI file format is not supported",
+        ja = "Standard MIDIファイル形式はサポートされていません",
+        zhCN = "不支持标准MIDI文件格式"
+    ),
     MultipleFileImportError(
         en = "Multiple files of {{format}} could not be imported in one go",
         ja = "複数の{{format}}ファイルを一度にインポートすることはできません",

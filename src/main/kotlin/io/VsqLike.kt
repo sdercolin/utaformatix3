@@ -1,6 +1,7 @@
 package io
 
 import exception.EmptyProjectException
+import exception.UnsupportedStandardMidiError
 import model.DEFAULT_LYRIC
 import model.ExportNotification
 import model.ExportResult
@@ -91,9 +92,9 @@ object VsqLike {
             titleWithIndexes.last().let { last ->
                 last.first to lines.subList(last.second, lines.count())
             }
-        ).map { pair ->
-            pair.first to pair.second.map { it.splitFirst("=") }.toMap()
-        }.toMap()
+        ).associate { pair ->
+            pair.first to pair.second.associate { it.splitFirst("=") }
+        }
 
         val name = sectionMap["Common"]?.let { section ->
             section["Name"] ?: ""
@@ -450,7 +451,10 @@ object VsqLike {
         val warnings = mutableListOf<ImportWarning>()
 
         val midiTracks = (midi.track as Array<dynamic>)
-        val tracksAsText = extractTextsFromMetaEvents(midiTracks)
+        val tracksAsText = extractTextsFromMetaEvents(midiTracks).filter { it.isNotEmpty() }
+        if (tracksAsText.isEmpty()) {
+            throw UnsupportedStandardMidiError()
+        }
         val measurePrefix = getMeasurePrefix(tracksAsText.first())
         val (tempos, timeSignatures, tickPrefix) = parseMasterTrack(
             midiTracks.first(),
