@@ -3,6 +3,7 @@ package ui
 import ImportParamsJson
 import csstype.VerticalAlign
 import csstype.px
+import exception.UnsupportedFileFormatError
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -67,6 +68,7 @@ val Importer = scopedFC<ImporterProps> { props, scope ->
                 files,
                 fileFormat,
                 setLoading = { isLoading = it },
+                onSnackBarError = { snackbarError = it },
                 onDialogError = { dialogError = it },
                 props,
                 params
@@ -173,6 +175,7 @@ private fun import(
     files: List<File>,
     format: Format,
     setLoading: (Boolean) -> Unit,
+    onSnackBarError: (SnackbarErrorState) -> Unit,
     onDialogError: (DialogErrorState) -> Unit,
     props: ImporterProps,
     params: ImportParams
@@ -190,13 +193,17 @@ private fun import(
         }.onFailure { t ->
             console.log(t)
             setLoading(false)
-            onDialogError(
-                DialogErrorState(
-                    isShowing = true,
-                    title = string(Strings.ImportErrorDialogTitle),
-                    message = t.stackTraceToString()
+            if (t is UnsupportedFileFormatError) {
+                onSnackBarError(SnackbarErrorState(true, t.message))
+            } else {
+                onDialogError(
+                    DialogErrorState(
+                        isShowing = true,
+                        title = string(Strings.ImportErrorDialogTitle),
+                        message = t.stackTraceToString()
+                    )
                 )
-            )
+            }
         }
     }
 }
