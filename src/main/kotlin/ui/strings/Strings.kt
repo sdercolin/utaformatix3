@@ -12,7 +12,7 @@ enum class Strings(
     val ja: String,
     val zhCN: String,
     val ru: String = en,
-    val fr: String
+    val fr: String = en
 ) {
     LanguageDisplayName(
         en = English.displayName,
@@ -343,7 +343,14 @@ enum class Strings(
     UnsupportedStandardMidiError(
         en = "Standard MIDI file format is not supported",
         ja = "Standard MIDIファイル形式はサポートされていません",
-        zhCN = "不支持标准MIDI文件格式"
+        zhCN = "不支持标准MIDI文件格式",
+        fr = "Le format de fichier MIDI standard n'est pas pris en charge"
+    ),
+    UnsupportedLegacyPpsfError(
+        en = "Legacy ppsf file format is not supported (only ppsf for Piapro Studio NT is supported)",
+        ja = "レガシー ppsf ファイル形式はサポートされていません（Piapro Studio NTのみサポートされています）",
+        zhCN = "不支持旧版ppsf文件格式（仅支持 ppsf for Piapro Studio NT）",
+        fr = "Le format de fichier ppsf hérité n'est pas pris en charge (seul ppsf pour Piapro Studio NT est pris en charge)"
     ),
     MultipleFileImportError(
         en = "Multiple files of {{format}} could not be imported in one go",
