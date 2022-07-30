@@ -210,7 +210,7 @@ enum class Strings(
         en = "Match type",
         ja = "マッチタイプ",
         zhCN = "匹配类型",
-        fr = "Type de match"
+        fr = "Type de match",
     ),
     LyricsReplacementMatchTypeAll(
         en = "All",
