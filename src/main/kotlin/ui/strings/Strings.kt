@@ -129,7 +129,8 @@ enum class Strings(
     LyricsReplacement(
         en = "Replace lyrics",
         ja = "歌詞を置き換える",
-        zhCN = "替换歌词"
+        zhCN = "替换歌词",
+        ru = "Заменить тексты"
     ),
     LyricsReplacementDescription(
         en = "Replace lyrics that pass the filter.\n- Presets are loaded according to original format and " +
@@ -139,87 +140,107 @@ enum class Strings(
             "・「{{matchType}}」で「{{regex}}」使用する場合、「{{to}}」に「$1」、「$2」などのプレースホルダーを用いて、" +
             "キャプチャされたグループを入れることができます。",
         zhCN = "替换可通过过滤器的歌词。\n・转换部分格式时，预设将会被加载。\n・在使用「{{regex}}」的「{{matchType}}」时" +
-            "，您可以在「{{to}}」中使用「$1」、「$2」等占位符来填充被捕获的组。"
+            "，您可以在「{{to}}」中使用「$1」、「$2」等占位符来填充被捕获的组。",
+        ru = "Замените тексты, которые проходят фильтр.\n- Пресеты загружаются в соответсвии с " +
+            "исходным и целевым форматом.\n- Если вы используете \"{{regex}}\" в качестве " +
+            "\"{{matchType}}\", вы можете использовать заполнители типа \"\$1\", \"$2\", и т.д. " +
+            "в \"{{to}}\" для заполнения захваченных групп."
     ),
     LyricsReplacementItemLabel(
         en = "#{{number}}",
         ja = "#{{number}}",
-        zhCN = "#{{number}}"
+        zhCN = "#{{number}}",
+        ru = "#{{number}}"
     ),
     LyricsReplacementAddItemButton(
         en = "Add replacement rule",
         ja = "置換ルールを追加",
-        zhCN = "添加替换规则"
+        zhCN = "添加替换规则",
+        ru = "Добавить правило переноса"
     ),
     LyricsReplacementFilterTypeLabel(
         en = "Filter type",
         ja = "フィルタータイプ",
-        zhCN = "过滤器类型"
+        zhCN = "过滤器类型",
+        ru = "Тип фильтра"
     ),
     LyricsReplacementFilterTypeNone(
         en = "None",
         ja = "なし",
-        zhCN = "无"
+        zhCN = "无",
+        ru = "Нет"
     ),
     LyricsReplacementFilterTypeExact(
         en = "Exact",
         ja = "完全一致",
-        zhCN = "完全匹配"
+        zhCN = "完全匹配",
+        ru = "Точный"
     ),
     LyricsReplacementFilterTypeContaining(
         en = "Containing",
         ja = "含む",
-        zhCN = "包含"
+        zhCN = "包含",
+        ru = "Содержащий"
     ),
     LyricsReplacementFilterTypePrefix(
         en = "Prefix",
         ja = "前方一致",
-        zhCN = "前缀"
+        zhCN = "前缀",
+        ru = "Префикс"
     ),
     LyricsReplacementFilterTypeSuffix(
         en = "Suffix",
         ja = "後方一致",
-        zhCN = "后缀"
+        zhCN = "后缀",
+        ru = "Суффикс"
     ),
     LyricsReplacementFilterTypeRegex(
         en = "Regex",
         ja = "正規表現",
-        zhCN = "正则表达式"
+        zhCN = "正则表达式",
+        ru = "Регулярное выражение"
     ),
     LyricsReplacementFilterTextLabel(
         en = "Filter",
         ja = "フィルター",
-        zhCN = "过滤器"
+        zhCN = "过滤器",
+        ru = "Фильтр"
     ),
     LyricsReplacementMatchTypeLabel(
         en = "Match type",
         ja = "マッチタイプ",
-        zhCN = "匹配类型"
+        zhCN = "匹配类型",
+        ru = "Тип совпадения"
     ),
     LyricsReplacementMatchTypeAll(
         en = "All",
         ja = "全部",
-        zhCN = "全部"
+        zhCN = "全部",
+        ru = "Все"
     ),
     LyricsReplacementMatchTypeExact(
         en = "Exact",
         ja = "完全一致",
-        zhCN = "完全匹配"
+        zhCN = "完全匹配",
+        ru = "Точный"
     ),
     LyricsReplacementMatchTypeRegex(
         en = "Regex",
         ja = "正規表現",
-        zhCN = "正则表达式"
+        zhCN = "正则表达式",
+        ru = "Регулярное выражение"
     ),
     LyricsReplacementFromTextLabel(
         en = "From",
         ja = "置換元",
-        zhCN = "替换源"
+        zhCN = "替换源",
+        ru = "Из"
     ),
     LyricsReplacementToTextLabel(
         en = "To",
         ja = "置換先",
-        zhCN = "替换为"
+        zhCN = "替换为",
+        ru = "До"
     ),
     ConvertPitchData(
         en = "Convert pitch parameters",
@@ -322,12 +343,14 @@ enum class Strings(
     UnsupportedStandardMidiError(
         en = "Standard MIDI file format is not supported",
         ja = "Standard MIDIファイル形式はサポートされていません",
-        zhCN = "不支持标准MIDI文件格式"
+        zhCN = "不支持标准MIDI文件格式",
+        ru = "Стандартный формат MIDI-файла не поддерживается"
     ),
     UnsupportedLegacyPpsfError(
         en = "Legacy ppsf file format is not supported (only ppsf for Piapro Studio NT is supported)",
         ja = "レガシー ppsf ファイル形式はサポートされていません（Piapro Studio NTのみサポートされています）",
-        zhCN = "不支持旧版ppsf文件格式（仅支持 ppsf for Piapro Studio NT）"
+        zhCN = "不支持旧版ppsf文件格式（仅支持 ppsf for Piapro Studio NT）",
+        ru = "Устаревший формат файла ppsf не поддерживается. (Поддерживается только ppsf от Piapro Studio NT)"
     ),
     MultipleFileImportError(
         en = "Multiple files of {{format}} could not be imported in one go",
