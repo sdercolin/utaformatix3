@@ -1,5 +1,6 @@
 package io
 
+import exception.UnsupportedLegacyPpsfError
 import external.JsZip
 import kotlinx.coroutines.await
 import kotlinx.serialization.SerialName
@@ -98,7 +99,9 @@ object Ppsf {
 
     private suspend fun readContent(file: File): Project {
         val binary = file.readBinary()
-        val zip = JsZip().loadAsync(binary).await()
+        val zip = runCatching { JsZip().loadAsync(binary).await() }.getOrElse {
+            throw UnsupportedLegacyPpsfError()
+        }
         val vprEntry = zip.file(jsonPath)
         val text = requireNotNull(vprEntry).async("string").await() as String
         return jsonSerializer.decodeFromString(Project.serializer(), text)
