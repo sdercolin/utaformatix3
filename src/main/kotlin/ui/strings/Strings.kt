@@ -146,7 +146,7 @@ enum class Strings(
             "исходным и целевым форматом.\n- Если вы используете \"{{regex}}\" в качестве " +
             "\"{{matchType}}\", вы можете использовать заполнители типа \"\$1\", \"$2\", и т.д. " +
             "в \"{{to}}\" для заполнения захваченных групп.",
-        fr = "Remplacez les paroles qui passent le filtre.\n- Les préréglages sont chargés en fonction " + 
+        fr = "Remplacez les paroles qui passent le filtre.\n- Les préréglages sont chargés en fonction " +
             "du format d'origine et du format cible. Si vous utilisez \"{{regex}}\" comme \"{{matchType}}\", " +
             "vous pouvez utiliser des caractères de remplacement comme \"\$1\", \"$2\", etc. dans \"{{to}}\" " +
             "pour remplir les groupes capturés."
@@ -373,7 +373,8 @@ enum class Strings(
         ja = "レガシー ppsf ファイル形式はサポートされていません（Piapro Studio NTのみサポートされています）",
         zhCN = "不支持旧版ppsf文件格式（仅支持 ppsf for Piapro Studio NT）",
         ru = "Устаревший формат файла ppsf не поддерживается. (Поддерживается только ppsf от Piapro Studio NT)",
-        fr = "Le format de fichier ppsf hérité n'est pas pris en charge (seul ppsf pour Piapro Studio NT est pris en charge)"
+        fr = "Le format de fichier ppsf hérité n'est pas pris en charge (seul ppsf pour Piapro Studio NT " +
+            "est pris en charge)"
     ),
     MultipleFileImportError(
         en = "Multiple files of {{format}} could not be imported in one go",
