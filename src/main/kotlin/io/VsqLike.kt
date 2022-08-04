@@ -1,6 +1,7 @@
 package io
 
 import exception.EmptyProjectException
+import exception.UnsupportedStandardMidiError
 import model.DEFAULT_LYRIC
 import model.ExportNotification
 import model.ExportResult
@@ -82,7 +83,7 @@ object VsqLike {
     private fun parseTrack(trackAsText: String, trackId: Int, tickPrefix: Long, params: ImportParams): Track {
         val lines = trackAsText.linesNotBlank()
         val titleWithIndexes = lines.mapIndexed { index, line ->
-            if (line.matches("\\[.*\\]")) line.drop(1).dropLast(1) to index
+            if (Regex("\\[.*\\]").matches(line)) line.drop(1).dropLast(1) to index
             else null
         }.filterNotNull()
         val sectionMap = titleWithIndexes.zipWithNext().map { (current, next) ->
@@ -91,9 +92,9 @@ object VsqLike {
             titleWithIndexes.last().let { last ->
                 last.first to lines.subList(last.second, lines.count())
             }
-        ).map { pair ->
-            pair.first to pair.second.map { it.splitFirst("=") }.toMap()
-        }.toMap()
+        ).associate { pair ->
+            pair.first to pair.second.associate { it.splitFirst("=") }
+        }
 
         val name = sectionMap["Common"]?.let { section ->
             section["Name"] ?: ""
@@ -450,7 +451,10 @@ object VsqLike {
         val warnings = mutableListOf<ImportWarning>()
 
         val midiTracks = (midi.track as Array<dynamic>)
-        val tracksAsText = extractTextsFromMetaEvents(midiTracks)
+        val tracksAsText = extractTextsFromMetaEvents(midiTracks).filter { it.isNotEmpty() }
+        if (tracksAsText.isEmpty()) {
+            throw UnsupportedStandardMidiError()
+        }
         val measurePrefix = getMeasurePrefix(tracksAsText.first())
         val (tempos, timeSignatures, tickPrefix) = parseMasterTrack(
             midiTracks.first(),

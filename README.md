@@ -33,7 +33,7 @@ The current version `3.x` is built with [Kotlin for JavaScript](https://kotlinla
 
 ## Localization help
 
-[時雨ゆん](https://twitter.com/Yun_Shigure), [KagamineP](https://github.com/KagamineP)
+[時雨ゆん](https://twitter.com/Yun_Shigure), [KagamineP](https://github.com/KagamineP), [Exorcism0666](https://github.com/Exorcism0666)
 
 ## Get started for development
 1. Install [IntelliJ IDEA](https://www.jetbrains.com/idea/)

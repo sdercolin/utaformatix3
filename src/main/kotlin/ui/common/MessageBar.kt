@@ -1,4 +1,4 @@
-package ui
+package ui.common
 
 import kotlinx.js.jso
 import mui.material.Alert

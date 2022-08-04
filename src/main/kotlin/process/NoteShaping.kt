@@ -2,6 +2,7 @@ package process
 
 import kotlin.math.min
 import model.Note
+import model.Project
 import model.Track
 
 interface RichNote<T : Any> {
@@ -29,7 +30,9 @@ fun <T : RichNote<T>> List<T>.validateNotes(): List<T> {
 
 fun Track.validateNotes() = copy(notes = notes.validateNotes())
 
-fun Track.fillRests(excludedMaxLength: Long) =
+fun Project.fillRests(excludedMaxLength: Long) = copy(tracks = tracks.map { it.fillRests(excludedMaxLength) })
+
+private fun Track.fillRests(excludedMaxLength: Long) =
     if (notes.isEmpty()) this
     else this.copy(
         notes = notes.let {

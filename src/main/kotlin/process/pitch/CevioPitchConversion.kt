@@ -6,6 +6,7 @@ import model.Note
 import model.Pitch
 import model.Tempo
 import process.pitch.CevioTrackPitchData.Event
+import util.runIf
 
 data class CevioTrackPitchData(
     val events: List<Event>,
@@ -172,11 +173,13 @@ fun Pitch.generateForCevio(notes: List<Note>, tempos: List<Tempo>, tickPrefix: L
     for ((thisPoint, nextPoint) in data.zipWithNext() + (data.last() to null)) {
         val index = thisPoint.first
         if (nextIndex != null && nextIndex > index) {
-            val lastEvent = eventsWithFullParams.last()
-            eventsWithFullParams.remove(lastEvent)
-            val lastEventRepeat = index - lastEvent.index!!
-            if (lastEventRepeat >= 1) {
-                eventsWithFullParams.add(lastEvent.copy(repeat = lastEventRepeat))
+            val lastEvent = eventsWithFullParams.lastOrNull()
+            if (lastEvent != null) {
+                eventsWithFullParams.remove(lastEvent)
+                val lastEventRepeat = index - lastEvent.index!!
+                if (lastEventRepeat >= 1) {
+                    eventsWithFullParams.add(lastEvent.copy(repeat = lastEventRepeat))
+                }
             }
         }
 
@@ -216,7 +219,7 @@ private fun denormalizeFromTick(
     tickPrefix: Long
 ): List<Event> {
     val tempos = temposInTicks
-        .map { if (it.tickPosition == 0L) it else it.copy(tickPosition = it.tickPosition + tickPrefix) }
+        .map { it.runIf(it.tickPosition != 0L) { copy(tickPosition = it.tickPosition + tickPrefix) } }
         .expand()
     val events = eventsWithFullParams.map { it.copy(index = it.index?.plus(tickPrefix)) }
 
@@ -299,4 +302,4 @@ private fun removeRedundantIndex(eventsWithFullParams: List<Event>) =
     }
 
 private fun removeRedundantRepeat(events: List<Event>) =
-    events.map { if (it.repeat == 1L) it.copy(repeat = null) else it }
+    events.map { it.runIf(it.repeat == 1L) { copy(repeat = null) } }

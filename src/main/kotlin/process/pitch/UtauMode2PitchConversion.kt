@@ -9,6 +9,7 @@ import process.interpolateCosineEaseInOut
 import process.interpolateCosineEaseOut
 import process.interpolateLinear
 import process.simplifyShapeTo
+import util.runIf
 
 private const val SAMPLING_INTERVAL_TICK = 4L
 
@@ -132,7 +133,9 @@ private fun List<Pair<Long, Double>>.fixPointsAtLastNote(thisNote: Note, lastNot
     if (lastNote == null || lastNote.tickOff != thisNote.tickOn) this
     else {
         val fixed = this.map {
-            if (it.first < thisNote.tickOn) it.first to (it.second + thisNote.key - lastNote.key) else it
+            it.runIf(it.first < thisNote.tickOn) {
+                it.first to (it.second + thisNote.key - lastNote.key)
+            }
         }
         val lastPoint = fixed.lastOrNull()
         if (lastPoint != null && lastPoint.first < thisNote.tickOn) fixed + (thisNote.tickOn to 0.0)

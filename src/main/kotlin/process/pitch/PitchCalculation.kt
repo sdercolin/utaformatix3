@@ -6,6 +6,7 @@ import model.LOG_FRQ_CENTER_C
 import model.LOG_FRQ_DIFF_ONE_KEY
 import model.Note
 import model.Pitch
+import util.runIf
 
 fun Double.loggedFrequencyToKey() = KEY_CENTER_C + (this - LOG_FRQ_CENTER_C) / LOG_FRQ_DIFF_ONE_KEY
 fun Double.keyToLoggedFrequency() = (this - KEY_CENTER_C) * LOG_FRQ_DIFF_ONE_KEY + LOG_FRQ_CENTER_C
@@ -41,9 +42,8 @@ private fun Pitch.convertRelativity(
                         else value.takeUnless { it == 0.0 }?.let { it + currentNoteKey }
                     } else 0.0
                 pos to convertedValue
-            }.let {
-                if (!toAbsolute) it.appendPointsAtBorders(notes, radius = borderAppendRadius)
-                else it
+            }.runIf(!toAbsolute) {
+                appendPointsAtBorders(notes, radius = borderAppendRadius)
             }
         }
     }
