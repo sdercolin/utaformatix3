@@ -14,6 +14,7 @@ The current version `3.x` is built with [Kotlin for JavaScript](https://kotlinla
 - Detect and convert Japanese lyrics types
   - between CV and VCV
   - between Kana and Romaji
+- Find/Replace texts in the lyrics
 - Convert pitch for the following supported formats
   
   |        Format        | Pitch import | Vibrato import | Pitch export | 
