@@ -29,7 +29,7 @@ data class Project(
                 .mapIndexed { index, track -> track.copy(id = index) }
         ).takeIf { it.tracks.isNotEmpty() }
 
-    val hasXSampaData get() = tracks.any { track -> track.notes.any { it.xSampa != null } }
+    val hasXSampaData get() = tracks.any { track -> track.notes.any { it.phoneme != null } }
 
     fun requireValid() = this.also {
         tracks.forEachIndexed { index, track ->

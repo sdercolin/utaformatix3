@@ -151,12 +151,23 @@ enum class Format(
             TODO("Not Implemented")
         },
         possibleLyricsTypes = listOf(RomajiCv, KanaCv)
+    ),
+    UfData(
+        ".ufdata",
+        parser = { files, params ->
+            io.UfData.parse(files.first(), params)
+        },
+        generator = { project, features ->
+            io.UfData.generate(project, features)
+        },
+        possibleLyricsTypes = listOf(RomajiCv, RomajiVcv, KanaCv, KanaVcv),
+        availableFeaturesForGeneration = listOf(ConvertPitch)
     );
 
     val allExtensions get() = listOf(extension) + otherExtensions
 
     companion object {
-        val importable get() = listOf(Vsqx, Vpr, Vsq, VocaloidMid, Ust, Ustx, Ccs, MusicXml, Svp, S5p, Dv, Ppsf)
-        val exportable get() = listOf(Vsqx, Vpr, Vsq, VocaloidMid, Ust, Ustx, Ccs, MusicXml, Svp, S5p, Dv)
+        val importable get() = listOf(Vsqx, Vpr, Vsq, VocaloidMid, Ust, Ustx, Ccs, MusicXml, Svp, S5p, Dv, Ppsf, UfData)
+        val exportable get() = listOf(Vsqx, Vpr, Vsq, VocaloidMid, Ust, Ustx, Ccs, MusicXml, Svp, S5p, Dv, UfData)
     }
 }

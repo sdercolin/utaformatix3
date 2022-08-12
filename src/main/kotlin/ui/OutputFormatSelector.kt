@@ -12,6 +12,7 @@ import model.Format.MusicXml
 import model.Format.Ppsf
 import model.Format.S5p
 import model.Format.Svp
+import model.Format.UfData
 import model.Format.Ust
 import model.Format.Ustx
 import model.Format.VocaloidMid
@@ -129,6 +130,11 @@ private val ImportWarning.text: String
             Strings.ImportWarningTimeSignatureIgnoredInPreMeasure,
             "timeSignature" to timeSignature.displayValue
         )
+        is ImportWarning.IncompatibleFormatSerializationVersion -> string(
+            Strings.ImportWarningIncompatibleFormatSerializationVersion,
+            "dataVersion" to dataVersion,
+            "currentVersion" to currentVersion
+        )
     }
 
 private val Format.description: String?
@@ -145,6 +151,7 @@ private val Format.description: String?
         Dv -> Strings.DvFormatDescription
         Vsq -> Strings.VsqFormatDescription
         Ppsf -> null
+        UfData -> Strings.UfDataFormatDescription
     }?.let { string(it) }
 
 private val Format.iconPath: String?
@@ -161,6 +168,7 @@ private val Format.iconPath: String?
         Dv -> Resources.dvIcon
         Vsq -> Resources.vsqIcon
         Ppsf -> null
+        UfData -> Resources.ufdataIcon
     }
 
 external interface OutputFormatSelectorProps : Props {

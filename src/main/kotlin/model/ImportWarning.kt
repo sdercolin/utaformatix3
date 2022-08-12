@@ -10,4 +10,5 @@ sealed class ImportWarning {
     object TimeSignatureNotFound : ImportWarning()
     class TimeSignatureIgnoredInTrack(val track: Track, val timeSignature: TimeSignature) : ImportWarning()
     class TimeSignatureIgnoredInPreMeasure(val timeSignature: TimeSignature) : ImportWarning()
+    class IncompatibleFormatSerializationVersion(val currentVersion: String, val dataVersion: String) : ImportWarning()
 }
