@@ -72,7 +72,7 @@ object Vpr {
                     tickOff = tickOffset + note.pos + note.duration,
                     lyric = note.lyric.takeUnless { it.isNullOrBlank() } ?: DEFAULT_LYRIC,
                     key = note.number,
-                    xSampa = note.phoneme
+                    phoneme = note.phoneme
                 )
             }
         val pitch = if (params.simpleImport) null else parsePitchData(track)
@@ -157,7 +157,7 @@ object Vpr {
                     duration = it.length,
                     number = it.key,
                     lyric = it.lyric,
-                    phoneme = it.xSampa ?: emptyNote.phoneme
+                    phoneme = it.phoneme ?: emptyNote.phoneme
                 )
             }
             val duration = track.notes.lastOrNull()?.tickOff

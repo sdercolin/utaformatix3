@@ -1,5 +1,6 @@
 package ui.strings
 
+import com.sdercolin.utaformatix.data.UtaFormatixDataVersion
 import io.MusicXml.MUSIC_XML_VERSION
 import ui.strings.Language.English
 import ui.strings.Language.French
@@ -344,15 +345,15 @@ enum class Strings(
     ),
     ImportFileSubDescription(
         en = "Supported file types: VSQX, VPR, VSQ, MID(VOCALOID), USTs," +
-            " USTX, CCS, MUSICXML, XML, SVP, S5P, DV, PPSF(NT)",
+            " USTX, CCS, MUSICXML, XML, SVP, S5P, DV, PPSF(NT), UFDATA",
         ja = "サポートされているファイル形式：VSQX、VPR、VSQ、MID（VOCALOID）、UST（複数可）、" +
-            "USTX、CCS、MUSICXML、XML、SVP、S5P、DV、PPSF（NT）",
+            "USTX、CCS、MUSICXML、XML、SVP、S5P、DV、PPSF（NT）、UFDATA",
         zhCN = "支持的文件类型：VSQX、VPR、VSQ、MID（VOCALOID）、UST（允许复数个）、" +
-            "USTX、CCS、MUSICXML、XML、SVP、S5P、DV、PPSF（NT）",
+            "USTX、CCS、MUSICXML、XML、SVP、S5P、DV、PPSF（NT）、UFDATA",
         ru = "Поддерживаемые форматы файлов: VSQx, VPR, VSQ, MID (VOCALOID), UST," +
-            " USTX, CCS, MusicXML, XML, SVP, S5P, DV, PPSF(NT)",
+            " USTX, CCS, MusicXML, XML, SVP, S5P, DV, PPSF(NT), UFDATA",
         fr = "Types de fichiers pris en charge : VSQX, VPR, VSQ, MID(VOCALOID), USTs," +
-            " USTX, CCS, MUSICXML, XML, SVP, S5P, DV, PPSF(NT)"
+            " USTX, CCS, MUSICXML, XML, SVP, S5P, DV, PPSF(NT), UFDATA"
     ),
     UnsupportedFileTypeImportError(
         en = "Unsupported file type",
@@ -488,6 +489,13 @@ enum class Strings(
         ru = "- Метка временной сигнатуры ({{timeSignature}}) в предварительных мерах была проигнорирована.",
         fr = "- La signature rythmique ({{timeSignature}}) dans les pré-mesures a été ignorée."
     ),
+    ImportWarningIncompatibleFormatSerializationVersion(
+        en = "- Some data may have been lost because the input file has an incompatible serialization version:" +
+            " {{dataVersion}}. Current version is {{currentVersion}}.",
+        ja = "- 入力ファイルのシリアライゼーションバージョン {{dataVersion}} への互換性がないため、すべてのデータを読み込んでいない" +
+            "可能性があります。現在のバージョンは {{currentVersion}} です。",
+        zhCN = "- 因为导入的文件的序列化版本 {{dataVersion}} 与当前版本不兼容，部分数据可能丢失。当前版本：{{currentVersion}}。"
+    ),
     VsqxFormatDescription(
         en = "Project for VOCALOID4",
         ja = "VOCALOID4 プロジェクト",
@@ -564,6 +572,11 @@ enum class Strings(
         zhCN = "VOCALOID1 工程",
         ru = "Проект для VOCALOID1",
         fr = "Projet pour VOCALOID1"
+    ),
+    UfDataFormatDescription(
+        en = "UtaFormatix Data Format (v$UtaFormatixDataVersion)",
+        ja = "UtaFormatix データ形式（v$UtaFormatixDataVersion）",
+        zhCN = "UtaFormatix 数据格式（v$UtaFormatixDataVersion）"
     ),
     ExportButton(
         en = "Export",

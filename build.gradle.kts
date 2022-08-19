@@ -22,6 +22,9 @@ fun kotlinw(target: String): String =
 val kotlinWrappersVersion = "1.0.0-pre.343"
 
 dependencies {
+    // Model
+    implementation("com.sdercolin.utaformatix:utaformatix-data:1.0.0")
+
     // Kotlin
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core-js:1.6.2")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.3")

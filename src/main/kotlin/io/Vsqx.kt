@@ -207,7 +207,7 @@ object Vsqx {
                     tickOn = tickOn + tickOffset,
                     tickOff = tickOn + tickOffset + length,
                     lyric = lyric,
-                    xSampa = xSampa
+                    phoneme = xSampa
                 )
             }
         val pitch = if (params.simpleImport) null else {
@@ -407,10 +407,10 @@ object Vsqx {
             val lyricCData = document.createCDATASection(model.lyric)
             it.appendChild(lyricCData)
         }
-        if (model.xSampa != null) {
+        if (model.phoneme != null) {
             newNote.getSingleElementByTagName(tagNames.xSampa).also {
                 it.clear()
-                val xSampaCData = document.createCDATASection(model.xSampa)
+                val xSampaCData = document.createCDATASection(model.phoneme)
                 it.appendChild(xSampaCData)
             }
         }

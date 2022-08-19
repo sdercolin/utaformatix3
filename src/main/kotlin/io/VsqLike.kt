@@ -122,7 +122,7 @@ object VsqLike {
                     lyric = lyric,
                     tickOn = tickPosition,
                     tickOff = tickPosition + length,
-                    xSampa = xSampa
+                    phoneme = xSampa
                 )
             }
             .filterNotNull()
@@ -251,7 +251,7 @@ object VsqLike {
             }
             lyricsLines.apply {
                 add("[h#${number.padStartZero(4)}]")
-                add("L0=\"${note.lyric}\",\"${note.xSampa ?: "a"}\",0.000000,64,0,0")
+                add("L0=\"${note.lyric}\",\"${note.phoneme ?: "a"}\",0.000000,64,0,0")
             }
         }
 
