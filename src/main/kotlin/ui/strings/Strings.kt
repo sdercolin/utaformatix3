@@ -345,15 +345,15 @@ enum class Strings(
     ),
     ImportFileSubDescription(
         en = "Supported file types: VSQX, VPR, VSQ, MID(VOCALOID), USTs," +
-            " USTX, CCS, MUSICXML, XML, SVP, S5P, DV, PPSF(NT)",
+            " USTX, CCS, MUSICXML, XML, SVP, S5P, DV, PPSF(NT), UFDATA",
         ja = "サポートされているファイル形式：VSQX、VPR、VSQ、MID（VOCALOID）、UST（複数可）、" +
-            "USTX、CCS、MUSICXML、XML、SVP、S5P、DV、PPSF（NT）",
+            "USTX、CCS、MUSICXML、XML、SVP、S5P、DV、PPSF（NT）、UFDATA",
         zhCN = "支持的文件类型：VSQX、VPR、VSQ、MID（VOCALOID）、UST（允许复数个）、" +
-            "USTX、CCS、MUSICXML、XML、SVP、S5P、DV、PPSF（NT）",
+            "USTX、CCS、MUSICXML、XML、SVP、S5P、DV、PPSF（NT）、UFDATA",
         ru = "Поддерживаемые форматы файлов: VSQx, VPR, VSQ, MID (VOCALOID), UST," +
-            " USTX, CCS, MusicXML, XML, SVP, S5P, DV, PPSF(NT)",
+            " USTX, CCS, MusicXML, XML, SVP, S5P, DV, PPSF(NT), UFDATA",
         fr = "Types de fichiers pris en charge : VSQX, VPR, VSQ, MID(VOCALOID), USTs," +
-            " USTX, CCS, MUSICXML, XML, SVP, S5P, DV, PPSF(NT)"
+            " USTX, CCS, MUSICXML, XML, SVP, S5P, DV, PPSF(NT), UFDATA"
     ),
     UnsupportedFileTypeImportError(
         en = "Unsupported file type",
