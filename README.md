@@ -8,8 +8,8 @@ The current version `3.x` is built with [Kotlin for JavaScript](https://kotlinla
 
 ## Features
 
-- Supported importing formats: `.vsqx(3/4)`, `.vpr`, `.vsq`, `.mid(VOCALOID)`, `.ust`, `.ustx`, `.ccs`,`.xml(MusicXML)`, `.musicxml`, `.svp`, `.s5p`, `.dv`, `.ppsf(NT)`
-- Supported exporting formats: `.vsqx(4)`, `.vpr`, `.vsq`, `.mid(VOCALOID)`, `.ust`, `.ustx`, `.ccs`, `.xml(MusicXML)`, `.svp`, `.s5p`, `.dv`
+- Supported importing formats: `.vsqx(3/4)`, `.vpr`, `.vsq`, `.mid(VOCALOID)`, `.ust`, `.ustx`, `.ccs`,`.xml(MusicXML)`, `.musicxml`, `.svp`, `.s5p`, `.dv`, `.ppsf(NT)`, `.ufdata`
+- Supported exporting formats: `.vsqx(4)`, `.vpr`, `.vsq`, `.mid(VOCALOID)`, `.ust`, `.ustx`, `.ccs`, `.xml(MusicXML)`, `.svp`, `.s5p`, `.dv`, `.ufdata`
 - Keep information including: tracks, notes, tempo labels, time signatures
 - Detect and convert Japanese lyrics types
   - between CV and VCV
@@ -27,6 +27,12 @@ The current version `3.x` is built with [Kotlin for JavaScript](https://kotlinla
   |         S5P          |       ✓      |                |       ✓      |
   |         DV           |       ✓      |        ✓       |       ✓      |
   
+## Open format published (.ufdata)
+
+We have published the internal data format of UtaFormatix to [UtaFormatix Data](https://github.com/sdercolin/utaformatix-data).
+
+If you are developing OSS projects related to singing voice synthesis, you may find it useful.
+
 ## Contributors
 
 [sdercolin](https://github.com/sdercolin), [ghosrt](https://github.com/ghosrt), [shine5402](https://github.com/shine5402)
