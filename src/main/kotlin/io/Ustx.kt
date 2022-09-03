@@ -12,8 +12,6 @@ import model.Format
 import model.ImportParams
 import model.Note
 import model.Project
-import model.Tempo
-import model.TimeSignature
 import org.w3c.files.Blob
 import org.w3c.files.BlobPropertyBag
 import org.w3c.files.File
@@ -35,21 +33,53 @@ object Ustx {
         val yaml = JsYaml.load(yamlText)
         val jsonText = JSON.stringify(yaml)
         val project = jsonSerializer.decodeFromString(Project.serializer(), jsonText)
-        val timeSignature = TimeSignature(0, project.beatPerBar, project.beatUnit)
-        val tempo = Tempo(0, project.bpm)
+        val tempos = parseTempos(project)
+        val timeSignatures = parseTimeSignatures(project)
         return Project(
             format = Format.Ustx,
             inputFiles = listOf(file),
             name = project.name,
-            tracks = parseTracks(project, params, tempo.bpm),
-            timeSignatures = listOf(timeSignature),
-            tempos = listOf(tempo),
+            tracks = parseTracks(project, params, tempos),
+            timeSignatures = timeSignatures,
+            tempos = tempos,
             measurePrefix = 0,
             importWarnings = listOf()
         )
     }
 
-    private fun parseTracks(project: Project, params: ImportParams, bpm: Double): List<model.Track> {
+    private fun parseTimeSignatures(project: Project): List<model.TimeSignature> {
+        val list = project.timeSignatures?.ifEmpty { null }
+        return list?.map {
+            model.TimeSignature(
+                measurePosition = it.barPosition,
+                numerator = it.beatPerBar,
+                denominator = it.beatUnit
+            )
+        } ?: listOf(
+            model.TimeSignature(
+                0,
+                project.beatPerBar ?: 4,
+                project.beatUnit ?: 4
+            )
+        )
+    }
+
+    private fun parseTempos(project: Project): List<model.Tempo> {
+        val list = project.tempos?.ifEmpty { null }
+        return list?.map {
+            model.Tempo(
+                tickPosition = it.position,
+                bpm = it.bpm
+            )
+        } ?: listOf(
+            model.Tempo(
+                tickPosition = 0,
+                bpm = project.bpm ?: 120.0
+            )
+        )
+    }
+
+    private fun parseTracks(project: Project, params: ImportParams, tempos: List<model.Tempo>): List<model.Track> {
         val trackMap = List(project.tracks.size) { index: Int ->
             model.Track(
                 id = index,
@@ -83,7 +113,7 @@ object Ustx {
                     pitchCurve.orEmpty(),
                     validatedNotePitches.orEmpty()
                 )
-                pitchFromUstxPart(validatedNotes, partPitchData, bpm)
+                pitchFromUstxPart(validatedNotes, partPitchData, tempos)
             } else null
             val mergedPitch = mergePitchFromUstxParts(track.pitch, pitch)
             val newTrack = track.copy(notes = track.notes + validatedNotes, pitch = mergedPitch)
@@ -244,10 +274,12 @@ object Ustx {
         @SerialName("output_dir") val outputDir: String,
         @SerialName("cache_dir") val cacheDir: String,
         @SerialName("ustx_version") val ustxVersion: Double,
-        val bpm: Double,
-        @SerialName("beat_per_bar") val beatPerBar: Int,
-        @SerialName("beat_unit") val beatUnit: Int,
-        val resolution: Int,
+        val bpm: Double? = null,
+        @SerialName("beat_per_bar") val beatPerBar: Int? = null,
+        @SerialName("beat_unit") val beatUnit: Int? = null,
+        val resolution: Int? = null,
+        @SerialName("time_signatures") val timeSignatures: List<TimeSignature>? = null,
+        val tempos: List<Tempo>? = null,
         val expressions: Map<String, Expression>,
         val tracks: List<Track>,
         @SerialName("voice_parts") val voiceParts: List<VoicePart>
@@ -323,5 +355,18 @@ object Ustx {
         val xs: List<Long>,
         val ys: List<Double>,
         val abbr: String
+    )
+
+    @Serializable
+    private data class Tempo(
+        val position: Long,
+        val bpm: Double
+    )
+
+    @Serializable
+    private data class TimeSignature(
+        @SerialName("bar_position") val barPosition: Int,
+        @SerialName("beat_per_bar") val beatPerBar: Int,
+        @SerialName("beat_unit") val beatUnit: Int
     )
 }

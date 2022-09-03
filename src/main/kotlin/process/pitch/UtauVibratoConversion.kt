@@ -3,6 +3,7 @@ package process.pitch
 import kotlin.math.PI
 import kotlin.math.sin
 import model.Note
+import process.TickTimeTransformer
 
 /**
  * Shared by processes for OpenUtau and Utau mode2
@@ -21,16 +22,16 @@ data class UtauNoteVibratoParams(
 fun List<Pair<Long, Double>>.appendUtauNoteVibrato(
     vibratoParams: UtauNoteVibratoParams?,
     thisNote: Note,
-    bpm: Double,
+    tickTimeTransformer: TickTimeTransformer,
     sampleIntervalTick: Long
 ): List<Pair<Long, Double>> {
     vibratoParams ?: return this
 
-    // x-axis: tick, y-axis: 100cents
-    val noteLength = thisNote.length
+    // x-axis: milliSec, y-axis: 100cents
+    val noteLength = tickTimeTransformer.tickDistanceToMilliSec(tickStart = thisNote.tickOn, tickEnd = thisNote.tickOff)
     val vibratoLength = noteLength * vibratoParams.length / 100
     if (vibratoLength <= 0) return this
-    val frequency = 1.0 / tickFromMilliSec(vibratoParams.period, bpm)
+    val frequency = 1.0 / vibratoParams.period
     if (frequency.isNaN()) return this
     val depth = vibratoParams.depth / 100
     if (depth <= 0) return this
@@ -52,19 +53,33 @@ fun List<Pair<Long, Double>>.appendUtauNoteVibrato(
         }
     }
 
-    return map { (it.first - thisNote.tickOn) to it.second }
-        .fold(listOf<Pair<Long, Double>>()) { acc, inputPoint ->
+    val noteStartInMillis = tickTimeTransformer.tickToMilliSec(thisNote.tickOn)
+
+    // get approximate interval for interpolation
+    val sampleIntervalInMillis = tickTimeTransformer.tickDistanceToMilliSec(
+        tickStart = thisNote.tickOn,
+        tickEnd = thisNote.tickOn + sampleIntervalTick
+    )
+
+    return map { (it.first - noteStartInMillis) to it.second }
+        .fold(listOf<Pair<Double, Double>>()) { acc, inputPoint ->
             val lastPoint = acc.lastOrNull()
-            val newPoint = inputPoint.let { it.first to (it.second + vibrato(it.first.toDouble())) }
+            val newPoint = inputPoint.let { it.first to (it.second + vibrato(it.first)) }
             if (lastPoint == null) {
                 acc + newPoint
             } else {
-                val interpolatedIndexes = ((lastPoint.first + 1) until inputPoint.first)
-                    .filter { (it - lastPoint.first) % sampleIntervalTick == 0L }
-                val interpolatedPoints =
-                    interpolatedIndexes.map { it to (inputPoint.second + vibrato(it.toDouble())) }
+                val interpolatedXs = mutableListOf<Double>()
+                var pos = lastPoint.first + sampleIntervalInMillis
+                while (pos < newPoint.first) {
+                    interpolatedXs.add(pos)
+                    pos += sampleIntervalInMillis
+                }
+                val interpolatedPoints = interpolatedXs.map { x -> x to (lastPoint.second + vibrato(x)) }
                 acc + interpolatedPoints + newPoint
             }
         }
-        .map { (it.first + thisNote.tickOn) to it.second }
+        .map { (milliSecFromNoteStart, value) ->
+            val tick = tickTimeTransformer.milliSecToTick(milliSecFromNoteStart + noteStartInMillis)
+            tick to value
+        }
 }

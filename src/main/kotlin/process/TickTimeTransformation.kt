@@ -35,7 +35,13 @@ class TickTimeTransformer(
         .first { tick in it.range }
         .let { it.offset + (tick - it.range.first) * it.secPerTick }
 
+    fun tickToMilliSec(tick: Long) = tickToSec(tick) * 1000
+
+    fun tickDistanceToMilliSec(tickStart: Long, tickEnd: Long) = (tickToSec(tickEnd) - tickToSec(tickStart)) * 1000
+
     fun secToTick(sec: Double) = segments
         .last { it.offset <= sec }
         .let { ((sec - it.offset) / it.secPerTick).toLong() + it.range.first }
+
+    fun milliSecToTick(milliSec: Double) = secToTick(milliSec / 1000.0)
 }

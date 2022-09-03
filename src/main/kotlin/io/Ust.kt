@@ -52,7 +52,8 @@ object Ust {
                 params.simpleImport -> null
                 result.isMode2 -> pitchFromUtauMode2Track(
                     result.pitchDataMode2,
-                    result.notes
+                    result.notes,
+                    result.tempos
                 )
                 else -> pitchFromUtauMode1Track(result.pitchDataMode1, result.notes)
             }
