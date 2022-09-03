@@ -76,7 +76,7 @@ kotlin {
             }
             testTask {
                 useKarma {
-                    enabled = System.getenv("GRADLE_TEST_DISABLED") != "true"
+                    enabled = true
                     useChromeHeadless()
                     webpackConfig.cssSupport.enabled = true
                 }
