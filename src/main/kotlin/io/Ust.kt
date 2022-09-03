@@ -45,9 +45,7 @@ object Ust {
         val results = files.map {
             parseFile(it)
         }
-        val projectName = results
-            .mapNotNull { it.projectName }
-            .firstOrNull()
+        val projectName = results.firstNotNullOfOrNull { it.projectName }
             ?: files.first().nameWithoutExtension
         val tracks = results.mapIndexed { index, result ->
             val pitch = when {
@@ -66,15 +64,13 @@ object Ust {
             ).validateNotes()
         }
         val warnings = mutableListOf<ImportWarning>()
-        val tempos = results.firstOrNull { it.tempos.isNotEmpty() }?.tempos.let {
-            if (it == null || it.isEmpty()) {
+        val tempos = results.firstOrNull { it.tempos.isNotEmpty() }?.tempos
+            ?: listOf(Tempo.default).also {
                 warnings.add(ImportWarning.TempoNotFound)
             }
-            it ?: listOf(Tempo.default)
-        }
         warnings.addAll(
             results.flatMap { result ->
-                val ignoredTempos = result.tempos - tempos
+                val ignoredTempos = result.tempos - tempos.toSet()
                 ignoredTempos.map { ImportWarning.TempoIgnoredInFile(result.file, it) }
             }
         )
