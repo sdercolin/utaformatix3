@@ -6,7 +6,6 @@ import model.Note
 import model.Pitch
 import model.Tempo
 import process.RichNote
-import process.TickTimeTransformer
 import process.interpolateCosineEaseInOut
 import process.interpolateLinear
 

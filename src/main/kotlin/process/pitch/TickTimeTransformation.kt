@@ -1,4 +1,4 @@
-package process
+package process.pitch
 
 import model.TICKS_IN_BEAT
 import model.Tempo

@@ -4,7 +4,6 @@ import io.Ust
 import model.Note
 import model.Pitch
 import model.Tempo
-import process.TickTimeTransformer
 import process.interpolateCosineEaseIn
 import process.interpolateCosineEaseInOut
 import process.interpolateCosineEaseOut

@@ -3,7 +3,6 @@ package process.pitch
 import kotlin.math.PI
 import kotlin.math.sin
 import model.Note
-import process.TickTimeTransformer
 
 /**
  * Shared by processes for OpenUtau and Utau mode2
