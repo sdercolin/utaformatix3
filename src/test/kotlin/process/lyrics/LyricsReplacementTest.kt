@@ -1,12 +1,10 @@
-package process.pitch
+package process.lyrics
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import model.Format
 import model.Note
 import model.Track
-import process.lyrics.LyricsReplacementRequest
-import process.lyrics.replaceLyrics
 
 class LyricsReplacementTest {
 

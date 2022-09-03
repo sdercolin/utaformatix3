@@ -638,13 +638,6 @@ enum class Strings(
         ru = "Не удалось преобразовать временные сигнатуры в целевой формат.",
         fr = "Impossible de convertir les signatures rythmiques au format cible."
     ),
-    ExportNotificationTimeSignatureChangeIgnored(
-        en = "Could not convert time signature changes to the target format.",
-        ja = "拍子記号の変更を出力することができませんでした。",
-        zhCN = "未能将节拍记号的变化导出到目标格式。",
-        ru = "Не удалось преобразовать изменения временной сигнатуры в целевой формат.",
-        fr = "Impossible de convertir les changements de signature rythmique au format cible."
-    ),
     ExportNotificationPitchDataExported(
         en = "Some pitch parameters were exported. For a higher reproduction accuracy," +
             " you may need to turn off pitch transition and vibrato settings in the target editor.",

@@ -80,18 +80,19 @@ fun pitchToUtauMode2Track(pitch: Pitch?, notes: List<Note>, tempos: List<Tempo>)
     )
 }
 
-fun pitchFromUtauMode2Track(pitchData: UtauMode2TrackPitchData?, notes: List<Note>): Pitch? {
+fun pitchFromUtauMode2Track(pitchData: UtauMode2TrackPitchData?, notes: List<Note>, tempos: List<Tempo>): Pitch? {
     pitchData ?: return null
     val notePitches = notes.zip(pitchData.notes)
-    var bpm = notePitches.firstOrNull { it.second?.bpm != null }?.second?.bpm ?: return null
+    val tickTimeTransformer = TickTimeTransformer(tempos)
     val pitchPoints = mutableListOf<Pair<Long, Double>>()
     var lastNote: Note? = null
     var pendingPitchPoints = listOf<Pair<Long, Double>>()
     for ((note, notePitch) in notePitches) {
         val points = mutableListOf<Pair<Long, Double>>()
-        if (notePitch?.bpm != null) bpm = notePitch.bpm
+        val noteStartInMillis = tickTimeTransformer.tickToMilliSec(note.tickOn)
         if (notePitch?.start != null) {
-            var tickPos = note.tickOn + tickFromMilliSec(notePitch.start, bpm)
+            var posInMillis = noteStartInMillis + notePitch.start
+            var tickPos = tickTimeTransformer.milliSecToTick(posInMillis)
             val startShift =
                 if (note.tickOn == lastNote?.tickOff) {
                     // always same value as the last note
@@ -105,7 +106,8 @@ fun pitchFromUtauMode2Track(pitchData: UtauMode2TrackPitchData?, notes: List<Not
                 val width = notePitch.widths[index]
                 val shift = notePitch.shifts.getOrNull(index) ?: 0.0
                 val curveType = notePitch.curveTypes.getOrNull(index) ?: ""
-                tickPos += tickFromMilliSec(width, bpm)
+                posInMillis += width
+                tickPos = tickTimeTransformer.milliSecToTick(posInMillis)
                 val thisPoint = tickPos to (shift / 10)
                 val lastPoint = points.last()
                 if (thisPoint.second != lastPoint.second) {
@@ -121,7 +123,7 @@ fun pitchFromUtauMode2Track(pitchData: UtauMode2TrackPitchData?, notes: List<Not
             .fixPointsAtLastNote(note, lastNote)
             .appendStartPoint(note)
             .appendEndPoint(note)
-            .appendUtauNoteVibrato(notePitch?.vibratoParams, note, bpm, SAMPLING_INTERVAL_TICK)
+            .appendUtauNoteVibrato(notePitch?.vibratoParams, note, tickTimeTransformer, SAMPLING_INTERVAL_TICK)
             .shape()
         lastNote = note
     }

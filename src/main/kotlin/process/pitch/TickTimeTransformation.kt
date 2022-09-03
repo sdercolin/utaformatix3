@@ -1,4 +1,4 @@
-package process
+package process.pitch
 
 import model.TICKS_IN_BEAT
 import model.Tempo
@@ -25,7 +25,7 @@ class TickTimeTransformer(
             } else {
                 val lastParams = acc.last()
                 val offset = lastParams.offset +
-                    (lastParams.range.last - lastParams.range.first) * lastParams.secPerTick
+                    (lastParams.range.last + 1 - lastParams.range.first) * lastParams.secPerTick
                 Segment(range, offset, rate)
             }
             acc + thisResult
@@ -35,7 +35,15 @@ class TickTimeTransformer(
         .first { tick in it.range }
         .let { it.offset + (tick - it.range.first) * it.secPerTick }
 
+    fun tickToMilliSec(tick: Long) = tickToSec(tick) * 1000
+
+    fun tickDistanceToSec(tickStart: Long, tickEnd: Long) = (tickToSec(tickEnd) - tickToSec(tickStart))
+
+    fun tickDistanceToMilliSec(tickStart: Long, tickEnd: Long) = tickDistanceToSec(tickStart, tickEnd) * 1000
+
     fun secToTick(sec: Double) = segments
         .last { it.offset <= sec }
         .let { ((sec - it.offset) / it.secPerTick).toLong() + it.range.first }
+
+    fun milliSecToTick(milliSec: Double) = secToTick(milliSec / 1000.0)
 }

@@ -2,8 +2,6 @@ package process.pitch
 
 import model.DEFAULT_BPM
 import model.Tempo
-import process.TickTimeTransformer
-import process.bpmToSecPerTick
 import process.interpolateCosineEaseInOut
 import process.interpolateLinear
 import util.runIf

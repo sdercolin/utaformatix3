@@ -2,11 +2,18 @@
 comment: ''
 output_dir: Vocal
 cache_dir: UCache
-ustx_version: 0.5
+ustx_version: 0.6
+resolution: 480
 bpm: 120
 beat_per_bar: 4
 beat_unit: 4
-resolution: 480
+time_signatures:
+  - bar_position: 0
+    beat_per_bar: 4
+    beat_unit: 4
+tempos:
+  - position: 0
+    bpm: 120
 expressions:
   dyn:
     name: dynamics (curve)
