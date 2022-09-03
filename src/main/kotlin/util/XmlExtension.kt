@@ -47,5 +47,5 @@ fun Element.insertAfterThis(child: Element) = insertAdjacentElement("afterend", 
 fun Element.clone() = cloneNode(true) as Element
 
 fun Document.appendNewChildTo(node: Node, localName: String, handler: (Element) -> Unit) = node.appendChild(
-    createElement(localName).also(handler)
+    createElement(localName).also(handler),
 )

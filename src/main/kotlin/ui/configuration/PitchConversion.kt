@@ -23,7 +23,7 @@ val PitchConversionBlock = subFC<PitchConversionProps, PitchConversionState> { _
             configurationSwitch(
                 isOn = state.isOn,
                 onSwitched = { editState { copy(isOn = it) } },
-                labelStrings = Strings.ConvertPitchData
+                labelStrings = Strings.ConvertPitchData,
             )
             Tooltip {
                 title = ReactNode(string(Strings.ConvertPitchDataDescription))

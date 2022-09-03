@@ -1,23 +1,23 @@
 package process.pitch
 
-import kotlin.math.max
-import kotlin.math.roundToLong
 import model.Note
 import model.Pitch
 import model.Tempo
 import process.pitch.CevioTrackPitchData.Event
 import util.runIf
+import kotlin.math.max
+import kotlin.math.roundToLong
 
 data class CevioTrackPitchData(
     val events: List<Event>,
     val tempos: List<Tempo>, // normalized
-    val tickPrefix: Long // normalized
+    val tickPrefix: Long, // normalized
 ) {
 
     data class Event(
         val index: Long?, // raw value
         val repeat: Long?, // raw value
-        val value: Double
+        val value: Double,
     )
 }
 
@@ -28,21 +28,21 @@ data class CevioTrackPitchData(
 private data class EventDouble(
     val index: Double?,
     val repeat: Double?,
-    val value: Double?
+    val value: Double?,
 ) {
     fun round() =
         if (this.value == null) null
         else Event(
             index = this.index?.roundToLong(),
             repeat = this.repeat?.roundToLong(),
-            value = this.value
+            value = this.value,
         )
 
     companion object {
         fun from(event: Event) = EventDouble(
             index = event.index?.toDouble(),
             repeat = event.repeat?.toDouble(),
-            value = event.value
+            value = event.value,
         )
     }
 }
@@ -200,7 +200,7 @@ fun Pitch.generateForCevio(notes: List<Note>, tempos: List<Tempo>, tickPrefix: L
     return CevioTrackPitchData(
         events,
         listOf(), // not used
-        tickPrefix
+        tickPrefix,
     )
 }
 
@@ -216,7 +216,7 @@ fun CevioTrackPitchData.getLength(): Long {
 private fun denormalizeFromTick(
     eventsWithFullParams: List<EventDouble>,
     temposInTicks: List<Tempo>,
-    tickPrefix: Long
+    tickPrefix: Long,
 ): List<Event> {
     val tempos = temposInTicks
         .map { it.runIf(it.tickPosition != 0L) { copy(tickPosition = it.tickPosition + tickPrefix) } }
@@ -239,7 +239,7 @@ private fun denormalizeFromTick(
             repeat += tempos[currentTempoIndex + 1].first - max(tempos[currentTempoIndex].first, pos)
             remainingRepeatInTicks -= tempos[currentTempoIndex + 1].second - max(
                 tempos[currentTempoIndex].second,
-                tickPos
+                tickPos,
             )
             currentTempoIndex++
         }
@@ -247,7 +247,7 @@ private fun denormalizeFromTick(
         EventDouble(
             index = pos,
             repeat = repeat.coerceAtLeast(1.0),
-            value = event.value
+            value = event.value,
         ).round()
     }
 }

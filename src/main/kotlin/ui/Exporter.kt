@@ -84,7 +84,7 @@ private val ExportNotification.text: String
             ExportNotification.TimeSignatureIgnored -> Strings.ExportNotificationTimeSignatureIgnored
             ExportNotification.PitchDataExported -> Strings.ExportNotificationPitchDataExported
             ExportNotification.DataOverLengthLimitIgnored -> Strings.ExportNotificationDataOverLengthLimitIgnored
-        }
+        },
     )
 
 external interface ExporterProps : Props {

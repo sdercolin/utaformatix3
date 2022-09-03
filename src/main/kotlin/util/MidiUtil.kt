@@ -35,7 +35,7 @@ object MidiUtil {
             numerator.toByte(),
             kotlin.math.log2(denominator.toDouble()).toInt().toByte(),
             0x18,
-            0x08
+            0x08,
         )
     }
 }

@@ -17,7 +17,7 @@ fun Project.lengthLimited(maxLength: Long): Project {
     return copy(
         tracks = tracks,
         timeSignatures = timeSignatures,
-        tempos = tempos
+        tempos = tempos,
     )
 }
 
@@ -29,6 +29,6 @@ private fun Track.lengthLimited(maxLength: Long): Track {
 
     return copy(
         notes = notes,
-        pitch = pitch
+        pitch = pitch,
     )
 }

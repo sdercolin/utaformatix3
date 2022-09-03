@@ -1,8 +1,8 @@
 package process.pitch
 
+import model.Tempo
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import model.Tempo
 
 class TickTimeTransformerTest {
 

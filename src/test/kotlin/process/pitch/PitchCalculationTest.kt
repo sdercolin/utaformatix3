@@ -7,12 +7,11 @@ class PitchCalculationTest {
 
     @Test
     fun testAppendPitchPointsForInterpolation() {
-
         val input = listOf(
             0L to 0.0,
             3L to 6.0,
             10L to 20.0,
-            50L to 100.0
+            50L to 100.0,
         )
         val interval = 4L
 
@@ -22,7 +21,7 @@ class PitchCalculationTest {
             6L to 6.0,
             10L to 20.0,
             46L to 20.0,
-            50L to 100.0
+            50L to 100.0,
         )
         val actual = appendPitchPointsForInterpolation(input, interval)
 
@@ -31,7 +30,6 @@ class PitchCalculationTest {
 
     @Test
     fun testReduceRepeatedPitchPoints() {
-
         val input = listOf(0, 0, 0, 1, 1, 1, 2, 2, 1, 3, 2, 3, 3, 3, 3, 3, 4, 5, 5, 5)
             .mapIndexed { index: Int, i: Int -> index.toLong() to i.toDouble() }
 

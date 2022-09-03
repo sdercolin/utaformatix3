@@ -6,12 +6,12 @@ import model.Tempo
 fun Double.bpmToSecPerTick() = 60.0 / TICKS_IN_BEAT / this
 
 class TickTimeTransformer(
-    tempos: List<Tempo>
+    tempos: List<Tempo>,
 ) {
     private class Segment(
         val range: LongRange,
         val offset: Double,
-        val secPerTick: Double
+        val secPerTick: Double,
     )
 
     // a piecewise linear transformation from tick to sec

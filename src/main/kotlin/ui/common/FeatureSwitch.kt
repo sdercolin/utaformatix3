@@ -13,7 +13,7 @@ import ui.strings.string
 fun ChildrenBuilder.configurationSwitch(
     isOn: Boolean,
     onSwitched: (Boolean) -> Unit,
-    labelStrings: Strings
+    labelStrings: Strings,
 ) {
     FormControlLabel {
         label = ReactNode(string(labelStrings))

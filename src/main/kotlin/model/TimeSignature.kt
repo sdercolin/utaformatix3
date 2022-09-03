@@ -3,7 +3,7 @@ package model
 data class TimeSignature(
     val measurePosition: Int,
     val numerator: Int,
-    val denominator: Int
+    val denominator: Int,
 ) {
     val displayValue get() = "$numerator/$denominator"
     val ticksInMeasure get() = TICKS_IN_FULL_NOTE * numerator / denominator

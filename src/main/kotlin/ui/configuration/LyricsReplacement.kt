@@ -55,7 +55,7 @@ val LyricsReplacementBlock = subFC<LyricsReplacementProps, LyricsReplacementStat
             configurationSwitch(
                 isOn = state.isOn,
                 onSwitched = { editState { copy(isOn = it) } },
-                labelStrings = Strings.LyricsReplacement
+                labelStrings = Strings.LyricsReplacement,
             )
             Tooltip {
                 val text = string(
@@ -84,7 +84,7 @@ val LyricsReplacementBlock = subFC<LyricsReplacementProps, LyricsReplacementStat
 
 private fun ChildrenBuilder.buildLyricsReplacementDetail(
     state: LyricsReplacementState,
-    editState: (LyricsReplacementState.() -> LyricsReplacementState) -> Unit
+    editState: (LyricsReplacementState.() -> LyricsReplacementState) -> Unit,
 ) {
     div {
         css {
@@ -98,7 +98,7 @@ private fun ChildrenBuilder.buildLyricsReplacementDetail(
                     margin = Margin(
                         horizontal = 24.px,
                         top = 16.px,
-                        bottom = 24.px
+                        bottom = 24.px,
                     )
                     paddingTop = 8.px
                     paddingBottom = 8.px
@@ -126,7 +126,7 @@ private fun ChildrenBuilder.buildLyricsReplacementDetail(
 private fun ChildrenBuilder.buildLyricsReplacementItem(
     index: Int,
     request: LyricsReplacementRequest,
-    editState: (LyricsReplacementState.() -> LyricsReplacementState) -> Unit
+    editState: (LyricsReplacementState.() -> LyricsReplacementState) -> Unit,
 ) {
     val item = request.items[index]
     fun editRequest(block: LyricsReplacementRequest.() -> LyricsReplacementRequest) {

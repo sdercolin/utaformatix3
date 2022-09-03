@@ -15,7 +15,7 @@ enum class Format(
     val generator: suspend (Project, List<Feature>) -> ExportResult,
     val possibleLyricsTypes: List<LyricsType>,
     val suggestedLyricType: LyricsType? = null,
-    val availableFeaturesForGeneration: List<Feature> = listOf()
+    val availableFeaturesForGeneration: List<Feature> = listOf(),
 ) {
     Vsqx(
         ".vsqx",
@@ -26,7 +26,7 @@ enum class Format(
             io.Vsqx.generate(project, features)
         },
         possibleLyricsTypes = listOf(RomajiCv, KanaCv),
-        availableFeaturesForGeneration = listOf(ConvertPitch)
+        availableFeaturesForGeneration = listOf(ConvertPitch),
     ),
     Vpr(
         ".vpr",
@@ -37,7 +37,7 @@ enum class Format(
             io.Vpr.generate(project, features)
         },
         possibleLyricsTypes = listOf(RomajiCv, KanaCv),
-        availableFeaturesForGeneration = listOf(ConvertPitch)
+        availableFeaturesForGeneration = listOf(ConvertPitch),
     ),
     Ust(
         ".ust",
@@ -49,7 +49,7 @@ enum class Format(
             io.Ust.generate(project, features)
         },
         possibleLyricsTypes = listOf(RomajiCv, RomajiVcv, KanaCv, KanaVcv),
-        availableFeaturesForGeneration = listOf(ConvertPitch)
+        availableFeaturesForGeneration = listOf(ConvertPitch),
     ),
     Ustx(
         ".ustx",
@@ -61,7 +61,7 @@ enum class Format(
             io.Ustx.generate(project, features)
         },
         possibleLyricsTypes = listOf(RomajiCv, RomajiVcv, KanaCv, KanaVcv),
-        availableFeaturesForGeneration = listOf(ConvertPitch)
+        availableFeaturesForGeneration = listOf(ConvertPitch),
     ),
     Ccs(
         ".ccs",
@@ -72,7 +72,7 @@ enum class Format(
             io.Ccs.generate(project, features)
         },
         possibleLyricsTypes = listOf(KanaCv),
-        availableFeaturesForGeneration = listOf(ConvertPitch)
+        availableFeaturesForGeneration = listOf(ConvertPitch),
     ),
     Svp(
         ".svp",
@@ -83,7 +83,7 @@ enum class Format(
             io.Svp.generate(project, features)
         },
         possibleLyricsTypes = listOf(RomajiCv, KanaCv),
-        availableFeaturesForGeneration = listOf(ConvertPitch)
+        availableFeaturesForGeneration = listOf(ConvertPitch),
     ),
     S5p(
         ".s5p",
@@ -94,7 +94,7 @@ enum class Format(
             io.S5p.generate(project, features)
         },
         possibleLyricsTypes = listOf(RomajiCv, KanaCv),
-        availableFeaturesForGeneration = listOf(ConvertPitch)
+        availableFeaturesForGeneration = listOf(ConvertPitch),
     ),
     MusicXml(
         ".musicxml",
@@ -106,7 +106,7 @@ enum class Format(
             io.MusicXml.generate(project)
         },
         possibleLyricsTypes = listOf(RomajiCv, KanaCv),
-        suggestedLyricType = KanaCv
+        suggestedLyricType = KanaCv,
     ),
     Dv(
         ".dv",
@@ -118,7 +118,7 @@ enum class Format(
         },
         possibleLyricsTypes = listOf(RomajiCv, KanaCv),
         suggestedLyricType = RomajiCv,
-        availableFeaturesForGeneration = listOf(ConvertPitch)
+        availableFeaturesForGeneration = listOf(ConvertPitch),
     ),
     Vsq(
         ".vsq",
@@ -129,7 +129,7 @@ enum class Format(
             io.Vsq.generate(project, features)
         },
         possibleLyricsTypes = listOf(RomajiCv, KanaCv),
-        availableFeaturesForGeneration = listOf(ConvertPitch)
+        availableFeaturesForGeneration = listOf(ConvertPitch),
     ),
     VocaloidMid(
         ".mid",
@@ -140,7 +140,7 @@ enum class Format(
             io.VocaloidMid.generate(project, features)
         },
         possibleLyricsTypes = listOf(RomajiCv, KanaCv),
-        availableFeaturesForGeneration = listOf(ConvertPitch)
+        availableFeaturesForGeneration = listOf(ConvertPitch),
     ),
     Ppsf(
         ".ppsf",
@@ -150,7 +150,7 @@ enum class Format(
         generator = { _, _ ->
             TODO("Not Implemented")
         },
-        possibleLyricsTypes = listOf(RomajiCv, KanaCv)
+        possibleLyricsTypes = listOf(RomajiCv, KanaCv),
     ),
     UfData(
         ".ufdata",
@@ -161,7 +161,7 @@ enum class Format(
             io.UfData.generate(project, features)
         },
         possibleLyricsTypes = listOf(RomajiCv, RomajiVcv, KanaCv, KanaVcv),
-        availableFeaturesForGeneration = listOf(ConvertPitch)
+        availableFeaturesForGeneration = listOf(ConvertPitch),
     );
 
     val allExtensions get() = listOf(extension) + otherExtensions

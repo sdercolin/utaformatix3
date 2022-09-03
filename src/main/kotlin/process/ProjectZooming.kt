@@ -1,11 +1,11 @@
 package process
 
-import kotlin.math.ceil
-import kotlin.math.roundToInt
-import kotlin.math.roundToLong
 import model.Project
 import model.TimeSignature
 import model.Track
+import kotlin.math.ceil
+import kotlin.math.roundToInt
+import kotlin.math.roundToLong
 
 fun Project.needWarningZoom(factor: Double): Boolean {
     return timeSignatures.any {
@@ -41,13 +41,13 @@ private fun Track.zoom(factor: Double): Track {
     val notes = notes.map {
         it.copy(
             tickOn = (it.tickOn * factor).roundToLong(),
-            tickOff = (it.tickOff * factor).roundToLong()
+            tickOff = (it.tickOff * factor).roundToLong(),
         )
     }
     val pitch = pitch?.copy(
         data = pitch.data.map { (tick, value) ->
             (tick * factor).roundToLong() to value
-        }
+        },
     )
     return copy(notes = notes, pitch = pitch)
 }

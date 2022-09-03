@@ -9,11 +9,11 @@ group = "com.sdercolin.utaformatix"
 
 repositories {
     mavenCentral()
-    jcenter()
 }
 
 configure<org.jlleitschuh.gradle.ktlint.KtlintExtension> {
     version.set("0.45.2")
+    enableExperimentalRules.set(true)
 }
 
 fun kotlinw(target: String): String =

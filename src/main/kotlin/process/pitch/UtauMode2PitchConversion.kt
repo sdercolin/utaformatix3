@@ -14,17 +14,17 @@ import util.runIf
 private const val SAMPLING_INTERVAL_TICK = 4L
 
 data class UtauMode2TrackPitchData(
-    val notes: List<UtauMode2NotePitchData?>
+    val notes: List<UtauMode2NotePitchData?>,
 )
 
 data class UtauMode2NotePitchData(
     val bpm: Double?,
-    val start: Double?, // msec, null only if the note is not applied with pitch
+    val start: Double?, // milliSec, null only if the note is not applied with pitch
     val startShift: Double?, // 10 cents
-    val widths: List<Double>, // msec
+    val widths: List<Double>, // milliSec
     val shifts: List<Double>, // 10 cents
     val curveTypes: List<String>, // (blank)/s/r/j
-    val vibratoParams: UtauNoteVibratoParams?
+    val vibratoParams: UtauNoteVibratoParams?,
 )
 
 fun pitchToUtauMode2Track(pitch: Pitch?, notes: List<Note>, tempos: List<Tempo>): UtauMode2TrackPitchData? {
@@ -34,7 +34,7 @@ fun pitchToUtauMode2Track(pitch: Pitch?, notes: List<Note>, tempos: List<Tempo>)
     data class NotePitchData(
         val pitch: List<Pair<Long, Double>>,
         val offset: Long,
-        val bpm: Double
+        val bpm: Double,
     )
 
     val toRelative = { from: List<Pair<Long, Double?>>, key: Int ->
@@ -46,19 +46,19 @@ fun pitchToUtauMode2Track(pitch: Pitch?, notes: List<Note>, tempos: List<Tempo>)
             NotePitchData(
                 toRelative(absolutePitch.filter { it.first < notes.first().tickOff }, notes.first().key),
                 -(absolutePitch.filter { it.first < 0 }.unzip().first.minOrNull() ?: 0),
-                tempos.bpmForNote(notes.first())
-            )
+                tempos.bpmForNote(notes.first()),
+            ),
         ), // first note
         notes.drop(1).map { note ->
             NotePitchData(
                 toRelative(
                     absolutePitch.filter { it.first >= note.tickOn && it.first < note.tickOff },
-                    note.key
+                    note.key,
                 ),
                 (absolutePitch.firstOrNull { it.first >= note.tickOn }?.first ?: note.tickOn) - note.tickOn,
-                tempos.bpmForNote(note)
+                tempos.bpmForNote(note),
             )
-        }
+        },
     ).flatten()
 
     val dotPitDataSimplified = dotPitData.map {
@@ -74,9 +74,9 @@ fun pitchToUtauMode2Track(pitch: Pitch?, notes: List<Note>, tempos: List<Tempo>)
                 currNote.pitch.zipWithNext().map { milliSecFromTick(it.second.first - it.first.first, currNote.bpm) },
                 currNote.pitch.drop(1).unzip().second.map { it * 10 },
                 List(currNote.pitch.size - 1) { "" },
-                null
+                null,
             )
-        }
+        },
     )
 }
 
@@ -176,7 +176,7 @@ private fun List<Pair<Long, Double>>.shape() =
 private fun interpolate(
     lastPoint: Pair<Long, Double>,
     thisPoint: Pair<Long, Double>,
-    curveType: String
+    curveType: String,
 ): List<Pair<Long, Double>> {
     val input = listOf(lastPoint, thisPoint)
     val output = when (curveType) {

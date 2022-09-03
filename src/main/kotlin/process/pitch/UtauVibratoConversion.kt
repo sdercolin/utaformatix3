@@ -1,8 +1,8 @@
 package process.pitch
 
+import model.Note
 import kotlin.math.PI
 import kotlin.math.sin
-import model.Note
 
 /**
  * Shared by processes for OpenUtau and Utau mode2
@@ -10,19 +10,19 @@ import model.Note
 
 data class UtauNoteVibratoParams(
     val length: Double, // percentage of the note's length
-    val period: Double, // msec
+    val period: Double, // milliSec
     val depth: Double, // cent
     val fadeIn: Double, // percentage of the vibrato's length
     val fadeOut: Double, // percentage of the vibrato's length
     val phaseShift: Double, // percentage of period
-    val shift: Double // percentage of depth
+    val shift: Double, // percentage of depth
 )
 
 fun List<Pair<Long, Double>>.appendUtauNoteVibrato(
     vibratoParams: UtauNoteVibratoParams?,
     thisNote: Note,
     tickTimeTransformer: TickTimeTransformer,
-    sampleIntervalTick: Long
+    sampleIntervalTick: Long,
 ): List<Pair<Long, Double>> {
     vibratoParams ?: return this
 
@@ -57,7 +57,7 @@ fun List<Pair<Long, Double>>.appendUtauNoteVibrato(
     // get approximate interval for interpolation
     val sampleIntervalInMillis = tickTimeTransformer.tickDistanceToMilliSec(
         tickStart = thisNote.tickOn,
-        tickEnd = thisNote.tickOn + sampleIntervalTick
+        tickEnd = thisNote.tickOn + sampleIntervalTick,
     )
 
     return map { (it.first - noteStartInMillis) to it.second }
