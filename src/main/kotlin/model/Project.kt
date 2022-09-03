@@ -13,20 +13,20 @@ data class Project(
     val tempos: List<Tempo>,
     val measurePrefix: Int,
     val importWarnings: List<ImportWarning>,
-    val lyricsType: LyricsType = LyricsType.Unknown
+    val lyricsType: LyricsType = LyricsType.Unknown,
 ) {
 
     fun lyricsTypeAnalysed() =
         copy(
             lyricsType = analyseLyricsTypeForProject(this)
                 .takeIf { format.possibleLyricsTypes.contains(it) }
-                ?: LyricsType.Unknown
+                ?: LyricsType.Unknown,
         )
 
     fun withoutEmptyTracks() =
         copy(
             tracks = tracks.filter { it.notes.isNotEmpty() }
-                .mapIndexed { index, track -> track.copy(id = index) }
+                .mapIndexed { index, track -> track.copy(id = index) },
         ).takeIf { it.tracks.isNotEmpty() }
 
     val hasXSampaData get() = tracks.any { track -> track.notes.any { it.phoneme != null } }

@@ -1,13 +1,13 @@
 package process.pitch
 
 import io.Dv
-import kotlin.math.roundToInt
 import model.Note
 import model.Pitch
 import model.Tempo
 import process.RichNote
 import process.interpolateCosineEaseInOut
 import process.interpolateLinear
+import kotlin.math.roundToInt
 
 private const val SAMPLING_INTERVAL_TICK = 4L
 private const val PORTAMENTO_LENGTH_MAX_SEC = 0.3125 // [porHead, porTail] == 100
@@ -18,7 +18,7 @@ private const val BEND_VALUE_MAX = 3.0 // benDep == 100
 
 data class DvSegmentPitchRawData(
     val tickOffset: Long, // only for import
-    val data: List<Pair<Int, Int>> // (tick, DV style cent)
+    val data: List<Pair<Int, Int>>, // (tick, DV style cent)
 )
 
 data class DvNoteWithPitch(
@@ -27,7 +27,7 @@ data class DvNoteWithPitch(
     val porTail: Int, // 0~100
     val benLen: Int, // 0~100
     val benDep: Int, // 0~100
-    val vibrato: List<Pair<Int, Int>> // (ms, minus cent)
+    val vibrato: List<Pair<Int, Int>>, // (ms, minus cent)
 ) : RichNote<DvNoteWithPitch> {
     override fun copyWithNote(note: Note) = copy(note = note)
 }
@@ -35,7 +35,7 @@ data class DvNoteWithPitch(
 fun pitchFromDvTrack(
     segments: List<DvSegmentPitchRawData>,
     notes: List<DvNoteWithPitch>,
-    tempos: List<Tempo>
+    tempos: List<Tempo>,
 ) = segments
     .mergePointsFromSegments()
     .mergeSameTickPoints()
@@ -83,7 +83,7 @@ private fun List<Pair<Long, Double?>>.mergeSameValuePoints() = asSequence()
 
 private fun List<Pair<Long, Double?>>.applyDefaultPitch(
     notes: List<DvNoteWithPitch>,
-    tempos: List<Tempo>
+    tempos: List<Tempo>,
 ): List<Pair<Long, Double?>> {
     if (this.isEmpty()) return this
     if (notes.isEmpty()) return this
@@ -116,7 +116,7 @@ private fun List<Pair<Long, Double?>>.applyDefaultPitch(
 
 private fun getBasePitch(
     notes: List<DvNoteWithPitch>,
-    transformer: TickTimeTransformer
+    transformer: TickTimeTransformer,
 ) = (listOf(null) + notes + listOf(null)).zipWithNext().flatMap { (lastNote, thisNote) ->
     val result = mutableListOf<Pair<Long, Double>>()
 
@@ -146,7 +146,7 @@ private fun getBasePitch(
 
 private fun getBendPitch(
     notes: List<DvNoteWithPitch>,
-    transformer: TickTimeTransformer
+    transformer: TickTimeTransformer,
 ) = notes.flatMap { note ->
     val startTick = note.note.tickOn
     val startSec = transformer.tickToSec(startTick)
@@ -181,7 +181,7 @@ private fun getBendPitch(
 private fun getPortamento(
     lastNote: DvNoteWithPitch,
     transformer: TickTimeTransformer,
-    thisNote: DvNoteWithPitch
+    thisNote: DvNoteWithPitch,
 ): List<Pair<Long, Double>> {
     val tailLengthSec = PORTAMENTO_LENGTH_MAX_SEC * lastNote.porTail / 100
     val startSec = transformer.tickToSec(lastNote.note.tickOff) - tailLengthSec
@@ -198,7 +198,7 @@ private fun getPortamento(
 
 private fun getVibratoPitch(
     notes: List<DvNoteWithPitch>,
-    transformer: TickTimeTransformer
+    transformer: TickTimeTransformer,
 ) = notes.flatMap { note ->
     val startTick = note.note.tickOn
     val startSec = transformer.tickToSec(startTick)

@@ -6,5 +6,5 @@ package model
  */
 data class Pitch(
     val data: List<Pair<Long, Double?>>,
-    val isAbsolute: Boolean
+    val isAbsolute: Boolean,
 )

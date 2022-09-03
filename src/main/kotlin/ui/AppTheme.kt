@@ -24,5 +24,5 @@ val appTheme = createTheme(
                 paper = "#3b3b3b"
             }
         }
-    }
+    },
 )

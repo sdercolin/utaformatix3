@@ -126,7 +126,7 @@ private fun List<Track>.cleanup(noteCleanup: (String) -> String) =
         track.copy(
             notes = track.notes.map { note ->
                 note.copy(lyric = noteCleanup(note.lyric))
-            }
+            },
         )
     }
 

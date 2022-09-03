@@ -3,7 +3,6 @@ package io
 import external.Encoding
 import external.JsZip
 import external.JsZipOption
-import kotlin.math.roundToLong
 import kotlinx.coroutines.await
 import model.DEFAULT_METER_HIGH
 import model.DEFAULT_METER_LOW
@@ -39,6 +38,7 @@ import util.padStartZero
 import util.readBinary
 import util.readText
 import util.toFixed
+import kotlin.math.roundToLong
 
 object Ust {
     suspend fun parse(files: List<File>, params: ImportParams): Project {
@@ -53,7 +53,7 @@ object Ust {
                 result.isMode2 -> pitchFromUtauMode2Track(
                     result.pitchDataMode2,
                     result.notes,
-                    result.tempos
+                    result.tempos,
                 )
                 else -> pitchFromUtauMode1Track(result.pitchDataMode1, result.notes)
             }
@@ -61,7 +61,7 @@ object Ust {
                 id = index,
                 name = result.file.nameWithoutExtension,
                 notes = result.notes,
-                pitch = pitch
+                pitch = pitch,
             ).validateNotes()
         }
         val warnings = mutableListOf<ImportWarning>()
@@ -73,7 +73,7 @@ object Ust {
             results.flatMap { result ->
                 val ignoredTempos = result.tempos - tempos.toSet()
                 ignoredTempos.map { ImportWarning.TempoIgnoredInFile(result.file, it) }
-            }
+            },
         )
         return Project(
             format = Format.Ust,
@@ -83,7 +83,7 @@ object Ust {
             measurePrefix = 0,
             timeSignatures = listOf(TimeSignature.default),
             tempos = tempos,
-            importWarnings = warnings
+            importWarnings = warnings,
         )
     }
 
@@ -156,8 +156,8 @@ object Ust {
                             key = pendingNoteKey,
                             lyric = pendingNoteLyric,
                             tickOn = pendingNoteTickOn,
-                            tickOff = pendingNoteTickOff
-                        )
+                            tickOff = pendingNoteTickOff,
+                        ),
                     )
                     notePitchDataListMode2.add(
                         UtauMode2NotePitchData(
@@ -176,15 +176,15 @@ object Ust {
                                     fadeIn = it.getOrNull(3) ?: 0.0,
                                     fadeOut = it.getOrNull(4) ?: 0.0,
                                     phaseShift = it.getOrNull(5) ?: 0.0,
-                                    shift = it.getOrNull(6) ?: 0.0
+                                    shift = it.getOrNull(6) ?: 0.0,
                                 )
-                            }
-                        )
+                            },
+                        ),
                     )
                     notePitchDataListMode1.add(
                         UtauMode1NotePitchData(
-                            pendingPitchBend
-                        )
+                            pendingPitchBend,
+                        ),
                     )
                 }
                 pendingNoteKey = null
@@ -264,7 +264,7 @@ object Ust {
     }
 
     private fun parseMode1PitchData(
-        pitchString: String
+        pitchString: String,
     ): List<Double> {
         return pitchString.split(",").map { pitchPointString ->
             pitchPointString.toDoubleOrNull() ?: 0.0
@@ -278,7 +278,7 @@ object Ust {
         val tempos: List<Tempo>,
         val isMode2: Boolean,
         val pitchDataMode1: UtauMode1TrackPitchData?,
-        val pitchDataMode2: UtauMode2TrackPitchData?
+        val pitchDataMode2: UtauMode2TrackPitchData?,
     )
 
     suspend fun generate(project: Project, features: List<Feature>): ExportResult {
@@ -361,7 +361,7 @@ object Ust {
                     "PBY=${mode2Pitch?.startShift},${
                     mode2Pitch?.shifts
                         ?.joinToString(",") { it.toString() }
-                    }"
+                    }",
                 )
                 builder.appendLine("PBM=${mode2Pitch?.curveTypes?.joinToString(",")}")
                 if (mode2Pitch?.vibratoParams != null) {

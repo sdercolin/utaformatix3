@@ -63,7 +63,7 @@ object MusicXml {
             timeSignatures = masterTrackResult.timeSignatures,
             tempos = masterTrackResult.tempoWithMeasureIndexes.map { it.second },
             measurePrefix = 0,
-            importWarnings = warnings
+            importWarnings = warnings,
         )
     }
 
@@ -87,7 +87,7 @@ object MusicXml {
                     TimeSignature(
                         measurePosition = index,
                         numerator = timeNode.getSingleElementByTagName("beats").innerValue.toInt(),
-                        denominator = timeNode.getSingleElementByTagName("beat-type").innerValue.toInt()
+                        denominator = timeNode.getSingleElementByTagName("beat-type").innerValue.toInt(),
                     )
                 }
                 ?.also {
@@ -101,7 +101,7 @@ object MusicXml {
                 ?.let { soundNode ->
                     Tempo(
                         tickPosition = tickPosition,
-                        bpm = soundNode.getAttribute("tempo")!!.toDouble()
+                        bpm = soundNode.getAttribute("tempo")!!.toDouble(),
                     )
                 }
                 ?.also {
@@ -121,7 +121,7 @@ object MusicXml {
             tempoWithMeasureIndexes = tempos,
             timeSignatures = timeSignatures,
             importTickRate = importTickRate,
-            measureBorders = measureBorders
+            measureBorders = measureBorders,
         )
     }
 
@@ -172,7 +172,7 @@ object MusicXml {
                         key = key,
                         lyric = lyric,
                         tickOn = tickPosition,
-                        tickOff = tickPosition + duration
+                        tickOff = tickPosition + duration,
                     )
                 } else {
                     notes.removeLast().let {
@@ -193,7 +193,7 @@ object MusicXml {
         return Track(
             id = trackIndex,
             name = trackName,
-            notes = notes
+            notes = notes,
         )
     }
 
@@ -201,7 +201,7 @@ object MusicXml {
         val tempoWithMeasureIndexes: List<Pair<Int, Tempo>>,
         val timeSignatures: List<TimeSignature>,
         val importTickRate: Double,
-        val measureBorders: List<Long>
+        val measureBorders: List<Long>,
     )
 
     suspend fun generate(project: Project): ExportResult {
@@ -235,7 +235,7 @@ object MusicXml {
             val measureNode = document.generateMeasureNode(
                 measure,
                 index,
-                if (index == 0) firstMeasureNode else null
+                if (index == 0) firstMeasureNode else null,
             )
             partNode.appendChild(measureNode)
         }
@@ -299,7 +299,7 @@ object MusicXml {
         }
         return listOf(
             soundNode,
-            directionNode
+            directionNode,
         )
     }
 
@@ -372,7 +372,7 @@ object MusicXml {
                         NoteType.Middle -> "middle"
                         NoteType.End -> "end"
                         NoteType.Single -> "single"
-                    }
+                    },
                 )
             }
             appendNewChildTo(lyricNode, "text") {
@@ -388,11 +388,11 @@ object MusicXml {
                 notes = track.notes.map {
                     it.copy(
                         tickOn = (it.tickOn * DEFAULT_TICK_RATE_CEVIO).toLong(),
-                        tickOff = (it.tickOff * DEFAULT_TICK_RATE_CEVIO).toLong()
+                        tickOff = (it.tickOff * DEFAULT_TICK_RATE_CEVIO).toLong(),
                     )
-                }
+                },
             )
-        }
+        },
     )
 
     private fun Project.getKeyTicks(track: Track): List<KeyTick> {
@@ -449,8 +449,8 @@ object MusicXml {
                     if (ongoingNoteWithCurrentHead == null) {
                         currentContentGroup.add(
                             MXmlMeasureContent.Rest(
-                                duration = keyTickRelative - currentTickInMeasure
-                            )
+                                duration = keyTickRelative - currentTickInMeasure,
+                            ),
                         )
                     }
                     currentTickInMeasure = keyTickRelative
@@ -465,8 +465,8 @@ object MusicXml {
                                 MXmlMeasureContent.Note(
                                     duration = keyTick.tick - head,
                                     note = note,
-                                    type = if (note.tickOn == head) NoteType.Begin else NoteType.Middle
-                                )
+                                    type = if (note.tickOn == head) NoteType.Begin else NoteType.Middle,
+                                ),
                             )
                             ongoingNoteWithCurrentHead = note to keyTick.tick
                             currentContentGroup.add(MXmlMeasureContent.Tempo(keyTick.tempo.bpm))
@@ -479,8 +479,8 @@ object MusicXml {
                             MXmlMeasureContent.Note(
                                 duration = keyTick.note.tickOff - head,
                                 note = keyTick.note,
-                                type = if (note.tickOn == head) NoteType.Single else NoteType.End
-                            )
+                                type = if (note.tickOn == head) NoteType.Single else NoteType.End,
+                            ),
                         )
                         ongoingNoteWithCurrentHead = null
                     }
@@ -497,8 +497,8 @@ object MusicXml {
                         MXmlMeasureContent.Note(
                             duration = borderPair.second - head,
                             note = note,
-                            type = if (note.tickOn == head) NoteType.Begin else NoteType.Middle
-                        )
+                            type = if (note.tickOn == head) NoteType.Begin else NoteType.Middle,
+                        ),
                     )
                     ongoingNoteWithCurrentHead = note to borderPair.second
                 }
@@ -513,7 +513,7 @@ object MusicXml {
                     tickStart = borderPair.first,
                     length = borderPair.second - borderPair.first,
                     timeSignature = timeSignatures.find { it.measurePosition == index },
-                    contents = contents
+                    contents = contents,
                 )
             }
     }
@@ -528,7 +528,7 @@ object MusicXml {
         val tickStart: Long,
         val length: Long,
         val timeSignature: TimeSignature?,
-        val contents: List<MXmlMeasureContent>
+        val contents: List<MXmlMeasureContent>,
     )
 
     private sealed class MXmlMeasureContent {

@@ -86,13 +86,13 @@ object Ccs {
             timeSignatures = timeSignatures,
             tempos = tempos,
             measurePrefix = FIXED_MEASURE_PREFIX,
-            importWarnings = warnings
+            importWarnings = warnings,
         )
     }
 
     private fun mergeTempos(
         results: List<TrackParseResult>,
-        warnings: MutableList<ImportWarning>
+        warnings: MutableList<ImportWarning>,
     ): MutableList<Tempo> {
         val tempos = results.firstOrNull { it.tempos.isNotEmpty() }?.tempos.let {
             if (it == null || it.isEmpty()) {
@@ -105,7 +105,7 @@ object Ccs {
             results.flatMap { result ->
                 val ignoredTempos = result.tempos - tempos
                 ignoredTempos.map { ImportWarning.TempoIgnoredInTrack(result.track, it) }
-            }
+            },
         )
 
         // Delete all tempo tags inside prefix, add apply the last as the first
@@ -122,7 +122,7 @@ object Ccs {
 
     private fun mergeTimeSignatures(
         results: List<TrackParseResult>,
-        warnings: MutableList<ImportWarning>
+        warnings: MutableList<ImportWarning>,
     ): List<TimeSignature> {
         val timeSignatures = results.firstOrNull { it.timeSignatures.isNotEmpty() }?.timeSignatures.let {
             if (it == null || it.isEmpty()) {
@@ -135,7 +135,7 @@ object Ccs {
             results.flatMap { result ->
                 val ignoredTimeSignatures = result.timeSignatures - timeSignatures
                 ignoredTimeSignatures.map { ImportWarning.TimeSignatureIgnoredInTrack(result.track, it) }
-            }
+            },
         )
 
         // Delete all time signatures inside prefix, add apply the last as the first
@@ -237,7 +237,7 @@ object Ccs {
     private data class TrackParseResult(
         val track: Track,
         val tempos: List<Tempo>,
-        val timeSignatures: List<TimeSignature>
+        val timeSignatures: List<TimeSignature>,
     )
 
     fun generate(project: Project, features: List<Feature>): ExportResult {
@@ -250,8 +250,8 @@ object Ccs {
             blob,
             name,
             listOfNotNull(
-                if (features.contains(Feature.ConvertPitch)) ExportNotification.PitchDataExported else null
-            )
+                if (features.contains(Feature.ConvertPitch)) ExportNotification.PitchDataExported else null,
+            ),
         )
     }
 
@@ -308,7 +308,7 @@ object Ccs {
     private fun setupTempoNodes(
         temposNode: Element,
         models: List<Tempo>,
-        tickPrefix: Long
+        tickPrefix: Long,
     ) {
         var previous = temposNode.getSingleElementByTagName("Sound")
         previous.setAttribute("Tempo", models.first().bpm.toFixed(2))
@@ -324,7 +324,7 @@ object Ccs {
     private fun setupBeatNodes(
         beatsNode: Element,
         models: List<TimeSignature>,
-        tickPrefix: Long
+        tickPrefix: Long,
     ) {
         var previous = beatsNode.getSingleElementByTagName("Time")
         previous.setAttribute("Beats", models.first().numerator.toString())
@@ -346,7 +346,7 @@ object Ccs {
         document: Document,
         unitNode: Element,
         models: List<Note>,
-        tickPrefix: Long
+        tickPrefix: Long,
     ) {
         val score = unitNode
             .getSingleElementByTagName("Song")
@@ -367,7 +367,7 @@ object Ccs {
         unitNode: Element,
         trackModel: Track,
         tempos: List<Tempo>,
-        tickPrefix: Long
+        tickPrefix: Long,
     ) {
         val data = trackModel.pitch
             ?.generateForCevio(trackModel.notes, tempos, (tickPrefix / TICK_RATE).toLong()) ?: return

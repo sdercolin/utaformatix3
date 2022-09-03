@@ -19,7 +19,7 @@ data class SvpDefaultVibratoParameters(
     val easeInLength: Double?, // sec
     val easeOutLength: Double?, // sec
     val depth: Double?, // semitone
-    val frequency: Double? // Hz
+    val frequency: Double?, // Hz
 )
 
 data class SvpNoteWithVibrato(
@@ -30,7 +30,7 @@ data class SvpNoteWithVibrato(
     val easeOutLength: Double?, // sec
     val depth: Double?, // semitone
     val frequency: Double?, // Hz
-    val phase: Double? // rad
+    val phase: Double?, // rad
 ) {
     val noteEndTick get() = noteStartTick + noteLengthTick
 }
@@ -42,7 +42,7 @@ fun processSvpInputPitchData(
     tempos: List<Tempo>,
     vibratoEnvPoints: List<Pair<Long, Double>>,
     vibratoEnvMode: String?,
-    vibratoDefaultParameters: SvpDefaultVibratoParameters?
+    vibratoDefaultParameters: SvpDefaultVibratoParameters?,
 ) = points
     .merge()
     .interpolate(mode)
@@ -51,7 +51,7 @@ fun processSvpInputPitchData(
         notesWithVibrato,
         vibratoDefaultParameters,
         tempos,
-        vibratoEnvPoints.merge().interpolate(vibratoEnvMode).orEmpty().extendEveryTick()
+        vibratoEnvPoints.merge().interpolate(vibratoEnvMode).orEmpty().extendEveryTick(),
     )
     .removeRedundantPoints()
 
@@ -82,9 +82,8 @@ private fun List<Pair<Long, Double>>.appendVibrato(
     notes: List<SvpNoteWithVibrato>,
     vibratoDefaultParameters: SvpDefaultVibratoParameters?,
     tempos: List<Tempo>,
-    vibratoEnv: Map<Long, Double>
+    vibratoEnv: Map<Long, Double>,
 ): List<Pair<Long, Double>> {
-
     val transformer = TickTimeTransformer(tempos)
 
     return notes
@@ -105,7 +104,7 @@ private fun List<Pair<Long, Double>>.appendVibrato(
                     vibratoDefaultParameters,
                     transformer,
                     tempos,
-                    vibratoEnv
+                    vibratoEnv,
                 )
         }
 }
@@ -115,7 +114,7 @@ private fun List<Pair<Long, Double>>.appendVibratoInNote(
     defaultParameters: SvpDefaultVibratoParameters?,
     tickTimeTransformer: TickTimeTransformer,
     tempos: List<Tempo>,
-    vibratoEnv: Map<Long, Double>
+    vibratoEnv: Map<Long, Double>,
 ): List<Pair<Long, Double>> {
     // Note with minus position is skipped, but with raise an error after import, see Project.requireValid()
     note?.takeIf { it.noteStartTick >= 0L } ?: return this

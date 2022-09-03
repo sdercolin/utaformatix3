@@ -38,7 +38,7 @@ val LyricsConversionBlock = subFC<LyricsConversionProps, LyricsConversionState> 
         configurationSwitch(
             isOn = state.isOn,
             onSwitched = { editState { copy(isOn = it) } },
-            labelStrings = Strings.JapaneseLyricsConversion
+            labelStrings = Strings.JapaneseLyricsConversion,
         )
     }
 
@@ -56,7 +56,7 @@ private fun ChildrenBuilder.buildLyricsDetail(
     fromLyricsType: LyricsType?,
     setFromLyricsType: (LyricsType) -> Unit,
     toLyricsType: LyricsType?,
-    setToLyricsType: (LyricsType) -> Unit
+    setToLyricsType: (LyricsType) -> Unit,
 ) {
     div {
         css {
@@ -70,14 +70,14 @@ private fun ChildrenBuilder.buildLyricsDetail(
                     margin = Margin(
                         horizontal = 24.px,
                         top = 16.px,
-                        bottom = 24.px
+                        bottom = 24.px,
                     )
                 }
                 FormGroup {
                     buildLyricsTypeControl(
                         labelText = string(
                             Strings.FromLyricsTypeLabel,
-                            "type" to props.project.lyricsType.text
+                            "type" to props.project.lyricsType.text,
                         ),
                         type = fromLyricsType,
                         setType = setFromLyricsType,
@@ -85,15 +85,15 @@ private fun ChildrenBuilder.buildLyricsDetail(
                             LyricsType.RomajiCv,
                             LyricsType.RomajiVcv,
                             LyricsType.KanaCv,
-                            LyricsType.KanaVcv
-                        )
+                            LyricsType.KanaVcv,
+                        ),
                     )
 
                     buildLyricsTypeControl(
                         labelText = string(Strings.ToLyricsTypeLabel),
                         type = toLyricsType,
                         setType = setToLyricsType,
-                        lyricTypeOptions = props.outputFormat.possibleLyricsTypes
+                        lyricTypeOptions = props.outputFormat.possibleLyricsTypes,
                     )
                 }
             }
@@ -105,7 +105,7 @@ private fun ChildrenBuilder.buildLyricsTypeControl(
     labelText: String,
     type: LyricsType?,
     setType: (LyricsType) -> Unit,
-    lyricTypeOptions: List<LyricsType>
+    lyricTypeOptions: List<LyricsType>,
 ) {
     FormControl {
         margin = FormControlMargin.normal

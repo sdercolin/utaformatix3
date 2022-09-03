@@ -5,8 +5,8 @@ fun List<Pair<Long, Double?>>.resampled(
     interpolateMethod: (
         prev: Pair<Long, Double?>?,
         next: Pair<Long, Double?>?,
-        pos: Long
-    ) -> Double?
+        pos: Long,
+    ) -> Double?,
 ): List<Pair<Long, Double?>> {
     val result: MutableList<Pair<Long, Double?>> = mutableListOf()
     val leftBound = this.map { it.first }.minOrNull() ?: 0

@@ -60,7 +60,7 @@ val Importer = scopedFC<ImporterProps> { props, scope ->
             !fileFormat.multipleFile && files.count() > 1 -> {
                 snackbarError = SnackbarErrorState(
                     true,
-                    string(Strings.MultipleFileImportError, "format" to fileFormat.name)
+                    string(Strings.MultipleFileImportError, "format" to fileFormat.name),
                 )
             }
             else -> import(
@@ -71,7 +71,7 @@ val Importer = scopedFC<ImporterProps> { props, scope ->
                 onSnackBarError = { snackbarError = it },
                 onDialogError = { dialogError = it },
                 props,
-                params
+                params,
             )
         }
     }
@@ -106,14 +106,14 @@ val Importer = scopedFC<ImporterProps> { props, scope ->
         isShowing = snackbarError.isShowing,
         message = snackbarError.message,
         close = { closeMessageBar() },
-        color = AlertColor.error
+        color = AlertColor.error,
     )
 
     errorDialog(
         isShowing = dialogError.isShowing,
         title = dialogError.title,
         errorMessage = dialogError.message,
-        close = { closeErrorDialog() }
+        close = { closeErrorDialog() },
     )
 
     progress(isShowing = isLoading)
@@ -145,7 +145,7 @@ private fun ChildrenBuilder.buildConfigurations(params: ImportParams, onNewParam
         div {
             FormControlLabel {
                 label = ReactNode(string(Strings.UseSimpleImport))
-                control = Switch.create() {
+                control = Switch.create {
                     color = SwitchColor.secondary
                     checked = params.simpleImport
                     onChange = { event, _ ->
@@ -178,7 +178,7 @@ private fun import(
     onSnackBarError: (SnackbarErrorState) -> Unit,
     onDialogError: (DialogErrorState) -> Unit,
     props: ImporterProps,
-    params: ImportParams
+    params: ImportParams,
 ) {
     setLoading(true)
     scope.launch {
@@ -200,8 +200,8 @@ private fun import(
                     DialogErrorState(
                         isShowing = true,
                         title = string(Strings.ImportErrorDialogTitle),
-                        message = t.stackTraceToString()
-                    )
+                        message = t.stackTraceToString(),
+                    ),
                 )
             }
         }
@@ -231,5 +231,5 @@ external interface ImporterProps : Props {
 
 data class SnackbarErrorState(
     val isShowing: Boolean = false,
-    val message: String = ""
+    val message: String = "",
 )

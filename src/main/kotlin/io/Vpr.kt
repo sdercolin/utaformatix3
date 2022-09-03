@@ -37,7 +37,7 @@ object Vpr {
             TimeSignature(
                 measurePosition = it.bar,
                 numerator = it.numer,
-                denominator = it.denom
+                denominator = it.denom,
             )
         }?.takeIf { it.isNotEmpty() } ?: listOf(TimeSignature.default).also {
             warnings.add(ImportWarning.TimeSignatureNotFound)
@@ -45,7 +45,7 @@ object Vpr {
         val tempos = content.masterTrack?.tempo?.events?.map {
             model.Tempo(
                 tickPosition = it.pos,
-                bpm = it.value.toDouble() / BPM_RATE
+                bpm = it.value.toDouble() / BPM_RATE,
             )
         }?.takeIf { it.isNotEmpty() } ?: listOf(model.Tempo.default).also {
             warnings.add(ImportWarning.TempoNotFound)
@@ -58,7 +58,7 @@ object Vpr {
             timeSignatures = timeSignatures,
             tempos = tempos,
             measurePrefix = 0,
-            importWarnings = warnings
+            importWarnings = warnings,
         )
     }
 
@@ -72,7 +72,7 @@ object Vpr {
                     tickOff = tickOffset + note.pos + note.duration,
                     lyric = note.lyric.takeUnless { it.isNullOrBlank() } ?: DEFAULT_LYRIC,
                     key = note.number,
-                    phoneme = note.phoneme
+                    phoneme = note.phoneme,
                 )
             }
         val pitch = if (params.simpleImport) null else parsePitchData(track)
@@ -80,7 +80,7 @@ object Vpr {
             id = trackIndex,
             name = track.name ?: "Track ${trackIndex + 1}",
             notes = notes,
-            pitch = pitch
+            pitch = pitch,
         ).validateNotes()
     }
 
@@ -91,7 +91,7 @@ object Vpr {
                 pit = part.getControllerEvents(PITCH_BEND_NAME)
                     .map { VocaloidPartPitchData.Event.fromPair(it.pos to it.value.toInt()) },
                 pbs = part.getControllerEvents(PITCH_BEND_SENSITIVITY_NAME)
-                    .map { VocaloidPartPitchData.Event.fromPair(it.pos to it.value.toInt()) }
+                    .map { VocaloidPartPitchData.Event.fromPair(it.pos to it.value.toInt()) },
             )
         }
         return pitchFromVocaloidParts(dataByParts)
@@ -126,8 +126,8 @@ object Vpr {
             name,
             listOfNotNull(
                 if (project.hasXSampaData) null else ExportNotification.PhonemeResetRequiredV5,
-                if (features.contains(Feature.ConvertPitch)) ExportNotification.PitchDataExported else null
-            )
+                if (features.contains(Feature.ConvertPitch)) ExportNotification.PitchDataExported else null,
+            ),
         )
     }
 
@@ -157,7 +157,7 @@ object Vpr {
                     duration = it.length,
                     number = it.key,
                     lyric = it.lyric,
-                    phoneme = it.phoneme ?: emptyNote.phoneme
+                    phoneme = it.phoneme ?: emptyNote.phoneme,
                 )
             }
             val duration = track.notes.lastOrNull()?.tickOff
@@ -166,12 +166,12 @@ object Vpr {
                 emptyTrack.parts.first().copy(
                     duration = it,
                     notes = notes,
-                    controllers = controllers
+                    controllers = controllers,
                 )
             }
             emptyTrack.copy(
                 name = track.name,
-                parts = listOfNotNull(part)
+                parts = listOfNotNull(part),
             )
         }
         vpr.tracks = tracks
@@ -187,8 +187,8 @@ object Vpr {
             controllers.add(
                 Controller(
                     name = PITCH_BEND_SENSITIVITY_NAME,
-                    events = pitchRawData.pbs.map { ControllerEvent(pos = it.pos, value = it.value.toLong()) }
-                )
+                    events = pitchRawData.pbs.map { ControllerEvent(pos = it.pos, value = it.value.toLong()) },
+                ),
             )
         }
         if (pitchRawData.pit.isNotEmpty()) {
@@ -197,8 +197,8 @@ object Vpr {
                     name = PITCH_BEND_NAME,
                     events = pitchRawData.pit.map {
                         ControllerEvent(pos = it.pos, value = it.value.toLong())
-                    }
-                )
+                    },
+                ),
             )
         }
         return controllers.takeIf { it.isNotEmpty() }
@@ -212,7 +212,7 @@ object Vpr {
     private const val BPM_RATE = 100.0
     private val possibleJsonPaths = listOf(
         "Project\\sequence.json",
-        "Project/sequence.json"
+        "Project/sequence.json",
     )
 
     private const val PITCH_BEND_NAME = "pitchBend"
@@ -225,7 +225,7 @@ object Vpr {
         var tracks: List<Track> = listOf(),
         var vender: String? = null,
         var version: Version? = null,
-        var voices: List<Voice>? = null
+        var voices: List<Voice>? = null,
     )
 
     @Serializable
@@ -234,7 +234,7 @@ object Vpr {
         var samplingRate: Int? = null,
         var tempo: Tempo? = null,
         var timeSig: TimeSig? = null,
-        var volume: JsonElement? = null
+        var volume: JsonElement? = null,
     )
 
     @Serializable
@@ -242,26 +242,26 @@ object Vpr {
         var events: List<TempoEvent> = listOf(),
         var global: JsonElement? = null,
         var height: Double? = null,
-        var isFolded: Boolean? = null
+        var isFolded: Boolean? = null,
     )
 
     @Serializable
     private data class TempoEvent(
         var pos: Long,
-        var value: Int
+        var value: Int,
     )
 
     @Serializable
     private data class TimeSig(
         var events: List<TimeSigEvent> = listOf(),
-        var isFolded: Boolean? = null
+        var isFolded: Boolean? = null,
     )
 
     @Serializable
     private data class TimeSigEvent(
         var bar: Int,
         var denom: Int,
-        var numer: Int
+        var numer: Int,
     )
 
     @Serializable
@@ -276,27 +276,27 @@ object Vpr {
         var panpot: JsonElement? = null,
         var parts: List<Part> = listOf(),
         var type: Int? = null,
-        var volume: JsonElement? = null
+        var volume: JsonElement? = null,
     )
 
     @Serializable
     private data class Version(
         var major: Int? = null,
         var minor: Int? = null,
-        var revision: Int? = null
+        var revision: Int? = null,
     )
 
     @Serializable
     private data class Voice(
         var compID: String? = null,
-        var name: String? = null
+        var name: String? = null,
     )
 
     @Serializable
     private data class Loop(
         var begin: Long? = null,
         var end: Long? = null,
-        var isEnabled: Boolean? = null
+        var isEnabled: Boolean? = null,
     )
 
     @Serializable
@@ -307,7 +307,7 @@ object Vpr {
         var pos: Long,
         var styleName: String? = null,
         var voice: JsonElement? = null,
-        var controllers: List<Controller>? = null
+        var controllers: List<Controller>? = null,
     ) {
         fun getControllerEvents(name: String) = controllers?.find { it.name == name }?.events.orEmpty()
     }
@@ -315,13 +315,13 @@ object Vpr {
     @Serializable
     private data class Controller(
         var name: String,
-        var events: List<ControllerEvent> = listOf()
+        var events: List<ControllerEvent> = listOf(),
     )
 
     @Serializable
     private data class ControllerEvent(
         var pos: Long,
-        var value: Long
+        var value: Long,
     )
 
     @Serializable
@@ -335,6 +335,6 @@ object Vpr {
         var pos: Long,
         var singingSkill: JsonElement? = null,
         var velocity: Int? = null,
-        var vibrato: JsonElement? = null
+        var vibrato: JsonElement? = null,
     )
 }

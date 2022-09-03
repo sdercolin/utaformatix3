@@ -1,7 +1,7 @@
 package process.pitch
 
-import kotlin.math.roundToLong
 import model.TICKS_IN_BEAT
+import kotlin.math.roundToLong
 
 fun tickFromMilliSec(msec: Double, bpm: Double): Long {
     return (msec * bpm * (TICKS_IN_BEAT) / 60000).roundToLong()

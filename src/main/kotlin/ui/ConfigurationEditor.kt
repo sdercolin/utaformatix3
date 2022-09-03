@@ -73,7 +73,7 @@ val ConfigurationEditor = scopedFC<ConfigurationEditorProps> { props, scope ->
         LyricsConversionState(
             doLyricsConversion,
             fromLyricsType,
-            toLyricsType
+            toLyricsType,
         )
     }
     val (lyricsReplacement, setLyricsReplacement) = useState {
@@ -94,7 +94,7 @@ val ConfigurationEditor = scopedFC<ConfigurationEditorProps> { props, scope ->
         }
         SlightRestsFillingState(
             true,
-            RESTS_FILLING_MAX_LENGTH_DENOMINATOR_DEFAULT
+            RESTS_FILLING_MAX_LENGTH_DENOMINATOR_DEFAULT,
         )
     }
     val (pitchConversion, setPitchConversion) = useState {
@@ -106,7 +106,7 @@ val ConfigurationEditor = scopedFC<ConfigurationEditorProps> { props, scope ->
             props.outputFormat.availableFeaturesForGeneration.contains(Feature.ConvertPitch)
         PitchConversionState(
             isAvailable = isPitchConversionAvailable,
-            isOn = isPitchConversionAvailable
+            isOn = isPitchConversionAvailable,
         )
     }
     val (projectZoom, setProjectZoom) = useState {
@@ -116,7 +116,7 @@ val ConfigurationEditor = scopedFC<ConfigurationEditorProps> { props, scope ->
         ProjectZoomState(
             isOn = false,
             factor = projectZoomFactorOptions.first(),
-            hasWarning = false
+            hasWarning = false,
         )
     }
     var dialogError by useState(DialogErrorState())
@@ -161,14 +161,14 @@ val ConfigurationEditor = scopedFC<ConfigurationEditorProps> { props, scope ->
         pitchConversion,
         projectZoom,
         setProcessing = { isProcessing = it },
-        onDialogError = { dialogError = it }
+        onDialogError = { dialogError = it },
     )
 
     errorDialog(
         isShowing = dialogError.isShowing,
         title = dialogError.title,
         errorMessage = dialogError.message,
-        close = { closeErrorDialog() }
+        close = { closeErrorDialog() },
     )
 
     progress(isShowing = isProcessing)
@@ -195,7 +195,7 @@ private fun ChildrenBuilder.buildNextButton(
     pitchConversion: PitchConversionState,
     projectZoom: ProjectZoomState,
     setProcessing: (Boolean) -> Unit,
-    onDialogError: (DialogErrorState) -> Unit
+    onDialogError: (DialogErrorState) -> Unit,
 ) {
     div {
         css {
@@ -215,7 +215,7 @@ private fun ChildrenBuilder.buildNextButton(
                     pitchConversion,
                     projectZoom,
                     setProcessing,
-                    onDialogError
+                    onDialogError,
                 )
             }
             +string(Strings.NextButton)
@@ -232,7 +232,7 @@ private fun process(
     pitchConversion: PitchConversionState,
     projectZoom: ProjectZoomState,
     setProcessing: (Boolean) -> Unit,
-    onDialogError: (DialogErrorState) -> Unit
+    onDialogError: (DialogErrorState) -> Unit,
 ) {
     setProcessing(true)
     scope.launch {
@@ -273,7 +273,7 @@ private fun process(
                 "lyricsReplacement" to lyricsReplacement,
                 "slightRestsFilling" to slightRestsFilling,
                 "pitchConversion" to pitchConversion,
-                "projectZoom" to projectZoom
+                "projectZoom" to projectZoom,
             ).forEach {
                 window.localStorage.setItem(it.first, json.encodeToString(it.second))
             }
@@ -285,8 +285,8 @@ private fun process(
                 DialogErrorState(
                     isShowing = true,
                     title = string(Strings.ProcessErrorDialogTitle),
-                    message = t.stackTraceToString()
-                )
+                    message = t.stackTraceToString(),
+                ),
             )
         }
     }
@@ -313,7 +313,7 @@ external interface ConfigurationEditorProps : Props {
 data class LyricsConversionState(
     val isOn: Boolean,
     val fromType: LyricsType?,
-    val toType: LyricsType?
+    val toType: LyricsType?,
 ) : SubState() {
     val isReady: Boolean get() = if (isOn) fromType != null && toType != null else true
 }
@@ -321,7 +321,7 @@ data class LyricsConversionState(
 @Serializable
 data class LyricsReplacementState(
     val isOn: Boolean,
-    val request: LyricsReplacementRequest
+    val request: LyricsReplacementRequest,
 ) : SubState() {
     val isReady: Boolean get() = if (isOn) request.isValid else true
 }
@@ -329,7 +329,7 @@ data class LyricsReplacementState(
 @Serializable
 data class SlightRestsFillingState(
     val isOn: Boolean,
-    val excludedMaxLengthDenominator: Int
+    val excludedMaxLengthDenominator: Int,
 ) : SubState() {
 
     val excludedMaxLength: Long
@@ -339,14 +339,14 @@ data class SlightRestsFillingState(
 @Serializable
 data class PitchConversionState(
     val isAvailable: Boolean,
-    val isOn: Boolean
+    val isOn: Boolean,
 ) : SubState()
 
 @Serializable
 data class ProjectZoomState(
     val isOn: Boolean,
     val factor: String,
-    val hasWarning: Boolean
+    val hasWarning: Boolean,
 ) : SubState() {
     val factorValue: Double
         get() = factor.evalFractionOrNull()!!

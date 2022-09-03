@@ -6,7 +6,7 @@ import model.Pitch
 import process.dotResampled
 
 data class UtauMode1TrackPitchData(
-    val notes: List<UtauMode1NotePitchData?>
+    val notes: List<UtauMode1NotePitchData?>,
 )
 
 /** This class contains Utau Pitch Data in Mode1.
@@ -23,7 +23,7 @@ data class UtauMode1TrackPitchData(
  * Please notice that UTAU save its pitch data by cent, not semitone. This class will keep this behaviour.
  */
 data class UtauMode1NotePitchData(
-    val pitchPoints: List<Double>?
+    val pitchPoints: List<Double>?,
 )
 
 fun pitchFromUtauMode1Track(pitchData: UtauMode1TrackPitchData?, notes: List<Note>): Pitch? {
@@ -35,7 +35,7 @@ fun pitchFromUtauMode1Track(pitchData: UtauMode1TrackPitchData?, notes: List<Not
             pitchPoints.addAll(
                 data.mapIndexed { index, value ->
                     Pair(note.tickOn + index * Ust.MODE1_PITCH_SAMPLING_INTERVAL_TICK, value / 100)
-                }
+                },
             )
         }
     }
@@ -52,8 +52,8 @@ fun pitchToUtauMode1Track(pitch: Pitch?, notes: List<Note>): UtauMode1TrackPitch
                     ?.filter { it.first >= note.tickOn && it.first < note.tickOff }
                     ?.dotResampled(Ust.MODE1_PITCH_SAMPLING_INTERVAL_TICK)
                     ?.map { Pair(it.first, it.second ?: note.key.toDouble()) }
-                    ?.map { (it.second - note.key) * 100 }
+                    ?.map { (it.second - note.key) * 100 },
             )
-        }
+        },
     )
 }

@@ -1,7 +1,6 @@
 package io
 
 import external.Resources
-import kotlin.math.roundToLong
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
@@ -21,6 +20,7 @@ import process.pitch.getRelativeData
 import process.validateNotes
 import util.nameWithoutExtension
 import util.readText
+import kotlin.math.roundToLong
 
 object S5p {
     private const val TICK_RATE = 1470000L
@@ -37,7 +37,7 @@ object S5p {
             TimeSignature(
                 measurePosition = it.measure,
                 numerator = it.beatPerMeasure,
-                denominator = it.beatGranularity
+                denominator = it.beatGranularity,
             )
         }.takeIf { it.isNotEmpty() } ?: listOf(TimeSignature.default).also {
             warnings.add(ImportWarning.TimeSignatureNotFound)
@@ -45,7 +45,7 @@ object S5p {
         val tempos = project.tempo.map {
             model.Tempo(
                 tickPosition = it.position / TICK_RATE,
-                bpm = it.beatPerMinute
+                bpm = it.beatPerMinute,
             )
         }.takeIf { it.isNotEmpty() } ?: listOf(model.Tempo.default).also {
             warnings.add(ImportWarning.TempoNotFound)
@@ -59,7 +59,7 @@ object S5p {
             timeSignatures = timeSignatures,
             tempos = tempos,
             measurePrefix = 0,
-            importWarnings = warnings
+            importWarnings = warnings,
         )
     }
 
@@ -69,7 +69,7 @@ object S5p {
                 id = index,
                 name = track.name ?: "Track ${index + 1}",
                 notes = parseNotes(track),
-                pitch = if (params.simpleImport) null else parsePitch(track)
+                pitch = if (params.simpleImport) null else parsePitch(track),
             ).validateNotes()
         }
 
@@ -97,7 +97,7 @@ object S5p {
             key = note.pitch,
             tickOn = tickOn,
             tickOff = tickOn + note.duration / TICK_RATE,
-            lyric = note.lyric.takeUnless { it.isNullOrBlank() } ?: DEFAULT_LYRIC
+            lyric = note.lyric.takeUnless { it.isNullOrBlank() } ?: DEFAULT_LYRIC,
         )
     }
 
@@ -109,8 +109,8 @@ object S5p {
             blob,
             name,
             listOfNotNull(
-                if (features.contains(Feature.ConvertPitch)) ExportNotification.PitchDataExported else null
-            )
+                if (features.contains(Feature.ConvertPitch)) ExportNotification.PitchDataExported else null,
+            ),
         )
     }
 
@@ -121,13 +121,13 @@ object S5p {
             Meter(
                 measure = it.measurePosition,
                 beatPerMeasure = it.numerator,
-                beatGranularity = it.denominator
+                beatGranularity = it.denominator,
             )
         }
         s5p.tempo = project.tempos.map {
             Tempo(
                 position = it.tickPosition * TICK_RATE,
-                beatPerMinute = it.bpm
+                beatPerMinute = it.bpm,
             )
         }
         val emptyTrack = s5p.tracks.first()
@@ -146,13 +146,13 @@ object S5p {
                     onset = it.tickOn * TICK_RATE,
                     duration = it.length * TICK_RATE,
                     lyric = it.lyric,
-                    pitch = it.key
+                    pitch = it.key,
                 )
             },
             parameters = emptyTrack.parameters!!.copy(
                 interval = DEFAULT_INTERVAL,
-                pitchDelta = generatePitchData(track, features, DEFAULT_INTERVAL)
-            )
+                pitchDelta = generatePitchData(track, features, DEFAULT_INTERVAL),
+            ),
         )
     }
 
@@ -176,20 +176,20 @@ object S5p {
         var mixer: JsonElement? = null,
         var tempo: List<Tempo> = listOf(),
         var tracks: List<Track> = listOf(),
-        var version: Int? = null
+        var version: Int? = null,
     )
 
     @Serializable
     private data class Meter(
         var beatGranularity: Int,
         var beatPerMeasure: Int,
-        var measure: Int
+        var measure: Int,
     )
 
     @Serializable
     private data class Tempo(
         var beatPerMinute: Double,
-        var position: Long
+        var position: Long,
     )
 
     @Serializable
@@ -201,7 +201,7 @@ object S5p {
         var mixer: JsonElement? = null,
         var name: String? = null,
         var notes: List<Note?> = listOf(),
-        var parameters: Parameters? = null
+        var parameters: Parameters? = null,
     )
 
     @Serializable
@@ -211,7 +211,7 @@ object S5p {
         var duration: Long,
         var lyric: String? = null,
         var onset: Long,
-        var pitch: Int
+        var pitch: Int,
     )
 
     @Serializable
@@ -223,6 +223,6 @@ object S5p {
         var pitchDelta: List<Double>? = null,
         var tension: List<Double>? = null,
         var vibratoEnv: List<Double>? = null,
-        var voicing: List<Double>? = null
+        var voicing: List<Double>? = null,
     )
 }

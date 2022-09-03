@@ -9,7 +9,7 @@ import react.Props
 import react.useEffectOnce
 
 fun <P : Props> scopedFC(
-    block: ChildrenBuilder.(props: P, scope: CoroutineScope) -> Unit
+    block: ChildrenBuilder.(props: P, scope: CoroutineScope) -> Unit,
 ) = FC<P> { props ->
     val scope = CoroutineScope(Dispatchers.Default)
 

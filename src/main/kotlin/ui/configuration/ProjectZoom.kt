@@ -48,7 +48,7 @@ val ProjectZoomBlock = subFC<ProjectZoomProps, ProjectZoomState> { props, state,
             configurationSwitch(
                 isOn = state.isOn,
                 onSwitched = { editState { copy(isOn = it) } },
-                labelStrings = Strings.ProjectZoom
+                labelStrings = Strings.ProjectZoom,
             )
             Tooltip {
                 title = ReactNode(string(Strings.ProjectZoomDescription))
@@ -79,7 +79,7 @@ val ProjectZoomBlock = subFC<ProjectZoomProps, ProjectZoomState> { props, state,
 
 private fun ChildrenBuilder.buildProjectZoomDetail(
     state: ProjectZoomState,
-    editState: (ProjectZoomState.() -> ProjectZoomState) -> Unit
+    editState: (ProjectZoomState.() -> ProjectZoomState) -> Unit,
 ) {
     div {
         css {
@@ -94,7 +94,7 @@ private fun ChildrenBuilder.buildProjectZoomDetail(
                         left = 24.px,
                         right = 48.px,
                         top = 16.px,
-                        bottom = 16.px
+                        bottom = 16.px,
                     )
                     paddingBottom = 8.px
                 }

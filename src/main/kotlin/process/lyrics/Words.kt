@@ -200,7 +200,7 @@ val kanaToRomaji = listOf(
     "を" to "o",
     "うぉ" to "wo",
     "ん" to "n",
-    "ー" to "-"
+    "ー" to "-",
 )
 
 val kanas = kanaToRomaji.map { it.first }

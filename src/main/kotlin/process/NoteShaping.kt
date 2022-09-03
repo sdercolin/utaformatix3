@@ -1,9 +1,9 @@
 package process
 
-import kotlin.math.min
 import model.Note
 import model.Project
 import model.Track
+import kotlin.math.min
 
 interface RichNote<T : Any> {
     val note: Note
@@ -43,7 +43,7 @@ private fun Track.fillRests(excludedMaxLength: Long) =
                     } else note
                 }
                 .plus(it.last())
-        }
+        },
     )
 
 const val RESTS_FILLING_MAX_LENGTH_DENOMINATOR_DEFAULT = 64

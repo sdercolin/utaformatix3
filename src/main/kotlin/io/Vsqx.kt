@@ -2,7 +2,6 @@ package io
 
 import exception.IllegalFileException
 import external.Resources
-import kotlin.math.max
 import kotlinx.dom.clear
 import model.DEFAULT_LYRIC
 import model.ExportNotification
@@ -39,6 +38,7 @@ import util.insertAfterThis
 import util.nameWithoutExtension
 import util.readText
 import util.setSingleChildValue
+import kotlin.math.max
 
 object Vsqx {
 
@@ -84,7 +84,7 @@ object Vsqx {
             timeSignatures = timeSignatures,
             tempos = tempos,
             measurePrefix = measurePrefix,
-            importWarnings = warnings
+            importWarnings = warnings,
         )
     }
 
@@ -92,7 +92,7 @@ object Vsqx {
         masterTrack: Element,
         tagNames: TagNames,
         measurePrefix: Int,
-        warnings: MutableList<ImportWarning>
+        warnings: MutableList<ImportWarning>,
     ): Pair<Long, List<TimeSignature>> {
         val rawTimeSignatures = masterTrack.getElementListByTagName(tagNames.timeSig, allowEmpty = false)
             .mapNotNull {
@@ -105,7 +105,7 @@ object Vsqx {
                 TimeSignature(
                     measurePosition = posMes,
                     numerator = nume,
-                    denominator = denomi
+                    denominator = denomi,
                 )
             }
             .ifEmpty {
@@ -145,7 +145,7 @@ object Vsqx {
         masterTrack: Element,
         tagNames: TagNames,
         tickPrefix: Long,
-        warnings: MutableList<ImportWarning>
+        warnings: MutableList<ImportWarning>,
     ): List<Tempo> {
         val tempos = masterTrack.getElementListByTagName(tagNames.tempo, allowEmpty = false)
             .mapNotNull {
@@ -158,7 +158,7 @@ object Vsqx {
                         ?: return@mapNotNull null
                 Tempo(
                     tickPosition = posTick - tickPrefix,
-                    bpm = bpm
+                    bpm = bpm,
                 )
             }
             .ifEmpty {
@@ -184,7 +184,7 @@ object Vsqx {
         id: Int,
         tagNames: TagNames,
         tickPrefix: Long,
-        params: ImportParams
+        params: ImportParams,
     ): Track {
         val trackName = trackNode.getSingleElementByTagNameOrNull(tagNames.trackName)?.innerValueOrNull
             ?: "Track ${id + 1}"
@@ -207,7 +207,7 @@ object Vsqx {
                     tickOn = tickOn + tickOffset,
                     tickOff = tickOn + tickOffset + length,
                     lyric = lyric,
-                    phoneme = xSampa
+                    phoneme = xSampa,
                 )
             }
         val pitch = if (params.simpleImport) null else {
@@ -221,7 +221,7 @@ object Vsqx {
                     }.map {
                         VocaloidPartPitchData.Event(
                             pos = it.getSingleElementByTagName(tagNames.posTick).innerValue.toLong(),
-                            value = it.getSingleElementByTagName(tagNames.attr).innerValue.toInt()
+                            value = it.getSingleElementByTagName(tagNames.attr).innerValue.toInt(),
                         )
                     }
                     val pit = controlNodes.filter {
@@ -229,13 +229,13 @@ object Vsqx {
                     }.map {
                         VocaloidPartPitchData.Event(
                             pos = it.getSingleElementByTagName(tagNames.posTick).innerValue.toLong(),
-                            value = it.getSingleElementByTagName(tagNames.attr).innerValue.toInt()
+                            value = it.getSingleElementByTagName(tagNames.attr).innerValue.toInt(),
                         )
                     }
                     VocaloidPartPitchData(
                         startPos = tickOffset,
                         pit = pit,
-                        pbs = pbs
+                        pbs = pbs,
                     )
                 }
             pitchFromVocaloidParts(pitchByParts)
@@ -244,7 +244,7 @@ object Vsqx {
             id = id,
             name = trackName,
             notes = notes,
-            pitch = pitch
+            pitch = pitch,
         ).validateNotes()
     }
 
@@ -259,8 +259,8 @@ object Vsqx {
             name,
             listOfNotNull(
                 if (project.hasXSampaData) null else ExportNotification.PhonemeResetRequiredV4,
-                if (features.contains(Feature.ConvertPitch)) ExportNotification.PitchDataExported else null
-            )
+                if (features.contains(Feature.ConvertPitch)) ExportNotification.PitchDataExported else null,
+            ),
         )
     }
 
@@ -308,7 +308,7 @@ object Vsqx {
         masterTrack: Element,
         tagNames: TagNames,
         models: List<Tempo>,
-        tickPrefix: Long
+        tickPrefix: Long,
     ) {
         val empty = masterTrack.getSingleElementByTagName(tagNames.tempo)
         var previous = empty
@@ -330,7 +330,7 @@ object Vsqx {
         masterTrack: Element,
         tagNames: TagNames,
         models: List<TimeSignature>,
-        measurePrefix: Int
+        measurePrefix: Int,
     ) {
         val empty = masterTrack.getSingleElementByTagName(tagNames.timeSig)
         var previous = empty
@@ -357,7 +357,7 @@ object Vsqx {
         project: Project,
         tickPrefix: Long,
         document: XMLDocument,
-        features: List<Feature>
+        features: List<Feature>,
     ): Element {
         val trackModel = project.tracks[trackIndex]
 
@@ -373,7 +373,7 @@ object Vsqx {
             features.contains(Feature.ConvertPitch),
             part,
             trackModel,
-            tagNames
+            tagNames,
         )
 
         val emptyNote = part.getSingleElementByTagName(tagNames.note)
@@ -396,7 +396,7 @@ object Vsqx {
         emptyNote: Element,
         tagNames: TagNames,
         model: Note,
-        document: XMLDocument
+        document: XMLDocument,
     ): Element {
         val newNote = emptyNote.clone()
         newNote.setSingleChildValue(tagNames.posTick, model.tickOn)
@@ -421,7 +421,7 @@ object Vsqx {
         convert: Boolean,
         part: Element,
         trackModel: Track,
-        tagNames: TagNames
+        tagNames: TagNames,
     ) {
         val emptyControl = part.getSingleElementByTagName(tagNames.mCtrl)
         val pitchRawData = trackModel.pitch?.generateForVocaloid(trackModel.notes)
@@ -473,7 +473,7 @@ object Vsqx {
         val attr: String = "attr",
         val id: String = "id",
         val pbsName: String = "PBS",
-        val pitName: String = "PIT"
+        val pitName: String = "PIT",
     ) {
         Vsq3,
         Vsq4(
@@ -492,7 +492,7 @@ object Vsqx {
             mCtrl = "cc",
             attr = "v",
             pbsName = "S",
-            pitName = "P"
+            pitName = "P",
         )
     }
 }

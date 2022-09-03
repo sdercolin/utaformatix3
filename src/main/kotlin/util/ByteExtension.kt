@@ -9,7 +9,7 @@ import org.khronos.webgl.get
 fun MutableList<Byte>.addBlock(
     block: List<Byte>,
     littleEndian: Boolean = true,
-    lengthInVariableLength: Boolean = false
+    lengthInVariableLength: Boolean = false,
 ) {
     if (lengthInVariableLength) addIntVariableLengthBigEndian(block.count())
     else addInt(block.count(), littleEndian)
@@ -19,7 +19,7 @@ fun MutableList<Byte>.addBlock(
 fun MutableList<Byte>.addList(
     list: List<List<Byte>>,
     littleEndian: Boolean = true,
-    lengthInVariableLength: Boolean = false
+    lengthInVariableLength: Boolean = false,
 ) {
     if (lengthInVariableLength) addIntVariableLengthBigEndian(list.count())
     else addInt(list.count(), littleEndian)
@@ -29,7 +29,7 @@ fun MutableList<Byte>.addList(
 fun MutableList<Byte>.addListBlock(
     list: List<List<Byte>>,
     littleEndian: Boolean = true,
-    lengthInVariableLength: Boolean = false
+    lengthInVariableLength: Boolean = false,
 ) {
     val block = mutableListOf<Byte>().apply {
         if (lengthInVariableLength) addIntVariableLengthBigEndian(list.count())

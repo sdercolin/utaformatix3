@@ -6,9 +6,9 @@ import ui.strings.string
 open class UnsupportedFileFormatError(override val message: String) : Exception(message)
 
 class UnsupportedStandardMidiError : UnsupportedFileFormatError(
-    string(Strings.UnsupportedStandardMidiError)
+    string(Strings.UnsupportedStandardMidiError),
 )
 
 class UnsupportedLegacyPpsfError : UnsupportedFileFormatError(
-    string(Strings.UnsupportedLegacyPpsfError)
+    string(Strings.UnsupportedLegacyPpsfError),
 )

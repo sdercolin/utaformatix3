@@ -21,10 +21,9 @@ fun ChildrenBuilder.errorDialog(
     isShowing: Boolean,
     close: () -> Unit,
     title: String,
-    errorMessage: String
+    errorMessage: String,
 ) {
     Dialog {
-
         open = isShowing
         onClose = { _, _ -> close() }
         DialogTitle {
@@ -63,5 +62,5 @@ fun ChildrenBuilder.errorDialog(
 data class DialogErrorState(
     val isShowing: Boolean = false,
     val title: String = "",
-    val message: String = ""
+    val message: String = "",
 )

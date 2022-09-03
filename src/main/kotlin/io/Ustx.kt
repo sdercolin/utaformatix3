@@ -43,7 +43,7 @@ object Ustx {
             timeSignatures = timeSignatures,
             tempos = tempos,
             measurePrefix = 0,
-            importWarnings = listOf()
+            importWarnings = listOf(),
         )
     }
 
@@ -53,14 +53,14 @@ object Ustx {
             model.TimeSignature(
                 measurePosition = it.barPosition,
                 numerator = it.beatPerBar,
-                denominator = it.beatUnit
+                denominator = it.beatUnit,
             )
         } ?: listOf(
             model.TimeSignature(
                 0,
                 project.beatPerBar ?: 4,
-                project.beatUnit ?: 4
-            )
+                project.beatUnit ?: 4,
+            ),
         )
     }
 
@@ -69,13 +69,13 @@ object Ustx {
         return list?.map {
             model.Tempo(
                 tickPosition = it.position,
-                bpm = it.bpm
+                bpm = it.bpm,
             )
         } ?: listOf(
             model.Tempo(
                 tickPosition = 0,
-                bpm = project.bpm ?: 120.0
-            )
+                bpm = project.bpm ?: 120.0,
+            ),
         )
     }
 
@@ -84,7 +84,7 @@ object Ustx {
             model.Track(
                 id = index,
                 name = "Track ${index + 1}",
-                notes = listOf()
+                notes = listOf(),
             )
         }.associateBy { it.id }.toMutableMap()
         for (voicePart in project.voiceParts) {
@@ -97,7 +97,7 @@ object Ustx {
                     key = it.tone,
                     lyric = it.lyric,
                     tickOn = it.position + tickPrefix,
-                    tickOff = it.position + it.duration + tickPrefix
+                    tickOff = it.position + it.duration + tickPrefix,
                 )
             }
             val notePitches = if (params.simpleImport) null
@@ -111,7 +111,7 @@ object Ustx {
             val pitch: model.Pitch? = if (validatedNotePitches?.isNotEmpty() == true || pitchCurve != null) {
                 val partPitchData = OpenUtauPartPitchData(
                     pitchCurve.orEmpty(),
-                    validatedNotePitches.orEmpty()
+                    validatedNotePitches.orEmpty(),
                 )
                 pitchFromUstxPart(validatedNotes, partPitchData, tempos)
             } else null
@@ -123,7 +123,7 @@ object Ustx {
             .map {
                 it.copy(
                     notes = it.notes.mapIndexed { index, note -> note.copy(id = index) },
-                    pitch = it.pitch.reduceRepeatedPitchPointsFromUstxTrack()
+                    pitch = it.pitch.reduceRepeatedPitchPointsFromUstxTrack(),
                 )
             }
             .sortedBy { it.id }
@@ -136,7 +136,7 @@ object Ustx {
                 y = it.y,
                 shape = OpenUtauNotePitchData.Shape.values()
                     .find { shape -> shape.textValue == it.shape }
-                    ?: OpenUtauNotePitchData.Shape.EaseInOut
+                    ?: OpenUtauNotePitchData.Shape.EaseInOut,
             )
         }
         val vibrato = note.vibrato.let {
@@ -147,7 +147,7 @@ object Ustx {
                 fadeIn = it.`in`,
                 fadeOut = it.out,
                 phaseShift = it.shift,
-                shift = it.drift
+                shift = it.drift,
             )
         }
         return OpenUtauNotePitchData(points, vibrato)
@@ -155,7 +155,7 @@ object Ustx {
 
     private fun getValidatedNotes(
         notes: List<model.Note>,
-        notePitches: List<OpenUtauNotePitchData>?
+        notePitches: List<OpenUtauNotePitchData>?,
     ): Pair<List<model.Note>, List<OpenUtauNotePitchData>?> {
         val validatedNotes = mutableListOf<model.Note>()
         val validatedNotePitches = if (notePitches != null) mutableListOf<OpenUtauNotePitchData>() else null
@@ -179,8 +179,8 @@ object Ustx {
             blob,
             name,
             listOfNotNull(
-                if (features.contains(Feature.ConvertPitch)) ExportNotification.PitchDataExported else null
-            )
+                if (features.contains(Feature.ConvertPitch)) ExportNotification.PitchDataExported else null,
+            ),
         )
     }
 
@@ -205,18 +205,18 @@ object Ustx {
             tempos = project.tempos.map {
                 Tempo(
                     position = it.tickPosition,
-                    bpm = it.bpm
+                    bpm = it.bpm,
                 )
             },
             timeSignatures = project.timeSignatures.map {
                 TimeSignature(
                     barPosition = it.measurePosition,
                     beatPerBar = it.numerator,
-                    beatUnit = it.denominator
+                    beatUnit = it.denominator,
                 )
             },
             tracks = tracks,
-            voiceParts = voiceParts
+            voiceParts = voiceParts,
         )
         val jsonText = jsonSerializer.encodeToString(Project.serializer(), ustx)
         return JsYaml.dump(JSON.parse(jsonText))
@@ -245,14 +245,14 @@ object Ustx {
             trackNo = track.id,
             position = 0L,
             notes = notes,
-            curves = curves
+            curves = curves,
         )
     }
 
     private fun generateNote(
         template: Note,
         lastNote: model.Note?,
-        thisNote: model.Note
+        thisNote: model.Note,
     ): Note {
         val firstPitchPointValue = if (lastNote?.tickOff == thisNote.tickOn) {
             (lastNote.key - thisNote.key) * 10.0 // the unit is 10 cents
@@ -269,7 +269,7 @@ object Ustx {
             tone = thisNote.key,
             pitch = pitch,
             lyric = thisNote.lyric,
-            vibrato = template.vibrato.copy()
+            vibrato = template.vibrato.copy(),
         )
     }
 
@@ -293,7 +293,7 @@ object Ustx {
         val tempos: List<Tempo>? = null,
         val expressions: Map<String, Expression>,
         val tracks: List<Track>,
-        @SerialName("voice_parts") val voiceParts: List<VoicePart>
+        @SerialName("voice_parts") val voiceParts: List<VoicePart>,
     )
 
     @Serializable
@@ -306,7 +306,7 @@ object Ustx {
         @SerialName("default_value") val defaultValue: Int,
         @SerialName("is_flag") val isFlag: Boolean,
         val flag: String? = null,
-        val options: List<String>? = null
+        val options: List<String>? = null,
     )
 
     @Serializable
@@ -314,7 +314,7 @@ object Ustx {
         val phonemizer: String,
         val mute: Boolean,
         val solo: Boolean,
-        val volume: Double
+        val volume: Double,
     )
 
     @Serializable
@@ -324,7 +324,7 @@ object Ustx {
         @SerialName("track_no") val trackNo: Int,
         val position: Long,
         val notes: List<Note>,
-        val curves: List<Curve>? = null
+        val curves: List<Curve>? = null,
     )
 
     @Serializable
@@ -334,20 +334,20 @@ object Ustx {
         val tone: Int,
         val lyric: String,
         val pitch: Pitch,
-        val vibrato: Vibrato
+        val vibrato: Vibrato,
     )
 
     @Serializable
     private data class Pitch(
         val data: List<Datum>,
-        @SerialName("snap_first") val snapFirst: Boolean
+        @SerialName("snap_first") val snapFirst: Boolean,
     )
 
     @Serializable
     private data class Datum(
         val x: Double,
         val y: Double,
-        val shape: String
+        val shape: String,
     )
 
     @Serializable
@@ -358,26 +358,26 @@ object Ustx {
         val `in`: Double,
         val out: Double,
         val shift: Double,
-        val drift: Double
+        val drift: Double,
     )
 
     @Serializable
     private data class Curve(
         val xs: List<Long>,
         val ys: List<Double>,
-        val abbr: String
+        val abbr: String,
     )
 
     @Serializable
     private data class Tempo(
         val position: Long,
-        val bpm: Double
+        val bpm: Double,
     )
 
     @Serializable
     private data class TimeSignature(
         @SerialName("bar_position") val barPosition: Int,
         @SerialName("beat_per_bar") val beatPerBar: Int,
-        @SerialName("beat_unit") val beatUnit: Int
+        @SerialName("beat_unit") val beatUnit: Int,
     )
 }
