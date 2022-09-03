@@ -17,7 +17,7 @@ data class OpenUtauNotePitchData(
 ) {
 
     data class Point(
-        val x: Double, // msec
+        val x: Double, // milliSec
         val y: Double, // 10 cents
         val shape: Shape,
     )

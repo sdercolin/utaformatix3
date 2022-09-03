@@ -94,16 +94,14 @@ object Ccs {
         results: List<TrackParseResult>,
         warnings: MutableList<ImportWarning>,
     ): MutableList<Tempo> {
-        val tempos = results.firstOrNull { it.tempos.isNotEmpty() }?.tempos.let {
-            if (it == null || it.isEmpty()) {
-                warnings.add(ImportWarning.TempoNotFound)
-            }
-            it ?: listOf(Tempo.default)
-        }.toMutableList()
+        val tempos = (
+            results.firstOrNull { it.tempos.isNotEmpty() }?.tempos
+                ?: listOf(Tempo.default).also { warnings.add(ImportWarning.TempoNotFound) }
+            ).toMutableList()
 
         warnings.addAll(
             results.flatMap { result ->
-                val ignoredTempos = result.tempos - tempos
+                val ignoredTempos = result.tempos - tempos.toSet()
                 ignoredTempos.map { ImportWarning.TempoIgnoredInTrack(result.track, it) }
             },
         )
@@ -124,16 +122,14 @@ object Ccs {
         results: List<TrackParseResult>,
         warnings: MutableList<ImportWarning>,
     ): List<TimeSignature> {
-        val timeSignatures = results.firstOrNull { it.timeSignatures.isNotEmpty() }?.timeSignatures.let {
-            if (it == null || it.isEmpty()) {
-                warnings.add(ImportWarning.TimeSignatureNotFound)
-            }
-            it ?: listOf(TimeSignature.default)
-        }.toMutableList()
+        val timeSignatures = (
+            results.firstOrNull { it.timeSignatures.isNotEmpty() }?.timeSignatures
+                ?: listOf(TimeSignature.default).also { warnings.add(ImportWarning.TimeSignatureNotFound) }
+            ).toMutableList()
 
         warnings.addAll(
             results.flatMap { result ->
-                val ignoredTimeSignatures = result.timeSignatures - timeSignatures
+                val ignoredTimeSignatures = result.timeSignatures - timeSignatures.toSet()
                 ignoredTimeSignatures.map { ImportWarning.TimeSignatureIgnoredInTrack(result.track, it) }
             },
         )

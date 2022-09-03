@@ -19,9 +19,9 @@ data class UtauMode2TrackPitchData(
 
 data class UtauMode2NotePitchData(
     val bpm: Double?,
-    val start: Double?, // msec, null only if the note is not applied with pitch
+    val start: Double?, // milliSec, null only if the note is not applied with pitch
     val startShift: Double?, // 10 cents
-    val widths: List<Double>, // msec
+    val widths: List<Double>, // milliSec
     val shifts: List<Double>, // 10 cents
     val curveTypes: List<String>, // (blank)/s/r/j
     val vibratoParams: UtauNoteVibratoParams?,

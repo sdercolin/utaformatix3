@@ -10,7 +10,7 @@ import kotlin.math.sin
 
 data class UtauNoteVibratoParams(
     val length: Double, // percentage of the note's length
-    val period: Double, // msec
+    val period: Double, // milliSec
     val depth: Double, // cent
     val fadeIn: Double, // percentage of the vibrato's length
     val fadeOut: Double, // percentage of the vibrato's length

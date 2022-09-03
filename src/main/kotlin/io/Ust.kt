@@ -168,7 +168,7 @@ object Ust {
                             shifts = pendingPBY.orEmpty(),
                             curveTypes = pendingPBM.orEmpty(),
                             vibratoParams = pendingVBR?.takeIf { it.isNotEmpty() }?.let {
-                                // length(%), period(msec), depth(cent), easeIn(%), easeOut(%), phase(%), shift(%)
+                                // length(%), period(milliSec), depth(cent), easeIn(%), easeOut(%), phase(%), shift(%)
                                 UtauNoteVibratoParams(
                                     length = it[0],
                                     period = it[1],

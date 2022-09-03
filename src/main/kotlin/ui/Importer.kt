@@ -1,9 +1,9 @@
 package ui
 
-import ImportParamsJson
 import csstype.VerticalAlign
 import csstype.px
 import exception.UnsupportedFileFormatError
+import io.ImportParamsJson
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch

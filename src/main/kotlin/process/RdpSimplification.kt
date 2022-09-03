@@ -8,7 +8,7 @@ package process
 * Implementation reference: https://rosettacode.org/wiki/Ramer-Douglas-Peucker_line_simplification
 * */
 
-// As Utaformatix use Pair<Long, Double> to describe pitch point, so...
+// As UtaFormatix use Pair<Long, Double> to describe pitch point, so...
 private typealias Point = Pair<Long, Double>
 
 private fun perpendicularDistance(pt: Point, lineStart: Point, lineEnd: Point): Double {

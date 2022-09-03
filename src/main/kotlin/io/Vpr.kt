@@ -147,7 +147,7 @@ object Vpr {
             TempoEvent(pos = it.tickPosition, value = (it.bpm * BPM_RATE).toInt())
         }
         vpr.masterTrack!!.tempo!!.events = tempoEvents
-        endTick = endTick.coerceAtLeast(tempoEvents.map { it.pos }.maxOrNull() ?: 0)
+        endTick = endTick.coerceAtLeast(tempoEvents.maxOfOrNull { it.pos } ?: 0)
         val emptyTrack = vpr.tracks.first()
         val emptyNote = emptyTrack.parts.first().notes.first()
         val tracks = project.tracks.map { track ->
@@ -175,7 +175,7 @@ object Vpr {
             )
         }
         vpr.tracks = tracks
-        endTick = endTick.coerceAtLeast(tracks.map { it.parts.firstOrNull()?.duration ?: 0 }.maxOrNull() ?: 0)
+        endTick = endTick.coerceAtLeast(tracks.maxOfOrNull { it.parts.firstOrNull()?.duration ?: 0 } ?: 0)
         vpr.masterTrack!!.loop!!.end = endTick
         return jsonSerializer.encodeToString(Project.serializer(), vpr)
     }
