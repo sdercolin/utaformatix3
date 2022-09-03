@@ -82,7 +82,6 @@ private val ExportNotification.text: String
             ExportNotification.PhonemeResetRequiredV5 -> Strings.ExportNotificationPhonemeResetRequiredV5
             ExportNotification.TempoChangeIgnored -> Strings.ExportNotificationTempoChangeIgnored
             ExportNotification.TimeSignatureIgnored -> Strings.ExportNotificationTimeSignatureIgnored
-            ExportNotification.TimeSignatureChangeIgnored -> Strings.ExportNotificationTimeSignatureIgnored
             ExportNotification.PitchDataExported -> Strings.ExportNotificationPitchDataExported
             ExportNotification.DataOverLengthLimitIgnored -> Strings.ExportNotificationDataOverLengthLimitIgnored
         }

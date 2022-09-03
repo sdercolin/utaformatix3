@@ -179,9 +179,7 @@ object Ustx {
             blob,
             name,
             listOfNotNull(
-                if (features.contains(Feature.ConvertPitch)) ExportNotification.PitchDataExported else null,
-                if (project.tempos.count() > 1) ExportNotification.TempoChangeIgnored else null,
-                if (project.timeSignatures.count() > 1) ExportNotification.TimeSignatureChangeIgnored else null
+                if (features.contains(Feature.ConvertPitch)) ExportNotification.PitchDataExported else null
             )
         )
     }
@@ -204,6 +202,19 @@ object Ustx {
             bpm = project.tempos.first().bpm,
             beatPerBar = project.timeSignatures.first().numerator,
             beatUnit = project.timeSignatures.first().denominator,
+            tempos = project.tempos.map {
+                Tempo(
+                    position = it.tickPosition,
+                    bpm = it.bpm
+                )
+            },
+            timeSignatures = project.timeSignatures.map {
+                TimeSignature(
+                    barPosition = it.measurePosition,
+                    beatPerBar = it.numerator,
+                    beatUnit = it.denominator
+                )
+            },
             tracks = tracks,
             voiceParts = voiceParts
         )

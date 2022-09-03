@@ -6,7 +6,6 @@ sealed class ExportNotification {
     object PhonemeResetRequiredV5 : ExportNotification()
     object TempoChangeIgnored : ExportNotification()
     object TimeSignatureIgnored : ExportNotification()
-    object TimeSignatureChangeIgnored : ExportNotification()
     object PitchDataExported : ExportNotification()
     object DataOverLengthLimitIgnored : ExportNotification()
 }
