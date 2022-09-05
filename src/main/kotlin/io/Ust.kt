@@ -294,10 +294,6 @@ object Ust {
         val blob = zip.generateAsync(option).await() as Blob
         val name = project.name + ".zip"
         val notifications = mutableListOf<ExportNotification>()
-        // TODO: Maybe find a better way to handle multi tempo export in future
-        if (project.tempos.distinctBy { it.bpm }.count() > 1) {
-            notifications.add(ExportNotification.TempoChangeIgnored)
-        }
         if (project.timeSignatures.any { it.numerator != DEFAULT_METER_HIGH || it.denominator != DEFAULT_METER_LOW }) {
             notifications.add(ExportNotification.TimeSignatureIgnored)
         }
