@@ -388,7 +388,8 @@ object Ust {
                 val mode2Pitch = pitchDataMode2?.notes?.get(index)
                 builder.appendLine("PBS=${mode2Pitch?.start}")
                 // We insert startShift in PBW and PBY with width=1, as UTAU would just ignore it
-                // Theoretically this would make all pit data moved behind by 1 tick, but hey, who can tell the difference...
+                // Theoretically this would make all pit data moved behind by 1 tick,
+                // but hey, who can tell the difference...
                 builder.appendLine("PBW=1,${mode2Pitch?.widths?.joinToString(",") { it.toString() }}")
                 builder.appendLine(
                     "PBY=${mode2Pitch?.startShift},${
