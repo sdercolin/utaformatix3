@@ -624,13 +624,6 @@ enum class Strings(
         fr = "Les phonèmes de toutes les notes ont été réglés sur \"a\". Veuillez utiliser \"Lyrics\" ->" +
             " \"Convert Phonemes to Match Languages\" dans le menu de VOCALOID5 pour les réinitialiser.",
     ),
-    ExportNotificationTempoChangeIgnored(
-        en = "Could not convert tempo changes to the target format.",
-        ja = "テンポの変更を出力することができませんでした。",
-        zhCN = "未能将速度的变化导出到目标格式。",
-        ru = "Невозможно конвертировать изменения темпа в целевой формат.",
-        fr = " Impossible de convertir les changements de tempo au format cible.",
-    ),
     ExportNotificationTimeSignatureIgnored(
         en = "Could not convert time signatures to the target format.",
         ja = "拍子記号を出力することができませんでした。",
