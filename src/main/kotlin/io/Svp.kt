@@ -73,7 +73,9 @@ object Svp {
         model.Track(
             id = index,
             name = track.name ?: "Track ${index + 1}",
-            notes = parseNotes(track, project),
+            notes = parseNotes(track, project)
+                // for some reasons, svp can have negative positioned notes inside
+                .filter { it.tickOn >= 0 },
             pitch = if (params.simpleImport) null else parsePitch(track, project, tempos),
         ).validateNotes()
     }
