@@ -323,6 +323,16 @@ object Ust {
         builder.appendLine("Mode2=True")
         var tickPos = 0L
         var restCount = 0
+
+        var nextTempoIndex: Int? = 0
+
+        fun increaseNextTempoIndex() {
+            nextTempoIndex = nextTempoIndex?.plus(1)?.takeIf { it < project.tempos.size }
+        }
+        increaseNextTempoIndex()
+
+        fun getNextTempo() = nextTempoIndex?.let { project.tempos[it] }
+
         val pitchDataMode1 = if (features.contains(Feature.ConvertPitch)) {
             pitchToUtauMode1Track(track.pitch, track.notes)
         } else null
@@ -331,19 +341,46 @@ object Ust {
         } else null
         for ((index, note) in track.notes.withIndex()) {
             if (tickPos < note.tickOn) {
+                val nextTempo = getNextTempo()
+                var restOn = tickPos
+                var noteBpm: String? = null
+                if (nextTempo != null && nextTempo.tickPosition in restOn until note.tickOn) {
+                    val restNoteNumber = (note.id + restCount).padStartZero(4)
+                    builder.appendLine("[#$restNoteNumber]")
+                    builder.appendLine("Length=${nextTempo.tickPosition - restOn}")
+                    builder.appendLine("Lyric=R")
+                    builder.appendLine("NoteNum=60")
+                    builder.appendLine("PreUtterance=")
+                    restCount++
+                    restOn = nextTempo.tickPosition
+                    noteBpm = nextTempo.bpm.toFixed(2)
+                    increaseNextTempoIndex()
+                }
                 val restNoteNumber = (note.id + restCount).padStartZero(4)
                 builder.appendLine("[#$restNoteNumber]")
-                builder.appendLine("Length=${note.tickOn - tickPos}")
+                builder.appendLine("Length=${note.tickOn - restOn}")
                 builder.appendLine("Lyric=R")
                 builder.appendLine("NoteNum=60")
+                if (noteBpm != null) {
+                    builder.appendLine("Tempo=$noteBpm")
+                }
                 builder.appendLine("PreUtterance=")
                 restCount++
+            }
+            val nextTempo = getNextTempo()
+            var noteBpm: String? = null
+            if (nextTempo != null && nextTempo.tickPosition in note.tickOn until note.tickOff) {
+                noteBpm = nextTempo.bpm.toFixed(2)
+                increaseNextTempoIndex()
             }
             val noteNumber = (note.id + restCount).padStartZero(4)
             builder.appendLine("[#$noteNumber]")
             builder.appendLine("Length=${note.length}")
             builder.appendLine("Lyric=${note.lyric}")
             builder.appendLine("NoteNum=${note.key}")
+            if (noteBpm != null) {
+                builder.appendLine("Tempo=$noteBpm")
+            }
             builder.appendLine("PreUtterance=")
 
             if (features.contains(Feature.ConvertPitch)) {
