@@ -16,7 +16,7 @@ data class LyricsReplacementRequest(
     val isValid get() = items.all { it.isValid }
 
     fun update(editIndex: Int, updater: Item.() -> Item) = copy(
-        items = items.mapIndexed { index, item -> item.runIf(index == editIndex) { updater() } }
+        items = items.mapIndexed { index, item -> item.runIf(index == editIndex) { updater() } },
     )
 
     fun moveUp(index: Int) = move(index, -1)
@@ -42,7 +42,7 @@ data class LyricsReplacementRequest(
         val filter: String = "",
         val matchType: MatchType = MatchType.All,
         val from: String = "",
-        val to: String = ""
+        val to: String = "",
     ) {
         val isValid
             get() = (filterType == FilterType.None || filter.isNotEmpty()) &&
@@ -102,8 +102,8 @@ data class LyricsReplacementRequest(
                         filter = "R",
                         matchType = MatchType.All,
                         from = "",
-                        to = ""
-                    )
+                        to = "",
+                    ),
                 )
                 else -> Unit
             }
@@ -115,8 +115,8 @@ data class LyricsReplacementRequest(
                         filter = "-",
                         matchType = MatchType.All,
                         from = "",
-                        to = "ー"
-                    )
+                        to = "ー",
+                    ),
                 )
 
                 Format.Ustx -> items.add(
@@ -125,8 +125,8 @@ data class LyricsReplacementRequest(
                         filter = "-",
                         matchType = MatchType.All,
                         from = "",
-                        to = "+"
-                    )
+                        to = "+",
+                    ),
                 )
                 else -> Unit
             }
@@ -137,14 +137,14 @@ data class LyricsReplacementRequest(
 }
 
 fun Project.replaceLyrics(request: LyricsReplacementRequest) = copy(
-    tracks = tracks.map { it.replaceLyrics(request) }
+    tracks = tracks.map { it.replaceLyrics(request) },
 )
 
 fun Track.replaceLyrics(request: LyricsReplacementRequest) = copy(
     notes = notes.mapNotNull { note -> note.replaceLyrics(request).takeIf { it.lyric.isNotEmpty() } }
-        .validateNotes()
+        .validateNotes(),
 )
 
 private fun Note.replaceLyrics(request: LyricsReplacementRequest) = copy(
-    lyric = request.doReplace(lyric)
+    lyric = request.doReplace(lyric),
 )

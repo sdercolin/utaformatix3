@@ -83,7 +83,7 @@ private fun ChildrenBuilder.buildFormatList(props: OutputFormatSelectorProps) {
                             marginLeft = 24.px
                         }
                         ListItemText {
-                            primary = Typography.create() {
+                            primary = Typography.create {
                                 variant = TypographyVariant.h4
                                 style = jso { fontWeight = FontWeight.lighter }
 
@@ -105,18 +105,18 @@ private val ImportWarning.text: String
             Strings.ImportWarningTempoIgnoredInFile,
             "bpm" to tempo.bpm.toString(),
             "tick" to tempo.tickPosition.toString(),
-            "file" to file.name
+            "file" to file.name,
         )
         is ImportWarning.TempoIgnoredInTrack -> string(
             Strings.ImportWarningTempoIgnoredInTrack,
             "bpm" to tempo.bpm.toString(),
             "tick" to tempo.tickPosition.toString(),
             "number" to (track.id + 1).toString(),
-            "name" to track.name
+            "name" to track.name,
         )
         is ImportWarning.TempoIgnoredInPreMeasure -> string(
             Strings.ImportWarningTempoIgnoredInPreMeasure,
-            "bpm" to tempo.bpm.toString()
+            "bpm" to tempo.bpm.toString(),
         )
         is ImportWarning.TimeSignatureNotFound -> string(Strings.ImportWarningTimeSignatureNotFound)
         is ImportWarning.TimeSignatureIgnoredInTrack -> string(
@@ -124,16 +124,16 @@ private val ImportWarning.text: String
             "timeSignature" to timeSignature.displayValue,
             "measure" to timeSignature.measurePosition.toString(),
             "number" to (track.id + 1).toString(),
-            "name" to track.name
+            "name" to track.name,
         )
         is ImportWarning.TimeSignatureIgnoredInPreMeasure -> string(
             Strings.ImportWarningTimeSignatureIgnoredInPreMeasure,
-            "timeSignature" to timeSignature.displayValue
+            "timeSignature" to timeSignature.displayValue,
         )
         is ImportWarning.IncompatibleFormatSerializationVersion -> string(
             Strings.ImportWarningIncompatibleFormatSerializationVersion,
             "dataVersion" to dataVersion,
-            "currentVersion" to currentVersion
+            "currentVersion" to currentVersion,
         )
     }
 

@@ -43,7 +43,7 @@ val SlightRestsFillingBlock = subFC<SlightRestsFillingProps, SlightRestsFillingS
             configurationSwitch(
                 isOn = state.isOn,
                 onSwitched = { editState { copy(isOn = it) } },
-                labelStrings = Strings.SlightRestsFilling
+                labelStrings = Strings.SlightRestsFilling,
             )
             Tooltip {
                 title = ReactNode(string(Strings.SlightRestsFillingDescription))
@@ -63,7 +63,7 @@ val SlightRestsFillingBlock = subFC<SlightRestsFillingProps, SlightRestsFillingS
 
 private fun ChildrenBuilder.buildRestsFillingDetail(
     state: SlightRestsFillingState,
-    editState: (SlightRestsFillingState.() -> SlightRestsFillingState) -> Unit
+    editState: (SlightRestsFillingState.() -> SlightRestsFillingState) -> Unit,
 ) {
     div {
         css {
@@ -78,7 +78,7 @@ private fun ChildrenBuilder.buildRestsFillingDetail(
                         left = 24.px,
                         right = 48.px,
                         top = 16.px,
-                        bottom = 16.px
+                        bottom = 16.px,
                     )
                     paddingBottom = 8.px
                 }
@@ -108,7 +108,7 @@ private fun ChildrenBuilder.buildRestsFillingDetail(
                                 value = denominator.toString()
                                 +string(
                                     Strings.SlightRestsFillingThresholdItem,
-                                    "denominator" to denominator.toString()
+                                    "denominator" to denominator.toString(),
                                 )
                             }
                         }

@@ -80,12 +80,10 @@ private val ExportNotification.text: String
             ExportNotification.PhonemeResetRequiredVSQ -> Strings.ExportNotificationPhonemeResetRequiredVSQ
             ExportNotification.PhonemeResetRequiredV4 -> Strings.ExportNotificationPhonemeResetRequiredV4
             ExportNotification.PhonemeResetRequiredV5 -> Strings.ExportNotificationPhonemeResetRequiredV5
-            ExportNotification.TempoChangeIgnored -> Strings.ExportNotificationTempoChangeIgnored
             ExportNotification.TimeSignatureIgnored -> Strings.ExportNotificationTimeSignatureIgnored
-            ExportNotification.TimeSignatureChangeIgnored -> Strings.ExportNotificationTimeSignatureIgnored
             ExportNotification.PitchDataExported -> Strings.ExportNotificationPitchDataExported
             ExportNotification.DataOverLengthLimitIgnored -> Strings.ExportNotificationDataOverLengthLimitIgnored
-        }
+        },
     )
 
 external interface ExporterProps : Props {

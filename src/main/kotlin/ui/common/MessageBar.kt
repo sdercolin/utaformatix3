@@ -13,7 +13,7 @@ fun ChildrenBuilder.messageBar(
     isShowing: Boolean,
     message: String,
     close: () -> Unit,
-    color: AlertColor
+    color: AlertColor,
 ) = Snackbar {
     anchorOrigin = jso {
         vertical = SnackbarOriginVertical.bottom

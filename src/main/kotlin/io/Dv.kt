@@ -1,6 +1,5 @@
 package io
 
-import kotlin.math.max
 import model.ExportResult
 import model.Feature
 import model.Format
@@ -29,6 +28,7 @@ import util.addListBlock
 import util.addString
 import util.nameWithoutExtension
 import util.readAsArrayBuffer
+import kotlin.math.max
 
 /**
  * References: https://pypi.org/project/dvfile/
@@ -83,7 +83,7 @@ object Dv {
             timeSignatures = timeSignatures,
             tempos = tempos,
             measurePrefix = FIXED_MEASURE_PREFIX,
-            importWarnings = warnings
+            importWarnings = warnings,
         )
     }
 
@@ -91,7 +91,7 @@ object Dv {
         tickPrefix: Long,
         tempos: List<Tempo>,
         params: ImportParams,
-        reader: ArrayBufferReader
+        reader: ArrayBufferReader,
     ): Track? {
         val trackType = reader.readInt()
         if (trackType != 0) {
@@ -134,7 +134,7 @@ object Dv {
                     key = noteKey,
                     lyric = lyric,
                     tickOn = segmentStart + noteStart - tickPrefix,
-                    tickOff = segmentStart + noteStart - tickPrefix + noteLength
+                    tickOff = segmentStart + noteStart - tickPrefix + noteLength,
                 )
                 notesWithPitch.add(
                     DvNoteWithPitch(
@@ -143,8 +143,8 @@ object Dv {
                         benLen = benLen,
                         porHead = porHead,
                         porTail = porTail,
-                        vibrato = vibratoData
-                    )
+                        vibrato = vibratoData,
+                    ),
                 )
             }
             reader.readBytes()
@@ -163,7 +163,7 @@ object Dv {
             id = 0,
             name = trackName,
             notes = notesWithPitchValidated.map { it.note },
-            pitch = pitch
+            pitch = pitch,
         )
     }
 
@@ -182,7 +182,7 @@ object Dv {
 
     private fun parsePitchData(
         tickOffset: Long,
-        reader: ArrayBufferReader
+        reader: ArrayBufferReader,
     ): DvSegmentPitchRawData {
         reader.readInt()
         val pointLength = reader.readInt()
@@ -194,7 +194,7 @@ object Dv {
     }
 
     private fun skipPitchData(
-        reader: ArrayBufferReader
+        reader: ArrayBufferReader,
     ) {
         reader.readBytes()
     }
@@ -358,8 +358,8 @@ object Dv {
                             mutableListOf<Byte>().apply {
                                 addInt(100001)
                                 addInt(0)
-                            }
-                        )
+                            },
+                        ),
                     )
                     addListBlock(
                         listOf(
@@ -370,8 +370,8 @@ object Dv {
                             mutableListOf<Byte>().apply {
                                 addInt(100001)
                                 addInt(0)
-                            }
-                        )
+                            },
+                        ),
                     )
                     addListBlock(
                         listOf(
@@ -382,10 +382,10 @@ object Dv {
                             mutableListOf<Byte>().apply {
                                 addInt(1124)
                                 addInt(0)
-                            }
-                        )
+                            },
+                        ),
                     )
-                }
+                },
             )
             addBlock(noteUnknownDataBlock)
             addAll(noteUnknownPhonemes)
@@ -420,17 +420,17 @@ object Dv {
     private const val STARTING_MEASURE_POSITION = -3
     private const val FIXED_MEASURE_PREFIX = 4
     private val header = listOf(
-        0x53, 0x48, 0x41, 0x52, 0x50, 0x4B, 0x45, 0x59, 0x05, 0x00, 0x00, 0x00
+        0x53, 0x48, 0x41, 0x52, 0x50, 0x4B, 0x45, 0x59, 0x05, 0x00, 0x00, 0x00,
     ).map { it.toByte() }
     private const val DEFAULT_VOLUME = 30
     private const val MIN_SEGMENT_LENGTH = 480 * 4
     private val segmentDefaultParameterData1 = listOf(
         0x14, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0xFF, 0xFF,
-        0x80, 0x00, 0x00, 0x00, 0x01, 0xB0, 0x04, 0x00, 0x80, 0x00, 0x00, 0x00
+        0x80, 0x00, 0x00, 0x00, 0x01, 0xB0, 0x04, 0x00, 0x80, 0x00, 0x00, 0x00,
     ).map { it.toByte() }
     private val segmentDefaultParameterDataPitch = listOf(
         0x14, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0xFF, 0xFF,
-        0xFF, 0xFF, 0xFF, 0xFF, 0x01, 0xB0, 0x04, 0x00, 0xFF, 0xFF, 0xFF, 0xFF
+        0xFF, 0xFF, 0xFF, 0xFF, 0x01, 0xB0, 0x04, 0x00, 0xFF, 0xFF, 0xFF, 0xFF,
     ).map { it.toByte() }
     private val segmentDefaultParameterData2 = listOf(
         0x14, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0xFF, 0xFF,
@@ -442,11 +442,11 @@ object Dv {
         0x14, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0xFF, 0xFF,
         0x80, 0x00, 0x00, 0x00, 0x01, 0xB0, 0x04, 0x00, 0x80, 0x00, 0x00, 0x00,
         0x14, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0xFF, 0xFF,
-        0x00, 0x00, 0x00, 0x00, 0x01, 0xB0, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00
+        0x00, 0x00, 0x00, 0x00, 0x01, 0xB0, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00,
     ).map { it.toByte() }
     private val noteUnknownPhonemes = listOf(
         0x00, 0x00, 0x00, 0x80, 0x3F, 0x00, 0x00, 0x00, 0x80, 0x3F, 0x00, 0x00,
-        0x80, 0x3F, 0x00, 0x00, 0x80, 0x3F
+        0x80, 0x3F, 0x00, 0x00, 0x80, 0x3F,
     ).map { it.toByte() }
     private val noteUnknownDataBlock = listOf(
         0x00, 0x04, 0x00, 0x00, 0x07, 0xEF, 0x52, 0xB4, 0x79, 0xCA, 0xC6, 0xBB,
@@ -790,6 +790,6 @@ object Dv {
         0xE9, 0xED, 0x88, 0x3D, 0x56, 0xEF, 0x78, 0x3D, 0x48, 0x03, 0x60, 0x3D,
         0xFA, 0x17, 0x47, 0x3D, 0xC1, 0x2D, 0x2E, 0x3D, 0xEE, 0x44, 0x15, 0x3D,
         0xAC, 0xBB, 0xF8, 0x3C, 0x98, 0xF1, 0xC6, 0x3C, 0x49, 0x2C, 0x95, 0x3C,
-        0xD0, 0xD8, 0x46, 0x3C, 0x79, 0xCA, 0xC6, 0x3B
+        0xD0, 0xD8, 0x46, 0x3C, 0x79, 0xCA, 0xC6, 0x3B,
     ).map { it.toByte() }
 }

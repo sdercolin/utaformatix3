@@ -83,7 +83,7 @@ object VsqLike {
     private fun parseTrack(trackAsText: String, trackId: Int, tickPrefix: Long, params: ImportParams): Track {
         val lines = trackAsText.linesNotBlank()
         val titleWithIndexes = lines.mapIndexed { index, line ->
-            if (Regex("\\[.*\\]").matches(line)) line.drop(1).dropLast(1) to index
+            if (Regex("\\[.*]").matches(line)) line.drop(1).dropLast(1) to index
             else null
         }.filterNotNull()
         val sectionMap = titleWithIndexes.zipWithNext().map { (current, next) ->
@@ -91,7 +91,7 @@ object VsqLike {
         }.plus(
             titleWithIndexes.last().let { last ->
                 last.first to lines.subList(last.second, lines.count())
-            }
+            },
         ).associate { pair ->
             pair.first to pair.second.associate { it.splitFirst("=") }
         }
@@ -122,7 +122,7 @@ object VsqLike {
                     lyric = lyric,
                     tickOn = tickPosition,
                     tickOff = tickPosition + length,
-                    phoneme = xSampa
+                    phoneme = xSampa,
                 )
             }
             .filterNotNull()
@@ -146,9 +146,9 @@ object VsqLike {
                 VocaloidPartPitchData(
                     startPos = 0,
                     pit = pit,
-                    pbs = pbs
-                )
-            )
+                    pbs = pbs,
+                ),
+            ),
         )
     }
 
@@ -185,7 +185,7 @@ object VsqLike {
                     bytes.addBlock(
                         MidiUtil.generateMidiTimeSignatureBytes(event.numerator, event.denominator),
                         IS_LITTLE_ENDIAN,
-                        lengthInVariableLength = true
+                        lengthInVariableLength = true,
                     )
                 }
                 is Tempo -> {
@@ -229,7 +229,7 @@ object VsqLike {
         tickPrefix: Int,
         measurePrefix: Int,
         project: Project,
-        features: List<Feature>
+        features: List<Feature>,
     ): String {
         val notesLines = mutableListOf<String>()
         val lyricsLines = mutableListOf<String>()
@@ -308,7 +308,7 @@ object VsqLike {
         tickPrefix: Int,
         measurePrefix: Int,
         project: Project,
-        features: List<Feature>
+        features: List<Feature>,
     ): List<Byte> {
         val bytes = mutableListOf<Byte>()
         bytes.add(0x00)
@@ -341,7 +341,7 @@ object VsqLike {
     private fun parseMasterTrack(
         masterTrack: dynamic,
         measurePrefix: Int,
-        warnings: MutableList<ImportWarning>
+        warnings: MutableList<ImportWarning>,
     ): Triple<List<Tempo>, List<TimeSignature>, Long> {
         val events = masterTrack.event as Array<dynamic>
         var tickPosition = 0
@@ -355,8 +355,8 @@ object VsqLike {
                     rawTempos.add(
                         Tempo(
                             tickPosition.toLong(),
-                            MidiUtil.convertMidiTempoToBpm(event.data as Int)
-                        )
+                            MidiUtil.convertMidiTempoToBpm(event.data as Int),
+                        ),
                     )
                 }
                 MidiUtil.MetaType.TimeSignature -> {
@@ -366,8 +366,8 @@ object VsqLike {
                         TimeSignature(
                             tickCounter.measure,
                             numerator,
-                            denominator
-                        )
+                            denominator,
+                        ),
                     )
                 }
                 else -> {
@@ -408,7 +408,7 @@ object VsqLike {
         return Triple(
             tempos,
             timeSignatures,
-            tickPrefix
+            tickPrefix,
         )
     }
 
@@ -428,7 +428,7 @@ object VsqLike {
         bytes.addBlock(
             generateMasterTrack(project, tickPrefix),
             IS_LITTLE_ENDIAN,
-            lengthInVariableLength = false
+            lengthInVariableLength = false,
         )
 
         // normal tracks
@@ -437,7 +437,7 @@ object VsqLike {
             bytes.addBlock(
                 generateTrack(it, tickPrefix, measurePrefix, project, features),
                 IS_LITTLE_ENDIAN,
-                lengthInVariableLength = false
+                lengthInVariableLength = false,
             )
         }
         return Uint8Array(bytes.toTypedArray())
@@ -459,7 +459,7 @@ object VsqLike {
         val (tempos, timeSignatures, tickPrefix) = parseMasterTrack(
             midiTracks.first(),
             measurePrefix,
-            warnings
+            warnings,
         )
 
         val tracks = tracksAsText.mapIndexed { index, trackText ->
@@ -474,7 +474,7 @@ object VsqLike {
             timeSignatures = timeSignatures,
             tempos = tempos,
             measurePrefix = measurePrefix,
-            importWarnings = warnings
+            importWarnings = warnings,
         )
     }
 
@@ -491,8 +491,8 @@ object VsqLike {
             listOfNotNull(
                 if (projectLengthLimited.hasXSampaData) null else ExportNotification.PhonemeResetRequiredVSQ,
                 if (features.contains(Feature.ConvertPitch)) ExportNotification.PitchDataExported else null,
-                if (project == projectLengthLimited) null else ExportNotification.DataOverLengthLimitIgnored
-            )
+                if (project == projectLengthLimited) null else ExportNotification.DataOverLengthLimitIgnored,
+            ),
         )
     }
 

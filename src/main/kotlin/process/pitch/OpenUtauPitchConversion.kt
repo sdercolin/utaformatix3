@@ -1,24 +1,25 @@
 package process.pitch
 
-import kotlin.math.roundToInt
 import model.Note
 import model.Pitch
+import model.Tempo
 import process.interpolateCosineEaseIn
 import process.interpolateCosineEaseInOut
 import process.interpolateCosineEaseOut
 import process.interpolateLinear
+import kotlin.math.roundToInt
 
 private const val SAMPLING_INTERVAL_TICK = 5L
 
 data class OpenUtauNotePitchData(
     val points: List<Point>,
-    val vibrato: UtauNoteVibratoParams
+    val vibrato: UtauNoteVibratoParams,
 ) {
 
     data class Point(
-        val x: Double, // msec
+        val x: Double, // milliSec
         val y: Double, // 10 cents
-        val shape: Shape
+        val shape: Shape,
     )
 
     enum class Shape(val textValue: String) {
@@ -31,22 +32,24 @@ data class OpenUtauNotePitchData(
 
 data class OpenUtauPartPitchData(
     val points: List<Point>,
-    val notes: List<OpenUtauNotePitchData>
+    val notes: List<OpenUtauNotePitchData>,
 ) {
     data class Point(
         val x: Long, // tick
-        val y: Int // cent
+        val y: Int, // cent
     )
 }
 
-fun pitchFromUstxPart(notes: List<Note>, pitchData: OpenUtauPartPitchData, bpm: Double): Pitch? {
+fun pitchFromUstxPart(notes: List<Note>, pitchData: OpenUtauPartPitchData, tempos: List<Tempo>): Pitch? {
     // Extract pitch points from notes
     val notePointsList = mutableListOf<List<Pair<Long, Double>>>()
+    val tickTimeTransformer = TickTimeTransformer(tempos)
     for ((note, notePitch) in notes.zip(pitchData.notes)) {
         val points = mutableListOf<Pair<Long, Double>>()
         var lastPointShape = OpenUtauNotePitchData.Shape.EaseInOut
+        val noteStartInMillis = tickTimeTransformer.tickToMilliSec(note.tickOn)
         for (rawPoint in notePitch.points) {
-            val x = note.tickOn + tickFromMilliSec(rawPoint.x, bpm)
+            val x = tickTimeTransformer.milliSecToTick(noteStartInMillis + rawPoint.x)
             val y = rawPoint.y / 10
             val thisPoint = x to y
             val lastPoint = points.lastOrNull()
@@ -62,7 +65,7 @@ fun pitchFromUstxPart(notes: List<Note>, pitchData: OpenUtauPartPitchData, bpm: 
         val (pointsBefore, pointsNotBefore) = points.partition { it.first < note.tickOn }
         val (pointsAfter, pointsIn) = pointsNotBefore.partition { it.first > note.tickOff }
         val pointsInNoteWithVibrato = pointsIn
-            .appendUtauNoteVibrato(notePitch.vibrato, note, bpm, SAMPLING_INTERVAL_TICK)
+            .appendUtauNoteVibrato(notePitch.vibrato, note, tickTimeTransformer, SAMPLING_INTERVAL_TICK)
         val pointsWithVibrato = pointsBefore + pointsInNoteWithVibrato + pointsAfter
         notePointsList.add(pointsWithVibrato.resampled(SAMPLING_INTERVAL_TICK))
     }
@@ -169,7 +172,7 @@ fun Pitch?.toOpenUtauPitchData(notes: List<Note>): List<Pair<Long, Double>> {
 private fun interpolate(
     lastPoint: Pair<Long, Double>,
     thisPoint: Pair<Long, Double>,
-    shape: OpenUtauNotePitchData.Shape
+    shape: OpenUtauNotePitchData.Shape,
 ): List<Pair<Long, Double>> {
     val input = listOf(lastPoint, thisPoint)
     val output = when (shape) {

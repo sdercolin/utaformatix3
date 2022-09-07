@@ -19,7 +19,7 @@ fun Pitch.getRelativeData(notes: List<Note>, borderAppendRadius: Long = 0L): Lis
 private fun Pitch.convertRelativity(
     notes: List<Note>,
     toAbsolute: Boolean,
-    borderAppendRadius: Long = 0L
+    borderAppendRadius: Long = 0L,
 ): List<Pair<Long, Double?>>? =
     when {
         isAbsolute && toAbsolute -> this.data
@@ -68,7 +68,7 @@ private fun List<Note>.getBorders(): List<Long> {
 
 private fun List<Pair<Long, Double?>>.appendPointsAtBorders(
     notes: List<Note>,
-    radius: Long
+    radius: Long,
 ): List<Pair<Long, Double?>> {
     if (radius <= 0) return this
     val result = this.toMutableList()

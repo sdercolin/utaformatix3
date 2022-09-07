@@ -3,7 +3,6 @@ package io
 import external.Encoding
 import external.JsZip
 import external.JsZipOption
-import kotlin.math.roundToLong
 import kotlinx.coroutines.await
 import model.DEFAULT_METER_HIGH
 import model.DEFAULT_METER_LOW
@@ -39,22 +38,22 @@ import util.padStartZero
 import util.readBinary
 import util.readText
 import util.toFixed
+import kotlin.math.roundToLong
 
 object Ust {
     suspend fun parse(files: List<File>, params: ImportParams): Project {
         val results = files.map {
             parseFile(it)
         }
-        val projectName = results
-            .mapNotNull { it.projectName }
-            .firstOrNull()
+        val projectName = results.firstNotNullOfOrNull { it.projectName }
             ?: files.first().nameWithoutExtension
         val tracks = results.mapIndexed { index, result ->
             val pitch = when {
                 params.simpleImport -> null
                 result.isMode2 -> pitchFromUtauMode2Track(
                     result.pitchDataMode2,
-                    result.notes
+                    result.notes,
+                    result.tempos,
                 )
                 else -> pitchFromUtauMode1Track(result.pitchDataMode1, result.notes)
             }
@@ -62,21 +61,19 @@ object Ust {
                 id = index,
                 name = result.file.nameWithoutExtension,
                 notes = result.notes,
-                pitch = pitch
+                pitch = pitch,
             ).validateNotes()
         }
         val warnings = mutableListOf<ImportWarning>()
-        val tempos = results.firstOrNull { it.tempos.isNotEmpty() }?.tempos.let {
-            if (it == null || it.isEmpty()) {
+        val tempos = results.firstOrNull { it.tempos.isNotEmpty() }?.tempos
+            ?: listOf(Tempo.default).also {
                 warnings.add(ImportWarning.TempoNotFound)
             }
-            it ?: listOf(Tempo.default)
-        }
         warnings.addAll(
             results.flatMap { result ->
-                val ignoredTempos = result.tempos - tempos
+                val ignoredTempos = result.tempos - tempos.toSet()
                 ignoredTempos.map { ImportWarning.TempoIgnoredInFile(result.file, it) }
-            }
+            },
         )
         return Project(
             format = Format.Ust,
@@ -86,7 +83,7 @@ object Ust {
             measurePrefix = 0,
             timeSignatures = listOf(TimeSignature.default),
             tempos = tempos,
-            importWarnings = warnings
+            importWarnings = warnings,
         )
     }
 
@@ -159,8 +156,8 @@ object Ust {
                             key = pendingNoteKey,
                             lyric = pendingNoteLyric,
                             tickOn = pendingNoteTickOn,
-                            tickOff = pendingNoteTickOff
-                        )
+                            tickOff = pendingNoteTickOff,
+                        ),
                     )
                     notePitchDataListMode2.add(
                         UtauMode2NotePitchData(
@@ -171,7 +168,7 @@ object Ust {
                             shifts = pendingPBY.orEmpty(),
                             curveTypes = pendingPBM.orEmpty(),
                             vibratoParams = pendingVBR?.takeIf { it.isNotEmpty() }?.let {
-                                // length(%), period(msec), depth(cent), easeIn(%), easeOut(%), phase(%), shift(%)
+                                // length(%), period(milliSec), depth(cent), easeIn(%), easeOut(%), phase(%), shift(%)
                                 UtauNoteVibratoParams(
                                     length = it[0],
                                     period = it[1],
@@ -179,15 +176,15 @@ object Ust {
                                     fadeIn = it.getOrNull(3) ?: 0.0,
                                     fadeOut = it.getOrNull(4) ?: 0.0,
                                     phaseShift = it.getOrNull(5) ?: 0.0,
-                                    shift = it.getOrNull(6) ?: 0.0
+                                    shift = it.getOrNull(6) ?: 0.0,
                                 )
-                            }
-                        )
+                            },
+                        ),
                     )
                     notePitchDataListMode1.add(
                         UtauMode1NotePitchData(
-                            pendingPitchBend
-                        )
+                            pendingPitchBend,
+                        ),
                     )
                 }
                 pendingNoteKey = null
@@ -267,7 +264,7 @@ object Ust {
     }
 
     private fun parseMode1PitchData(
-        pitchString: String
+        pitchString: String,
     ): List<Double> {
         return pitchString.split(",").map { pitchPointString ->
             pitchPointString.toDoubleOrNull() ?: 0.0
@@ -281,7 +278,7 @@ object Ust {
         val tempos: List<Tempo>,
         val isMode2: Boolean,
         val pitchDataMode1: UtauMode1TrackPitchData?,
-        val pitchDataMode2: UtauMode2TrackPitchData?
+        val pitchDataMode2: UtauMode2TrackPitchData?,
     )
 
     suspend fun generate(project: Project, features: List<Feature>): ExportResult {
@@ -297,10 +294,6 @@ object Ust {
         val blob = zip.generateAsync(option).await() as Blob
         val name = project.name + ".zip"
         val notifications = mutableListOf<ExportNotification>()
-        // TODO: Maybe find a better way to handle multi tempo export in future
-        if (project.tempos.distinctBy { it.bpm }.count() > 1) {
-            notifications.add(ExportNotification.TempoChangeIgnored)
-        }
         if (project.timeSignatures.any { it.numerator != DEFAULT_METER_HIGH || it.denominator != DEFAULT_METER_LOW }) {
             notifications.add(ExportNotification.TimeSignatureIgnored)
         }
@@ -326,6 +319,16 @@ object Ust {
         builder.appendLine("Mode2=True")
         var tickPos = 0L
         var restCount = 0
+
+        var nextTempoIndex: Int? = 0
+
+        fun increaseNextTempoIndex() {
+            nextTempoIndex = nextTempoIndex?.plus(1)?.takeIf { it < project.tempos.size }
+        }
+        increaseNextTempoIndex()
+
+        fun getNextTempo() = nextTempoIndex?.let { project.tempos[it] }
+
         val pitchDataMode1 = if (features.contains(Feature.ConvertPitch)) {
             pitchToUtauMode1Track(track.pitch, track.notes)
         } else null
@@ -334,19 +337,46 @@ object Ust {
         } else null
         for ((index, note) in track.notes.withIndex()) {
             if (tickPos < note.tickOn) {
+                val nextTempo = getNextTempo()
+                var restOn = tickPos
+                var noteBpm: String? = null
+                if (nextTempo != null && nextTempo.tickPosition in restOn until note.tickOn) {
+                    val restNoteNumber = (note.id + restCount).padStartZero(4)
+                    builder.appendLine("[#$restNoteNumber]")
+                    builder.appendLine("Length=${nextTempo.tickPosition - restOn}")
+                    builder.appendLine("Lyric=R")
+                    builder.appendLine("NoteNum=60")
+                    builder.appendLine("PreUtterance=")
+                    restCount++
+                    restOn = nextTempo.tickPosition
+                    noteBpm = nextTempo.bpm.toFixed(2)
+                    increaseNextTempoIndex()
+                }
                 val restNoteNumber = (note.id + restCount).padStartZero(4)
                 builder.appendLine("[#$restNoteNumber]")
-                builder.appendLine("Length=${note.tickOn - tickPos}")
+                builder.appendLine("Length=${note.tickOn - restOn}")
                 builder.appendLine("Lyric=R")
                 builder.appendLine("NoteNum=60")
+                if (noteBpm != null) {
+                    builder.appendLine("Tempo=$noteBpm")
+                }
                 builder.appendLine("PreUtterance=")
                 restCount++
+            }
+            val nextTempo = getNextTempo()
+            var noteBpm: String? = null
+            if (nextTempo != null && nextTempo.tickPosition in note.tickOn until note.tickOff) {
+                noteBpm = nextTempo.bpm.toFixed(2)
+                increaseNextTempoIndex()
             }
             val noteNumber = (note.id + restCount).padStartZero(4)
             builder.appendLine("[#$noteNumber]")
             builder.appendLine("Length=${note.length}")
             builder.appendLine("Lyric=${note.lyric}")
             builder.appendLine("NoteNum=${note.key}")
+            if (noteBpm != null) {
+                builder.appendLine("Tempo=$noteBpm")
+            }
             builder.appendLine("PreUtterance=")
 
             if (features.contains(Feature.ConvertPitch)) {
@@ -358,13 +388,14 @@ object Ust {
                 val mode2Pitch = pitchDataMode2?.notes?.get(index)
                 builder.appendLine("PBS=${mode2Pitch?.start}")
                 // We insert startShift in PBW and PBY with width=1, as UTAU would just ignore it
-                // Theoretically this would make all pit data moved behind by 1 tick, but hey, who can tell the difference...
+                // Theoretically this would make all pit data moved behind by 1 tick,
+                // but hey, who can tell the difference...
                 builder.appendLine("PBW=1,${mode2Pitch?.widths?.joinToString(",") { it.toString() }}")
                 builder.appendLine(
                     "PBY=${mode2Pitch?.startShift},${
                     mode2Pitch?.shifts
                         ?.joinToString(",") { it.toString() }
-                    }"
+                    }",
                 )
                 builder.appendLine("PBM=${mode2Pitch?.curveTypes?.joinToString(",")}")
                 if (mode2Pitch?.vibratoParams != null) {

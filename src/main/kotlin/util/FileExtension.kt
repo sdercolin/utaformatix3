@@ -1,9 +1,6 @@
 package util
 
 import exception.CannotReadFileException
-import kotlin.coroutines.resume
-import kotlin.coroutines.resumeWithException
-import kotlin.coroutines.suspendCoroutine
 import kotlinx.browser.document
 import org.khronos.webgl.ArrayBuffer
 import org.w3c.dom.HTMLInputElement
@@ -11,6 +8,9 @@ import org.w3c.files.File
 import org.w3c.files.FileList
 import org.w3c.files.FileReader
 import org.w3c.files.get
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
+import kotlin.coroutines.suspendCoroutine
 
 val File.nameWithoutExtension: String
     get() {

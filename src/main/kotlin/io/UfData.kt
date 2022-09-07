@@ -39,8 +39,8 @@ object UfData {
             importWarnings.add(
                 ImportWarning.IncompatibleFormatSerializationVersion(
                     currentVersion = UtaFormatixDataVersion.toString(),
-                    dataVersion = version.toString()
-                )
+                    dataVersion = version.toString(),
+                ),
             )
         }
         return model.Project(
@@ -51,7 +51,7 @@ object UfData {
             timeSignatures = document.project.timeSignatures.map(::parseTimeSignature),
             tempos = document.project.tempos.map(::parseTempo),
             measurePrefix = document.project.measurePrefix,
-            importWarnings = importWarnings
+            importWarnings = importWarnings,
         )
     }
 
@@ -63,7 +63,7 @@ object UfData {
                 lyric = note.lyric,
                 tickOn = note.tickOn,
                 tickOff = note.tickOff,
-                phoneme = note.phoneme
+                phoneme = note.phoneme,
             )
         }
         val pitch = if (params.simpleImport) null else track.pitch?.let {
@@ -73,7 +73,7 @@ object UfData {
             id = index,
             name = track.name,
             notes = notes,
-            pitch = pitch
+            pitch = pitch,
         ).validateNotes()
     }
 
@@ -81,14 +81,14 @@ object UfData {
         return model.TimeSignature(
             measurePosition = timeSignature.measurePosition,
             numerator = timeSignature.numerator,
-            denominator = timeSignature.denominator
+            denominator = timeSignature.denominator,
         )
     }
 
     private fun parseTempo(tempo: Tempo): model.Tempo {
         return model.Tempo(
             tickPosition = tempo.tickPosition,
-            bpm = tempo.bpm
+            bpm = tempo.bpm,
         )
     }
 
@@ -100,8 +100,8 @@ object UfData {
                 tracks = project.tracks.map { generateTrack(it, features) },
                 timeSignatures = project.timeSignatures.map(::generateTimeSignature),
                 tempos = project.tempos.map(::generateTempo),
-                measurePrefix = project.measurePrefix
-            )
+                measurePrefix = project.measurePrefix,
+            ),
         )
         val text = jsonSerializer.encodeToString(Document.serializer(), document)
         val blob = Blob(arrayOf(text), BlobPropertyBag("application/octet-stream"))
@@ -110,8 +110,8 @@ object UfData {
             blob,
             name,
             listOfNotNull(
-                if (features.contains(Feature.ConvertPitch)) ExportNotification.PitchDataExported else null
-            )
+                if (features.contains(Feature.ConvertPitch)) ExportNotification.PitchDataExported else null,
+            ),
         )
     }
 
@@ -122,7 +122,7 @@ object UfData {
                 lyric = it.lyric,
                 tickOn = it.tickOn,
                 tickOff = it.tickOff,
-                phoneme = it.phoneme
+                phoneme = it.phoneme,
             )
         }
         val pitch = if (features.contains(Feature.ConvertPitch)) {
@@ -130,14 +130,14 @@ object UfData {
                 Pitch(
                     ticks = it.data.map { point -> point.first },
                     values = it.data.map { point -> point.second },
-                    isAbsolute = it.isAbsolute
+                    isAbsolute = it.isAbsolute,
                 )
             }
         } else null
         return Track(
             name = track.name,
             notes = notes,
-            pitch = pitch
+            pitch = pitch,
         )
     }
 
@@ -145,14 +145,14 @@ object UfData {
         return TimeSignature(
             measurePosition = timeSignature.measurePosition,
             numerator = timeSignature.numerator,
-            denominator = timeSignature.denominator
+            denominator = timeSignature.denominator,
         )
     }
 
     private fun generateTempo(tempo: model.Tempo): Tempo {
         return Tempo(
             tickPosition = tempo.tickPosition,
-            bpm = tempo.bpm
+            bpm = tempo.bpm,
         )
     }
 

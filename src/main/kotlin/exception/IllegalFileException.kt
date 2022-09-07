@@ -11,6 +11,6 @@ sealed class IllegalFileException(message: String) : Throwable(message) {
 
     class XmlElementAttributeValueIllegal(attribute: String, elementName: String) :
         IllegalFileException(
-            "The required attribute \"$attribute\" in element <$elementName> is missing or has in illegal value."
+            "The required attribute \"$attribute\" in element <$elementName> is missing or has in illegal value.",
         )
 }

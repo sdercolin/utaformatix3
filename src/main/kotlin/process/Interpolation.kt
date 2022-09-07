@@ -55,7 +55,7 @@ fun List<Pair<Long, Double>>.interpolateCosineEaseOut(samplingIntervalTick: Long
 
 private fun List<Pair<Long, Double>>.interpolate(
     samplingIntervalTick: Long,
-    mapping: (start: Pair<Long, Double>, end: Pair<Long, Double>, input: List<Long>) -> List<Pair<Long, Double>>
+    mapping: (start: Pair<Long, Double>, end: Pair<Long, Double>, input: List<Long>) -> List<Pair<Long, Double>>,
 ) = this.takeIf { it.isNotEmpty() }
     ?.zipWithNext()
     ?.flatMap { (start, end) ->

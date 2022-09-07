@@ -9,11 +9,11 @@ group = "com.sdercolin.utaformatix"
 
 repositories {
     mavenCentral()
-    jcenter()
 }
 
 configure<org.jlleitschuh.gradle.ktlint.KtlintExtension> {
     version.set("0.45.2")
+    enableExperimentalRules.set(true)
 }
 
 fun kotlinw(target: String): String =
@@ -76,15 +76,11 @@ kotlin {
             }
             testTask {
                 useKarma {
-                    enabled = System.getenv("GRADLE_TEST_DISABLED") != "true"
+                    enabled = true
                     useChromeHeadless()
                     webpackConfig.cssSupport.enabled = true
                 }
             }
         }
     }
-}
-
-tasks.register("stage") {
-    dependsOn("build")
 }

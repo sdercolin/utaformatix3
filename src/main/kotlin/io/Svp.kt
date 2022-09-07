@@ -2,7 +2,6 @@ package io
 
 import external.Resources
 import external.generateUUID
-import kotlin.math.roundToLong
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
@@ -26,6 +25,7 @@ import process.pitch.processSvpInputPitchData
 import process.validateNotes
 import util.nameWithoutExtension
 import util.readText
+import kotlin.math.roundToLong
 
 object Svp {
     suspend fun parse(file: File, params: ImportParams): model.Project {
@@ -39,7 +39,7 @@ object Svp {
             TimeSignature(
                 measurePosition = it.index,
                 numerator = it.numerator,
-                denominator = it.denominator
+                denominator = it.denominator,
             )
         }?.takeIf { it.isNotEmpty() } ?: listOf(TimeSignature.default).also {
             warnings.add(ImportWarning.TimeSignatureNotFound)
@@ -47,7 +47,7 @@ object Svp {
         val tempos = project.time.tempo?.map {
             model.Tempo(
                 tickPosition = it.position / TICK_RATE,
-                bpm = it.bpm
+                bpm = it.bpm,
             )
         }?.takeIf { it.isNotEmpty() } ?: listOf(model.Tempo.default).also {
             warnings.add(ImportWarning.TempoNotFound)
@@ -61,20 +61,22 @@ object Svp {
             timeSignatures = timeSignatures,
             tempos = tempos,
             measurePrefix = 0,
-            importWarnings = warnings
+            importWarnings = warnings,
         )
     }
 
     private fun parseTracks(
         project: Project,
         tempos: List<model.Tempo>,
-        params: ImportParams
+        params: ImportParams,
     ): List<model.Track> = project.tracks.mapIndexed { index, track ->
         model.Track(
             id = index,
             name = track.name ?: "Track ${index + 1}",
-            notes = parseNotes(track, project),
-            pitch = if (params.simpleImport) null else parsePitch(track, project, tempos)
+            notes = parseNotes(track, project)
+                // for some reasons, svp can have negative positioned notes inside
+                .filter { it.tickOn >= 0 },
+            pitch = if (params.simpleImport) null else parsePitch(track, project, tempos),
         ).validateNotes()
     }
 
@@ -98,7 +100,7 @@ object Svp {
             key = note.pitch + ref.pitchOffset,
             tickOn = tickOn,
             tickOff = tickOn + note.duration / TICK_RATE,
-            lyric = note.lyrics.takeUnless { it.isNullOrBlank() } ?: DEFAULT_LYRIC
+            lyric = note.lyrics.takeUnless { it.isNullOrBlank() } ?: DEFAULT_LYRIC,
         )
     }
 
@@ -123,7 +125,7 @@ object Svp {
                 easeInLength = it.tF0VbrLeft,
                 easeOutLength = it.tF0VbrRight,
                 depth = it.dF0Vbr,
-                frequency = it.fF0Vbr
+                frequency = it.fF0Vbr,
             )
         }
         val pitchDelta = group.parameters?.pitchDelta
@@ -163,7 +165,7 @@ object Svp {
                 easeOutLength = note.attributes?.tF0VbrRight,
                 depth = note.attributes?.dF0Vbr,
                 phase = note.attributes?.pF0Vbr,
-                frequency = note.attributes?.fF0Vbr
+                frequency = note.attributes?.fF0Vbr,
             )
         }
         return processSvpInputPitchData(
@@ -173,7 +175,7 @@ object Svp {
             tempos,
             vibratoEnvPoints,
             vibratoEnvMode,
-            vibratoDefaultParameters
+            vibratoDefaultParameters,
         )
     }
 
@@ -185,8 +187,8 @@ object Svp {
             blob,
             name,
             listOfNotNull(
-                if (features.contains(Feature.ConvertPitch)) ExportNotification.PitchDataExported else null
-            )
+                if (features.contains(Feature.ConvertPitch)) ExportNotification.PitchDataExported else null,
+            ),
         )
     }
 
@@ -197,13 +199,13 @@ object Svp {
             Meter(
                 index = it.measurePosition,
                 numerator = it.numerator,
-                denominator = it.denominator
+                denominator = it.denominator,
             )
         }
         svp.time.tempo = project.tempos.map {
             Tempo(
                 position = it.tickPosition * TICK_RATE,
-                bpm = it.bpm
+                bpm = it.bpm,
             )
         }
         val emptyTrack = svp.tracks.first()
@@ -226,17 +228,17 @@ object Svp {
                         lyrics = it.lyric,
                         phonemes = "",
                         pitch = it.key,
-                        attributes = Attributes()
+                        attributes = Attributes(),
                     )
                 },
                 parameters = emptyTrack.mainGroup!!.parameters!!.copy(
-                    pitchDelta = generatePitchData(track, features) ?: emptyTrack.mainGroup!!.parameters!!.pitchDelta
-                )
+                    pitchDelta = generatePitchData(track, features) ?: emptyTrack.mainGroup!!.parameters!!.pitchDelta,
+                ),
             ),
             mainRef = emptyTrack.mainRef!!.copy(
-                groupID = uuid
+                groupID = uuid,
             ),
-            dispOrder = track.id
+            dispOrder = track.id,
         )
     }
 
@@ -262,7 +264,7 @@ object Svp {
         var renderConfig: RenderConfig? = null,
         var time: Time,
         var tracks: List<Track> = listOf(),
-        var version: Int? = null
+        var version: Int? = null,
     )
 
     @Serializable
@@ -273,13 +275,13 @@ object Svp {
         var exportMixDown: Boolean? = null,
         var filename: String? = null,
         var numChannels: Int? = null,
-        var sampleRate: Int? = null
+        var sampleRate: Int? = null,
     )
 
     @Serializable
     private data class Time(
         var meter: List<Meter>? = null,
-        var tempo: List<Tempo>? = null
+        var tempo: List<Tempo>? = null,
     )
 
     @Serializable
@@ -291,20 +293,20 @@ object Svp {
         var mainRef: Ref? = null,
         var mixer: JsonElement? = null,
         var name: String? = null,
-        var renderEnabled: Boolean? = null
+        var renderEnabled: Boolean? = null,
     )
 
     @Serializable
     private data class Meter(
         var denominator: Int,
         var index: Int,
-        var numerator: Int
+        var numerator: Int,
     )
 
     @Serializable
     private data class Tempo(
         var bpm: Double,
-        var position: Long
+        var position: Long,
     )
 
     @Serializable
@@ -312,7 +314,7 @@ object Svp {
         var name: String? = null,
         var notes: List<Note> = listOf(),
         var parameters: Parameters? = null,
-        var uuid: String
+        var uuid: String,
     )
 
     @Serializable
@@ -324,7 +326,7 @@ object Svp {
         var voice: Voice? = null,
         var groupID: String,
         var isInstrumental: Boolean? = null,
-        var pitchOffset: Int = 0
+        var pitchOffset: Int = 0,
     )
 
     @Serializable
@@ -334,7 +336,7 @@ object Svp {
         var lyrics: String? = null,
         var onset: Long,
         var phonemes: String? = null,
-        var pitch: Int
+        var pitch: Int,
     )
 
     @Serializable
@@ -345,7 +347,7 @@ object Svp {
         var pitchDelta: PitchDelta? = null,
         var tension: JsonElement? = null,
         var vibratoEnv: VibratoEnv? = null,
-        var voicing: JsonElement? = null
+        var voicing: JsonElement? = null,
     )
 
     @Serializable
@@ -355,19 +357,19 @@ object Svp {
         var tF0VbrRight: Double? = null,
         var dF0Vbr: Double? = null,
         var pF0Vbr: Double? = null,
-        var fF0Vbr: Double? = null
+        var fF0Vbr: Double? = null,
     )
 
     @Serializable
     private data class PitchDelta(
         var mode: String? = null,
-        var points: List<Double>? = null
+        var points: List<Double>? = null,
     )
 
     @Serializable
     private data class VibratoEnv(
         var mode: String? = null,
-        var points: List<Double>? = null
+        var points: List<Double>? = null,
     )
 
     @Serializable
@@ -386,6 +388,6 @@ object Svp {
         var paramBreathiness: JsonElement? = null,
         var paramGender: JsonElement? = null,
         var paramToneShift: JsonElement? = null,
-        var renderMode: JsonElement? = null
+        var renderMode: JsonElement? = null,
     )
 }

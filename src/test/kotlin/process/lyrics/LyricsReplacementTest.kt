@@ -1,12 +1,10 @@
-package process.pitch
+package process.lyrics
 
-import kotlin.test.Test
-import kotlin.test.assertEquals
 import model.Format
 import model.Note
 import model.Track
-import process.lyrics.LyricsReplacementRequest
-import process.lyrics.replaceLyrics
+import kotlin.test.Test
+import kotlin.test.assertEquals
 
 class LyricsReplacementTest {
 
@@ -20,9 +18,9 @@ class LyricsReplacementTest {
                     filter = "ff",
                     matchType = LyricsReplacementRequest.MatchType.All,
                     from = "",
-                    to = "cc"
-                )
-            )
+                    to = "cc",
+                ),
+            ),
         )
         val result = lyrics.map { request.doReplace(it) }
         val expected = listOf("as", "ad", "cc", "qqw")
@@ -39,9 +37,9 @@ class LyricsReplacementTest {
                     filter = """\w+_\w+_R""",
                     matchType = LyricsReplacementRequest.MatchType.Regex,
                     from = """(\w+)_(\w+)_R""",
-                    to = "$1_$2_$1$2"
-                )
-            )
+                    to = "$1_$2_$1$2",
+                ),
+            ),
         )
         val result = lyrics.map { request.doReplace(it) }
         val expected = listOf("a_as_aas", "ad", "f_af_faf", "qqw", "f_af_Rr")
@@ -58,9 +56,9 @@ class LyricsReplacementTest {
                     filter = "",
                     matchType = LyricsReplacementRequest.MatchType.Regex,
                     from = """^. (.+)$""",
-                    to = "$1"
-                )
-            )
+                    to = "$1",
+                ),
+            ),
         )
         val result = lyrics.map { request.doReplace(it) }
         val expected = listOf("あ", "あ", "か")
@@ -76,17 +74,17 @@ class LyricsReplacementTest {
                 Note(1, 60, "a R", 1L, 2L),
                 Note(2, 60, "a", 2L, 3L),
                 Note(3, 60, "R", 3L, 4L),
-                Note(4, 60, "a", 4L, 5L)
+                Note(4, 60, "a", 4L, 5L),
             ),
             name = "",
-            pitch = null
+            pitch = null,
         )
         val request = requireNotNull(LyricsReplacementRequest.getPreset(Format.Ust, Format.Ust))
         val result = track.replaceLyrics(request)
         val expected = listOf(
             Note(0, 60, "a", 0L, 1L),
             Note(1, 60, "a", 2L, 3L),
-            Note(2, 60, "a", 4L, 5L)
+            Note(2, 60, "a", 4L, 5L),
         )
         assertEquals(expected, result.notes)
     }

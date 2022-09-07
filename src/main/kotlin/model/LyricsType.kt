@@ -2,7 +2,7 @@ package model
 
 enum class LyricsType(
     val isRomaji: Boolean,
-    val isCV: Boolean
+    val isCV: Boolean,
 ) {
     Unknown(false, false),
     RomajiCv(true, true),

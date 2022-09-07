@@ -8,7 +8,7 @@ data class Note(
     val lyric: String,
     val tickOn: Long,
     val tickOff: Long,
-    val phoneme: String? = null
+    val phoneme: String? = null,
 ) : RichNote<Note> {
     val length get() = tickOff - tickOn
 

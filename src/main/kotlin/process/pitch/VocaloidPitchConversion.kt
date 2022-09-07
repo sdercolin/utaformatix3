@@ -1,21 +1,21 @@
 package process.pitch
 
-import kotlin.math.abs
-import kotlin.math.ceil
-import kotlin.math.roundToInt
 import model.Note
 import model.Pitch
 import process.pitch.VocaloidPartPitchData.Event
+import kotlin.math.abs
+import kotlin.math.ceil
+import kotlin.math.roundToInt
 
 data class VocaloidPartPitchData(
     val startPos: Long,
     val pit: List<Event>,
-    val pbs: List<Event>
+    val pbs: List<Event>,
 ) {
 
     data class Event(
         val pos: Long,
-        val value: Int
+        val value: Int,
     ) {
         companion object {
             fun fromPair(pair: Pair<Long, Int>) = Event(pair.first, pair.second)
@@ -92,15 +92,15 @@ fun Pitch.generateForVocaloid(notes: List<Note>): VocaloidPartPitchData? {
     val pit = mutableListOf<Event>()
     val pbs = mutableListOf<Event>()
     for (section in pitchSectioned) {
-        val maxAbsValue = section.map { abs(it.second) }.maxOrNull() ?: 0.0
+        val maxAbsValue = section.maxOfOrNull { abs(it.second) } ?: 0.0
         var pbsForThisSection = ceil(abs(maxAbsValue)).toInt()
         if (pbsForThisSection > DEFAULT_PITCH_BEND_SENSITIVITY) {
             pbs.add(Event(section.first().first, pbsForThisSection))
             pbs.add(
                 Event(
                     section.last().first + MIN_BREAK_LENGTH_BETWEEN_PITCH_SECTIONS / 2,
-                    DEFAULT_PITCH_BEND_SENSITIVITY
-                )
+                    DEFAULT_PITCH_BEND_SENSITIVITY,
+                ),
             )
         } else {
             pbsForThisSection = DEFAULT_PITCH_BEND_SENSITIVITY
@@ -110,14 +110,14 @@ fun Pitch.generateForVocaloid(notes: List<Note>): VocaloidPartPitchData? {
                 Event(
                     pitchPos,
                     (pitchValue * PITCH_MAX_VALUE / pbsForThisSection).roundToInt()
-                        .coerceIn(-PITCH_MAX_VALUE, PITCH_MAX_VALUE)
-                )
+                        .coerceIn(-PITCH_MAX_VALUE, PITCH_MAX_VALUE),
+                ),
             )
         }
     }
     return VocaloidPartPitchData(
         startPos = 0,
         pit = pit,
-        pbs = pbs
+        pbs = pbs,
     )
 }

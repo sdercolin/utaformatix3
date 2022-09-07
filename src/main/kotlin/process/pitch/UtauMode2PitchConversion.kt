@@ -14,17 +14,17 @@ import util.runIf
 private const val SAMPLING_INTERVAL_TICK = 4L
 
 data class UtauMode2TrackPitchData(
-    val notes: List<UtauMode2NotePitchData?>
+    val notes: List<UtauMode2NotePitchData?>,
 )
 
 data class UtauMode2NotePitchData(
     val bpm: Double?,
-    val start: Double?, // msec, null only if the note is not applied with pitch
+    val start: Double?, // milliSec, null only if the note is not applied with pitch
     val startShift: Double?, // 10 cents
-    val widths: List<Double>, // msec
+    val widths: List<Double>, // milliSec
     val shifts: List<Double>, // 10 cents
     val curveTypes: List<String>, // (blank)/s/r/j
-    val vibratoParams: UtauNoteVibratoParams?
+    val vibratoParams: UtauNoteVibratoParams?,
 )
 
 fun pitchToUtauMode2Track(pitch: Pitch?, notes: List<Note>, tempos: List<Tempo>): UtauMode2TrackPitchData? {
@@ -34,7 +34,7 @@ fun pitchToUtauMode2Track(pitch: Pitch?, notes: List<Note>, tempos: List<Tempo>)
     data class NotePitchData(
         val pitch: List<Pair<Long, Double>>,
         val offset: Long,
-        val bpm: Double
+        val bpm: Double,
     )
 
     val toRelative = { from: List<Pair<Long, Double?>>, key: Int ->
@@ -46,19 +46,19 @@ fun pitchToUtauMode2Track(pitch: Pitch?, notes: List<Note>, tempos: List<Tempo>)
             NotePitchData(
                 toRelative(absolutePitch.filter { it.first < notes.first().tickOff }, notes.first().key),
                 -(absolutePitch.filter { it.first < 0 }.unzip().first.minOrNull() ?: 0),
-                tempos.bpmForNote(notes.first())
-            )
+                tempos.bpmForNote(notes.first()),
+            ),
         ), // first note
         notes.drop(1).map { note ->
             NotePitchData(
                 toRelative(
                     absolutePitch.filter { it.first >= note.tickOn && it.first < note.tickOff },
-                    note.key
+                    note.key,
                 ),
                 (absolutePitch.firstOrNull { it.first >= note.tickOn }?.first ?: note.tickOn) - note.tickOn,
-                tempos.bpmForNote(note)
+                tempos.bpmForNote(note),
             )
-        }
+        },
     ).flatten()
 
     val dotPitDataSimplified = dotPitData.map {
@@ -74,24 +74,25 @@ fun pitchToUtauMode2Track(pitch: Pitch?, notes: List<Note>, tempos: List<Tempo>)
                 currNote.pitch.zipWithNext().map { milliSecFromTick(it.second.first - it.first.first, currNote.bpm) },
                 currNote.pitch.drop(1).unzip().second.map { it * 10 },
                 List(currNote.pitch.size - 1) { "" },
-                null
+                null,
             )
-        }
+        },
     )
 }
 
-fun pitchFromUtauMode2Track(pitchData: UtauMode2TrackPitchData?, notes: List<Note>): Pitch? {
+fun pitchFromUtauMode2Track(pitchData: UtauMode2TrackPitchData?, notes: List<Note>, tempos: List<Tempo>): Pitch? {
     pitchData ?: return null
     val notePitches = notes.zip(pitchData.notes)
-    var bpm = notePitches.firstOrNull { it.second?.bpm != null }?.second?.bpm ?: return null
+    val tickTimeTransformer = TickTimeTransformer(tempos)
     val pitchPoints = mutableListOf<Pair<Long, Double>>()
     var lastNote: Note? = null
     var pendingPitchPoints = listOf<Pair<Long, Double>>()
     for ((note, notePitch) in notePitches) {
         val points = mutableListOf<Pair<Long, Double>>()
-        if (notePitch?.bpm != null) bpm = notePitch.bpm
+        val noteStartInMillis = tickTimeTransformer.tickToMilliSec(note.tickOn)
         if (notePitch?.start != null) {
-            var tickPos = note.tickOn + tickFromMilliSec(notePitch.start, bpm)
+            var posInMillis = noteStartInMillis + notePitch.start
+            var tickPos = tickTimeTransformer.milliSecToTick(posInMillis)
             val startShift =
                 if (note.tickOn == lastNote?.tickOff) {
                     // always same value as the last note
@@ -105,7 +106,8 @@ fun pitchFromUtauMode2Track(pitchData: UtauMode2TrackPitchData?, notes: List<Not
                 val width = notePitch.widths[index]
                 val shift = notePitch.shifts.getOrNull(index) ?: 0.0
                 val curveType = notePitch.curveTypes.getOrNull(index) ?: ""
-                tickPos += tickFromMilliSec(width, bpm)
+                posInMillis += width
+                tickPos = tickTimeTransformer.milliSecToTick(posInMillis)
                 val thisPoint = tickPos to (shift / 10)
                 val lastPoint = points.last()
                 if (thisPoint.second != lastPoint.second) {
@@ -121,7 +123,7 @@ fun pitchFromUtauMode2Track(pitchData: UtauMode2TrackPitchData?, notes: List<Not
             .fixPointsAtLastNote(note, lastNote)
             .appendStartPoint(note)
             .appendEndPoint(note)
-            .appendUtauNoteVibrato(notePitch?.vibratoParams, note, bpm, SAMPLING_INTERVAL_TICK)
+            .appendUtauNoteVibrato(notePitch?.vibratoParams, note, tickTimeTransformer, SAMPLING_INTERVAL_TICK)
             .shape()
         lastNote = note
     }
@@ -174,7 +176,7 @@ private fun List<Pair<Long, Double>>.shape() =
 private fun interpolate(
     lastPoint: Pair<Long, Double>,
     thisPoint: Pair<Long, Double>,
-    curveType: String
+    curveType: String,
 ): List<Pair<Long, Double>> {
     val input = listOf(lastPoint, thisPoint)
     val output = when (curveType) {
