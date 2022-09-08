@@ -83,7 +83,8 @@ object VsqLike {
     private fun parseTrack(trackAsText: String, trackId: Int, tickPrefix: Long, params: ImportParams): Track {
         val lines = trackAsText.linesNotBlank()
         val titleWithIndexes = lines.mapIndexed { index, line ->
-            if (Regex("\\[.*]").matches(line)) line.drop(1).dropLast(1) to index
+            @Suppress("RegExpRedundantEscape")
+            if (Regex("""\[.*\]""").matches(line)) line.drop(1).dropLast(1) to index
             else null
         }.filterNotNull()
         val sectionMap = titleWithIndexes.zipWithNext().map { (current, next) ->
