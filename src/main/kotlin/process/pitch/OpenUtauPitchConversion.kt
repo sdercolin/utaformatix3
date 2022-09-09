@@ -140,6 +140,7 @@ fun pitchFromUstxPart(notes: List<Note>, pitchData: OpenUtauPartPitchData, tempo
             tick to points.sumOf { it.second }
         }
         .sortedBy { it.first }
+        .filter { it.first >= 0 }
 
     return if (pitchPoints.isEmpty()) null else Pitch(pitchPoints, isAbsolute = false)
 }
