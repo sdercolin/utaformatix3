@@ -39,4 +39,13 @@ class TickTimeTransformerTest {
         val expected = 3.0
         assertEquals(expected, actual)
     }
+
+    @Test
+    fun testNegativeInput() {
+        val second = -5.0
+        val tick = -5000L
+        println(transformer.secToTick(second))
+        assertEquals(tick, transformer.secToTick(second))
+        assertEquals(second, transformer.tickToSec(tick))
+    }
 }
