@@ -87,6 +87,7 @@ object VsqLike {
             if (Regex("""\[.*\]""").matches(line)) line.drop(1).dropLast(1) to index
             else null
         }.filterNotNull()
+        if (titleWithIndexes.isEmpty()) throw UnsupportedStandardMidiError()
         val sectionMap = titleWithIndexes.zipWithNext().map { (current, next) ->
             current.first to lines.subList(current.second + 1, next.second)
         }.plus(
