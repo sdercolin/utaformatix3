@@ -312,9 +312,9 @@ object Ustx {
     @Serializable
     private data class Track(
         val phonemizer: String,
-        val mute: Boolean,
-        val solo: Boolean,
-        val volume: Double,
+        val mute: Boolean = false,
+        val solo: Boolean = false,
+        val volume: Double = 0.0,
     )
 
     @Serializable
