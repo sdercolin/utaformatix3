@@ -105,6 +105,16 @@ data class LyricsReplacementRequest(
                         to = "",
                     ),
                 )
+
+                Format.Ustx -> items.add(
+                    Item(
+                        filterType = FilterType.Exact,
+                        filter = "+",
+                        matchType = MatchType.All,
+                        from = "",
+                        to = "-",
+                    ),
+                )
                 else -> Unit
             }
 
