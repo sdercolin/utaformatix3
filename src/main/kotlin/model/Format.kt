@@ -1,10 +1,10 @@
 package model
 
 import model.Feature.ConvertPitch
-import model.LyricsType.KanaCv
-import model.LyricsType.KanaVcv
-import model.LyricsType.RomajiCv
-import model.LyricsType.RomajiVcv
+import model.JapaneseLyricsType.KanaCv
+import model.JapaneseLyricsType.KanaVcv
+import model.JapaneseLyricsType.RomajiCv
+import model.JapaneseLyricsType.RomajiVcv
 import org.w3c.files.File
 
 enum class Format(
@@ -13,8 +13,8 @@ enum class Format(
     val multipleFile: Boolean = false,
     val parser: suspend (List<File>, ImportParams) -> Project,
     val generator: suspend (Project, List<Feature>) -> ExportResult,
-    val possibleLyricsTypes: List<LyricsType>,
-    val suggestedLyricType: LyricsType? = null,
+    val possibleLyricsTypes: List<JapaneseLyricsType>,
+    val suggestedLyricType: JapaneseLyricsType? = null,
     val availableFeaturesForGeneration: List<Feature> = listOf(),
 ) {
     Vsqx(
