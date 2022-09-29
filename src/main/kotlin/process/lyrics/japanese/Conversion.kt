@@ -1,14 +1,14 @@
-package process.lyrics
+package process.lyrics.japanese
 
 import model.Format
-import model.LyricsType
+import model.JapaneseLyricsType
 import model.Note
 import model.Project
 import model.Track
 
-fun convert(project: Project, targetType: LyricsType, targetFormat: Format): Project {
-    val sourceType = project.lyricsType
-    var tracks = cleanup(project.tracks, sourceType)
+fun convertJapaneseLyrics(project: Project, targetType: JapaneseLyricsType, targetFormat: Format): Project {
+    val sourceType = project.japaneseLyricsType
+    var tracks = cleanupJapaneseLyrics(project.tracks, sourceType)
     when {
         sourceType.isRomaji && !targetType.isRomaji -> tracks = convertRomajiToKana(tracks)
         !sourceType.isRomaji && targetType.isRomaji -> tracks = convertKanaToRomaji(tracks)
@@ -29,7 +29,7 @@ private fun convertKanaToRomaji(tracks: List<Track>) = tracks.convertBetweenRoma
     it.toRomaji()
 }
 
-private fun List<Track>.convertBetweenRomajiAndKana(conversion: (String) -> String) = convert { notes ->
+private fun List<Track>.convertBetweenRomajiAndKana(conversion: (String) -> String) = convertJapaneseLyrics { notes ->
     notes.map { note ->
         val lyric = note.lyric
         if (lyric.contains(" ")) {
@@ -43,7 +43,7 @@ private fun List<Track>.convertBetweenRomajiAndKana(conversion: (String) -> Stri
     }
 }
 
-private fun convertCVToVCV(tracks: List<Track>) = tracks.convert { notes ->
+private fun convertCVToVCV(tracks: List<Track>) = tracks.convertJapaneseLyrics { notes ->
     val result = notes.toMutableList()
     var lastTail = "-"
     for (i in result.indices) {
@@ -68,7 +68,7 @@ private fun convertCVToVCV(tracks: List<Track>) = tracks.convert { notes ->
     result.toList()
 }
 
-private fun convertVCVToCV(tracks: List<Track>) = tracks.convert { notes ->
+private fun convertVCVToCV(tracks: List<Track>) = tracks.convertJapaneseLyrics { notes ->
     notes.map { note ->
         val lyric = note.lyric
         if (!lyric.contains(" ")) return@map note
@@ -81,11 +81,11 @@ private fun convertVCVToCV(tracks: List<Track>) = tracks.convert { notes ->
     }
 }
 
-private fun List<Track>.convert(conversion: (List<Note>) -> List<Note>) = map { track ->
+private fun List<Track>.convertJapaneseLyrics(conversion: (List<Note>) -> List<Note>) = map { track ->
     track.copy(notes = conversion(track.notes))
 }
 
-private fun convertVowelConnections(tracks: List<Track>, targetType: LyricsType): List<Track> {
+private fun convertVowelConnections(tracks: List<Track>, targetType: JapaneseLyricsType): List<Track> {
     return tracks.map { track ->
         val lyrics = track.notes.map { it.lyric }.toMutableList()
         if (lyrics.size < 2) return@map track

@@ -13,8 +13,8 @@ import kotlinx.serialization.modules.SerializersModule
 import model.ExportResult
 import model.Feature
 import model.Format
-import model.LyricsType
-import model.LyricsType.Unknown
+import model.JapaneseLyricsType
+import model.JapaneseLyricsType.Unknown
 import model.Project
 import model.TICKS_IN_FULL_NOTE
 import mui.material.Button
@@ -25,7 +25,8 @@ import process.RESTS_FILLING_MAX_LENGTH_DENOMINATOR_DEFAULT
 import process.evalFractionOrNull
 import process.fillRests
 import process.lyrics.LyricsReplacementRequest
-import process.lyrics.convert
+import process.lyrics.chinese.convertChineseLyricsToPinyin
+import process.lyrics.japanese.convertJapaneseLyrics
 import process.lyrics.replaceLyrics
 import process.projectZoomFactorOptions
 import process.zoom
@@ -40,7 +41,8 @@ import ui.common.errorDialog
 import ui.common.progress
 import ui.common.scopedFC
 import ui.common.title
-import ui.configuration.LyricsConversionBlock
+import ui.configuration.ChinesePinyinConversionBlock
+import ui.configuration.JapaneseLyricsConversionBlock
 import ui.configuration.LyricsReplacementBlock
 import ui.configuration.PitchConversionBlock
 import ui.configuration.ProjectZoomBlock
@@ -53,27 +55,36 @@ import util.runIfAllNotNull
 
 val ConfigurationEditor = scopedFC<ConfigurationEditorProps> { props, scope ->
     var isProcessing by useState(false)
-    val (lyricsConversion, setLyricsConversion) = useState {
-        getStateFromLocalStorage<LyricsConversionState>("lyricsConversion")?.let {
+    val (japaneseLyricsConversion, setJapaneseLyricsConversion) = useState {
+        getStateFromLocalStorage<JapaneseLyricsConversionState>("japaneseLyricsConversion")?.let {
             return@useState it
         }
 
-        val analysedType = props.project.lyricsType
-        val doLyricsConversion = analysedType != Unknown
-        val fromLyricsType: LyricsType?
-        val toLyricsType: LyricsType?
+        val japaneseLyricsAnalysedType = props.project.japaneseLyricsType
+        val doJapaneseLyricsConversion = japaneseLyricsAnalysedType != Unknown
+        val fromLyricsType: JapaneseLyricsType?
+        val toLyricsType: JapaneseLyricsType?
 
-        if (doLyricsConversion) {
-            fromLyricsType = analysedType
-            toLyricsType = analysedType.findBestConversionTargetIn(props.outputFormat)
+        if (doJapaneseLyricsConversion) {
+            fromLyricsType = japaneseLyricsAnalysedType
+            toLyricsType = japaneseLyricsAnalysedType.findBestConversionTargetIn(props.outputFormat)
         } else {
             fromLyricsType = null
             toLyricsType = null
         }
-        LyricsConversionState(
-            doLyricsConversion,
+        JapaneseLyricsConversionState(
+            doJapaneseLyricsConversion,
             fromLyricsType,
             toLyricsType,
+        )
+    }
+    val (chinesePinyinConversion, setChinesePinyinConversion) = useState {
+        getStateFromLocalStorage<ChinesePinyinConversionState>("chinesePinyinConversion")?.let {
+            return@useState it
+        }
+
+        ChinesePinyinConversionState(
+            isOn = false,
         )
     }
     val (lyricsReplacement, setLyricsReplacement) = useState {
@@ -121,18 +132,22 @@ val ConfigurationEditor = scopedFC<ConfigurationEditorProps> { props, scope ->
     }
     var dialogError by useState(DialogErrorState())
 
-    fun isReady() = lyricsConversion.isReady && lyricsReplacement.isReady
+    fun isReady() = japaneseLyricsConversion.isReady && lyricsReplacement.isReady
 
     fun closeErrorDialog() {
         dialogError = dialogError.copy(isShowing = false)
     }
 
     title(Strings.ConfigurationEditorCaption)
-    LyricsConversionBlock {
+    JapaneseLyricsConversionBlock {
         this.project = props.project
         this.outputFormat = props.outputFormat
-        initialState = lyricsConversion
-        submitState = setLyricsConversion
+        initialState = japaneseLyricsConversion
+        submitState = setJapaneseLyricsConversion
+    }
+    ChinesePinyinConversionBlock {
+        initialState = chinesePinyinConversion
+        submitState = setChinesePinyinConversion
     }
     LyricsReplacementBlock {
         initialState = lyricsReplacement
@@ -155,7 +170,8 @@ val ConfigurationEditor = scopedFC<ConfigurationEditorProps> { props, scope ->
         scope,
         props,
         isEnabled = isReady(),
-        lyricsConversion,
+        japaneseLyricsConversion,
+        chinesePinyinConversion,
         lyricsReplacement,
         slightRestsFilling,
         pitchConversion,
@@ -189,7 +205,8 @@ private fun ChildrenBuilder.buildNextButton(
     scope: CoroutineScope,
     props: ConfigurationEditorProps,
     isEnabled: Boolean,
-    lyricsConversion: LyricsConversionState,
+    japaneseLyricsConversion: JapaneseLyricsConversionState,
+    chinesePinyinConversion: ChinesePinyinConversionState,
     lyricsReplacement: LyricsReplacementState,
     slightRestsFilling: SlightRestsFillingState,
     pitchConversion: PitchConversionState,
@@ -209,7 +226,8 @@ private fun ChildrenBuilder.buildNextButton(
                 process(
                     scope,
                     props,
-                    lyricsConversion,
+                    japaneseLyricsConversion,
+                    chinesePinyinConversion,
                     lyricsReplacement,
                     slightRestsFilling,
                     pitchConversion,
@@ -226,7 +244,8 @@ private fun ChildrenBuilder.buildNextButton(
 private fun process(
     scope: CoroutineScope,
     props: ConfigurationEditorProps,
-    lyricsConversion: LyricsConversionState,
+    japaneseLyricsConversion: JapaneseLyricsConversionState,
+    chinesePinyinConversion: ChinesePinyinConversionState,
     lyricsReplacement: LyricsReplacementState,
     slightRestsFilling: SlightRestsFillingState,
     pitchConversion: PitchConversionState,
@@ -238,14 +257,16 @@ private fun process(
     scope.launch {
         runCatchingCancellable {
             val format = props.outputFormat
-            val fromType = lyricsConversion.fromType
-            val toType = lyricsConversion.toType
-
             val project = props.project
-                .runIf(lyricsConversion.isOn) {
-                    runIfAllNotNull(fromType, toType) { fromType, toType ->
-                        convert(copy(lyricsType = fromType), toType, format)
+                .runIf(japaneseLyricsConversion.isOn) {
+                    val fromType = japaneseLyricsConversion.fromType
+                    val toType = japaneseLyricsConversion.toType
+                    runIfAllNotNull(fromType, toType) { nonNullFromType, nonNullToType ->
+                        convertJapaneseLyrics(copy(japaneseLyricsType = nonNullFromType), nonNullToType, format)
                     }
+                }
+                .runIf(chinesePinyinConversion.isOn) {
+                    convertChineseLyricsToPinyin(this)
                 }
                 .runIf(lyricsReplacement.isOn) {
                     replaceLyrics(lyricsReplacement.request)
@@ -269,7 +290,7 @@ private fun process(
             val result = format.generator.invoke(project, availableFeatures)
             console.log(result.blob)
             listOf(
-                "lyricsConversion" to lyricsConversion,
+                "japaneseLyricsConversion" to japaneseLyricsConversion,
                 "lyricsReplacement" to lyricsReplacement,
                 "slightRestsFilling" to slightRestsFilling,
                 "pitchConversion" to pitchConversion,
@@ -295,7 +316,7 @@ private fun process(
 private val json = Json {
     ignoreUnknownKeys = true
     serializersModule = SerializersModule {
-        polymorphic(SubState::class, LyricsConversionState::class, LyricsConversionState.serializer())
+        polymorphic(SubState::class, JapaneseLyricsConversionState::class, JapaneseLyricsConversionState.serializer())
         polymorphic(SubState::class, LyricsReplacementState::class, LyricsReplacementState.serializer())
         polymorphic(SubState::class, SlightRestsFillingState::class, SlightRestsFillingState.serializer())
         polymorphic(SubState::class, PitchConversionState::class, PitchConversionState.serializer())
@@ -310,13 +331,18 @@ external interface ConfigurationEditorProps : Props {
 }
 
 @Serializable
-data class LyricsConversionState(
+data class JapaneseLyricsConversionState(
     val isOn: Boolean,
-    val fromType: LyricsType?,
-    val toType: LyricsType?,
+    val fromType: JapaneseLyricsType?,
+    val toType: JapaneseLyricsType?,
 ) : SubState() {
     val isReady: Boolean get() = if (isOn) fromType != null && toType != null else true
 }
+
+@Serializable
+data class ChinesePinyinConversionState(
+    val isOn: Boolean,
+) : SubState()
 
 @Serializable
 data class LyricsReplacementState(

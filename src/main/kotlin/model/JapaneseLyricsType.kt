@@ -1,6 +1,6 @@
 package model
 
-enum class LyricsType(
+enum class JapaneseLyricsType(
     val isRomaji: Boolean,
     val isCV: Boolean,
 ) {
@@ -10,7 +10,7 @@ enum class LyricsType(
     KanaCv(false, true),
     KanaVcv(false, false);
 
-    fun findBestConversionTargetIn(outputFormat: Format): LyricsType? {
+    fun findBestConversionTargetIn(outputFormat: Format): JapaneseLyricsType? {
         outputFormat.suggestedLyricType?.let {
             return it
         }

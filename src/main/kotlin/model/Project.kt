@@ -2,7 +2,7 @@ package model
 
 import exception.IllegalNotePositionException
 import org.w3c.files.File
-import process.lyrics.analyseLyricsTypeForProject
+import process.lyrics.japanese.analyseJapaneseLyricsTypeForProject
 
 data class Project(
     val format: Format,
@@ -13,14 +13,14 @@ data class Project(
     val tempos: List<Tempo>,
     val measurePrefix: Int,
     val importWarnings: List<ImportWarning>,
-    val lyricsType: LyricsType = LyricsType.Unknown,
+    val japaneseLyricsType: JapaneseLyricsType = JapaneseLyricsType.Unknown,
 ) {
 
     fun lyricsTypeAnalysed() =
         copy(
-            lyricsType = analyseLyricsTypeForProject(this)
+            japaneseLyricsType = analyseJapaneseLyricsTypeForProject(this)
                 .takeIf { format.possibleLyricsTypes.contains(it) }
-                ?: LyricsType.Unknown,
+                ?: JapaneseLyricsType.Unknown,
         )
 
     fun withoutEmptyTracks() =

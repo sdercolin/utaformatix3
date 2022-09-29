@@ -1,16 +1,16 @@
-package process.lyrics
+package process.lyrics.japanese
 
-import model.LyricsType
-import model.LyricsType.KanaCv
-import model.LyricsType.KanaVcv
-import model.LyricsType.RomajiCv
-import model.LyricsType.RomajiVcv
-import model.LyricsType.Unknown
+import model.JapaneseLyricsType
+import model.JapaneseLyricsType.KanaCv
+import model.JapaneseLyricsType.KanaVcv
+import model.JapaneseLyricsType.RomajiCv
+import model.JapaneseLyricsType.RomajiVcv
+import model.JapaneseLyricsType.Unknown
 import model.Note
 import model.Project
 import model.Track
 
-fun analyseLyricsTypeForProject(project: Project): LyricsType {
+fun analyseJapaneseLyricsTypeForProject(project: Project): JapaneseLyricsType {
     if (project.tracks.isEmpty()) return Unknown
 
     val maxNoteCountInAllTracks = project.tracks.maxByOrNull { it.notes.count() }!!.notes.count()
@@ -29,10 +29,10 @@ fun analyseLyricsTypeForProject(project: Project): LyricsType {
     }
 }
 
-private fun analyseLyricsTypeForTrack(track: Track): LyricsType {
+private fun analyseLyricsTypeForTrack(track: Track): JapaneseLyricsType {
     val total = track.notes.count()
     val types = track.notes.map { checkNoteType(it) }
-    val typePercentages = LyricsType.values()
+    val typePercentages = JapaneseLyricsType.values()
         .map { type -> type to types.count { it == type } }
         .map { it.first to (it.second.toDouble() / total) }
     return typePercentages
@@ -41,7 +41,7 @@ private fun analyseLyricsTypeForTrack(track: Track): LyricsType {
         ?: Unknown
 }
 
-private fun checkNoteType(note: Note): LyricsType {
+private fun checkNoteType(note: Note): JapaneseLyricsType {
     val lyric = note.lyric
     if (lyric.contains(" ")) {
         val mainLyric = lyric.substring(lyric.indexOf(" ") + 1)
