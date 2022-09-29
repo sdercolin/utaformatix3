@@ -1,20 +1,20 @@
-package process.lyrics
+package process.lyrics.japanese
 
-import model.LyricsType
-import model.LyricsType.KanaCv
-import model.LyricsType.KanaVcv
-import model.LyricsType.RomajiCv
-import model.LyricsType.RomajiVcv
-import model.LyricsType.Unknown
+import model.JapaneseLyricsType
+import model.JapaneseLyricsType.KanaCv
+import model.JapaneseLyricsType.KanaVcv
+import model.JapaneseLyricsType.RomajiCv
+import model.JapaneseLyricsType.RomajiVcv
+import model.JapaneseLyricsType.Unknown
 import model.Track
 
-fun cleanup(tracks: List<Track>, type: LyricsType) =
+fun cleanupJapaneseLyrics(tracks: List<Track>, type: JapaneseLyricsType) =
     when (type) {
         Unknown -> tracks
-        RomajiCv -> tracks.cleanup { it.cleanupAsRomajiCV() }
-        RomajiVcv -> tracks.cleanup { it.cleanupAsRomajiVCV() }
-        KanaCv -> tracks.cleanup { it.cleanupAsKanaCV() }
-        KanaVcv -> tracks.cleanup { it.cleanupAsKanaVCV() }
+        RomajiCv -> tracks.cleanupJapaneseLyrics { it.cleanupAsRomajiCV() }
+        RomajiVcv -> tracks.cleanupJapaneseLyrics { it.cleanupAsRomajiVCV() }
+        KanaCv -> tracks.cleanupJapaneseLyrics { it.cleanupAsKanaCV() }
+        KanaVcv -> tracks.cleanupJapaneseLyrics { it.cleanupAsKanaVCV() }
     }
 
 private fun String.cleanupAsRomajiCV(): String {
@@ -121,7 +121,7 @@ private fun String.cleanupAsKanaVCV(): String {
     return result
 }
 
-private fun List<Track>.cleanup(noteCleanup: (String) -> String) =
+private fun List<Track>.cleanupJapaneseLyrics(noteCleanup: (String) -> String) =
     map { track ->
         track.copy(
             notes = track.notes.map { note ->

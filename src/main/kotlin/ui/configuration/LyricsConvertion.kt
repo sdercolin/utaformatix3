@@ -4,7 +4,7 @@ import csstype.Length
 import csstype.Margin
 import csstype.px
 import model.Format
-import model.LyricsType
+import model.JapaneseLyricsType
 import model.Project
 import mui.material.FormControl
 import mui.material.FormControlLabel
@@ -21,42 +21,43 @@ import react.ChildrenBuilder
 import react.create
 import react.css.css
 import react.dom.html.ReactHTML.div
-import ui.LyricsConversionState
+import ui.JapaneseLyricsConversionState
 import ui.common.SubProps
 import ui.common.configurationSwitch
 import ui.common.subFC
 import ui.strings.Strings
 import ui.strings.string
 
-external interface LyricsConversionProps : SubProps<LyricsConversionState> {
+external interface LyricsConversionProps : SubProps<JapaneseLyricsConversionState> {
     var project: Project
     var outputFormat: Format
 }
 
-val LyricsConversionBlock = subFC<LyricsConversionProps, LyricsConversionState> { props, state, editState ->
-    FormGroup {
-        configurationSwitch(
-            isOn = state.isOn,
-            onSwitched = { editState { copy(isOn = it) } },
-            labelStrings = Strings.JapaneseLyricsConversion,
+val JapaneseLyricsConversionBlock =
+    subFC<LyricsConversionProps, JapaneseLyricsConversionState> { props, state, editState ->
+        FormGroup {
+            configurationSwitch(
+                isOn = state.isOn,
+                onSwitched = { editState { copy(isOn = it) } },
+                labelStrings = Strings.JapaneseLyricsConversion,
+            )
+        }
+
+        if (state.isOn) buildLyricsDetail(
+            props = props,
+            fromLyricsType = state.fromType,
+            setFromLyricsType = { editState { copy(fromType = it) } },
+            toLyricsType = state.toType,
+            setToLyricsType = { editState { copy(toType = it) } },
         )
     }
 
-    if (state.isOn) buildLyricsDetail(
-        props = props,
-        fromLyricsType = state.fromType,
-        setFromLyricsType = { editState { copy(fromType = it) } },
-        toLyricsType = state.toType,
-        setToLyricsType = { editState { copy(toType = it) } },
-    )
-}
-
 private fun ChildrenBuilder.buildLyricsDetail(
     props: LyricsConversionProps,
-    fromLyricsType: LyricsType?,
-    setFromLyricsType: (LyricsType) -> Unit,
-    toLyricsType: LyricsType?,
-    setToLyricsType: (LyricsType) -> Unit,
+    fromLyricsType: JapaneseLyricsType?,
+    setFromLyricsType: (JapaneseLyricsType) -> Unit,
+    toLyricsType: JapaneseLyricsType?,
+    setToLyricsType: (JapaneseLyricsType) -> Unit,
 ) {
     div {
         css {
@@ -77,15 +78,15 @@ private fun ChildrenBuilder.buildLyricsDetail(
                     buildLyricsTypeControl(
                         labelText = string(
                             Strings.FromLyricsTypeLabel,
-                            "type" to props.project.lyricsType.text,
+                            "type" to props.project.japaneseLyricsType.text,
                         ),
                         type = fromLyricsType,
                         setType = setFromLyricsType,
                         lyricTypeOptions = listOf(
-                            LyricsType.RomajiCv,
-                            LyricsType.RomajiVcv,
-                            LyricsType.KanaCv,
-                            LyricsType.KanaVcv,
+                            JapaneseLyricsType.RomajiCv,
+                            JapaneseLyricsType.RomajiVcv,
+                            JapaneseLyricsType.KanaCv,
+                            JapaneseLyricsType.KanaVcv,
                         ),
                     )
 
@@ -103,9 +104,9 @@ private fun ChildrenBuilder.buildLyricsDetail(
 
 private fun ChildrenBuilder.buildLyricsTypeControl(
     labelText: String,
-    type: LyricsType?,
-    setType: (LyricsType) -> Unit,
-    lyricTypeOptions: List<LyricsType>,
+    type: JapaneseLyricsType?,
+    setType: (JapaneseLyricsType) -> Unit,
+    lyricTypeOptions: List<JapaneseLyricsType>,
 ) {
     FormControl {
         margin = FormControlMargin.normal
@@ -118,7 +119,7 @@ private fun ChildrenBuilder.buildLyricsTypeControl(
             value = type?.name.orEmpty()
             onChange = { event, _ ->
                 val value = event.target.value
-                setType(LyricsType.valueOf(value))
+                setType(JapaneseLyricsType.valueOf(value))
             }
             lyricTypeOptions.forEach { lyricsType ->
                 FormControlLabel {
@@ -136,13 +137,13 @@ private fun ChildrenBuilder.buildLyricsTypeControl(
     }
 }
 
-private val LyricsType.text get() = string(strings)
+private val JapaneseLyricsType.text get() = string(strings)
 
-private val LyricsType.strings
+private val JapaneseLyricsType.strings
     get() = when (this) {
-        LyricsType.RomajiCv -> Strings.LyricsTypeRomajiCV
-        LyricsType.RomajiVcv -> Strings.LyricsTypeRomajiVCV
-        LyricsType.KanaCv -> Strings.LyricsTypeKanaCV
-        LyricsType.KanaVcv -> Strings.LyricsTypeKanaVCV
-        LyricsType.Unknown -> Strings.LyricsTypeUnknown
+        JapaneseLyricsType.RomajiCv -> Strings.LyricsTypeRomajiCV
+        JapaneseLyricsType.RomajiVcv -> Strings.LyricsTypeRomajiVCV
+        JapaneseLyricsType.KanaCv -> Strings.LyricsTypeKanaCV
+        JapaneseLyricsType.KanaVcv -> Strings.LyricsTypeKanaVCV
+        JapaneseLyricsType.Unknown -> Strings.LyricsTypeUnknown
     }

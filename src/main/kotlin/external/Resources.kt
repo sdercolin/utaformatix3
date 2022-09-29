@@ -54,4 +54,7 @@ object Resources {
 
     val ufdataIcon: String
         get() = require("images/ufdata.png").default as String
+
+    val chineseLyricsDictionaryText: String
+        get() = require("texts/mandarin-pinyin-dict.txt").default as String
 }
