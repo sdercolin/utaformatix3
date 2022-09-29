@@ -192,7 +192,14 @@ fun Pitch.generateForCevio(notes: List<Note>, tempos: List<Tempo>, tickPrefix: L
         val value = thisPoint.second?.keyToLoggedFrequency() ?: continue
         eventsWithFullParams.add(EventDouble(index.toDouble(), repeat.toDouble(), value)) // in ticks temporarily
     }
+    val areEventsConnectedToNext = eventsWithFullParams.plus(null).zipWithNext().map {
+        val thisEvent = it.first!!
+        val nextEvent = it.second ?: return@map false
+        val repeat = thisEvent.repeat ?: 1.0
+        thisEvent.index!! + repeat >= nextEvent.index!!
+    }
     val events = denormalizeFromTick(eventsWithFullParams, tempos, tickPrefix)
+        .restoreConnection(areEventsConnectedToNext)
         .let(::mergeEventsIfPossible)
         .let(::removeRedundantIndex)
         .let(::removeRedundantRepeat)
@@ -250,6 +257,21 @@ private fun denormalizeFromTick(
             value = event.value,
         ).round()
     }
+}
+
+private fun List<Event>.restoreConnection(connected: List<Boolean>): List<Event> {
+    return this.plus(null)
+        .zipWithNext()
+        .mapIndexed { index, pair ->
+            val (thisEvent, nextEvent) = pair
+            requireNotNull(thisEvent)
+            if (nextEvent == null) return@mapIndexed thisEvent
+            if (connected[index]) {
+                thisEvent.copy(repeat = nextEvent.index!! - thisEvent.index!!)
+            } else {
+                thisEvent
+            }
+        }
 }
 
 private fun mergeEventsIfPossible(eventsWithFullParams: List<Event>) =
