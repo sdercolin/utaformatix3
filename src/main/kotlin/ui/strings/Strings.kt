@@ -127,6 +127,13 @@ enum class Strings(
         ru = "Целевой тип текстов",
         fr = "Type de paroles cible",
     ),
+    ChinesePinyinConversion(
+        en = "Convert lyrics in Chinese characters to Pinyin",
+        ja = "中国語歌詞（漢字）を Pinyin に変換",
+        zhCN = "将中文汉字歌词转换为拼音",
+        ru = "Преобразовать тексты на китайском языке в пиньинь",
+        fr = "Convertir les paroles en caractères chinois en pinyin",
+    ),
     LyricsReplacement(
         en = "Replace lyrics",
         ja = "歌詞を置き換える",

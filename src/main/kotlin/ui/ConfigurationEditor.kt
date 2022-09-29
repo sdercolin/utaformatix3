@@ -25,6 +25,7 @@ import process.RESTS_FILLING_MAX_LENGTH_DENOMINATOR_DEFAULT
 import process.evalFractionOrNull
 import process.fillRests
 import process.lyrics.LyricsReplacementRequest
+import process.lyrics.chinese.convertChineseLyricsToPinyin
 import process.lyrics.japanese.convertJapaneseLyrics
 import process.lyrics.replaceLyrics
 import process.projectZoomFactorOptions
@@ -40,6 +41,7 @@ import ui.common.errorDialog
 import ui.common.progress
 import ui.common.scopedFC
 import ui.common.title
+import ui.configuration.ChinesePinyinConversionBlock
 import ui.configuration.JapaneseLyricsConversionBlock
 import ui.configuration.LyricsReplacementBlock
 import ui.configuration.PitchConversionBlock
@@ -74,6 +76,15 @@ val ConfigurationEditor = scopedFC<ConfigurationEditorProps> { props, scope ->
             doJapaneseLyricsConversion,
             fromLyricsType,
             toLyricsType,
+        )
+    }
+    val (chinesePinyinConversion, setChinesePinyinConversion) = useState {
+        getStateFromLocalStorage<ChinesePinyinConversionState>("chinesePinyinConversion")?.let {
+            return@useState it
+        }
+
+        ChinesePinyinConversionState(
+            isOn = false,
         )
     }
     val (lyricsReplacement, setLyricsReplacement) = useState {
@@ -134,6 +145,10 @@ val ConfigurationEditor = scopedFC<ConfigurationEditorProps> { props, scope ->
         initialState = japaneseLyricsConversion
         submitState = setJapaneseLyricsConversion
     }
+    ChinesePinyinConversionBlock {
+        initialState = chinesePinyinConversion
+        submitState = setChinesePinyinConversion
+    }
     LyricsReplacementBlock {
         initialState = lyricsReplacement
         submitState = setLyricsReplacement
@@ -156,6 +171,7 @@ val ConfigurationEditor = scopedFC<ConfigurationEditorProps> { props, scope ->
         props,
         isEnabled = isReady(),
         japaneseLyricsConversion,
+        chinesePinyinConversion,
         lyricsReplacement,
         slightRestsFilling,
         pitchConversion,
@@ -189,7 +205,8 @@ private fun ChildrenBuilder.buildNextButton(
     scope: CoroutineScope,
     props: ConfigurationEditorProps,
     isEnabled: Boolean,
-    lyricsConversion: JapaneseLyricsConversionState,
+    japaneseLyricsConversion: JapaneseLyricsConversionState,
+    chinesePinyinConversion: ChinesePinyinConversionState,
     lyricsReplacement: LyricsReplacementState,
     slightRestsFilling: SlightRestsFillingState,
     pitchConversion: PitchConversionState,
@@ -209,7 +226,8 @@ private fun ChildrenBuilder.buildNextButton(
                 process(
                     scope,
                     props,
-                    lyricsConversion,
+                    japaneseLyricsConversion,
+                    chinesePinyinConversion,
                     lyricsReplacement,
                     slightRestsFilling,
                     pitchConversion,
@@ -227,6 +245,7 @@ private fun process(
     scope: CoroutineScope,
     props: ConfigurationEditorProps,
     japaneseLyricsConversion: JapaneseLyricsConversionState,
+    chinesePinyinConversion: ChinesePinyinConversionState,
     lyricsReplacement: LyricsReplacementState,
     slightRestsFilling: SlightRestsFillingState,
     pitchConversion: PitchConversionState,
@@ -245,6 +264,9 @@ private fun process(
                     runIfAllNotNull(fromType, toType) { nonNullFromType, nonNullToType ->
                         convertJapaneseLyrics(copy(japaneseLyricsType = nonNullFromType), nonNullToType, format)
                     }
+                }
+                .runIf(chinesePinyinConversion.isOn) {
+                    convertChineseLyricsToPinyin(this)
                 }
                 .runIf(lyricsReplacement.isOn) {
                     replaceLyrics(lyricsReplacement.request)
@@ -316,6 +338,11 @@ data class JapaneseLyricsConversionState(
 ) : SubState() {
     val isReady: Boolean get() = if (isOn) fromType != null && toType != null else true
 }
+
+@Serializable
+data class ChinesePinyinConversionState(
+    val isOn: Boolean,
+) : SubState()
 
 @Serializable
 data class LyricsReplacementState(
