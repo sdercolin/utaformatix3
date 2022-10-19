@@ -44,6 +44,13 @@ val CustomFooter = FC<CustomFooterProps> { props ->
                 onClick = { props.onOpenEmbeddedPage(Strings.ReleaseNotesUrl) }
                 +"Release Notes"
             }
+            +"　|　"
+            Link {
+                color = NamedColor.grey
+                underline = LinkUnderline.hover
+                onClick = { props.onOpenEmbeddedPage(Strings.GoogleAnalyticsUsageInfoUrl) }
+                +"About Usage of Google Analytics"
+            }
         }
     }
 }
