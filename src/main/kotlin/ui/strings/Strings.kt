@@ -437,6 +437,11 @@ enum class Strings(
         ru = "https://gist.githubusercontent.com/sdercolin/512db280480072f22cf1d462401eb1a0/raw",
         fr = "https://gist.githubusercontent.com/sdercolin/512db280480072f22cf1d462401eb1a0/raw",
     ),
+    GoogleAnalyticsUsageInfoUrl(
+      en = "https://gist.githubusercontent.com/sdercolin/b5d4cf81434ea381d8836e0015681029/raw",
+      ja = "https://gist.githubusercontent.com/sdercolin/b5d4cf81434ea381d8836e0015681029/raw",
+      zhCN = "https://gist.githubusercontent.com/sdercolin/b5d4cf81434ea381d8836e0015681029/raw",
+    ),
     ImportWarningTitle(
         en = "The following exceptions happened during the import process.",
         ja = "インポート中に下記の例外が発生しました。",
