@@ -6,4 +6,5 @@ enum class Language(val code: String, val displayName: String) {
     SimplifiedChinese("zh-CN", "简体中文"),
     Russian("ru", "Русский"),
     French("fr", "Français")
+    Indonesian("id", "Indonesia")
 }
