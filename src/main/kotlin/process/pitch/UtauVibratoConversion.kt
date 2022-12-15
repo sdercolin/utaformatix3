@@ -60,7 +60,7 @@ fun List<Pair<Long, Double>>.appendUtauNoteVibrato(
         tickEnd = thisNote.tickOn + sampleIntervalTick,
     )
 
-    return map { (it.first - noteStartInMillis) to it.second }
+    return map { (tickTimeTransformer.tickToMilliSec(it.first) - noteStartInMillis) to it.second }
         .fold(listOf<Pair<Double, Double>>()) { acc, inputPoint ->
             val lastPoint = acc.lastOrNull()
             val newPoint = inputPoint.let { it.first to (it.second + vibrato(it.first)) }
