@@ -118,6 +118,10 @@ private val ImportWarning.text: String
             Strings.ImportWarningTempoIgnoredInPreMeasure,
             "bpm" to tempo.bpm.toString(),
         )
+        is ImportWarning.DefaultTempoFixed -> string(
+            Strings.ImportWarningDefaultTempoFixed,
+            "bpm" to originalBpm.toString(),
+        )
         is ImportWarning.TimeSignatureNotFound -> string(Strings.ImportWarningTimeSignatureNotFound)
         is ImportWarning.TimeSignatureIgnoredInTrack -> string(
             Strings.ImportWarningTimeSignatureIgnoredInTrack,

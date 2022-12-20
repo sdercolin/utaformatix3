@@ -66,6 +66,15 @@ object Ust {
         }
         val warnings = mutableListOf<ImportWarning>()
         val tempos = results.firstOrNull { it.tempos.isNotEmpty() }?.tempos
+            ?.let {
+                // fix extremely large tempo
+                if (it.first().tickPosition == 0L && it.first().bpm > MAX_ACCEPTED_BPM) {
+                    warnings.add(ImportWarning.DefaultTempoFixed(it.first().bpm))
+                    listOf(Tempo.default) + it.drop(1)
+                } else {
+                    it
+                }
+            }
             ?: listOf(Tempo.default).also {
                 warnings.add(ImportWarning.TempoNotFound)
             }
@@ -424,5 +433,6 @@ object Ust {
 
     const val MODE1_PITCH_SAMPLING_INTERVAL_TICK = 5L
     const val MODE2_PITCH_MAX_POINT_COUNT = 50L
+    private const val MAX_ACCEPTED_BPM = 10000.0
     private const val LINE_SEPARATOR = "\r\n"
 }
