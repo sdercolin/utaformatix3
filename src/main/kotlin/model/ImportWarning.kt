@@ -7,6 +7,7 @@ sealed class ImportWarning {
     class TempoIgnoredInFile(val file: File, val tempo: Tempo) : ImportWarning()
     class TempoIgnoredInTrack(val track: Track, val tempo: Tempo) : ImportWarning()
     class TempoIgnoredInPreMeasure(val tempo: Tempo) : ImportWarning()
+    class DefaultTempoFixed(val originalBpm: Double) : ImportWarning()
     object TimeSignatureNotFound : ImportWarning()
     class TimeSignatureIgnoredInTrack(val track: Track, val timeSignature: TimeSignature) : ImportWarning()
     class TimeSignatureIgnoredInPreMeasure(val timeSignature: TimeSignature) : ImportWarning()

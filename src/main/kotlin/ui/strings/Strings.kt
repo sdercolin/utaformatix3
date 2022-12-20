@@ -477,6 +477,13 @@ enum class Strings(
         ru = "- Метка темпа ({{bpm}}) в предварительных мерах была проигнорирована.",
         fr = "- Le tempo ({{bpm}}) dans les pré-mesures a été ignorée.",
     ),
+    ImportWarningDefaultTempoFixed(
+        en = "- Default tempo was too large ({{bpm}}), so it was fixed to 120.",
+        ja = "- デフォルトテンポが大きすぎる（{{bpm}}）ので、120に修正しました。",
+        zhCN = "- 默认速度过大（{{bpm}}），已修正为120。",
+        ru = "- Темп по умолчанию слишком большой ({{bpm}}), поэтому он был исправлен на 120.",
+        fr = "- Le tempo par défaut était trop grand ({{bpm}}), il a donc été fixé à 120.",
+    ),
     ImportWarningTimeSignatureNotFound(
         en = "- No time signature labels found in the imported project.",
         ja = "- 拍子記号が見つかりませんでした。",
