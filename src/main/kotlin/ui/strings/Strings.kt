@@ -721,7 +721,16 @@ enum class Strings(
         zhCN = "批量转换",
         ru = "Пакетное преобразование",
         fr = "Conversion par lots",
-    );
+    ),
+    UseMultipleModeDescription(
+        en = "Convert multiple files at once. Every file will be saved separately as a project.",
+        ja = "複数のファイルを一括で変換します。各ファイルはプロジェクトとして別々に保存されます。",
+        zhCN = "一次性转换多个文件。每个文件将单独保存为一个工程。",
+        ru = "Преобразовать несколько файлов одновременно. Каждый файл будет сохранен отдельно в качестве проекта.",
+        fr = "Convertir plusieurs fichiers en même temps. " +
+            "Chaque fichier sera enregistré séparément en tant que projet.",
+    ),
+    ;
 
     fun get(language: Language): String = when (language) {
         English -> en

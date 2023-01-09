@@ -143,6 +143,7 @@ private fun ChildrenBuilder.buildFileDrop(onFiles: (List<File>) -> Unit) {
 
 private fun ChildrenBuilder.buildConfigurations(params: ImportParams, onNewParams: (ImportParams) -> Unit) {
     FormGroup {
+        row = true
         div {
             FormControlLabel {
                 label = ReactNode(string(Strings.UseSimpleImport))
@@ -169,6 +170,7 @@ private fun ChildrenBuilder.buildConfigurations(params: ImportParams, onNewParam
             }
         }
         div {
+            css { marginLeft = 48.px }
             FormControlLabel {
                 label = ReactNode(string(Strings.UseMultipleMode))
                 control = Switch.create {
@@ -180,6 +182,17 @@ private fun ChildrenBuilder.buildConfigurations(params: ImportParams, onNewParam
                     }
                 }
                 labelPlacement = LabelPlacement.end
+            }
+            Tooltip {
+                title = ReactNode(string(Strings.UseMultipleModeDescription))
+                placement = TooltipPlacement.right
+                disableInteractive = false
+
+                HelpOutline {
+                    style = jso {
+                        verticalAlign = VerticalAlign.middle
+                    }
+                }
             }
         }
     }
