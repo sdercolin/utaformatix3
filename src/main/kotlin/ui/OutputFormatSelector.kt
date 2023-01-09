@@ -47,17 +47,32 @@ val OutputFormatSelector = FC<OutputFormatSelectorProps> { props ->
     buildFormatList(props)
 }
 
+private const val MAX_WARNINGS = 20
+
 private fun ChildrenBuilder.buildImportWarnings(props: OutputFormatSelectorProps) {
-    val importWarnings = props.project.importWarnings
+    val importWarnings = props.projects.flatMap { project: Project ->
+        project.importWarnings.map { project.inputFiles[0].name to it }
+    }
     if (importWarnings.isEmpty()) return
+    val multipleMode = props.projects.size > 1
 
     Alert {
         severity = AlertColor.warning
         AlertTitle { +string(Strings.ImportWarningTitle) }
-        importWarnings.map { it.text }
+        importWarnings.take(MAX_WARNINGS).map {
+            if (multipleMode) {
+                val (fileName, warning) = it
+                "($fileName) ${warning.text}"
+            } else {
+                it.second.text
+            }
+        }
             .forEach {
                 div { +it }
             }
+        if (importWarnings.size > MAX_WARNINGS) {
+            div { +"..." }
+        }
     }
 }
 
@@ -176,7 +191,7 @@ private val Format.iconPath: String?
     }
 
 external interface OutputFormatSelectorProps : Props {
-    var project: Project
+    var projects: List<Project>
     var formats: List<Format>
     var onSelected: (Format) -> Unit
 }

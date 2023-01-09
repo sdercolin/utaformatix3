@@ -39,7 +39,7 @@ import ui.strings.Strings
 import ui.strings.string
 
 external interface ProjectZoomProps : SubProps<ProjectZoomState> {
-    var project: Project
+    var projects: List<Project>
 }
 
 val ProjectZoomBlock = subFC<ProjectZoomProps, ProjectZoomState> { props, state, editState ->
@@ -60,7 +60,7 @@ val ProjectZoomBlock = subFC<ProjectZoomProps, ProjectZoomState> { props, state,
                     }
                 }
             }
-            if (props.project.needWarningZoom(state.factorValue)) {
+            if (props.projects.any { it.needWarningZoom(state.factorValue) }) {
                 Tooltip {
                     title = ReactNode(string(Strings.ProjectZoomWarning))
                     placement = TooltipPlacement.right
