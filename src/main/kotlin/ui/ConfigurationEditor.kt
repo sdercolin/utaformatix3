@@ -35,6 +35,7 @@ import react.css.css
 import react.dom.html.ReactHTML.div
 import react.useState
 import ui.common.DialogErrorState
+import ui.common.ProgressProps
 import ui.common.SubState
 import ui.common.errorDialog
 import ui.common.progress
@@ -53,7 +54,7 @@ import util.runIf
 import util.runIfAllNotNull
 
 val ConfigurationEditor = scopedFC<ConfigurationEditorProps> { props, scope ->
-    var isProcessing by useState(false)
+    var progress by useState(ProgressProps.Initial)
     val (japaneseLyricsConversion, setJapaneseLyricsConversion) = useState {
         getStateFromLocalStorage<JapaneseLyricsConversionState>("japaneseLyricsConversion")?.let {
             return@useState it
@@ -177,7 +178,7 @@ val ConfigurationEditor = scopedFC<ConfigurationEditorProps> { props, scope ->
         slightRestsFilling,
         pitchConversion,
         projectZoom,
-        setProcessing = { isProcessing = it },
+        setProgress = { progress = it },
         onDialogError = { dialogError = it },
     )
 
@@ -188,7 +189,7 @@ val ConfigurationEditor = scopedFC<ConfigurationEditorProps> { props, scope ->
         close = { closeErrorDialog() },
     )
 
-    progress(isShowing = isProcessing)
+    progress(progress)
 }
 
 private inline fun <reified T> ChildrenBuilder.getStateFromLocalStorage(name: String): T? {
@@ -212,7 +213,7 @@ private fun ChildrenBuilder.buildNextButton(
     slightRestsFilling: SlightRestsFillingState,
     pitchConversion: PitchConversionState,
     projectZoom: ProjectZoomState,
-    setProcessing: (Boolean) -> Unit,
+    setProgress: (ProgressProps) -> Unit,
     onDialogError: (DialogErrorState) -> Unit,
 ) {
     div {
@@ -233,7 +234,7 @@ private fun ChildrenBuilder.buildNextButton(
                     slightRestsFilling,
                     pitchConversion,
                     projectZoom,
-                    setProcessing,
+                    setProgress,
                     onDialogError,
                 )
             }
@@ -251,14 +252,14 @@ private fun process(
     slightRestsFilling: SlightRestsFillingState,
     pitchConversion: PitchConversionState,
     projectZoom: ProjectZoomState,
-    setProcessing: (Boolean) -> Unit,
+    setProgress: (ProgressProps) -> Unit,
     onDialogError: (DialogErrorState) -> Unit,
 ) {
-    setProcessing(true)
     scope.launch {
         runCatchingCancellable {
             val format = props.outputFormat
             val results = props.projects.mapIndexed { index, inputProject ->
+                setProgress(ProgressProps(isShowing = true, total = props.projects.size, current = index + 1))
                 val project = inputProject
                     .runIf(japaneseLyricsConversion.isOn) {
                         val fromType = japaneseLyricsConversion.fromType
@@ -319,7 +320,7 @@ private fun process(
             props.onFinished.invoke(adjustedResults, format)
         }.onFailure { t ->
             console.log(t)
-            setProcessing(false)
+            setProgress(ProgressProps.Initial)
             onDialogError(
                 DialogErrorState(
                     isShowing = true,

@@ -31,6 +31,7 @@ import react.css.css
 import react.dom.html.ReactHTML.div
 import react.useState
 import ui.common.DialogErrorState
+import ui.common.ProgressProps
 import ui.common.errorDialog
 import ui.common.messageBar
 import ui.common.progress
@@ -46,7 +47,7 @@ import util.toList
 import util.waitFileSelection
 
 val Importer = scopedFC<ImporterProps> { props, scope ->
-    var isLoading by useState(false)
+    var loadingProgress by useState(ProgressProps.Initial)
     var params by useState { loadImportParamsFromCookies() ?: ImportParams() }
     var snackbarError by useState(SnackbarErrorState())
     var dialogError by useState(DialogErrorState())
@@ -67,7 +68,7 @@ val Importer = scopedFC<ImporterProps> { props, scope ->
                 scope,
                 files,
                 fileFormat,
-                setLoading = { isLoading = it },
+                setProgress = { loadingProgress = it },
                 onSnackBarError = { snackbarError = it },
                 onDialogError = { dialogError = it },
                 props,
@@ -116,7 +117,7 @@ val Importer = scopedFC<ImporterProps> { props, scope ->
         close = { closeErrorDialog() },
     )
 
-    progress(isShowing = isLoading)
+    progress(loadingProgress)
 }
 
 private fun ChildrenBuilder.buildFileDrop(onFiles: (List<File>) -> Unit) {
@@ -188,13 +189,12 @@ private fun import(
     scope: CoroutineScope,
     files: List<File>,
     format: Format,
-    setLoading: (Boolean) -> Unit,
+    setProgress: (ProgressProps) -> Unit,
     onSnackBarError: (SnackbarErrorState) -> Unit,
     onDialogError: (DialogErrorState) -> Unit,
     props: ImporterProps,
     params: ImportParams,
 ) {
-    setLoading(true)
     scope.launch {
         runCatchingCancellable {
             delay(100)
@@ -203,6 +203,7 @@ private fun import(
                 val total = files.count()
                 console.log("Importing $total files...")
                 val projects = files.mapIndexed { index, file ->
+                    setProgress(ProgressProps(isShowing = true, total = total, current = index + 1))
                     val project = parseFunction(listOf(file), params).lyricsTypeAnalysed().requireValid()
                     console.log("Imported ${index + 1} of $total files")
                     project
@@ -210,6 +211,7 @@ private fun import(
                 console.log("A batch of $total projects are imported successfully.")
                 projects
             } else {
+                setProgress(ProgressProps(isShowing = true))
                 val project = parseFunction(files, params).lyricsTypeAnalysed().requireValid()
                 console.log("Project is imported successfully.")
                 console.log(project)
@@ -219,7 +221,7 @@ private fun import(
             props.onImported.invoke(projects)
         }.onFailure { t ->
             console.log(t)
-            setLoading(false)
+            setProgress(ProgressProps.Initial)
             if (t is UnsupportedFileFormatError) {
                 onSnackBarError(SnackbarErrorState(true, t.message))
             } else {

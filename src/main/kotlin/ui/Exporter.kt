@@ -27,6 +27,7 @@ import react.css.css
 import react.dom.html.ReactHTML.div
 import react.useState
 import ui.common.DialogErrorState
+import ui.common.ProgressProps
 import ui.common.errorDialog
 import ui.common.progress
 import ui.common.scopedFC
@@ -36,12 +37,12 @@ import ui.strings.string
 import util.runCatchingCancellable
 
 val Exporter = scopedFC<ExporterProps> { props, scope ->
-    var isProcessing by useState(false)
+    var progress by useState(ProgressProps.Initial)
     var dialogError by useState(DialogErrorState())
     title(Strings.ExporterTitleSuccess)
     buildExportInfo(props)
-    buildButtons(props, scope, setProcessing = { isProcessing = it }, onDialogError = { dialogError = it })
-    progress(isShowing = isProcessing)
+    buildButtons(props, scope, setProgress = { progress = it }, onDialogError = { dialogError = it })
+    progress(progress)
     errorDialog(
         isShowing = dialogError.isShowing,
         title = dialogError.title,
@@ -76,7 +77,7 @@ private fun ChildrenBuilder.buildExportInfo(props: ExporterProps) {
 private fun ChildrenBuilder.buildButtons(
     props: ExporterProps,
     scope: CoroutineScope,
-    setProcessing: (Boolean) -> Unit,
+    setProgress: (ProgressProps) -> Unit,
     onDialogError: (DialogErrorState) -> Unit,
 ) {
     div {
@@ -87,7 +88,7 @@ private fun ChildrenBuilder.buildButtons(
             variant = ButtonVariant.contained
             color = ButtonColor.secondary
             sx { backgroundColor = Color("#e0e0e0") }
-            onClick = { download(props, scope, setProcessing, onDialogError) }
+            onClick = { download(props, scope, setProgress, onDialogError) }
             SaveAlt()
             div {
                 css { padding = 8.px }
@@ -111,14 +112,14 @@ private fun ChildrenBuilder.buildButtons(
 private fun download(
     props: ExporterProps,
     scope: CoroutineScope,
-    setProcessing: (Boolean) -> Unit,
+    setProgress: (ProgressProps) -> Unit,
     onDialogError: (DialogErrorState) -> Unit,
 ) {
     if (props.results.size == 1) {
         val result = props.results.first()
         saveAs(result.blob, result.fileName)
     } else {
-        setProcessing(true)
+        setProgress(ProgressProps(isShowing = true))
         scope.launch {
             runCatchingCancellable {
                 val zip = JsZip()
@@ -128,10 +129,10 @@ private fun download(
                 val option = JsZipOption().also { it.type = "blob" }
                 val blob = zip.generateAsync(option).await() as Blob
                 saveAs(blob, props.results.first().fileName + "_all.zip")
-                setProcessing(false)
+                setProgress(ProgressProps.Initial)
             }.onFailure { t ->
                 console.log(t)
-                setProcessing(false)
+                setProgress(ProgressProps.Initial)
                 onDialogError(
                     DialogErrorState(
                         isShowing = true,
