@@ -51,6 +51,8 @@ val Exporter = scopedFC<ExporterProps> { props, scope ->
     )
 }
 
+private const val MAX_NOTIFICATIONS = 20
+
 private fun ChildrenBuilder.buildExportInfo(props: ExporterProps) {
     val notifications = props.results.flatMap { result ->
         result.notifications.map { result.fileName to it }
@@ -59,7 +61,7 @@ private fun ChildrenBuilder.buildExportInfo(props: ExporterProps) {
 
     Alert {
         severity = AlertColor.warning
-        notifications.take(10).map {
+        notifications.take(MAX_NOTIFICATIONS).map {
             if (props.results.size > 1) {
                 val (fileName, notification) = it
                 "($fileName) ${notification.text}"
@@ -70,7 +72,9 @@ private fun ChildrenBuilder.buildExportInfo(props: ExporterProps) {
             .forEach {
                 div { +it }
             }
-        // TODO: Show more button
+        if (notifications.size > MAX_NOTIFICATIONS) {
+            div { +"..." }
+        }
     }
 }
 
