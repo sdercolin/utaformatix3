@@ -185,11 +185,11 @@ private fun ChildrenBuilder.buildBody(stageInfo: StageInfo, pushStage: (StageInf
             }
             is StageInfo.SelectOutputFormat -> OutputFormatSelector {
                 formats = Format.exportable
-                project = stageInfo.project
-                onSelected = { pushStage(StageInfo.Configure(stageInfo.project, it)) }
+                projects = stageInfo.projects
+                onSelected = { pushStage(StageInfo.Configure(stageInfo.projects, it)) }
             }
             is StageInfo.Configure -> ConfigurationEditor {
-                project = stageInfo.project
+                projects = stageInfo.projects
                 outputFormat = stageInfo.outputFormat
                 onFinished = { result, format ->
                     pushStage(StageInfo.Export(result, format))
@@ -197,7 +197,7 @@ private fun ChildrenBuilder.buildBody(stageInfo: StageInfo, pushStage: (StageInf
             }
             is StageInfo.Export -> Exporter {
                 format = stageInfo.outputFormat
-                result = stageInfo.result
+                results = stageInfo.results
                 onRestart = { popAllStages() }
             }
             is StageInfo.ExtraPage -> EmbeddedPage {

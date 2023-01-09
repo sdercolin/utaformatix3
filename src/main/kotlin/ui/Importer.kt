@@ -51,13 +51,13 @@ val Importer = scopedFC<ImporterProps> { props, scope ->
     var snackbarError by useState(SnackbarErrorState())
     var dialogError by useState(DialogErrorState())
 
-    fun checkFilesToImport(files: List<File>) {
+    fun checkFilesToImport(files: List<File>, multipleMode: Boolean) {
         val fileFormat = getFileFormat(files, props)
         when {
             fileFormat == null -> {
                 snackbarError = SnackbarErrorState(true, string(Strings.UnsupportedFileTypeImportError))
             }
-            !fileFormat.multipleFile && files.count() > 1 -> {
+            !fileFormat.multipleFile && !multipleMode && files.count() > 1 -> {
                 snackbarError = SnackbarErrorState(
                     true,
                     string(Strings.MultipleFileImportError, "format" to fileFormat.name),
@@ -94,10 +94,10 @@ val Importer = scopedFC<ImporterProps> { props, scope ->
             scope.launch {
                 val accept = props.formats.joinToString(",") { it.extension }
                 val files = waitFileSelection(accept = accept, multiple = true)
-                checkFilesToImport(files)
+                checkFilesToImport(files, params.multipleMode)
             }
         }
-        buildFileDrop { checkFilesToImport(it) }
+        buildFileDrop { checkFilesToImport(it, params.multipleMode) }
     }
 
     buildConfigurations(params) { params = it }
@@ -167,6 +167,20 @@ private fun ChildrenBuilder.buildConfigurations(params: ImportParams, onNewParam
                 }
             }
         }
+        div {
+            FormControlLabel {
+                label = ReactNode(string(Strings.UseMultipleMode))
+                control = Switch.create {
+                    color = SwitchColor.secondary
+                    checked = params.multipleMode
+                    onChange = { event, _ ->
+                        val checked = event.target.checked
+                        onNewParams(params.copy(multipleMode = checked))
+                    }
+                }
+                labelPlacement = LabelPlacement.end
+            }
+        }
     }
 }
 
@@ -185,11 +199,24 @@ private fun import(
         runCatchingCancellable {
             delay(100)
             val parseFunction = format.parser
-            val project = parseFunction(files, params).lyricsTypeAnalysed().requireValid()
-            console.log("Project was imported successfully.")
-            console.log(project)
+            val projects = if (params.multipleMode) {
+                val total = files.count()
+                console.log("Importing $total files...")
+                val projects = files.mapIndexed { index, file ->
+                    val project = parseFunction(listOf(file), params).lyricsTypeAnalysed().requireValid()
+                    console.log("Imported ${index + 1} of $total files")
+                    project
+                }
+                console.log("A batch of $total projects are imported successfully.")
+                projects
+            } else {
+                val project = parseFunction(files, params).lyricsTypeAnalysed().requireValid()
+                console.log("Project is imported successfully.")
+                console.log(project)
+                listOf(project)
+            }
             saveImportParamsToCookies(params)
-            props.onImported.invoke(project)
+            props.onImported.invoke(projects)
         }.onFailure { t ->
             console.log(t)
             setLoading(false)
@@ -226,7 +253,7 @@ private const val ImportParamsCookieName = "import_params"
 
 external interface ImporterProps : Props {
     var formats: List<Format>
-    var onImported: (Project) -> Unit
+    var onImported: (List<Project>) -> Unit
 }
 
 data class SnackbarErrorState(

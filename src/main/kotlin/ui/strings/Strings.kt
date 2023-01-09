@@ -714,6 +714,13 @@ enum class Strings(
         zhCN = "忽略参数，使导入更快",
         ru = "Игнорировать подробные параметры для ускорения импорта",
         fr = "Ignorer les paramètres détaillés pour accélérer l'importation",
+    ),
+    UseMultipleMode(
+        en = "Batch conversion",
+        ja = "一括変換",
+        zhCN = "批量转换",
+        ru = "Пакетное преобразование",
+        fr = "Conversion par lots",
     );
 
     fun get(language: Language): String = when (language) {

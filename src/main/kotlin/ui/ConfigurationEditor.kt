@@ -14,7 +14,6 @@ import model.ExportResult
 import model.Feature
 import model.Format
 import model.JapaneseLyricsType
-import model.JapaneseLyricsType.Unknown
 import model.Project
 import model.TICKS_IN_FULL_NOTE
 import mui.material.Button
@@ -60,8 +59,9 @@ val ConfigurationEditor = scopedFC<ConfigurationEditorProps> { props, scope ->
             return@useState it
         }
 
-        val japaneseLyricsAnalysedType = props.project.japaneseLyricsType
-        val doJapaneseLyricsConversion = japaneseLyricsAnalysedType != Unknown
+        val japaneseLyricsAnalysedType =
+            props.projects.map { it.japaneseLyricsType }.distinct().singleOrNull() ?: JapaneseLyricsType.Unknown
+        val doJapaneseLyricsConversion = japaneseLyricsAnalysedType != JapaneseLyricsType.Unknown
         val fromLyricsType: JapaneseLyricsType?
         val toLyricsType: JapaneseLyricsType?
 
@@ -74,6 +74,7 @@ val ConfigurationEditor = scopedFC<ConfigurationEditorProps> { props, scope ->
         }
         JapaneseLyricsConversionState(
             doJapaneseLyricsConversion,
+            japaneseLyricsAnalysedType,
             fromLyricsType,
             toLyricsType,
         )
@@ -92,7 +93,7 @@ val ConfigurationEditor = scopedFC<ConfigurationEditorProps> { props, scope ->
             return@useState it
         }
 
-        val preset = LyricsReplacementRequest.getPreset(props.project.format, props.outputFormat)
+        val preset = LyricsReplacementRequest.getPreset(props.projects.first().format, props.outputFormat)
         if (preset == null) {
             LyricsReplacementState(false, LyricsReplacementRequest())
         } else {
@@ -112,7 +113,7 @@ val ConfigurationEditor = scopedFC<ConfigurationEditorProps> { props, scope ->
         getStateFromLocalStorage<PitchConversionState>("pitchConversion")?.let {
             return@useState it
         }
-        val hasPitchData = Feature.ConvertPitch.isAvailable(props.project)
+        val hasPitchData = props.projects.any { Feature.ConvertPitch.isAvailable(it) }
         val isPitchConversionAvailable = hasPitchData &&
             props.outputFormat.availableFeaturesForGeneration.contains(Feature.ConvertPitch)
         PitchConversionState(
@@ -140,7 +141,7 @@ val ConfigurationEditor = scopedFC<ConfigurationEditorProps> { props, scope ->
 
     title(Strings.ConfigurationEditorCaption)
     JapaneseLyricsConversionBlock {
-        this.project = props.project
+        this.projects = props.projects
         this.outputFormat = props.outputFormat
         initialState = japaneseLyricsConversion
         submitState = setJapaneseLyricsConversion
@@ -162,7 +163,7 @@ val ConfigurationEditor = scopedFC<ConfigurationEditorProps> { props, scope ->
         submitState = setPitchConversion
     }
     ProjectZoomBlock {
-        this.project = props.project
+        this.projects = props.projects
         initialState = projectZoom
         submitState = setProjectZoom
     }
@@ -257,38 +258,41 @@ private fun process(
     scope.launch {
         runCatchingCancellable {
             val format = props.outputFormat
-            val project = props.project
-                .runIf(japaneseLyricsConversion.isOn) {
-                    val fromType = japaneseLyricsConversion.fromType
-                    val toType = japaneseLyricsConversion.toType
-                    runIfAllNotNull(fromType, toType) { nonNullFromType, nonNullToType ->
-                        convertJapaneseLyrics(copy(japaneseLyricsType = nonNullFromType), nonNullToType, format)
+            val results = props.projects.map {
+                val project = it
+                    .runIf(japaneseLyricsConversion.isOn) {
+                        val fromType = japaneseLyricsConversion.fromType
+                        val toType = japaneseLyricsConversion.toType
+                        runIfAllNotNull(fromType, toType) { nonNullFromType, nonNullToType ->
+                            convertJapaneseLyrics(copy(japaneseLyricsType = nonNullFromType), nonNullToType, format)
+                        }
                     }
-                }
-                .runIf(chinesePinyinConversion.isOn) {
-                    convertChineseLyricsToPinyin(this)
-                }
-                .runIf(lyricsReplacement.isOn) {
-                    replaceLyrics(lyricsReplacement.request)
-                }
-                .runIf(slightRestsFilling.isOn) {
-                    fillRests(slightRestsFilling.excludedMaxLength)
-                }
-                .runIf(projectZoom.isOn) {
-                    zoom(projectZoom.factorValue)
-                }
-
-            val availableFeatures = Feature.values()
-                .filter { it.isAvailable.invoke(project) && format.availableFeaturesForGeneration.contains(it) }
-                .filter {
-                    when (it) {
-                        Feature.ConvertPitch -> pitchConversion.isOn
+                    .runIf(chinesePinyinConversion.isOn) {
+                        convertChineseLyricsToPinyin(this)
                     }
-                }
+                    .runIf(lyricsReplacement.isOn) {
+                        replaceLyrics(lyricsReplacement.request)
+                    }
+                    .runIf(slightRestsFilling.isOn) {
+                        fillRests(slightRestsFilling.excludedMaxLength)
+                    }
+                    .runIf(projectZoom.isOn) {
+                        zoom(projectZoom.factorValue)
+                    }
 
-            delay(100)
-            val result = format.generator.invoke(project, availableFeatures)
-            console.log(result.blob)
+                val availableFeatures = Feature.values()
+                    .filter { it.isAvailable.invoke(project) && format.availableFeaturesForGeneration.contains(it) }
+                    .filter {
+                        when (it) {
+                            Feature.ConvertPitch -> pitchConversion.isOn
+                        }
+                    }
+
+                delay(100)
+                val result = format.generator.invoke(project, availableFeatures)
+                console.log(result.blob)
+                result
+            }
             listOf(
                 "japaneseLyricsConversion" to japaneseLyricsConversion,
                 "lyricsReplacement" to lyricsReplacement,
@@ -298,7 +302,21 @@ private fun process(
             ).forEach {
                 window.localStorage.setItem(it.first, json.encodeToString(it.second))
             }
-            props.onFinished.invoke(result, format)
+
+            // adjust results to make every fileName unique
+            val adjustedResults = results.mapIndexed { index, result ->
+                val fileName = result.fileName
+                val adjustedFileName = if (results.any { it != result && it.fileName == fileName }) {
+                    val extension = fileName.substringAfterLast(".")
+                    val name = fileName.substringBeforeLast(".")
+                    "$name-$index.$extension"
+                } else {
+                    fileName
+                }
+                ExportResult(blob = result.blob, fileName = adjustedFileName, notifications = result.notifications)
+            }
+
+            props.onFinished.invoke(adjustedResults, format)
         }.onFailure { t ->
             console.log(t)
             setProcessing(false)
@@ -325,14 +343,15 @@ private val json = Json {
 }
 
 external interface ConfigurationEditorProps : Props {
-    var project: Project
+    var projects: List<Project>
     var outputFormat: Format
-    var onFinished: (ExportResult, Format) -> Unit
+    var onFinished: (List<ExportResult>, Format) -> Unit
 }
 
 @Serializable
 data class JapaneseLyricsConversionState(
     val isOn: Boolean,
+    val detectedType: JapaneseLyricsType,
     val fromType: JapaneseLyricsType?,
     val toType: JapaneseLyricsType?,
 ) : SubState() {

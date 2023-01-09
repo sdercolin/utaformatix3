@@ -29,7 +29,7 @@ import ui.strings.Strings
 import ui.strings.string
 
 external interface LyricsConversionProps : SubProps<JapaneseLyricsConversionState> {
-    var project: Project
+    var projects: List<Project>
     var outputFormat: Format
 }
 
@@ -45,6 +45,7 @@ val JapaneseLyricsConversionBlock =
 
         if (state.isOn) buildLyricsDetail(
             props = props,
+            detectedType = state.detectedType,
             fromLyricsType = state.fromType,
             setFromLyricsType = { editState { copy(fromType = it) } },
             toLyricsType = state.toType,
@@ -54,6 +55,7 @@ val JapaneseLyricsConversionBlock =
 
 private fun ChildrenBuilder.buildLyricsDetail(
     props: LyricsConversionProps,
+    detectedType: JapaneseLyricsType,
     fromLyricsType: JapaneseLyricsType?,
     setFromLyricsType: (JapaneseLyricsType) -> Unit,
     toLyricsType: JapaneseLyricsType?,
@@ -78,7 +80,7 @@ private fun ChildrenBuilder.buildLyricsDetail(
                     buildLyricsTypeControl(
                         labelText = string(
                             Strings.FromLyricsTypeLabel,
-                            "type" to props.project.japaneseLyricsType.text,
+                            "type" to detectedType.text,
                         ),
                         type = fromLyricsType,
                         setType = setFromLyricsType,
