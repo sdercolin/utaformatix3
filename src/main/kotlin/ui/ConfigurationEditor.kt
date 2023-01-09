@@ -258,8 +258,8 @@ private fun process(
     scope.launch {
         runCatchingCancellable {
             val format = props.outputFormat
-            val results = props.projects.map {
-                val project = it
+            val results = props.projects.mapIndexed { index, inputProject ->
+                val project = inputProject
                     .runIf(japaneseLyricsConversion.isOn) {
                         val fromType = japaneseLyricsConversion.fromType
                         val toType = japaneseLyricsConversion.toType
@@ -290,7 +290,7 @@ private fun process(
 
                 delay(100)
                 val result = format.generator.invoke(project, availableFeatures)
-                console.log(result.blob)
+                console.log("Finished processing project ${project.name}. ${index + 1}/${props.projects.size}")
                 result
             }
             listOf(
