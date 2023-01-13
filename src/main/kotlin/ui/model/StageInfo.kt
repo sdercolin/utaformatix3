@@ -10,16 +10,16 @@ sealed class StageInfo(
 ) {
     object Import : StageInfo(Stage.Import)
     data class SelectOutputFormat(
-        val project: Project,
+        val projects: List<Project>,
     ) : StageInfo(Stage.SelectOutputFormat)
 
     data class Configure(
-        val project: Project,
+        val projects: List<Project>,
         val outputFormat: Format,
     ) : StageInfo(Stage.Configure)
 
     data class Export(
-        val result: ExportResult,
+        val results: List<ExportResult>,
         val outputFormat: Format,
     ) : StageInfo(Stage.Export)
 

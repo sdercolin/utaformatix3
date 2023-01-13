@@ -477,6 +477,13 @@ enum class Strings(
         ru = "- Метка темпа ({{bpm}}) в предварительных мерах была проигнорирована.",
         fr = "- Le tempo ({{bpm}}) dans les pré-mesures a été ignorée.",
     ),
+    ImportWarningDefaultTempoFixed(
+        en = "- Default tempo was too large ({{bpm}}), so it was fixed to 120.",
+        ja = "- デフォルトテンポが大きすぎる（{{bpm}}）ので、120に修正しました。",
+        zhCN = "- 默认速度过大（{{bpm}}），已修正为120。",
+        ru = "- Темп по умолчанию слишком большой ({{bpm}}), поэтому он был исправлен на 120.",
+        fr = "- Le tempo par défaut était trop grand ({{bpm}}), il a donc été fixé à 120.",
+    ),
     ImportWarningTimeSignatureNotFound(
         en = "- No time signature labels found in the imported project.",
         ja = "- 拍子記号が見つかりませんでした。",
@@ -707,7 +714,23 @@ enum class Strings(
         zhCN = "忽略参数，使导入更快",
         ru = "Игнорировать подробные параметры для ускорения импорта",
         fr = "Ignorer les paramètres détaillés pour accélérer l'importation",
-    );
+    ),
+    UseMultipleMode(
+        en = "Batch conversion",
+        ja = "一括変換",
+        zhCN = "批量转换",
+        ru = "Пакетное преобразование",
+        fr = "Conversion par lots",
+    ),
+    UseMultipleModeDescription(
+        en = "Convert multiple files at once. Every file will be saved separately as a project.",
+        ja = "複数のファイルを一括で変換します。各ファイルはプロジェクトとして別々に保存されます。",
+        zhCN = "一次性转换多个文件。每个文件将单独保存为一个工程。",
+        ru = "Преобразовать несколько файлов одновременно. Каждый файл будет сохранен отдельно в качестве проекта.",
+        fr = "Convertir plusieurs fichiers en même temps. " +
+            "Chaque fichier sera enregistré séparément en tant que projet.",
+    ),
+    ;
 
     fun get(language: Language): String = when (language) {
         English -> en

@@ -15,5 +15,6 @@ object ImportParamsJson {
     private val jsonSerializer = Json {
         encodeDefaults = true
         isLenient = true
+        ignoreUnknownKeys = true
     }
 }
