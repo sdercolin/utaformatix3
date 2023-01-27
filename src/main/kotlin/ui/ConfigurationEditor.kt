@@ -183,9 +183,7 @@ val ConfigurationEditor = scopedFC<ConfigurationEditorProps> { props, scope ->
     )
 
     errorDialog(
-        isShowing = dialogError.isShowing,
-        title = dialogError.title,
-        errorMessage = dialogError.message,
+        state = dialogError,
         close = { closeErrorDialog() },
     )
 

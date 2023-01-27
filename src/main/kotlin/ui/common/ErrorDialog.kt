@@ -18,21 +18,19 @@ import ui.strings.Strings
 import ui.strings.string
 
 fun ChildrenBuilder.errorDialog(
-    isShowing: Boolean,
+    state: DialogErrorState,
     close: () -> Unit,
-    title: String,
-    errorMessage: String,
 ) {
     Dialog {
-        open = isShowing
+        open = state.isShowing
         onClose = { _, _ -> close() }
         DialogTitle {
-            +title
+            +state.title
         }
         Alert {
             severity = AlertColor.error
             style = jso { borderRadius = 0.px }
-            +errorMessage
+            +state.message
         }
         div {
             DialogContent {
