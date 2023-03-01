@@ -31,7 +31,7 @@ fun List<Pair<Long, Double>>.appendUtauNoteVibrato(
     val vibratoLength = noteLength * vibratoParams.length / 100
     if (vibratoLength <= 0) return this
     val frequency = 1.0 / vibratoParams.period
-    if (frequency.isNaN()) return this
+    if (frequency.isFinite().not()) return this
     val depth = vibratoParams.depth / 100
     if (depth <= 0) return this
     val easeInLength = noteLength * vibratoParams.fadeIn / 100
@@ -44,9 +44,9 @@ fun List<Pair<Long, Double>>.appendUtauNoteVibrato(
         if (t < start) 0.0
         else {
             val easeInFactor = ((t - start) / easeInLength).coerceIn(0.0..1.0)
-                .takeIf { !it.isNaN() } ?: 1.0
+                .takeIf { it.isFinite() } ?: 1.0
             val easeOutFactor = ((noteLength - t) / easeOutLength).coerceIn(0.0..1.0)
-                .takeIf { !it.isNaN() } ?: 1.0
+                .takeIf { it.isFinite() } ?: 1.0
             val x = 2 * PI * (frequency * (t - start) - phase)
             depth * easeInFactor * easeOutFactor * (sin(x) + shift)
         }
