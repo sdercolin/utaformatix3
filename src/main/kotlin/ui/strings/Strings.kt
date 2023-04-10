@@ -369,13 +369,6 @@ enum class Strings(
         ru = "Неподдерживаемый формат файла",
         fr = "Type de fichier non supporté",
     ),
-    UnsupportedStandardMidiError(
-        en = "Standard MIDI file format is not supported",
-        ja = "Standard MIDIファイル形式はサポートされていません",
-        zhCN = "不支持标准MIDI文件格式",
-        ru = "Стандартный формат MIDI-файла не поддерживается",
-        fr = "Le format de fichier MIDI standard n'est pas pris en charge",
-    ),
     UnsupportedLegacyPpsfError(
         en = "Legacy ppsf file format is not supported (only ppsf for Piapro Studio NT is supported)",
         ja = "レガシー ppsf ファイル形式はサポートされていません（Piapro Studio NTのみサポートされています）",

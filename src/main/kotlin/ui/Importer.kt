@@ -52,8 +52,24 @@ val Importer = scopedFC<ImporterProps> { props, scope ->
     var snackbarError by useState(SnackbarErrorState())
     var dialogError by useState(DialogErrorState())
 
-    fun checkFilesToImport(files: List<File>, multipleMode: Boolean) {
-        val fileFormat = getFileFormat(files, props)
+    suspend fun checkFilesToImport(files: List<File>, multipleMode: Boolean) {
+        val onError = { t: Throwable ->
+            console.log(t)
+            if (t is UnsupportedFileFormatError) {
+                snackbarError = SnackbarErrorState(true, t.message)
+            } else {
+                dialogError = DialogErrorState(
+                    isShowing = true,
+                    title = string(Strings.ImportErrorDialogTitle),
+                    message = t.stackTraceToString(),
+                )
+            }
+        }
+
+        val fileFormat = runCatchingCancellable { getFileFormat(files, props) }
+            .onFailure(onError)
+            .getOrElse { return }
+
         when {
             fileFormat == null -> {
                 snackbarError = SnackbarErrorState(true, string(Strings.UnsupportedFileTypeImportError))
@@ -69,8 +85,7 @@ val Importer = scopedFC<ImporterProps> { props, scope ->
                 files,
                 fileFormat,
                 setProgress = { loadingProgress = it },
-                onSnackBarError = { snackbarError = it },
-                onDialogError = { dialogError = it },
+                onError,
                 props,
                 params,
             )
@@ -98,7 +113,7 @@ val Importer = scopedFC<ImporterProps> { props, scope ->
                 checkFilesToImport(files, params.multipleMode)
             }
         }
-        buildFileDrop { checkFilesToImport(it, params.multipleMode) }
+        buildFileDrop(scope) { checkFilesToImport(it, params.multipleMode) }
     }
 
     buildConfigurations(params) { params = it }
@@ -118,10 +133,10 @@ val Importer = scopedFC<ImporterProps> { props, scope ->
     progress(loadingProgress)
 }
 
-private fun ChildrenBuilder.buildFileDrop(onFiles: (List<File>) -> Unit) {
+private fun ChildrenBuilder.buildFileDrop(scope: CoroutineScope, onFiles: suspend (List<File>) -> Unit) {
     FileDrop {
         onDrop = { files, _ ->
-            onFiles(files.toList())
+            scope.launch { onFiles(files.toList()) }
         }
         Typography {
             variant = TypographyVariant.h5
@@ -201,8 +216,7 @@ private fun import(
     files: List<File>,
     format: Format,
     setProgress: (ProgressProps) -> Unit,
-    onSnackBarError: (SnackbarErrorState) -> Unit,
-    onDialogError: (DialogErrorState) -> Unit,
+    onError: (Throwable) -> Unit,
     props: ImporterProps,
     params: ImportParams,
 ) {
@@ -231,28 +245,17 @@ private fun import(
             saveImportParamsToCookies(params)
             props.onImported.invoke(projects)
         }.onFailure { t ->
-            console.log(t)
+            onError(t)
             setProgress(ProgressProps.Initial)
-            if (t is UnsupportedFileFormatError) {
-                onSnackBarError(SnackbarErrorState(true, t.message))
-            } else {
-                onDialogError(
-                    DialogErrorState(
-                        isShowing = true,
-                        title = string(Strings.ImportErrorDialogTitle),
-                        message = t.stackTraceToString(),
-                    ),
-                )
-            }
         }
     }
 }
 
-private fun getFileFormat(files: List<File>, props: ImporterProps): Format? {
+private suspend fun getFileFormat(files: List<File>, props: ImporterProps): Format? {
     val extensions = files.map { it.extensionName }.distinct()
+    if (extensions.count() > 1) return null
 
-    return if (extensions.count() > 1) null
-    else props.formats.find { it.allExtensions.contains(".${extensions.first()}") }
+    return props.formats.find { it.match(files) }
 }
 
 private fun loadImportParamsFromCookies() = Cookies.get(ImportParamsCookieName)

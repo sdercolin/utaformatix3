@@ -1,7 +1,6 @@
 package io
 
 import exception.EmptyProjectException
-import exception.UnsupportedStandardMidiError
 import model.DEFAULT_LYRIC
 import model.ExportNotification
 import model.ExportResult
@@ -33,31 +32,49 @@ import util.addIntVariableLengthBigEndian
 import util.addShort
 import util.addString
 import util.asByteTypedArray
-import util.decode
 import util.encode
 import util.linesNotBlank
 import util.nameWithoutExtension
 import util.padStartZero
-import util.readAsArrayBuffer
 import util.splitFirst
 
 object VsqLike {
-    private fun extractTextsFromMetaEvents(midiTracks: Array<dynamic>): List<String> {
-        return midiTracks.drop(1)
-            .map { track ->
-                (track.event as Array<dynamic>)
-                    .fold("") { accumulator, element ->
-                        val metaType = MidiUtil.MetaType.parse(element.metaType as? Byte)
-                        if (metaType != MidiUtil.MetaType.Text) accumulator
-                        else {
-                            var text = element.data as String
-                            text = text.asByteTypedArray().decode("SJIS")
-                            text = text.drop(3)
-                            text = text.drop(text.indexOf(':') + 1)
-                            accumulator + text
-                        }
-                    }
-            }
+
+    suspend fun match(file: File): Boolean {
+        val midiTracks = Mid.loadMidiTracks(file)
+        val tracksAsText = Mid.extractVsqTextsFromMetaEvents(midiTracks).filter { it.isNotEmpty() }
+        if (tracksAsText.isEmpty()) return false
+        return tracksAsText.any { track ->
+            @Suppress("RegExpRedundantEscape") // Cannot remove the second \
+            track.linesNotBlank().any { Regex("""\[.*\]""").matches(it) }
+        }
+    }
+
+    suspend fun parse(file: File, format: Format, params: ImportParams): Project {
+        val midiTracks = Mid.loadMidiTracks(file)
+        val warnings = mutableListOf<ImportWarning>()
+        val tracksAsText = Mid.extractVsqTextsFromMetaEvents(midiTracks).filter { it.isNotEmpty() }
+        val measurePrefix = getMeasurePrefix(tracksAsText.first())
+        val (tempos, timeSignatures, tickPrefix) = parseMasterTrack(
+            midiTracks.first(),
+            measurePrefix,
+            warnings,
+        )
+
+        val tracks = tracksAsText.mapIndexed { index, trackText ->
+            parseTrack(trackText, index, tickPrefix, params)
+        }
+
+        return Project(
+            format = format,
+            inputFiles = listOf(file),
+            name = file.nameWithoutExtension,
+            tracks = tracks,
+            timeSignatures = timeSignatures,
+            tempos = tempos,
+            measurePrefix = measurePrefix,
+            importWarnings = warnings,
+        )
     }
 
     private fun getMeasurePrefix(firstTrack: String): Int {
@@ -83,11 +100,10 @@ object VsqLike {
     private fun parseTrack(trackAsText: String, trackId: Int, tickPrefix: Long, params: ImportParams): Track {
         val lines = trackAsText.linesNotBlank()
         val titleWithIndexes = lines.mapIndexed { index, line ->
-            @Suppress("RegExpRedundantEscape")
+            @Suppress("RegExpRedundantEscape") // Cannot remove the second \
             if (Regex("""\[.*\]""").matches(line)) line.drop(1).dropLast(1) to index
             else null
         }.filterNotNull()
-        if (titleWithIndexes.isEmpty()) throw UnsupportedStandardMidiError()
         val sectionMap = titleWithIndexes.zipWithNext().map { (current, next) ->
             current.first to lines.subList(current.second + 1, next.second)
         }.plus(
@@ -445,42 +461,7 @@ object VsqLike {
         return Uint8Array(bytes.toTypedArray())
     }
 
-    suspend fun getMappedTrackData(file: File, format: Format, params: ImportParams): Project {
-        val bytes = file.readAsArrayBuffer()
-        val midiParser = external.require("midi-parser-js")
-        val midi = midiParser.parse(Uint8Array(bytes))
-
-        val warnings = mutableListOf<ImportWarning>()
-
-        val midiTracks = (midi.track as Array<dynamic>)
-        val tracksAsText = extractTextsFromMetaEvents(midiTracks).filter { it.isNotEmpty() }
-        if (tracksAsText.isEmpty()) {
-            throw UnsupportedStandardMidiError()
-        }
-        val measurePrefix = getMeasurePrefix(tracksAsText.first())
-        val (tempos, timeSignatures, tickPrefix) = parseMasterTrack(
-            midiTracks.first(),
-            measurePrefix,
-            warnings,
-        )
-
-        val tracks = tracksAsText.mapIndexed { index, trackText ->
-            parseTrack(trackText, index, tickPrefix, params)
-        }
-
-        return Project(
-            format = format,
-            inputFiles = listOf(file),
-            name = file.nameWithoutExtension,
-            tracks = tracks,
-            timeSignatures = timeSignatures,
-            tempos = tempos,
-            measurePrefix = measurePrefix,
-            importWarnings = warnings,
-        )
-    }
-
-    fun getExportResult(project: Project, features: List<Feature>, format: Format): ExportResult {
+    fun generate(project: Project, features: List<Feature>, format: Format): ExportResult {
         val projectLengthLimited = project.lengthLimited(MAX_VSQ_OUTPUT_TICK)
         val content = projectLengthLimited.withoutEmptyTracks()?.let {
             generateContent(it, features)

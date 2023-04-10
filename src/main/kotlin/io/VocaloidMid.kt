@@ -10,11 +10,12 @@ import model.Project
 import org.w3c.files.File
 
 object VocaloidMid {
+
     suspend fun parse(file: File, params: ImportParams): Project {
-        return VsqLike.getMappedTrackData(file, Format.VocaloidMid, params)
+        return VsqLike.parse(file, Format.VocaloidMid, params)
     }
 
     fun generate(project: Project, features: List<Feature>): ExportResult {
-        return VsqLike.getExportResult(project, features, Format.VocaloidMid)
+        return VsqLike.generate(project, features, Format.VocaloidMid)
     }
 }

@@ -1,11 +1,13 @@
 package model
 
+import io.VsqLike
 import model.Feature.ConvertPitch
 import model.JapaneseLyricsType.KanaCv
 import model.JapaneseLyricsType.KanaVcv
 import model.JapaneseLyricsType.RomajiCv
 import model.JapaneseLyricsType.RomajiVcv
 import org.w3c.files.File
+import util.extensionName
 
 enum class Format(
     val extension: String,
@@ -16,6 +18,7 @@ enum class Format(
     val possibleLyricsTypes: List<JapaneseLyricsType>,
     val suggestedLyricType: JapaneseLyricsType? = null,
     val availableFeaturesForGeneration: List<Feature> = listOf(),
+    val customMatcher: (suspend (File) -> Boolean)? = null,
 ) {
     Vsqx(
         ".vsqx",
@@ -141,6 +144,7 @@ enum class Format(
         },
         possibleLyricsTypes = listOf(RomajiCv, KanaCv),
         availableFeaturesForGeneration = listOf(ConvertPitch),
+        customMatcher = { file -> file.extensionName == "mid" && VsqLike.match(file) },
     ),
     Ppsf(
         ".ppsf",
@@ -164,7 +168,16 @@ enum class Format(
         availableFeaturesForGeneration = listOf(ConvertPitch),
     );
 
-    val allExtensions get() = listOf(extension) + otherExtensions
+    private val allExtensions get() = listOf(extension) + otherExtensions
+
+    suspend fun match(files: List<File>): Boolean {
+        val customMatcher = customMatcher
+        if (customMatcher != null) {
+            return files.all { customMatcher(it) }
+        }
+        val extensions = files.map { it.extensionName }.distinct()
+        return extensions.size == 1 && extensions.first() in allExtensions
+    }
 
     companion object {
         val importable get() = listOf(Vsqx, Vpr, Vsq, VocaloidMid, Ust, Ustx, Ccs, MusicXml, Svp, S5p, Dv, Ppsf, UfData)
