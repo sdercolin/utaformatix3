@@ -589,6 +589,15 @@ enum class Strings(
         en = "UtaFormatix Data Format (v$UtaFormatixDataVersion)",
         ja = "UtaFormatix データ形式（v$UtaFormatixDataVersion）",
         zhCN = "UtaFormatix 数据格式（v$UtaFormatixDataVersion）",
+        ru = "Формат данных UtaFormatix (v$UtaFormatixDataVersion)",
+        fr = "Format de données UtaFormatix (v$UtaFormatixDataVersion)",
+    ),
+    StandardMidDescription(
+        en = "Standard MIDI File",
+        ja = "標準MIDIファイル",
+        zhCN = "标准MIDI文件",
+        ru = "Стандартный MIDI-файл",
+        fr = "Fichier MIDI standard",
     ),
     ExportButton(
         en = "Export",

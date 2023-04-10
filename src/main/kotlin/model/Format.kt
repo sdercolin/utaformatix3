@@ -146,13 +146,25 @@ enum class Format(
         availableFeaturesForGeneration = listOf(ConvertPitch),
         customMatcher = { file -> file.extensionName == "mid" && VsqLike.match(file) },
     ),
+    StandardMid(
+        ".mid",
+        parser = { files, _ ->
+            io.StandardMid.parse(files.first())
+        },
+        generator = { project, features ->
+            TODO() // io.StandardMid.generate(project, features)
+        },
+        possibleLyricsTypes = listOf(RomajiCv, KanaCv),
+        availableFeaturesForGeneration = listOf(),
+        customMatcher = { file -> file.extensionName == "mid" && !VsqLike.match(file) },
+    ),
     Ppsf(
         ".ppsf",
         parser = { files, _ ->
             io.Ppsf.parse(files.first())
         },
         generator = { _, _ ->
-            TODO("Not Implemented")
+            throw NotImplementedError()
         },
         possibleLyricsTypes = listOf(RomajiCv, KanaCv),
     ),
@@ -180,7 +192,39 @@ enum class Format(
     }
 
     companion object {
-        val importable get() = listOf(Vsqx, Vpr, Vsq, VocaloidMid, Ust, Ustx, Ccs, MusicXml, Svp, S5p, Dv, Ppsf, UfData)
-        val exportable get() = listOf(Vsqx, Vpr, Vsq, VocaloidMid, Ust, Ustx, Ccs, MusicXml, Svp, S5p, Dv, UfData)
+
+        val importable: List<Format>
+            get() = listOf(
+                Vsqx,
+                Vpr,
+                Vsq,
+                VocaloidMid,
+                Ust,
+                Ustx,
+                Ccs,
+                MusicXml,
+                Svp,
+                S5p,
+                Dv,
+                Ppsf,
+                StandardMid,
+                UfData,
+            )
+
+        val exportable: List<Format>
+            get() = listOf(
+                Vsqx,
+                Vpr,
+                Vsq,
+                VocaloidMid,
+                Ust,
+                Ustx,
+                Ccs,
+                MusicXml,
+                Svp,
+                S5p,
+                Dv,
+                UfData,
+            )
     }
 }

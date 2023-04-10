@@ -11,6 +11,7 @@ import model.Format.Dv
 import model.Format.MusicXml
 import model.Format.Ppsf
 import model.Format.S5p
+import model.Format.StandardMid
 import model.Format.Svp
 import model.Format.UfData
 import model.Format.Ust
@@ -170,6 +171,7 @@ private val Format.description: String?
         Dv -> Strings.DvFormatDescription
         Vsq -> Strings.VsqFormatDescription
         Ppsf -> null
+        StandardMid -> Strings.StandardMidDescription
         UfData -> Strings.UfDataFormatDescription
     }?.let { string(it) }
 
@@ -187,6 +189,7 @@ private val Format.iconPath: String?
         Dv -> Resources.dvIcon
         Vsq -> Resources.vsqIcon
         Ppsf -> null
+        StandardMid -> Resources.s5pIcon // TODO: add icon
         UfData -> Resources.ufdataIcon
     }
 
