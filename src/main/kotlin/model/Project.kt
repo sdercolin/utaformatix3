@@ -19,10 +19,7 @@ data class Project(
     fun lyricsTypeAnalysed() =
         copy(
             japaneseLyricsType = analyseJapaneseLyricsTypeForProject(this)
-                .takeIf {
-                    console.log(format.possibleLyricsTypes)
-                    format.possibleLyricsTypes.contains(it)
-                }
+                .takeIf { format.possibleLyricsTypes.contains(it) }
                 ?: JapaneseLyricsType.Unknown,
         )
 
