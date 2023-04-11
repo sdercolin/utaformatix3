@@ -13,9 +13,20 @@ import util.readAsArrayBuffer
 
 object Mid {
 
+    private fun customInterpreter(
+        metaType: Byte,
+        arrayBuffer: dynamic,
+    ): dynamic {
+        // we need to handle 0x20 `Channel Prefix` meta event,
+        // otherwise the parser will break and all the following data get shifted
+        if (metaType != 0x20.toByte()) return false
+        return arrayOf(arrayBuffer.readInt(1))
+    }
+
     suspend fun parseMidi(file: File): dynamic {
         val bytes = file.readAsArrayBuffer()
         val midiParser = external.require("midi-parser-js")
+        midiParser.customInterpreter = ::customInterpreter
         return midiParser.parse(Uint8Array(bytes))
     }
 
