@@ -18,7 +18,8 @@ enum class Format(
     val possibleLyricsTypes: List<JapaneseLyricsType>,
     val suggestedLyricType: JapaneseLyricsType? = null,
     val availableFeaturesForGeneration: List<Feature> = listOf(),
-    val customMatcher: (suspend (File) -> Boolean)? = null,
+    private val customMatcher: (suspend (File) -> Boolean)? = null,
+    private val alias: String? = null,
 ) {
     Vsqx(
         "vsqx",
@@ -145,6 +146,7 @@ enum class Format(
         possibleLyricsTypes = listOf(RomajiCv, KanaCv),
         availableFeaturesForGeneration = listOf(ConvertPitch),
         customMatcher = { file -> file.extensionName == "mid" && VsqLike.match(file) },
+        alias = "Mid (VOCALOID)",
     ),
     StandardMid(
         "mid",
@@ -157,6 +159,7 @@ enum class Format(
         possibleLyricsTypes = listOf(RomajiCv, KanaCv),
         availableFeaturesForGeneration = listOf(),
         customMatcher = { file -> file.extensionName == "mid" && !VsqLike.match(file) },
+        alias = "Mid (Standard)",
     ),
     Ppsf(
         "ppsf",
@@ -192,6 +195,8 @@ enum class Format(
     }
 
     fun getFileName(name: String): String = "$name.$extension"
+
+    val displayName get() = alias ?: name
 
     companion object {
 

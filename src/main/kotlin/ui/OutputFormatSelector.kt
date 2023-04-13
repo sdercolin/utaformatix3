@@ -103,7 +103,7 @@ private fun ChildrenBuilder.buildFormatList(props: OutputFormatSelectorProps) {
                                 variant = TypographyVariant.h4
                                 style = jso { fontWeight = FontWeight.lighter }
 
-                                +format.name.replace("_", " ")
+                                +format.displayName
                             }
                             secondary = ReactNode(format.description.orEmpty())
                         }
