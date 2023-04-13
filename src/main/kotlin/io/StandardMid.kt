@@ -88,6 +88,13 @@ object StandardMid {
                     val detectedEncoding = Encoding.detect(lyricBytes)
                     pendingLyric = lyricBytes.decode(detectedEncoding)
                 }
+                MidiUtil.MetaType.Text -> {
+                    if (pendingLyric == null) {
+                        val textBytes = (event.data as String).asByteTypedArray()
+                        val detectedEncoding = Encoding.detect(textBytes)
+                        pendingLyric = textBytes.decode(detectedEncoding)
+                    }
+                }
                 MidiUtil.MetaType.TrackName -> {
                     val trackNameBytes = (event.data as String).asByteTypedArray()
                     val detectedEncoding = Encoding.detect(trackNameBytes)
