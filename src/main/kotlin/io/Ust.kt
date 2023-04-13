@@ -85,7 +85,7 @@ object Ust {
             },
         )
         return Project(
-            format = Format.Ust,
+            format = format,
             inputFiles = files,
             name = projectName,
             tracks = tracks,
@@ -296,7 +296,7 @@ object Ust {
             val content = generateTrackContent(project, track, features)
             val contentEncodedArray = content.encode("SJIS")
             val trackNameUrlSafe = getSafeFileName(track.name)
-            val trackFileName = "${project.name}_${track.id + 1}_$trackNameUrlSafe${Format.Ust.extension}"
+            val trackFileName = "${project.name}_${track.id + 1}_$trackNameUrlSafe.${format.extension}"
             zip.file(trackFileName, Uint8Array(contentEncodedArray))
         }
         val option = JsZipOption().also { it.type = "blob" }
@@ -435,4 +435,5 @@ object Ust {
     const val MODE2_PITCH_MAX_POINT_COUNT = 50L
     private const val MAX_ACCEPTED_BPM = 10000.0
     private const val LINE_SEPARATOR = "\r\n"
+    private val format = Format.Ust
 }

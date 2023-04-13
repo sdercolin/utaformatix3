@@ -54,7 +54,7 @@ object Svp {
         }
         val tracks = parseTracks(project, tempos, params)
         return model.Project(
-            format = Format.Svp,
+            format = format,
             inputFiles = listOf(file),
             name = file.nameWithoutExtension,
             tracks = tracks,
@@ -182,7 +182,7 @@ object Svp {
     fun generate(project: model.Project, features: List<Feature>): ExportResult {
         val jsonText = generateContent(project, features)
         val blob = Blob(arrayOf(jsonText), BlobPropertyBag("application/octet-stream"))
-        val name = project.name + Format.Svp.extension
+        val name = format.getFileName(project.name)
         return ExportResult(
             blob,
             name,
@@ -390,4 +390,6 @@ object Svp {
         var paramToneShift: JsonElement? = null,
         var renderMode: JsonElement? = null,
     )
+
+    private val format = Format.Svp
 }

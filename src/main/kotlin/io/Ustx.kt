@@ -36,7 +36,7 @@ object Ustx {
         val tempos = parseTempos(project)
         val timeSignatures = parseTimeSignatures(project)
         return Project(
-            format = Format.Ustx,
+            format = format,
             inputFiles = listOf(file),
             name = project.name,
             tracks = parseTracks(project, params, tempos),
@@ -174,7 +174,7 @@ object Ustx {
     fun generate(project: model.Project, features: List<Feature>): ExportResult {
         val yamlText = generateContent(project, features)
         val blob = Blob(arrayOf(yamlText), BlobPropertyBag("application/octet-stream"))
-        val name = project.name + Format.Ustx.extension
+        val name = format.getFileName(project.name)
         return ExportResult(
             blob,
             name,
@@ -380,4 +380,6 @@ object Ustx {
         @SerialName("beat_per_bar") val beatPerBar: Int,
         @SerialName("beat_unit") val beatUnit: Int,
     )
+
+    private val format = Format.Ustx
 }

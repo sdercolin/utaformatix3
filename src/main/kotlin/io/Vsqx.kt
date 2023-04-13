@@ -77,7 +77,7 @@ object Vsqx {
         }
 
         return Project(
-            format = Format.Vsqx,
+            format = format,
             inputFiles = listOf(file),
             name = projectName,
             tracks = tracks,
@@ -253,7 +253,7 @@ object Vsqx {
         val serializer = XMLSerializer()
         val content = serializer.serializeToString(document).cleanEmptyXmlns()
         val blob = Blob(arrayOf(content), BlobPropertyBag("application/octet-stream"))
-        val name = project.name + Format.Vsqx.extension
+        val name = format.getFileName(project.name)
         return ExportResult(
             blob,
             name,
@@ -495,4 +495,6 @@ object Vsqx {
             pitName = "P",
         )
     }
+
+    private val format = Format.Vsqx
 }

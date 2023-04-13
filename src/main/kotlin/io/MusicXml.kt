@@ -56,7 +56,7 @@ object MusicXml {
         val tracks = partNodes.mapIndexed { index, element -> parseTrack(index, element, masterTrackResult) }
 
         return Project(
-            format = Format.MusicXml,
+            format = format,
             inputFiles = listOf(file),
             name = projectName,
             tracks = tracks,
@@ -210,7 +210,7 @@ object MusicXml {
         for (track in projectWithTickRateApplied.tracks) {
             val content = generateTrackContent(projectWithTickRateApplied, track)
             val trackNameUrlSafe = getSafeFileName(track.name)
-            val trackFileName = "${project.name}_${track.id + 1}_$trackNameUrlSafe${Format.MusicXml.extension}"
+            val trackFileName = "${project.name}_${track.id + 1}_$trackNameUrlSafe.${format.extension}"
             zip.file(trackFileName, content)
         }
         val option = JsZipOption().also { it.type = "blob" }
@@ -546,4 +546,5 @@ object MusicXml {
 
     private const val DEFAULT_TICK_RATE_CEVIO = 2.0
     const val MUSIC_XML_VERSION = "2.0"
+    private val format = Format.MusicXml
 }

@@ -21,7 +21,7 @@ enum class Format(
     val customMatcher: (suspend (File) -> Boolean)? = null,
 ) {
     Vsqx(
-        ".vsqx",
+        "vsqx",
         parser = { files, params ->
             io.Vsqx.parse(files.first(), params)
         },
@@ -32,7 +32,7 @@ enum class Format(
         availableFeaturesForGeneration = listOf(ConvertPitch),
     ),
     Vpr(
-        ".vpr",
+        "vpr",
         parser = { files, params ->
             io.Vpr.parse(files.first(), params)
         },
@@ -43,7 +43,7 @@ enum class Format(
         availableFeaturesForGeneration = listOf(ConvertPitch),
     ),
     Ust(
-        ".ust",
+        "ust",
         multipleFile = true,
         parser = { files, params ->
             io.Ust.parse(files, params)
@@ -55,7 +55,7 @@ enum class Format(
         availableFeaturesForGeneration = listOf(ConvertPitch),
     ),
     Ustx(
-        ".ustx",
+        "ustx",
         multipleFile = false,
         parser = { files, params ->
             io.Ustx.parse(files.first(), params)
@@ -67,7 +67,7 @@ enum class Format(
         availableFeaturesForGeneration = listOf(ConvertPitch),
     ),
     Ccs(
-        ".ccs",
+        "ccs",
         parser = { files, params ->
             io.Ccs.parse(files.first(), params)
         },
@@ -78,7 +78,7 @@ enum class Format(
         availableFeaturesForGeneration = listOf(ConvertPitch),
     ),
     Svp(
-        ".svp",
+        "svp",
         parser = { files, params ->
             io.Svp.parse(files.first(), params)
         },
@@ -89,7 +89,7 @@ enum class Format(
         availableFeaturesForGeneration = listOf(ConvertPitch),
     ),
     S5p(
-        ".s5p",
+        "s5p",
         parser = { files, params ->
             io.S5p.parse(files.first(), params)
         },
@@ -100,8 +100,8 @@ enum class Format(
         availableFeaturesForGeneration = listOf(ConvertPitch),
     ),
     MusicXml(
-        ".musicxml",
-        otherExtensions = listOf(".xml"),
+        "musicxml",
+        otherExtensions = listOf("xml"),
         parser = { files, _ ->
             io.MusicXml.parse(files.first())
         },
@@ -112,7 +112,7 @@ enum class Format(
         suggestedLyricType = KanaCv,
     ),
     Dv(
-        ".dv",
+        "dv",
         parser = { files, params ->
             io.Dv.parse(files.first(), params)
         },
@@ -135,7 +135,7 @@ enum class Format(
         availableFeaturesForGeneration = listOf(ConvertPitch),
     ),
     VocaloidMid(
-        ".mid",
+        "mid",
         parser = { files, params ->
             io.VocaloidMid.parse(files.first(), params)
         },
@@ -147,19 +147,19 @@ enum class Format(
         customMatcher = { file -> file.extensionName == "mid" && VsqLike.match(file) },
     ),
     StandardMid(
-        ".mid",
+        "mid",
         parser = { files, _ ->
             io.StandardMid.parse(files.first())
         },
-        generator = { project, features ->
-            TODO() // io.StandardMid.generate(project, features)
+        generator = { project, _ ->
+            io.StandardMid.generate(project)
         },
         possibleLyricsTypes = listOf(RomajiCv, KanaCv),
         availableFeaturesForGeneration = listOf(),
         customMatcher = { file -> file.extensionName == "mid" && !VsqLike.match(file) },
     ),
     Ppsf(
-        ".ppsf",
+        "ppsf",
         parser = { files, _ ->
             io.Ppsf.parse(files.first())
         },
@@ -169,7 +169,7 @@ enum class Format(
         possibleLyricsTypes = listOf(RomajiCv, KanaCv),
     ),
     UfData(
-        ".ufdata",
+        "ufdata",
         parser = { files, params ->
             io.UfData.parse(files.first(), params)
         },
@@ -190,6 +190,8 @@ enum class Format(
         val extensions = files.map { it.extensionName }.distinct()
         return extensions.size == 1 && extensions.first() in allExtensions
     }
+
+    fun getFileName(name: String): String = "$name.$extension"
 
     companion object {
 

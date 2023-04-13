@@ -12,11 +12,7 @@ import model.Note
 import model.Pitch
 import model.Project
 import model.TICKS_IN_FULL_NOTE
-import model.Tempo
-import model.TickCounter
-import model.TimeSignature
 import model.Track
-import org.khronos.webgl.Uint8Array
 import org.w3c.files.Blob
 import org.w3c.files.BlobPropertyBag
 import org.w3c.files.File
@@ -27,9 +23,6 @@ import process.pitch.pitchFromVocaloidParts
 import process.validateNotes
 import util.MidiUtil
 import util.addBlock
-import util.addInt
-import util.addIntVariableLengthBigEndian
-import util.addShort
 import util.addString
 import util.asByteTypedArray
 import util.encode
@@ -164,59 +157,6 @@ object VsqLike {
         )
     }
 
-    private fun generateMasterTrack(project: Project, tickPrefix: Int): List<Byte> {
-        val bytes = mutableListOf<Byte>()
-        bytes.add(0x00)
-        bytes.addAll(MidiUtil.MetaType.TrackName.eventHeaderBytes)
-        bytes.addString("Master Track", IS_LITTLE_ENDIAN, lengthInVariableLength = true)
-
-        val tickEventPairs = mutableListOf<Pair<Long, Any>>()
-        project.tempos.forEach {
-            val tick = if (it.tickPosition == 0L) 0L else it.tickPosition + tickPrefix
-            tickEventPairs.add(tick to it)
-        }
-        val counter = TickCounter()
-        counter.goToMeasure(project.timeSignatures.first())
-        tickEventPairs.add(0L to project.timeSignatures.first())
-        project.timeSignatures.drop(1).forEach {
-            counter.goToMeasure(it)
-            tickEventPairs.add(counter.outputTick + tickPrefix to it)
-        }
-        tickEventPairs.sortBy { it.first }
-        val deltaEventPairs = listOf(0L to tickEventPairs.first().second) +
-            tickEventPairs
-                .zipWithNext()
-                .map { (previous, current) ->
-                    (current.first - previous.first) to current.second
-                }
-        for ((delta, event) in deltaEventPairs) {
-            bytes.addIntVariableLengthBigEndian(delta.toInt())
-            when (event) {
-                is TimeSignature -> {
-                    bytes.addAll(MidiUtil.MetaType.TimeSignature.eventHeaderBytes)
-                    bytes.addBlock(
-                        MidiUtil.generateMidiTimeSignatureBytes(event.numerator, event.denominator),
-                        IS_LITTLE_ENDIAN,
-                        lengthInVariableLength = true,
-                    )
-                }
-                is Tempo -> {
-                    bytes.addAll(MidiUtil.MetaType.Tempo.eventHeaderBytes)
-                    val tempoBytes = mutableListOf<Byte>().let {
-                        it.addInt(MidiUtil.convertBpmToMidiTempo(event.bpm), IS_LITTLE_ENDIAN)
-                        it.takeLast(3)
-                    }
-                    bytes.addBlock(tempoBytes.takeLast(3), IS_LITTLE_ENDIAN, lengthInVariableLength = true)
-                }
-                else -> throw IllegalStateException()
-            }
-        }
-        bytes.add(0x00)
-        bytes.addAll(MidiUtil.MetaType.EndOfTrack.eventHeaderBytes)
-        bytes.add(0x00)
-        return bytes
-    }
-
     private fun generatePitchTexts(pitch: Pitch, tickPrefix: Int, notes: List<Note>): List<String> =
         mutableListOf<String>().apply {
             val pitchRawData = pitch.generateForVocaloid(notes) ?: return@apply
@@ -325,7 +265,7 @@ object VsqLike {
         val bytes = mutableListOf<Byte>()
         bytes.add(0x00)
         bytes.addAll(MidiUtil.MetaType.TrackName.eventHeaderBytes)
-        bytes.addString(track.name, IS_LITTLE_ENDIAN, lengthInVariableLength = true)
+        bytes.addString(track.name, Mid.IS_LITTLE_ENDIAN, lengthInVariableLength = true)
         var textBytes = generateTrackText(track, tickPrefix, measurePrefix, project, features)
             .encode("SJIS")
             .toList()
@@ -342,7 +282,7 @@ object VsqLike {
         textEvents.forEach {
             bytes.add(0x00)
             bytes.addAll(MidiUtil.MetaType.Text.eventHeaderBytes)
-            bytes.addBlock(it, IS_LITTLE_ENDIAN, lengthInVariableLength = true)
+            bytes.addBlock(it, Mid.IS_LITTLE_ENDIAN, lengthInVariableLength = true)
         }
         bytes.add(0x00)
         bytes.addAll(MidiUtil.MetaType.EndOfTrack.eventHeaderBytes)
@@ -350,41 +290,12 @@ object VsqLike {
         return bytes
     }
 
-    private fun generateContent(project: Project, features: List<Feature>): Uint8Array {
-        val bytes = mutableListOf<Byte>()
-        bytes.addAll(headerLabel)
-        bytes.addInt(6, IS_LITTLE_ENDIAN)
-        bytes.addShort(1, IS_LITTLE_ENDIAN)
-        bytes.addShort((project.tracks.count() + 1).toShort(), IS_LITTLE_ENDIAN)
-        bytes.addAll(timeDivisions)
-
-        val measurePrefix = project.measurePrefix.coerceIn(MIN_MEASURE_OFFSET, MAX_MEASURE_OFFSET)
-        val tickPrefix = project.timeSignatures.first().ticksInMeasure * measurePrefix
-
-        // master track
-        bytes.addAll(trackLabel)
-        bytes.addBlock(
-            generateMasterTrack(project, tickPrefix),
-            IS_LITTLE_ENDIAN,
-            lengthInVariableLength = false,
-        )
-
-        // normal tracks
-        project.tracks.forEach {
-            bytes.addAll(trackLabel)
-            bytes.addBlock(
-                generateTrack(it, tickPrefix, measurePrefix, project, features),
-                IS_LITTLE_ENDIAN,
-                lengthInVariableLength = false,
-            )
-        }
-        return Uint8Array(bytes.toTypedArray())
-    }
-
     fun generate(project: Project, features: List<Feature>, format: Format): ExportResult {
         val projectLengthLimited = project.lengthLimited(MAX_VSQ_OUTPUT_TICK)
         val content = projectLengthLimited.withoutEmptyTracks()?.let {
-            generateContent(it, features)
+            Mid.generateContent(it) { track, tickPrefix, measurePrefix ->
+                generateTrack(track, tickPrefix, measurePrefix, project, features)
+            }
         } ?: throw EmptyProjectException()
         val blob = Blob(arrayOf(content), BlobPropertyBag("application/octet-stream"))
         val name = projectLengthLimited.name + format.extension
@@ -399,11 +310,5 @@ object VsqLike {
         )
     }
 
-    private val headerLabel = listOf(0x4d, 0x54, 0x68, 0x64).map { it.toByte() }
-    private val timeDivisions = listOf(0x01, 0xe0).map { it.toByte() }
-    private val trackLabel = listOf(0x4d, 0x54, 0x72, 0x6b).map { it.toByte() }
-    private const val MIN_MEASURE_OFFSET = 1
-    private const val MAX_MEASURE_OFFSET = 8
-    private const val IS_LITTLE_ENDIAN = false
     private const val MAX_VSQ_OUTPUT_TICK = 4096L * TICKS_IN_FULL_NOTE
 }

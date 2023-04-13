@@ -12,10 +12,12 @@ import org.w3c.files.File
 object Vsq {
 
     suspend fun parse(file: File, params: ImportParams): Project {
-        return VsqLike.parse(file, Format.Vsq, params)
+        return VsqLike.parse(file, format, params)
     }
 
     fun generate(project: Project, features: List<Feature>): ExportResult {
-        return VsqLike.generate(project, features, Format.Vsq)
+        return VsqLike.generate(project, features, format)
     }
+
+    private val format = Format.Vsq
 }
