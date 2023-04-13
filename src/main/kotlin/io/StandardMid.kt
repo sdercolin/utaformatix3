@@ -1,16 +1,24 @@
 package io
 
 import external.Encoding
+import model.DEFAULT_LYRIC
+import model.ExportResult
 import model.Format
 import model.ImportWarning
 import model.Note
 import model.Project
 import model.Track
+import org.w3c.files.Blob
+import org.w3c.files.BlobPropertyBag
 import org.w3c.files.File
 import process.validateNotes
 import util.MidiUtil
+import util.addBlock
+import util.addIntVariableLengthBigEndian
+import util.addString
 import util.asByteTypedArray
 import util.decode
+import util.encode
 
 object StandardMid {
 
@@ -33,7 +41,7 @@ object StandardMid {
         }
 
         return Project(
-            format = Format.StandardMid,
+            format = format,
             inputFiles = listOf(file),
             name = file.name,
             tracks = tracks,
@@ -68,7 +76,7 @@ object StandardMid {
                         // cutting note
                         notes += it.copy(tickOff = tickPosition + delta)
                     }
-                    pendingNotesHeadsWithLyric[channel] = noteHead.copy(lyric = pendingLyric ?: "")
+                    pendingNotesHeadsWithLyric[channel] = noteHead.copy(lyric = pendingLyric ?: DEFAULT_LYRIC)
                 }
                 pendingLyric = null
                 pendingNoteHead = null
@@ -94,7 +102,7 @@ object StandardMid {
                             tickOn = tickPosition,
                             tickOff = tickPosition,
                             key = key,
-                            lyric = "",
+                            lyric = DEFAULT_LYRIC,
                         ) to channel
                     }
                     MidiUtil.EventType.NoteOff -> {
@@ -114,4 +122,67 @@ object StandardMid {
             notes = notes,
         ).validateNotes()
     }
+
+    fun generate(project: Project): ExportResult {
+        val content = Mid.generateContent(project) { track, tickPrefix, _ ->
+            generateTrack(track, tickPrefix)
+        }
+        val blob = Blob(arrayOf(content), BlobPropertyBag("application/octet-stream"))
+        val name = format.getFileName(project.name)
+        return ExportResult(
+            blob,
+            name,
+            listOf(),
+        )
+    }
+
+    private fun generateTrack(
+        track: Track,
+        tickPrefix: Int,
+    ): List<Byte> {
+        val bytes = mutableListOf<Byte>()
+        bytes.add(0x00)
+        bytes.addAll(MidiUtil.MetaType.TrackName.eventHeaderBytes)
+        bytes.addString(track.name, Mid.IS_LITTLE_ENDIAN, lengthInVariableLength = true)
+
+        var tickPosition = -tickPrefix.toLong()
+
+        track.validateNotes().notes.forEach { note ->
+
+            var delta = note.tickOn - tickPosition
+            tickPosition = note.tickOn
+
+            // write lyric event first
+            val lyric = note.lyric.ifBlank { DEFAULT_LYRIC }.encode("UTF-8").toList()
+            bytes.addIntVariableLengthBigEndian(delta.toInt())
+            bytes.addAll(MidiUtil.MetaType.Lyric.eventHeaderBytes)
+            bytes.addBlock(lyric, Mid.IS_LITTLE_ENDIAN, lengthInVariableLength = true)
+
+            // write note on event
+            bytes.addIntVariableLengthBigEndian(0) // delta is 0
+            bytes.add(MidiUtil.EventType.NoteOn.getStatusByte(channel = 0))
+            // note number
+            bytes.add(note.key.coerceIn(0..127).toByte())
+            // velocity, always 127
+            bytes.add(127.toByte())
+
+            // write note off event
+            delta = note.tickOff - tickPosition
+            tickPosition = note.tickOff
+
+            bytes.addIntVariableLengthBigEndian(delta.toInt())
+            bytes.add(MidiUtil.EventType.NoteOff.getStatusByte(channel = 0))
+            // note number
+            bytes.add(note.key.coerceIn(0..127).toByte())
+            // velocity, always 0
+            bytes.add(0.toByte())
+        }
+
+        bytes.add(0x00)
+        bytes.addAll(MidiUtil.MetaType.EndOfTrack.eventHeaderBytes)
+        bytes.add(0x00)
+        return bytes
+    }
+
+    private val format = Format.StandardMid
 }

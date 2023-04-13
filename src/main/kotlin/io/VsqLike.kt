@@ -291,24 +291,28 @@ object VsqLike {
     }
 
     fun generate(project: Project, features: List<Feature>, format: Format): ExportResult {
-        val projectLengthLimited = project.lengthLimited(MAX_VSQ_OUTPUT_TICK)
-        val content = projectLengthLimited.withoutEmptyTracks()?.let {
+        val projectFixed = project.lengthLimited(MAX_VSQ_OUTPUT_TICK)
+            .copy(measurePrefix = project.measurePrefix.coerceIn(MIN_MEASURE_OFFSET, MAX_MEASURE_OFFSET))
+            .withoutEmptyTracks()
+        val content = projectFixed?.let {
             Mid.generateContent(it) { track, tickPrefix, measurePrefix ->
                 generateTrack(track, tickPrefix, measurePrefix, project, features)
             }
         } ?: throw EmptyProjectException()
         val blob = Blob(arrayOf(content), BlobPropertyBag("application/octet-stream"))
-        val name = projectLengthLimited.name + format.extension
+        val name = projectFixed.name + format.extension
         return ExportResult(
             blob,
             name,
             listOfNotNull(
-                if (projectLengthLimited.hasXSampaData) null else ExportNotification.PhonemeResetRequiredVSQ,
+                if (projectFixed.hasXSampaData) null else ExportNotification.PhonemeResetRequiredVSQ,
                 if (features.contains(Feature.ConvertPitch)) ExportNotification.PitchDataExported else null,
-                if (project == projectLengthLimited) null else ExportNotification.DataOverLengthLimitIgnored,
+                if (project == projectFixed) null else ExportNotification.DataOverLengthLimitIgnored,
             ),
         )
     }
 
     private const val MAX_VSQ_OUTPUT_TICK = 4096L * TICKS_IN_FULL_NOTE
+    private const val MIN_MEASURE_OFFSET = 1
+    private const val MAX_MEASURE_OFFSET = 8
 }

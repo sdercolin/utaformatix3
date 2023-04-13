@@ -189,7 +189,7 @@ private val Format.iconPath: String?
         Dv -> Resources.dvIcon
         Vsq -> Resources.vsqIcon
         Ppsf -> null
-        StandardMid -> Resources.s5pIcon // TODO: add icon
+        StandardMid -> Resources.standardMidiIcon
         UfData -> Resources.ufdataIcon
     }
 

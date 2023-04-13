@@ -14,6 +14,8 @@ object MidiUtil {
         NoteOff(0x08),
         NoteOn(0x09);
 
+        fun getStatusByte(channel: Int) = ((value.toInt() shl 4) or channel).toByte()
+
         companion object {
             fun parse(value: Byte?): EventType? = values().find { it.value == value }
         }

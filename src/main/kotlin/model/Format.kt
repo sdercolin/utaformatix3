@@ -226,6 +226,7 @@ enum class Format(
                 Svp,
                 S5p,
                 Dv,
+                StandardMid,
                 UfData,
             )
     }
