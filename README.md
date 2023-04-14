@@ -12,7 +12,8 @@ and [React](https://github.com/facebook/react).
 - Supported importing
   formats: `.vsqx(3/4)`, `.vpr`, `.vsq`, `.mid(VOCALOID)`, `.mid(standard)`, `.ust`, `.ustx`, `.ccs`,`.xml(MusicXML)`
   , `.musicxml`, `.svp`, `.s5p`, `.dv`, `.ppsf(NT)`, `.ufdata`
-- Supported exporting formats: `.vsqx(4)`, `.vpr`, `.vsq`, `.mid(VOCALOID)`, `.ust`, `.ustx`, `.ccs`, `.xml(MusicXML)`
+- Supported exporting
+  formats: `.vsqx(4)`, `.vpr`, `.vsq`, `.mid(VOCALOID)`, `.mid(standard)`, `.ust`, `.ustx`, `.ccs`, `.xml(MusicXML)`
   , `.svp`, `.s5p`, `.dv`, `.ufdata`
 - Keep information including: tracks, notes, tempo labels, time signatures
 - Detect and convert Japanese lyrics types
