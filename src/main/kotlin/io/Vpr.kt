@@ -51,7 +51,7 @@ object Vpr {
             warnings.add(ImportWarning.TempoNotFound)
         }
         return model.Project(
-            format = Format.Vpr,
+            format = format,
             inputFiles = listOf(file),
             name = content.title ?: file.nameWithoutExtension,
             tracks = tracks,
@@ -120,7 +120,7 @@ object Vpr {
             it.mimeType = "application/octet-stream"
         }
         val blob = zip.generateAsync(option).await() as Blob
-        val name = project.name + Format.Vpr.extension
+        val name = format.getFileName(project.name)
         return ExportResult(
             blob,
             name,
@@ -337,4 +337,6 @@ object Vpr {
         var velocity: Int? = null,
         var vibrato: JsonElement? = null,
     )
+
+    private val format = Format.Vpr
 }

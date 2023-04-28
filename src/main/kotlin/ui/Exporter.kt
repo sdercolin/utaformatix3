@@ -44,9 +44,7 @@ val Exporter = scopedFC<ExporterProps> { props, scope ->
     buildButtons(props, scope, setProgress = { progress = it }, onDialogError = { dialogError = it })
     progress(progress)
     errorDialog(
-        isShowing = dialogError.isShowing,
-        title = dialogError.title,
-        errorMessage = dialogError.message,
+        state = dialogError,
         close = { dialogError = dialogError.copy(isShowing = false) },
     )
 }

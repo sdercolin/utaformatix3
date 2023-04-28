@@ -22,7 +22,7 @@ val File.nameWithoutExtension: String
 val File.extensionName: String
     get() {
         return if (!name.contains('.')) ""
-        else name.split(".").last()
+        else name.split(".").last().lowercase()
     }
 
 suspend fun waitFileSelection(accept: String, multiple: Boolean): List<File> = suspendCoroutine { cont ->

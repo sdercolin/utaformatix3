@@ -79,7 +79,7 @@ object Ccs {
         val timeSignatures = mergeTimeSignatures(results, warnings)
 
         return Project(
-            format = Format.Ccs,
+            format = format,
             inputFiles = listOf(file),
             name = projectName,
             tracks = tracks,
@@ -241,7 +241,7 @@ object Ccs {
         val serializer = XMLSerializer()
         val content = serializer.serializeToString(document)
         val blob = Blob(arrayOf(content), BlobPropertyBag("application/octet-stream"))
-        val name = project.name + Format.Ccs.extension
+        val name = format.getFileName(project.name)
         return ExportResult(
             blob,
             name,
@@ -386,4 +386,5 @@ object Ccs {
     private const val TICK_RATE = 2.0
     private const val OCTAVE_OFFSET = -1
     private const val FIXED_MEASURE_PREFIX = 1
+    private val format = Format.Ccs
 }

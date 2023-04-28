@@ -52,7 +52,7 @@ object S5p {
         }
         val tracks = parseTracks(project, params)
         return model.Project(
-            format = Format.S5p,
+            format = format,
             inputFiles = listOf(file),
             name = file.nameWithoutExtension,
             tracks = tracks,
@@ -104,7 +104,7 @@ object S5p {
     fun generate(project: model.Project, features: List<Feature>): ExportResult {
         val jsonText = generateContent(project, features)
         val blob = Blob(arrayOf(jsonText), BlobPropertyBag("application/octet-stream"))
-        val name = project.name + Format.S5p.extension
+        val name = format.getFileName(project.name)
         return ExportResult(
             blob,
             name,
@@ -225,4 +225,6 @@ object S5p {
         var vibratoEnv: List<Double>? = null,
         var voicing: List<Double>? = null,
     )
+
+    private val format = Format.S5p
 }

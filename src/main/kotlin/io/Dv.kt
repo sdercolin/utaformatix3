@@ -76,7 +76,7 @@ object Dv {
         tracks = tracks.mapIndexed { index, track -> track.copy(id = index) }.toMutableList()
 
         return Project(
-            format = Format.Dv,
+            format = format,
             inputFiles = listOf(file),
             name = file.nameWithoutExtension,
             tracks = tracks,
@@ -262,7 +262,7 @@ object Dv {
     fun generate(project: Project, features: List<Feature>): ExportResult {
         val contentBytes = generateContent(project, features)
         val blob = Blob(arrayOf(contentBytes), BlobPropertyBag("application/octet-stream"))
-        return ExportResult(blob, project.name + Format.Dv.extension, listOf())
+        return ExportResult(blob, format.getFileName(project.name), listOf())
     }
 
     private fun generateContent(project: Project, features: List<Feature>): Uint8Array {
@@ -792,4 +792,6 @@ object Dv {
         0xAC, 0xBB, 0xF8, 0x3C, 0x98, 0xF1, 0xC6, 0x3C, 0x49, 0x2C, 0x95, 0x3C,
         0xD0, 0xD8, 0x46, 0x3C, 0x79, 0xCA, 0xC6, 0x3B,
     ).map { it.toByte() }
+
+    private val format = Format.Dv
 }

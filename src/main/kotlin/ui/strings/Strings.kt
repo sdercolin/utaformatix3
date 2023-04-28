@@ -351,15 +351,15 @@ enum class Strings(
         fr = "Déposer les fichiers ou Cliquer ici pour importer",
     ),
     ImportFileSubDescription(
-        en = "Supported file types: VSQX, VPR, VSQ, MID(VOCALOID), USTs," +
+        en = "Supported file types: VSQX, VPR, VSQ, MID, USTs," +
             " USTX, CCS, MUSICXML, XML, SVP, S5P, DV, PPSF(NT), UFDATA",
-        ja = "サポートされているファイル形式：VSQX、VPR、VSQ、MID（VOCALOID）、UST（複数可）、" +
+        ja = "サポートされているファイル形式：VSQX、VPR、VSQ、MID、UST（複数可）、" +
             "USTX、CCS、MUSICXML、XML、SVP、S5P、DV、PPSF（NT）、UFDATA",
-        zhCN = "支持的文件类型：VSQX、VPR、VSQ、MID（VOCALOID）、UST（允许复数个）、" +
+        zhCN = "支持的文件类型：VSQX、VPR、VSQ、MID、UST（允许复数个）、" +
             "USTX、CCS、MUSICXML、XML、SVP、S5P、DV、PPSF（NT）、UFDATA",
-        ru = "Поддерживаемые форматы файлов: VSQx, VPR, VSQ, MID (VOCALOID), UST," +
+        ru = "Поддерживаемые форматы файлов: VSQx, VPR, VSQ, MID, UST," +
             " USTX, CCS, MusicXML, XML, SVP, S5P, DV, PPSF(NT), UFDATA",
-        fr = "Types de fichiers pris en charge : VSQX, VPR, VSQ, MID(VOCALOID), USTs," +
+        fr = "Types de fichiers pris en charge : VSQX, VPR, VSQ, MID, USTs," +
             " USTX, CCS, MUSICXML, XML, SVP, S5P, DV, PPSF(NT), UFDATA",
     ),
     UnsupportedFileTypeImportError(
@@ -368,13 +368,6 @@ enum class Strings(
         zhCN = "不支持的文件类型",
         ru = "Неподдерживаемый формат файла",
         fr = "Type de fichier non supporté",
-    ),
-    UnsupportedStandardMidiError(
-        en = "Standard MIDI file format is not supported",
-        ja = "Standard MIDIファイル形式はサポートされていません",
-        zhCN = "不支持标准MIDI文件格式",
-        ru = "Стандартный формат MIDI-файла не поддерживается",
-        fr = "Le format de fichier MIDI standard n'est pas pris en charge",
     ),
     UnsupportedLegacyPpsfError(
         en = "Legacy ppsf file format is not supported (only ppsf for Piapro Studio NT is supported)",
@@ -596,6 +589,15 @@ enum class Strings(
         en = "UtaFormatix Data Format (v$UtaFormatixDataVersion)",
         ja = "UtaFormatix データ形式（v$UtaFormatixDataVersion）",
         zhCN = "UtaFormatix 数据格式（v$UtaFormatixDataVersion）",
+        ru = "Формат данных UtaFormatix (v$UtaFormatixDataVersion)",
+        fr = "Format de données UtaFormatix (v$UtaFormatixDataVersion)",
+    ),
+    StandardMidDescription(
+        en = "Standard MIDI File",
+        ja = "標準MIDIファイル",
+        zhCN = "标准MIDI文件",
+        ru = "Стандартный MIDI-файл",
+        fr = "Fichier MIDI standard",
     ),
     ExportButton(
         en = "Export",

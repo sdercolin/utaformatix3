@@ -52,6 +52,9 @@ object Resources {
     val dvIcon: String
         get() = require("images/dv.png").default as String
 
+    val standardMidiIcon: String
+        get() = require("images/midi.png").default as String
+
     val ufdataIcon: String
         get() = require("images/ufdata.png").default as String
 

@@ -3,9 +3,28 @@ package util
 import kotlin.math.pow
 
 object MidiUtil {
+
+    private const val StandardTimeDivision = 480
+
+    fun convertInputTimeToStandardTime(inputTime: Int, timeDivision: Int): Int {
+        return inputTime * StandardTimeDivision / timeDivision
+    }
+
+    enum class EventType(val value: Byte) {
+        NoteOff(0x08),
+        NoteOn(0x09);
+
+        fun getStatusByte(channel: Int) = ((value.toInt() shl 4) or channel).toByte()
+
+        companion object {
+            fun parse(value: Byte?): EventType? = values().find { it.value == value }
+        }
+    }
+
     enum class MetaType(val value: Byte) {
         Text(0x01),
         TrackName(0x03),
+        Lyric(0x05),
         Tempo(0x51),
         TimeSignature(0x58),
         EndOfTrack(0x2f);

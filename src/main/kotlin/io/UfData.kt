@@ -44,7 +44,7 @@ object UfData {
             )
         }
         return model.Project(
-            format = Format.UfData,
+            format = format,
             inputFiles = listOf(file),
             name = document.project.name,
             tracks = document.project.tracks.mapIndexed { index, track -> parseTrack(index, track, params) },
@@ -105,7 +105,7 @@ object UfData {
         )
         val text = jsonSerializer.encodeToString(Document.serializer(), document)
         val blob = Blob(arrayOf(text), BlobPropertyBag("application/octet-stream"))
-        val name = project.name + Format.UfData.extension
+        val name = format.getFileName(project.name)
         return ExportResult(
             blob,
             name,
@@ -162,4 +162,6 @@ object UfData {
         encodeDefaults = true
         explicitNulls = false
     }
+
+    private val format = Format.UfData
 }
