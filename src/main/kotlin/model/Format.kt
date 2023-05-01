@@ -125,7 +125,7 @@ enum class Format(
         availableFeaturesForGeneration = listOf(ConvertPitch),
     ),
     Vsq(
-        ".vsq",
+        "vsq",
         parser = { files, params ->
             io.Vsq.parse(files.first(), params)
         },
