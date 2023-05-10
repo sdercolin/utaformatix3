@@ -300,7 +300,7 @@ object VsqLike {
             }
         } ?: throw EmptyProjectException()
         val blob = Blob(arrayOf(content), BlobPropertyBag("application/octet-stream"))
-        val name = projectFixed.name + format.extension
+        val name = format.getFileName(projectFixed.name)
         return ExportResult(
             blob,
             name,
