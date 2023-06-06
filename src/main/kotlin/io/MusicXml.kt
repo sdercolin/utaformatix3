@@ -51,7 +51,12 @@ object MusicXml {
         val partNodes = rootNode.getElementListByTagName("part")
 
         val warnings = mutableListOf<ImportWarning>()
-        val masterTrackResult = parseMasterTrack(partNodes.first(), warnings)
+        val masterTrack = partNodes.firstOrNull {
+            it.getElementListByTagName("measure").isNotEmpty()
+        } ?: throw IllegalFileException.XmlElementNotFound("measure")
+        val masterTrackResult = parseMasterTrack(masterTrack, warnings)
+        val timeSignatures = masterTrackResult.timeSignatures.ifEmpty { listOf(TimeSignature.default) }
+        val tempos = masterTrackResult.tempoWithMeasureIndexes.map { it.second }.ifEmpty { listOf(Tempo.default) }
 
         val tracks = partNodes.mapIndexed { index, element -> parseTrack(index, element, masterTrackResult) }
 
@@ -60,8 +65,8 @@ object MusicXml {
             inputFiles = listOf(file),
             name = projectName,
             tracks = tracks,
-            timeSignatures = masterTrackResult.timeSignatures,
-            tempos = masterTrackResult.tempoWithMeasureIndexes.map { it.second },
+            timeSignatures = timeSignatures,
+            tempos = tempos,
             measurePrefix = 0,
             importWarnings = warnings,
         )
