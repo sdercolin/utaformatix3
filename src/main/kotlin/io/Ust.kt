@@ -408,8 +408,8 @@ object Ust {
                 builder.appendLine("PBW=1,${mode2Pitch?.widths?.joinToString(",") { it.toString() }}")
                 builder.appendLine(
                     "PBY=${mode2Pitch?.startShift},${
-                        mode2Pitch?.shifts
-                            ?.joinToString(",") { it.toString() }
+                    mode2Pitch?.shifts
+                        ?.joinToString(",") { it.toString() }
                     }",
                 )
                 builder.appendLine("PBM=${mode2Pitch?.curveTypes?.joinToString(",")}")
