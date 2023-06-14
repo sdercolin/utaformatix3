@@ -112,7 +112,10 @@ object Ust {
         val notes = mutableListOf<Note>()
         val notePitchDataListMode1 = mutableListOf<UtauMode1NotePitchData>()
         val notePitchDataListMode2 = mutableListOf<UtauMode2NotePitchData>()
-        val tempos = mutableListOf<Tempo>()
+        val tempos = mutableMapOf<Long, Double>()
+
+        fun getCurrentTempo() = tempos.toList().maxByOrNull { it.first }?.second ?: Tempo.default.bpm
+
         var isHeader = true
         var time = 0L
         var pendingNoteKey: Int? = null
@@ -137,11 +140,11 @@ object Ust {
                 // Some locales use ',' instead of '.' for tempo
                 val bpm = it.replace(',', '.').toDoubleOrNull() ?: return@let
                 if (isHeader) {
-                    tempos.add(Tempo(0, bpm))
+                    tempos[0] = bpm
                 } else {
                     val tick = pendingNoteTickOn
                     if (tick != null) {
-                        tempos.add(Tempo(tick, bpm))
+                        tempos[tick] = bpm
                     } else {
                         pendingBpm = bpm
                     }
@@ -170,7 +173,7 @@ object Ust {
                     )
                     notePitchDataListMode2.add(
                         UtauMode2NotePitchData(
-                            bpm = tempos.last().bpm,
+                            bpm = getCurrentTempo(),
                             start = pendingPBS?.first,
                             startShift = pendingPBS?.second,
                             widths = pendingPBW.orEmpty(),
@@ -211,7 +214,7 @@ object Ust {
                 val length = it.toDoubleOrNull()?.roundToLong() ?: return@let
                 pendingNoteTickOn = time
                 pendingBpm?.let { bpm ->
-                    tempos.add(Tempo(time, bpm))
+                    tempos[time] = bpm
                     pendingBpm = null
                 }
                 time += length
@@ -267,9 +270,12 @@ object Ust {
                 }
             }
         }
+        val tempoList = tempos
+            .map { (tick, bpm) -> Tempo(tick, bpm) }
+            .sortedBy { it.tickPosition }
         val pitchDataMode1 = notePitchDataListMode1.ifEmpty { null }?.let { UtauMode1TrackPitchData(it) }
         val pitchDataMode2 = notePitchDataListMode2.ifEmpty { null }?.let { UtauMode2TrackPitchData(it) }
-        return FileParseResult(file, projectName, notes, tempos, isMode2, pitchDataMode1, pitchDataMode2)
+        return FileParseResult(file, projectName, notes, tempoList, isMode2, pitchDataMode1, pitchDataMode2)
     }
 
     private fun parseMode1PitchData(
