@@ -1,5 +1,6 @@
 package io
 
+import exception.IllegalFileException
 import external.Encoding
 import model.DEFAULT_LYRIC
 import model.ExportResult
@@ -24,7 +25,9 @@ object StandardMid {
 
     suspend fun parse(file: File): Project {
         val midi = Mid.parseMidi(file)
-        console.log(midi)
+        if (midi == false) {
+            throw IllegalFileException.IllegalMidiFile()
+        }
         val timeDivision = midi.timeDivision as Int
         val midiTracks = midi.track as Array<dynamic>
 
