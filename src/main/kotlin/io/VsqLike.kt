@@ -34,7 +34,11 @@ import util.splitFirst
 object VsqLike {
 
     suspend fun match(file: File): Boolean {
-        val midiTracks = Mid.parseMidi(file).track as Array<dynamic>
+        val midi = Mid.parseMidi(file)
+        if (midi == false) {
+            return false
+        }
+        val midiTracks = midi.track as Array<dynamic>
         val tracksAsText = Mid.extractVsqTextsFromMetaEvents(midiTracks).filter { it.isNotEmpty() }
         if (tracksAsText.isEmpty()) return false
         return tracksAsText.any { track ->

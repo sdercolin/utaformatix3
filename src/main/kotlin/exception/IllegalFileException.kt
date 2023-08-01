@@ -13,4 +13,6 @@ sealed class IllegalFileException(message: String) : Throwable(message) {
         IllegalFileException(
             "The required attribute \"$attribute\" in element <$elementName> is missing or has in illegal value.",
         )
+
+    class IllegalMidiFile : IllegalFileException("Cannot parse this file as a MIDI file.")
 }
