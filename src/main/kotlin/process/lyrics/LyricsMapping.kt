@@ -29,7 +29,7 @@ data class LyricsMappingRequest(
 
         val Presets: List<Pair<String, LyricsMappingRequest>> by lazy {
             listOf(
-                "VX-β 日本語かな -> 発音記号" to LyricsMappingRequest(
+                "VX-β 日本語かな変換" to LyricsMappingRequest(
                     mapText = Resources.lyricsMappingVxBetaJaText,
                     mapToPhonemes = false,
                 ),
