@@ -23,9 +23,11 @@ import org.w3c.dom.get
 import process.RESTS_FILLING_MAX_LENGTH_DENOMINATOR_DEFAULT
 import process.evalFractionOrNull
 import process.fillRests
+import process.lyrics.LyricsMappingRequest
 import process.lyrics.LyricsReplacementRequest
 import process.lyrics.chinese.convertChineseLyricsToPinyin
 import process.lyrics.japanese.convertJapaneseLyrics
+import process.lyrics.mapLyrics
 import process.lyrics.replaceLyrics
 import process.projectZoomFactorOptions
 import process.zoom
@@ -43,6 +45,7 @@ import ui.common.scopedFC
 import ui.common.title
 import ui.configuration.ChinesePinyinConversionBlock
 import ui.configuration.JapaneseLyricsConversionBlock
+import ui.configuration.LyricsMappingBlock
 import ui.configuration.LyricsReplacementBlock
 import ui.configuration.PitchConversionBlock
 import ui.configuration.ProjectZoomBlock
@@ -101,6 +104,16 @@ val ConfigurationEditor = scopedFC<ConfigurationEditorProps> { props, scope ->
             LyricsReplacementState(true, preset)
         }
     }
+    val (lyricsMapping, setLyricsMapping) = useState {
+        getStateFromLocalStorage<LyricsMappingState>("lyricsMapping")?.let {
+            return@useState it
+        }
+        LyricsMappingState(
+            isOn = false,
+            presetName = null,
+            request = LyricsMappingRequest(),
+        )
+    }
     val (slightRestsFilling, setSlightRestsFilling) = useState {
         getStateFromLocalStorage<SlightRestsFillingState>("slightRestsFilling")?.let {
             return@useState it
@@ -134,7 +147,7 @@ val ConfigurationEditor = scopedFC<ConfigurationEditorProps> { props, scope ->
     }
     var dialogError by useState(DialogErrorState())
 
-    fun isReady() = japaneseLyricsConversion.isReady && lyricsReplacement.isReady
+    fun isReady() = japaneseLyricsConversion.isReady && lyricsReplacement.isReady && lyricsMapping.isReady
 
     fun closeErrorDialog() {
         dialogError = dialogError.copy(isShowing = false)
@@ -154,6 +167,10 @@ val ConfigurationEditor = scopedFC<ConfigurationEditorProps> { props, scope ->
     LyricsReplacementBlock {
         initialState = lyricsReplacement
         submitState = setLyricsReplacement
+    }
+    LyricsMappingBlock {
+        initialState = lyricsMapping
+        submitState = setLyricsMapping
     }
     SlightRestsFillingBlock {
         initialState = slightRestsFilling
@@ -175,6 +192,7 @@ val ConfigurationEditor = scopedFC<ConfigurationEditorProps> { props, scope ->
         japaneseLyricsConversion,
         chinesePinyinConversion,
         lyricsReplacement,
+        lyricsMapping,
         slightRestsFilling,
         pitchConversion,
         projectZoom,
@@ -208,6 +226,7 @@ private fun ChildrenBuilder.buildNextButton(
     japaneseLyricsConversion: JapaneseLyricsConversionState,
     chinesePinyinConversion: ChinesePinyinConversionState,
     lyricsReplacement: LyricsReplacementState,
+    lyricsMapping: LyricsMappingState,
     slightRestsFilling: SlightRestsFillingState,
     pitchConversion: PitchConversionState,
     projectZoom: ProjectZoomState,
@@ -229,6 +248,7 @@ private fun ChildrenBuilder.buildNextButton(
                     japaneseLyricsConversion,
                     chinesePinyinConversion,
                     lyricsReplacement,
+                    lyricsMapping,
                     slightRestsFilling,
                     pitchConversion,
                     projectZoom,
@@ -247,6 +267,7 @@ private fun process(
     japaneseLyricsConversion: JapaneseLyricsConversionState,
     chinesePinyinConversion: ChinesePinyinConversionState,
     lyricsReplacement: LyricsReplacementState,
+    lyricsMapping: LyricsMappingState,
     slightRestsFilling: SlightRestsFillingState,
     pitchConversion: PitchConversionState,
     projectZoom: ProjectZoomState,
@@ -271,6 +292,9 @@ private fun process(
                     }
                     .runIf(lyricsReplacement.isOn) {
                         replaceLyrics(lyricsReplacement.request)
+                    }
+                    .runIf(lyricsMapping.isOn) {
+                        mapLyrics(lyricsMapping.request)
                     }
                     .runIf(slightRestsFilling.isOn) {
                         fillRests(slightRestsFilling.excludedMaxLength)
@@ -368,6 +392,21 @@ data class LyricsReplacementState(
     val request: LyricsReplacementRequest,
 ) : SubState() {
     val isReady: Boolean get() = if (isOn) request.isValid else true
+}
+
+@Serializable
+data class LyricsMappingState(
+    val isOn: Boolean,
+    val presetName: String?,
+    val request: LyricsMappingRequest,
+) : SubState() {
+    val isReady: Boolean get() = if (isOn) request.isValid else true
+
+    fun updatePresetName() = when {
+        presetName == null -> this
+        LyricsMappingRequest.findPreset(presetName) == request -> this
+        else -> copy(presetName = null)
+    }
 }
 
 @Serializable
