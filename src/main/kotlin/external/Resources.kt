@@ -60,4 +60,7 @@ object Resources {
 
     val chineseLyricsDictionaryText: String
         get() = require("texts/mandarin-pinyin-dict.txt").default as String
+
+    val lyricsMappingVxBetaJaText: String
+        get() = require("texts/vxbeta-japanese-mapping.txt").default as String
 }
