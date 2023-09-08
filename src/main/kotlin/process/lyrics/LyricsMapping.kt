@@ -9,11 +9,12 @@ import process.validateNotes
 
 @Serializable
 data class LyricsMappingRequest(
-    val mapLines: List<String>,
-    val mapToPhonemes: Boolean,
+    val mapText: String = "",
+    val mapToPhonemes: Boolean = false,
 ) {
+    val isValid get() = map.isNotEmpty()
 
-    val map = mapLines.mapNotNull { line ->
+    val map = mapText.lines().mapNotNull { line ->
         if (line.contains("=").not()) return@mapNotNull null
         val from = line.substringBefore("=").trim()
         val to = line.substringAfter("=").trim()
@@ -22,10 +23,14 @@ data class LyricsMappingRequest(
 
     companion object {
 
+        fun findPreset(name: String) = Presets.find { it.first == name }?.second
+
+        fun getPreset(name: String) = requireNotNull(findPreset(name))
+
         val Presets: List<Pair<String, LyricsMappingRequest>> by lazy {
             listOf(
                 "VX-β 日本語かな -> 発音記号" to LyricsMappingRequest(
-                    mapLines = Resources.lyricsMappingVxBetaJaText.lines(),
+                    mapText = Resources.lyricsMappingVxBetaJaText,
                     mapToPhonemes = false,
                 ),
             )
