@@ -149,7 +149,6 @@ private fun ChildrenBuilder.buildLyricsMappingDetail(
                             }
                         }
                     }
-
                     div {
                         TextField {
                             multiline = true
@@ -157,7 +156,6 @@ private fun ChildrenBuilder.buildLyricsMappingDetail(
                                 marginTop = 8.px
                                 marginBottom = 8.px
                                 width = 25.em
-                                overflowY = csstype.Overflow.scroll
                             }
                             (this.unsafeCast<StandardTextFieldProps>()).InputProps = jso {
                                 style = jso {
