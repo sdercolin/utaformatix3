@@ -318,7 +318,9 @@ private fun process(
             }
             listOf(
                 "japaneseLyricsConversion" to japaneseLyricsConversion,
+                "chinesePinyinConversion" to chinesePinyinConversion,
                 "lyricsReplacement" to lyricsReplacement,
+                "lyricsMapping" to lyricsMapping,
                 "slightRestsFilling" to slightRestsFilling,
                 "pitchConversion" to pitchConversion,
                 "projectZoom" to projectZoom,
@@ -358,7 +360,9 @@ private val json = Json {
     ignoreUnknownKeys = true
     serializersModule = SerializersModule {
         polymorphic(SubState::class, JapaneseLyricsConversionState::class, JapaneseLyricsConversionState.serializer())
+        polymorphic(SubState::class, ChinesePinyinConversionState::class, ChinesePinyinConversionState.serializer())
         polymorphic(SubState::class, LyricsReplacementState::class, LyricsReplacementState.serializer())
+        polymorphic(SubState::class, LyricsMappingState::class, LyricsMappingState.serializer())
         polymorphic(SubState::class, SlightRestsFillingState::class, SlightRestsFillingState.serializer())
         polymorphic(SubState::class, PitchConversionState::class, PitchConversionState.serializer())
         polymorphic(SubState::class, ProjectZoomState::class, ProjectZoomState.serializer())
