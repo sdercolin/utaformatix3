@@ -20,7 +20,15 @@ sealed class FeatureConfig(val type: Feature) {
     object ConvertPitch : FeatureConfig(Feature.ConvertPitch)
     data class SplitProject(
         val maxTrackCount: Int,
-    ) : FeatureConfig(Feature.SplitProject)
+    ) : FeatureConfig(Feature.SplitProject) {
+
+        companion object {
+            fun getDefault(format: Format): SplitProject = when (format) {
+                Format.Svp -> SplitProject(3)
+                else -> SplitProject(1)
+            }
+        }
+    }
 }
 
 fun List<FeatureConfig>.contains(feature: Feature) = any { it.type == feature }

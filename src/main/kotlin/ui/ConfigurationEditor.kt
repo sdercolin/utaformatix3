@@ -155,7 +155,7 @@ val ConfigurationEditor = scopedFC<ConfigurationEditorProps> { props, scope ->
         ProjectSplitState(
             isAvailable = props.outputFormat.availableFeaturesForGeneration.contains(Feature.SplitProject),
             isOn = false,
-            maxTrackCountInput = "1",
+            maxTrackCountInput = FeatureConfig.SplitProject.getDefault(props.outputFormat).maxTrackCount.toString(),
         )
     }
     var dialogError by useState(DialogErrorState())
