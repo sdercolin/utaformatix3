@@ -9,6 +9,7 @@ import model.DEFAULT_METER_LOW
 import model.ExportNotification
 import model.ExportResult
 import model.Feature
+import model.FeatureConfig
 import model.Format
 import model.ImportParams
 import model.ImportWarning
@@ -17,6 +18,7 @@ import model.Project
 import model.Tempo
 import model.TimeSignature
 import model.Track
+import model.contains
 import org.khronos.webgl.Uint8Array
 import org.w3c.files.Blob
 import org.w3c.files.File
@@ -296,7 +298,7 @@ object Ust {
         val pitchDataMode2: UtauMode2TrackPitchData?,
     )
 
-    suspend fun generate(project: Project, features: List<Feature>): ExportResult {
+    suspend fun generate(project: Project, features: List<FeatureConfig>): ExportResult {
         val zip = JsZip()
         for (track in project.tracks) {
             val content = generateTrackContent(project, track, features)
@@ -315,7 +317,7 @@ object Ust {
         return ExportResult(blob, name, notifications)
     }
 
-    private fun generateTrackContent(project: Project, track: Track, features: List<Feature>): String {
+    private fun generateTrackContent(project: Project, track: Track, features: List<FeatureConfig>): String {
         val builder = object {
             var content = ""
                 private set

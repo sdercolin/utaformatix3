@@ -8,10 +8,12 @@ import kotlinx.serialization.json.Json
 import model.ExportNotification
 import model.ExportResult
 import model.Feature
+import model.FeatureConfig
 import model.Format
 import model.ImportParams
 import model.Note
 import model.Project
+import model.contains
 import org.w3c.files.Blob
 import org.w3c.files.BlobPropertyBag
 import org.w3c.files.File
@@ -171,7 +173,7 @@ object Ustx {
         return validatedNotes to validatedNotePitches
     }
 
-    fun generate(project: model.Project, features: List<Feature>): ExportResult {
+    fun generate(project: model.Project, features: List<FeatureConfig>): ExportResult {
         val yamlText = generateContent(project, features)
         val blob = Blob(arrayOf(yamlText), BlobPropertyBag("application/octet-stream"))
         val name = format.getFileName(project.name)
@@ -184,7 +186,7 @@ object Ustx {
         )
     }
 
-    private fun generateContent(project: model.Project, features: List<Feature>): String {
+    private fun generateContent(project: model.Project, features: List<FeatureConfig>): String {
         val templateYamlText = Resources.ustxTemplate
         val templateYaml = JsYaml.load(templateYamlText)
         val templateJsonText = JSON.stringify(templateYaml)
@@ -222,7 +224,7 @@ object Ustx {
         return JsYaml.dump(JSON.parse(jsonText))
     }
 
-    private fun generateVoicePart(template: VoicePart, track: model.Track, features: List<Feature>): VoicePart {
+    private fun generateVoicePart(template: VoicePart, track: model.Track, features: List<FeatureConfig>): VoicePart {
         val noteTemplate = template.notes.first()
         val notes =
             listOfNotNull(track.notes.firstOrNull()?.let { generateNote(noteTemplate, null, it) }) +

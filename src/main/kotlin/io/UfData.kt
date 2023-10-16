@@ -15,9 +15,11 @@ import kotlinx.serialization.json.Json
 import model.ExportNotification
 import model.ExportResult
 import model.Feature
+import model.FeatureConfig
 import model.Format
 import model.ImportParams
 import model.ImportWarning
+import model.contains
 import org.w3c.files.Blob
 import org.w3c.files.BlobPropertyBag
 import org.w3c.files.File
@@ -92,7 +94,7 @@ object UfData {
         )
     }
 
-    fun generate(project: model.Project, features: List<Feature>): ExportResult {
+    fun generate(project: model.Project, features: List<FeatureConfig>): ExportResult {
         val document = Document(
             formatVersion = UtaFormatixDataVersion,
             project = Project(
@@ -115,7 +117,7 @@ object UfData {
         )
     }
 
-    private fun generateTrack(track: model.Track, features: List<Feature>): Track {
+    private fun generateTrack(track: model.Track, features: List<FeatureConfig>): Track {
         val notes = track.notes.map {
             Note(
                 key = it.key,

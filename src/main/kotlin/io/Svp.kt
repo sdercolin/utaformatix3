@@ -9,11 +9,13 @@ import model.DEFAULT_LYRIC
 import model.ExportNotification
 import model.ExportResult
 import model.Feature
+import model.FeatureConfig
 import model.Format
 import model.ImportParams
 import model.ImportWarning
 import model.Pitch
 import model.TimeSignature
+import model.contains
 import org.w3c.files.Blob
 import org.w3c.files.BlobPropertyBag
 import org.w3c.files.File
@@ -179,7 +181,7 @@ object Svp {
         )
     }
 
-    fun generate(project: model.Project, features: List<Feature>): ExportResult {
+    fun generate(project: model.Project, features: List<FeatureConfig>): ExportResult {
         val jsonText = generateContent(project, features)
         val blob = Blob(arrayOf(jsonText), BlobPropertyBag("application/octet-stream"))
         val name = format.getFileName(project.name)
@@ -192,7 +194,7 @@ object Svp {
         )
     }
 
-    private fun generateContent(project: model.Project, features: List<Feature>): String {
+    private fun generateContent(project: model.Project, features: List<FeatureConfig>): String {
         val template = Resources.svpTemplate
         val svp = jsonSerializer.decodeFromString(Project.serializer(), template)
         svp.time.meter = project.timeSignatures.map {
@@ -215,7 +217,7 @@ object Svp {
         return jsonSerializer.encodeToString(Project.serializer(), svp)
     }
 
-    private fun generateTrack(track: model.Track, emptyTrack: Track, features: List<Feature>): Track {
+    private fun generateTrack(track: model.Track, emptyTrack: Track, features: List<FeatureConfig>): Track {
         val uuid = generateUUID()
         return emptyTrack.copy(
             name = track.name,
@@ -242,7 +244,7 @@ object Svp {
         )
     }
 
-    private fun generatePitchData(track: model.Track, features: List<Feature>): PitchDelta? {
+    private fun generatePitchData(track: model.Track, features: List<FeatureConfig>): PitchDelta? {
         if (!features.contains(Feature.ConvertPitch)) return null
         val data = track.pitch?.getRelativeData(track.notes)
             ?.appendPitchPointsForSvpOutput()

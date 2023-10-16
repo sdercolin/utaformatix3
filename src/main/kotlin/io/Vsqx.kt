@@ -7,6 +7,7 @@ import model.DEFAULT_LYRIC
 import model.ExportNotification
 import model.ExportResult
 import model.Feature
+import model.FeatureConfig
 import model.Format
 import model.ImportParams
 import model.ImportWarning
@@ -16,6 +17,7 @@ import model.Tempo
 import model.TickCounter
 import model.TimeSignature
 import model.Track
+import model.contains
 import org.w3c.dom.Document
 import org.w3c.dom.Element
 import org.w3c.dom.XMLDocument
@@ -248,7 +250,7 @@ object Vsqx {
         ).validateNotes()
     }
 
-    fun generate(project: Project, features: List<Feature>): ExportResult {
+    fun generate(project: Project, features: List<FeatureConfig>): ExportResult {
         val document = generateContent(project, features)
         val serializer = XMLSerializer()
         val content = serializer.serializeToString(document).cleanEmptyXmlns()
@@ -266,7 +268,7 @@ object Vsqx {
 
     private fun String.cleanEmptyXmlns() = replace(" xmlns=\"\"", "")
 
-    private fun generateContent(project: Project, features: List<Feature>): Document {
+    private fun generateContent(project: Project, features: List<FeatureConfig>): Document {
         val text = Resources.vsqxTemplate
         val tagNames = TagNames.Vsq4
         val parser = DOMParser()
@@ -357,7 +359,7 @@ object Vsqx {
         project: Project,
         tickPrefix: Long,
         document: XMLDocument,
-        features: List<Feature>,
+        features: List<FeatureConfig>,
     ): Element {
         val trackModel = project.tracks[trackIndex]
 
@@ -370,7 +372,7 @@ object Vsqx {
         part.setSingleChildValue(tagNames.playTime, trackModel.notes.lastOrNull()?.tickOff ?: 0)
 
         setupPitchControllingNodes(
-            features.contains(Feature.ConvertPitch),
+            features.any { it.type == Feature.ConvertPitch },
             part,
             trackModel,
             tagNames,

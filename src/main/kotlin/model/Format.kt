@@ -2,6 +2,7 @@ package model
 
 import io.VsqLike
 import model.Feature.ConvertPitch
+import model.Feature.SplitProject
 import model.JapaneseLyricsType.KanaCv
 import model.JapaneseLyricsType.KanaVcv
 import model.JapaneseLyricsType.RomajiCv
@@ -14,7 +15,7 @@ enum class Format(
     val otherExtensions: List<String> = listOf(),
     val multipleFile: Boolean = false,
     val parser: suspend (List<File>, ImportParams) -> Project,
-    val generator: suspend (Project, List<Feature>) -> ExportResult,
+    val generator: suspend (Project, List<FeatureConfig>) -> ExportResult,
     val possibleLyricsTypes: List<JapaneseLyricsType>,
     val suggestedLyricType: JapaneseLyricsType? = null,
     val availableFeaturesForGeneration: List<Feature> = listOf(),
@@ -87,7 +88,7 @@ enum class Format(
             io.Svp.generate(project, features)
         },
         possibleLyricsTypes = listOf(RomajiCv, KanaCv),
-        availableFeaturesForGeneration = listOf(ConvertPitch),
+        availableFeaturesForGeneration = listOf(ConvertPitch, SplitProject),
     ),
     S5p(
         "s5p",

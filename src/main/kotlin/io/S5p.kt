@@ -8,11 +8,13 @@ import model.DEFAULT_LYRIC
 import model.ExportNotification
 import model.ExportResult
 import model.Feature
+import model.FeatureConfig
 import model.Format
 import model.ImportParams
 import model.ImportWarning
 import model.Pitch
 import model.TimeSignature
+import model.contains
 import org.w3c.files.Blob
 import org.w3c.files.BlobPropertyBag
 import org.w3c.files.File
@@ -101,7 +103,7 @@ object S5p {
         )
     }
 
-    fun generate(project: model.Project, features: List<Feature>): ExportResult {
+    fun generate(project: model.Project, features: List<FeatureConfig>): ExportResult {
         val jsonText = generateContent(project, features)
         val blob = Blob(arrayOf(jsonText), BlobPropertyBag("application/octet-stream"))
         val name = format.getFileName(project.name)
@@ -114,7 +116,7 @@ object S5p {
         )
     }
 
-    private fun generateContent(project: model.Project, features: List<Feature>): String {
+    private fun generateContent(project: model.Project, features: List<FeatureConfig>): String {
         val template = Resources.s5pTemplate
         val s5p = jsonSerializer.decodeFromString(Project.serializer(), template)
         s5p.meter = project.timeSignatures.map {
@@ -137,7 +139,7 @@ object S5p {
         return jsonSerializer.encodeToString(Project.serializer(), s5p)
     }
 
-    private fun generateTrack(track: model.Track, emptyTrack: Track, features: List<Feature>): Track {
+    private fun generateTrack(track: model.Track, emptyTrack: Track, features: List<FeatureConfig>): Track {
         return emptyTrack.copy(
             name = track.name,
             displayOrder = track.id,
@@ -156,7 +158,7 @@ object S5p {
         )
     }
 
-    private fun generatePitchData(track: model.Track, features: List<Feature>, interval: Long): List<Double> {
+    private fun generatePitchData(track: model.Track, features: List<FeatureConfig>, interval: Long): List<Double> {
         if (!features.contains(Feature.ConvertPitch)) return emptyList()
         val data = track.pitch?.getRelativeData(track.notes)
             ?.map { (it.first / (interval.toDouble().div(TICK_RATE)) to (it.second * 100)) }

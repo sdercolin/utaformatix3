@@ -12,6 +12,7 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.modules.SerializersModule
 import model.ExportResult
 import model.Feature
+import model.FeatureConfig
 import model.Format
 import model.JapaneseLyricsType
 import model.Project
@@ -303,16 +304,15 @@ private fun process(
                         zoom(projectZoom.factorValue)
                     }
 
-                val availableFeatures = Feature.values()
-                    .filter { it.isAvailable.invoke(project) && format.availableFeaturesForGeneration.contains(it) }
-                    .filter {
-                        when (it) {
-                            Feature.ConvertPitch -> pitchConversion.isOn
-                        }
-                    }
+                val featureConfigs = buildList<FeatureConfig> {
+                    if (pitchConversion.isOn) add(FeatureConfig.ConvertPitch)
+                }.filter {
+                    it.type.isAvailable.invoke(project) &&
+                        format.availableFeaturesForGeneration.contains(it.type)
+                }
 
                 delay(100)
-                val result = format.generator.invoke(project, availableFeatures)
+                val result = format.generator.invoke(project, featureConfigs)
                 console.log("Finished processing project ${project.name}. ${index + 1}/${props.projects.size}")
                 result
             }

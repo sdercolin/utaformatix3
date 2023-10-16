@@ -3,10 +3,11 @@
 package io
 
 import model.ExportResult
-import model.Feature
+import model.FeatureConfig
 import model.Format
 import model.ImportParams
 import model.Project
+import model.contains
 import org.w3c.files.File
 
 object VocaloidMid {
@@ -15,7 +16,7 @@ object VocaloidMid {
         return VsqLike.parse(file, format, params)
     }
 
-    fun generate(project: Project, features: List<Feature>): ExportResult {
+    fun generate(project: Project, features: List<FeatureConfig>): ExportResult {
         return VsqLike.generate(project, features, format)
     }
 

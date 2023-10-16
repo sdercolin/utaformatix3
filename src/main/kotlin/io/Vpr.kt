@@ -11,12 +11,14 @@ import model.DEFAULT_LYRIC
 import model.ExportNotification
 import model.ExportResult
 import model.Feature
+import model.FeatureConfig
 import model.Format
 import model.ImportParams
 import model.ImportWarning
 import model.Pitch
 import model.TickCounter
 import model.TimeSignature
+import model.contains
 import org.w3c.files.Blob
 import org.w3c.files.File
 import process.pitch.VocaloidPartPitchData
@@ -111,7 +113,7 @@ object Vpr {
         return jsonSerializer.decodeFromString(Project.serializer(), text)
     }
 
-    suspend fun generate(project: model.Project, features: List<Feature>): ExportResult {
+    suspend fun generate(project: model.Project, features: List<FeatureConfig>): ExportResult {
         val jsonText = generateContent(project, features)
         val zip = JsZip()
         zip.file(possibleJsonPaths.first(), jsonText)
@@ -131,7 +133,7 @@ object Vpr {
         )
     }
 
-    private fun generateContent(project: model.Project, features: List<Feature>): String {
+    private fun generateContent(project: model.Project, features: List<FeatureConfig>): String {
         val template = Resources.vprTemplate
         val vpr = jsonSerializer.decodeFromString(Project.serializer(), template)
         var endTick = 0L

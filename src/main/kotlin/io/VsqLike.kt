@@ -5,6 +5,7 @@ import model.DEFAULT_LYRIC
 import model.ExportNotification
 import model.ExportResult
 import model.Feature
+import model.FeatureConfig
 import model.Format
 import model.ImportParams
 import model.ImportWarning
@@ -13,6 +14,7 @@ import model.Pitch
 import model.Project
 import model.TICKS_IN_FULL_NOTE
 import model.Track
+import model.contains
 import org.w3c.files.Blob
 import org.w3c.files.BlobPropertyBag
 import org.w3c.files.File
@@ -185,7 +187,7 @@ object VsqLike {
         tickPrefix: Int,
         measurePrefix: Int,
         project: Project,
-        features: List<Feature>,
+        features: List<FeatureConfig>,
     ): String {
         val notesLines = mutableListOf<String>()
         val lyricsLines = mutableListOf<String>()
@@ -264,7 +266,7 @@ object VsqLike {
         tickPrefix: Int,
         measurePrefix: Int,
         project: Project,
-        features: List<Feature>,
+        features: List<FeatureConfig>,
     ): List<Byte> {
         val bytes = mutableListOf<Byte>()
         bytes.add(0x00)
@@ -294,7 +296,7 @@ object VsqLike {
         return bytes
     }
 
-    fun generate(project: Project, features: List<Feature>, format: Format): ExportResult {
+    fun generate(project: Project, features: List<FeatureConfig>, format: Format): ExportResult {
         val projectFixed = project.lengthLimited(MAX_VSQ_OUTPUT_TICK)
             .copy(measurePrefix = project.measurePrefix.coerceIn(MIN_MEASURE_OFFSET, MAX_MEASURE_OFFSET))
             .withoutEmptyTracks()

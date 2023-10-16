@@ -2,6 +2,7 @@ package io
 
 import model.ExportResult
 import model.Feature
+import model.FeatureConfig
 import model.Format
 import model.ImportParams
 import model.ImportWarning
@@ -11,6 +12,7 @@ import model.Tempo
 import model.TickCounter
 import model.TimeSignature
 import model.Track
+import model.contains
 import org.khronos.webgl.Uint8Array
 import org.w3c.files.Blob
 import org.w3c.files.BlobPropertyBag
@@ -259,13 +261,13 @@ object Dv {
         return results
     }
 
-    fun generate(project: Project, features: List<Feature>): ExportResult {
+    fun generate(project: Project, features: List<FeatureConfig>): ExportResult {
         val contentBytes = generateContent(project, features)
         val blob = Blob(arrayOf(contentBytes), BlobPropertyBag("application/octet-stream"))
         return ExportResult(blob, format.getFileName(project.name), listOf())
     }
 
-    private fun generateContent(project: Project, features: List<Feature>): Uint8Array {
+    private fun generateContent(project: Project, features: List<FeatureConfig>): Uint8Array {
         val bytes = mutableListOf<Byte>()
         bytes.addAll(header)
         val tickPrefix = project.timeSignatures.first().ticksInMeasure.toLong() * FIXED_MEASURE_PREFIX
@@ -306,7 +308,7 @@ object Dv {
             }
     }
 
-    private fun generateTrack(track: Track, tickPrefix: Long, features: List<Feature>): List<Byte> {
+    private fun generateTrack(track: Track, tickPrefix: Long, features: List<FeatureConfig>): List<Byte> {
         val segmentBytes = mutableListOf<Byte>().apply {
             addInt(tickPrefix.toInt())
             val lastNoteTickOff = track.notes.lastOrNull()?.tickOff?.toInt() ?: 0
@@ -338,7 +340,7 @@ object Dv {
         }
     }
 
-    private fun generateNote(note: Note, features: List<Feature>): List<Byte> {
+    private fun generateNote(note: Note, features: List<FeatureConfig>): List<Byte> {
         return mutableListOf<Byte>().apply {
             addInt(note.tickOn.toInt())
             addInt(note.length.toInt())
