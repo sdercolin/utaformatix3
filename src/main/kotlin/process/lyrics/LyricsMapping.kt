@@ -2,6 +2,7 @@ package process.lyrics
 
 import external.Resources
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.Transient
 import model.Note
 import model.Project
 import model.Track
@@ -14,6 +15,7 @@ data class LyricsMappingRequest(
 ) {
     val isValid get() = map.isNotEmpty()
 
+    @Transient
     val map = mapText.lines().mapNotNull { line ->
         if (line.contains("=").not()) return@mapNotNull null
         val from = line.substringBefore("=").trim()
