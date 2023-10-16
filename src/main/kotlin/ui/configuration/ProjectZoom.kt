@@ -104,7 +104,7 @@ private fun ChildrenBuilder.buildProjectZoomDetail(
                         focused = false
                         Typography {
                             variant = TypographyVariant.caption
-                            +string(Strings.ProjectZooLabel)
+                            +string(Strings.ProjectZoomLabel)
                         }
                     }
                     margin = FormControlMargin.normal

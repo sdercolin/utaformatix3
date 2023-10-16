@@ -357,7 +357,7 @@ enum class Strings(
         fr = "Les paramètres actuels peuvent être destructeurs," +
             " car certaines signatures temporelles seront déplacées au début de la mesure.",
     ),
-    ProjectZooLabel(
+    ProjectZoomLabel(
         en = "Factor",
         ja = "因子",
         zhCN = "系数",
