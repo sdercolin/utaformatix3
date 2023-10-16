@@ -13,7 +13,9 @@ external interface SubProps<T : SubState> : Props {
 }
 
 @Serializable
-abstract class SubState
+abstract class SubState {
+    open val isReady: Boolean = true
+}
 
 fun <P : SubProps<T>, T : SubState> subFC(
     block: ChildrenBuilder.(props: P, state: T, editState: (T.() -> T) -> Unit) -> Unit,

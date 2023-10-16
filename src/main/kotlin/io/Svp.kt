@@ -1,7 +1,10 @@
 package io
 
+import external.JsZip
+import external.JsZipOption
 import external.Resources
 import external.generateUUID
+import kotlinx.coroutines.await
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
@@ -16,6 +19,7 @@ import model.ImportWarning
 import model.Pitch
 import model.TimeSignature
 import model.contains
+import org.khronos.webgl.Uint8Array
 import org.w3c.files.Blob
 import org.w3c.files.BlobPropertyBag
 import org.w3c.files.File
@@ -25,6 +29,7 @@ import process.pitch.appendPitchPointsForSvpOutput
 import process.pitch.getRelativeData
 import process.pitch.processSvpInputPitchData
 import process.validateNotes
+import util.encode
 import util.nameWithoutExtension
 import util.readText
 import kotlin.math.roundToLong
@@ -71,7 +76,7 @@ object Svp {
         project: Project,
         tempos: List<model.Tempo>,
         params: ImportParams,
-    ): List<model.Track> = project.tracks.mapIndexed { index, track ->
+    ): List<model.Track> = project.tracksSorted.mapIndexed { index, track ->
         model.Track(
             id = index,
             name = track.name ?: "Track ${index + 1}",
@@ -181,40 +186,57 @@ object Svp {
         )
     }
 
-    fun generate(project: model.Project, features: List<FeatureConfig>): ExportResult {
-        val jsonText = generateContent(project, features)
-        val blob = Blob(arrayOf(jsonText), BlobPropertyBag("application/octet-stream"))
-        val name = format.getFileName(project.name)
-        return ExportResult(
-            blob,
-            name,
-            listOfNotNull(
-                if (features.contains(Feature.ConvertPitch)) ExportNotification.PitchDataExported else null,
-            ),
+    suspend fun generate(project: model.Project, features: List<FeatureConfig>): ExportResult {
+        val jsonTexts = generateContents(project, features)
+        val notifications = listOfNotNull(
+            if (features.contains(Feature.ConvertPitch)) ExportNotification.PitchDataExported else null,
         )
+        return if (jsonTexts.size == 1) {
+            val blob = Blob(arrayOf(jsonTexts.single()), BlobPropertyBag("application/octet-stream"))
+            val name = format.getFileName(project.name)
+            ExportResult(blob, name, notifications)
+        } else {
+            val zip = JsZip()
+            for ((index, text) in jsonTexts.withIndex()) {
+                val name = format.getFileName(project.name + "_${index + 1}")
+                zip.file(name, Uint8Array(text.encode("UTF-8")))
+            }
+            val option = JsZipOption().also { it.type = "blob" }
+            val blob = zip.generateAsync(option).await() as Blob
+            val name = format.getFileName(project.name) + ".zip"
+            ExportResult(blob, name, notifications)
+        }
     }
 
-    private fun generateContent(project: model.Project, features: List<FeatureConfig>): String {
+    private fun generateContents(project: model.Project, features: List<FeatureConfig>): List<String> {
         val template = Resources.svpTemplate
-        val svp = jsonSerializer.decodeFromString(Project.serializer(), template)
-        svp.time.meter = project.timeSignatures.map {
+        val maxTrackCount = features.filterIsInstance<FeatureConfig.SplitProject>().firstOrNull()
+            ?.maxTrackCount
+            ?: Int.MAX_VALUE
+        val meter = project.timeSignatures.map {
             Meter(
                 index = it.measurePosition,
                 numerator = it.numerator,
                 denominator = it.denominator,
             )
         }
-        svp.time.tempo = project.tempos.map {
+        val tempo = project.tempos.map {
             Tempo(
                 position = it.tickPosition * TICK_RATE,
                 bpm = it.bpm,
             )
         }
-        val emptyTrack = svp.tracks.first()
-        svp.tracks = project.tracks.map {
-            generateTrack(it, emptyTrack, features)
+        val trackChunks = project.tracks.chunked(maxTrackCount)
+        return trackChunks.map { tracks ->
+            val svp = jsonSerializer.decodeFromString(Project.serializer(), template)
+            val emptyTrack = svp.tracksSorted.first()
+            svp.time.meter = meter
+            svp.time.tempo = tempo
+            svp.tracks = tracks.map {
+                generateTrack(it, emptyTrack, features)
+            }
+            jsonSerializer.encodeToString(Project.serializer(), svp)
         }
-        return jsonSerializer.encodeToString(Project.serializer(), svp)
     }
 
     private fun generateTrack(track: model.Track, emptyTrack: Track, features: List<FeatureConfig>): Track {
@@ -267,7 +289,9 @@ object Svp {
         var time: Time,
         var tracks: List<Track> = listOf(),
         var version: Int? = null,
-    )
+    ) {
+        val tracksSorted get() = tracks.sortedBy { it.dispOrder }
+    }
 
     @Serializable
     private data class RenderConfig(

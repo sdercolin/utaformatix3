@@ -19,7 +19,7 @@ enum class Feature(val isAvailable: (Project) -> Boolean) {
 sealed class FeatureConfig(val type: Feature) {
     object ConvertPitch : FeatureConfig(Feature.ConvertPitch)
     data class SplitProject(
-        val maxTrackNumber: Int,
+        val maxTrackCount: Int,
     ) : FeatureConfig(Feature.SplitProject)
 }
 

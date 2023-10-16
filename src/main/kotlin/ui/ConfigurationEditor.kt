@@ -49,6 +49,7 @@ import ui.configuration.JapaneseLyricsConversionBlock
 import ui.configuration.LyricsMappingBlock
 import ui.configuration.LyricsReplacementBlock
 import ui.configuration.PitchConversionBlock
+import ui.configuration.ProjectSplitBlock
 import ui.configuration.ProjectZoomBlock
 import ui.configuration.SlightRestsFillingBlock
 import ui.strings.Strings
@@ -59,6 +60,7 @@ import util.runIfAllNotNull
 
 val ConfigurationEditor = scopedFC<ConfigurationEditorProps> { props, scope ->
     var progress by useState(ProgressProps.Initial)
+
     val (japaneseLyricsConversion, setJapaneseLyricsConversion) = useState {
         getStateFromLocalStorage<JapaneseLyricsConversionState>("japaneseLyricsConversion")?.let {
             return@useState it
@@ -146,9 +148,28 @@ val ConfigurationEditor = scopedFC<ConfigurationEditorProps> { props, scope ->
             hasWarning = false,
         )
     }
+    val (projectSplit, setProjectSplit) = useState {
+        getStateFromLocalStorage<ProjectSplitState>("projectSplit")?.let {
+            return@useState it
+        }
+        ProjectSplitState(
+            isAvailable = props.outputFormat.availableFeaturesForGeneration.contains(Feature.SplitProject),
+            isOn = false,
+            maxTrackCountInput = "1",
+        )
+    }
     var dialogError by useState(DialogErrorState())
 
-    fun isReady() = japaneseLyricsConversion.isReady && lyricsReplacement.isReady && lyricsMapping.isReady
+    fun isReady() = listOf(
+        japaneseLyricsConversion,
+        chinesePinyinConversion,
+        lyricsReplacement,
+        lyricsMapping,
+        slightRestsFilling,
+        pitchConversion,
+        projectZoom,
+        projectSplit,
+    ).all { it.isReady }
 
     fun closeErrorDialog() {
         dialogError = dialogError.copy(isShowing = false)
@@ -186,6 +207,10 @@ val ConfigurationEditor = scopedFC<ConfigurationEditorProps> { props, scope ->
         initialState = projectZoom
         submitState = setProjectZoom
     }
+    if (projectSplit.isAvailable) ProjectSplitBlock {
+        initialState = projectSplit
+        submitState = setProjectSplit
+    }
     buildNextButton(
         scope,
         props,
@@ -197,6 +222,7 @@ val ConfigurationEditor = scopedFC<ConfigurationEditorProps> { props, scope ->
         slightRestsFilling,
         pitchConversion,
         projectZoom,
+        projectSplit,
         setProgress = { progress = it },
         onDialogError = { dialogError = it },
     )
@@ -231,6 +257,7 @@ private fun ChildrenBuilder.buildNextButton(
     slightRestsFilling: SlightRestsFillingState,
     pitchConversion: PitchConversionState,
     projectZoom: ProjectZoomState,
+    projectSplit: ProjectSplitState,
     setProgress: (ProgressProps) -> Unit,
     onDialogError: (DialogErrorState) -> Unit,
 ) {
@@ -253,6 +280,7 @@ private fun ChildrenBuilder.buildNextButton(
                     slightRestsFilling,
                     pitchConversion,
                     projectZoom,
+                    projectSplit,
                     setProgress,
                     onDialogError,
                 )
@@ -272,6 +300,7 @@ private fun process(
     slightRestsFilling: SlightRestsFillingState,
     pitchConversion: PitchConversionState,
     projectZoom: ProjectZoomState,
+    projectSplit: ProjectSplitState,
     setProgress: (ProgressProps) -> Unit,
     onDialogError: (DialogErrorState) -> Unit,
 ) {
@@ -304,8 +333,9 @@ private fun process(
                         zoom(projectZoom.factorValue)
                     }
 
-                val featureConfigs = buildList<FeatureConfig> {
+                val featureConfigs = buildList {
                     if (pitchConversion.isOn) add(FeatureConfig.ConvertPitch)
+                    if (projectSplit.isOn) add(FeatureConfig.SplitProject(projectSplit.maxTrackCountInput.toInt()))
                 }.filter {
                     it.type.isAvailable.invoke(project) &&
                         format.availableFeaturesForGeneration.contains(it.type)
@@ -324,6 +354,7 @@ private fun process(
                 "slightRestsFilling" to slightRestsFilling,
                 "pitchConversion" to pitchConversion,
                 "projectZoom" to projectZoom,
+                "projectSplit" to projectSplit,
             ).forEach {
                 window.localStorage.setItem(it.first, json.encodeToString(it.second))
             }
@@ -366,6 +397,7 @@ private val json = Json {
         polymorphic(SubState::class, SlightRestsFillingState::class, SlightRestsFillingState.serializer())
         polymorphic(SubState::class, PitchConversionState::class, PitchConversionState.serializer())
         polymorphic(SubState::class, ProjectZoomState::class, ProjectZoomState.serializer())
+        polymorphic(SubState::class, ProjectSplitState::class, ProjectSplitState.serializer())
     }
 }
 
@@ -382,7 +414,7 @@ data class JapaneseLyricsConversionState(
     val fromType: JapaneseLyricsType?,
     val toType: JapaneseLyricsType?,
 ) : SubState() {
-    val isReady: Boolean get() = if (isOn) fromType != null && toType != null else true
+    override val isReady: Boolean get() = if (isOn) fromType != null && toType != null else true
 }
 
 @Serializable
@@ -395,7 +427,7 @@ data class LyricsReplacementState(
     val isOn: Boolean,
     val request: LyricsReplacementRequest,
 ) : SubState() {
-    val isReady: Boolean get() = if (isOn) request.isValid else true
+    override val isReady: Boolean get() = if (isOn) request.isValid else true
 }
 
 @Serializable
@@ -404,7 +436,7 @@ data class LyricsMappingState(
     val presetName: String?,
     val request: LyricsMappingRequest,
 ) : SubState() {
-    val isReady: Boolean get() = if (isOn) request.isValid else true
+    override val isReady: Boolean get() = if (isOn) request.isValid else true
 
     fun updatePresetName() = when {
         presetName == null -> this
@@ -437,4 +469,17 @@ data class ProjectZoomState(
 ) : SubState() {
     val factorValue: Double
         get() = factor.evalFractionOrNull()!!
+}
+
+@Serializable
+data class ProjectSplitState(
+    val isAvailable: Boolean,
+    val isOn: Boolean,
+    val maxTrackCountInput: String,
+) : SubState() {
+    override val isReady: Boolean
+        get() = if (isOn) {
+            val maxTrackCount = maxTrackCountInput.toIntOrNull()
+            maxTrackCount != null && maxTrackCount > 0
+        } else true
 }

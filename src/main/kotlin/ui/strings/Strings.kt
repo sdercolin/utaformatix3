@@ -364,6 +364,27 @@ enum class Strings(
         ru = "Коэффицент",
         fr = "Coefficient",
     ),
+    ProjectSplit(
+        en = "Split project",
+        ja = "プロジェクトを分割",
+        zhCN = "分割工程",
+        ru = "Разделить проект",
+        fr = "Diviser le projet",
+    ),
+    ProjectSplitDescription(
+        en = "If the project has more tracks than the specified number, it will be split into multiple projects.",
+        ja = "プロジェクトのトラック数が指定した数より多い場合、複数のプロジェクトに分割されます。",
+        zhCN = "如果工程的轨道数超过指定的数量，它将被分割成多个工程。",
+        ru = "Если в проекте больше дорожек, чем указанное количество, он будет разделен на несколько проектов.",
+        fr = "Si le projet a plus de pistes que le nombre spécifié, il sera divisé en plusieurs projets.",
+    ),
+    ProjectSplitMaxTrackCountLabel(
+        en = "Max track count",
+        ja = "最大トラック数",
+        zhCN = "最大轨道数",
+        ru = "Максимальное количество дорожек",
+        fr = "Nombre maximal de pistes",
+    ),
     NextButton(
         en = "Next",
         ja = "次へ",
@@ -772,7 +793,7 @@ enum class Strings(
         zhCN = "一次性转换多个文件。每个文件将单独保存为一个工程。",
         ru = "Преобразовать несколько файлов одновременно. Каждый файл будет сохранен отдельно в качестве проекта.",
         fr = "Convertir plusieurs fichiers en même temps. " +
-            "Chaque fichier sera enregistré séparément en tant que projet.",
+            "Chaque fichier sera enregistré apartment en tant que projet.",
     ),
     ;
 
