@@ -163,7 +163,7 @@ private fun ChildrenBuilder.buildLyricsMappingDetail(
                                     paddingBottom = 12.px
                                 }
                             }
-                            minRows = 5
+                            minRows = 10
                             maxRows = 10
                             placeholder = string(Strings.LyricsMappingMapPlaceholder)
                             value = state.request.mapText
