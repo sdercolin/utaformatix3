@@ -5,9 +5,8 @@ import csstype.Margin
 import csstype.VerticalAlign
 import csstype.em
 import csstype.px
+import emotion.react.css
 import kotlinx.js.jso
-import model.Project
-import mui.icons.material.ErrorOutline
 import mui.icons.material.HelpOutline
 import mui.material.BaseTextFieldProps
 import mui.material.Box
@@ -16,7 +15,6 @@ import mui.material.FormControlMargin
 import mui.material.FormControlVariant
 import mui.material.FormGroup
 import mui.material.FormLabel
-import mui.material.MenuItem
 import mui.material.Paper
 import mui.material.StandardTextFieldProps
 import mui.material.TextField
@@ -25,33 +23,28 @@ import mui.material.TooltipPlacement
 import mui.material.Typography
 import mui.material.styles.TypographyVariant
 import mui.system.sx
-import process.needWarningZoom
-import process.projectZoomFactorOptions
 import react.ChildrenBuilder
 import react.ReactNode
-import react.css.css
 import react.dom.html.ReactHTML.div
-import ui.ProjectZoomState
+import ui.ProjectSplitState
 import ui.common.SubProps
 import ui.common.configurationSwitch
 import ui.common.subFC
 import ui.strings.Strings
 import ui.strings.string
 
-external interface ProjectZoomProps : SubProps<ProjectZoomState> {
-    var projects: List<Project>
-}
+external interface ProjectSplitProps : SubProps<ProjectSplitState>
 
-val ProjectZoomBlock = subFC<ProjectZoomProps, ProjectZoomState> { props, state, editState ->
+val ProjectSplitBlock = subFC<ProjectSplitProps, ProjectSplitState> { _, state, editState ->
     FormGroup {
         div {
             configurationSwitch(
                 isOn = state.isOn,
                 onSwitched = { editState { copy(isOn = it) } },
-                labelStrings = Strings.ProjectZoom,
+                labelStrings = Strings.ProjectSplit,
             )
             Tooltip {
-                title = ReactNode(string(Strings.ProjectZoomDescription))
+                title = ReactNode(string(Strings.ProjectSplitDescription))
                 placement = TooltipPlacement.right
                 disableInteractive = false
                 HelpOutline {
@@ -60,26 +53,14 @@ val ProjectZoomBlock = subFC<ProjectZoomProps, ProjectZoomState> { props, state,
                     }
                 }
             }
-            if (props.projects.any { it.needWarningZoom(state.factorValue) }) {
-                Tooltip {
-                    title = ReactNode(string(Strings.ProjectZoomWarning))
-                    placement = TooltipPlacement.right
-                    disableInteractive = false
-                    ErrorOutline {
-                        style = jso {
-                            verticalAlign = VerticalAlign.middle
-                        }
-                    }
-                }
-            }
         }
     }
-    if (state.isOn) buildProjectZoomDetail(state, editState)
+    if (state.isOn) buildProjectSplitDetail(state, editState)
 }
 
-private fun ChildrenBuilder.buildProjectZoomDetail(
-    state: ProjectZoomState,
-    editState: (ProjectZoomState.() -> ProjectZoomState) -> Unit,
+private fun ChildrenBuilder.buildProjectSplitDetail(
+    state: ProjectSplitState,
+    editState: (ProjectSplitState.() -> ProjectSplitState) -> Unit,
 ) {
     div {
         css {
@@ -104,27 +85,21 @@ private fun ChildrenBuilder.buildProjectZoomDetail(
                         focused = false
                         Typography {
                             variant = TypographyVariant.caption
-                            +string(Strings.ProjectZoomLabel)
+                            +string(Strings.ProjectSplitMaxTrackCountLabel)
                         }
                     }
                     margin = FormControlMargin.normal
                     variant = FormControlVariant.standard
                     focused = false
                     TextField {
-                        style = jso { minWidth = 5.em }
-                        select = true
-                        value = state.factor.unsafeCast<Nothing?>()
+                        sx { width = 5.em }
+                        value = state.maxTrackCountInput
                         (this.unsafeCast<BaseTextFieldProps>()).variant = FormControlVariant.standard
                         (this.unsafeCast<StandardTextFieldProps>()).onChange = { event ->
                             val value = event.target.asDynamic().value as String
-                            editState { copy(factor = value) }
+                            editState { copy(maxTrackCountInput = value) }
                         }
-                        projectZoomFactorOptions.forEach { factor ->
-                            MenuItem {
-                                value = factor
-                                +(factor)
-                            }
-                        }
+                        error = state.isReady.not()
                     }
                 }
             }

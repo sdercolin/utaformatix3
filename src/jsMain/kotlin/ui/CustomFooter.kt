@@ -1,6 +1,7 @@
 package ui
 
 import csstype.NamedColor
+import emotion.react.css
 import mui.material.Link
 import mui.material.LinkUnderline
 import mui.material.Typography
@@ -8,7 +9,6 @@ import mui.material.TypographyAlign
 import mui.material.styles.TypographyVariant
 import react.FC
 import react.Props
-import react.css.css
 import react.dom.html.AnchorTarget
 import react.dom.html.ReactHTML.footer
 import ui.strings.Strings

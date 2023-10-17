@@ -5,6 +5,7 @@ import csstype.Margin
 import csstype.VerticalAlign
 import csstype.em
 import csstype.px
+import emotion.react.css
 import kotlinx.js.jso
 import mui.icons.material.HelpOutline
 import mui.material.BaseTextFieldProps
@@ -26,7 +27,6 @@ import mui.system.sx
 import process.restsFillingMaxLengthDenominatorOptions
 import react.ChildrenBuilder
 import react.ReactNode
-import react.css.css
 import react.dom.html.ReactHTML.div
 import ui.SlightRestsFillingState
 import ui.common.SubProps

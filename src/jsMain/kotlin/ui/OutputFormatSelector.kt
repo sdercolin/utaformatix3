@@ -2,6 +2,7 @@ package ui
 
 import csstype.FontWeight
 import csstype.px
+import emotion.react.css
 import external.Resources
 import kotlinx.browser.window
 import kotlinx.js.jso
@@ -36,7 +37,6 @@ import react.FC
 import react.Props
 import react.ReactNode
 import react.create
-import react.css.css
 import react.dom.html.ReactHTML.div
 import ui.common.title
 import ui.strings.Strings

@@ -1,11 +1,11 @@
 package ui
 
 import csstype.px
+import emotion.react.css
 import kotlinx.browser.window
 import kotlinx.coroutines.await
 import kotlinx.coroutines.launch
 import react.Props
-import react.css.css
 import react.dom.html.ReactHTML.div
 import react.useEffect
 import react.useState

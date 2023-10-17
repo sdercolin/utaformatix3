@@ -1,5 +1,6 @@
 package ui
 
+import dom.html.HTMLButtonElement
 import kotlinx.coroutines.launch
 import mui.icons.material.Language
 import mui.material.Button
@@ -7,7 +8,6 @@ import mui.material.ButtonColor
 import mui.material.Menu
 import mui.material.MenuItem
 import org.w3c.dom.Element
-import org.w3c.dom.HTMLButtonElement
 import react.Props
 import react.dom.html.ReactHTML.div
 import react.useState

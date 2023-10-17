@@ -3,6 +3,7 @@ package ui.common
 import csstype.AlignItems
 import csstype.Display
 import csstype.JustifyContent
+import emotion.react.css
 import mui.material.Backdrop
 import mui.material.CircularProgress
 import mui.material.CircularProgressColor
@@ -12,7 +13,6 @@ import mui.material.Typography
 import mui.material.styles.TypographyVariant
 import mui.system.responsive
 import react.ChildrenBuilder
-import react.css.css
 
 data class ProgressProps(
     val isShowing: Boolean,

@@ -1,4 +1,4 @@
-config.resolve.modules.push("src/main/resources");
+config.resolve.modules.push("./src/jsMain/resources");
 
 config.module.rules.push({
     test: /\.vsqx$/i,

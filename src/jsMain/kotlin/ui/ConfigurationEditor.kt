@@ -1,6 +1,7 @@
 package ui
 
 import csstype.px
+import emotion.react.css
 import kotlinx.browser.window
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
@@ -34,7 +35,6 @@ import process.projectZoomFactorOptions
 import process.zoom
 import react.ChildrenBuilder
 import react.Props
-import react.css.css
 import react.dom.html.ReactHTML.div
 import react.useMemo
 import react.useState

@@ -2,6 +2,7 @@ package ui
 
 import csstype.Color
 import csstype.px
+import emotion.react.css
 import external.JsZip
 import external.JsZipOption
 import external.saveAs
@@ -23,7 +24,6 @@ import mui.system.sx
 import org.w3c.files.Blob
 import react.ChildrenBuilder
 import react.Props
-import react.css.css
 import react.dom.html.ReactHTML.div
 import react.useState
 import ui.common.DialogErrorState

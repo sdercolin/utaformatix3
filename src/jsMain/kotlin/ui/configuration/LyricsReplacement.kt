@@ -8,6 +8,7 @@ import csstype.VerticalAlign
 import csstype.WhiteSpace
 import csstype.em
 import csstype.px
+import emotion.react.css
 import kotlinx.js.jso
 import mui.icons.material.AddCircle
 import mui.icons.material.ArrowDownward
@@ -37,7 +38,6 @@ import process.lyrics.LyricsReplacementRequest
 import react.ChildrenBuilder
 import react.ElementType
 import react.create
-import react.css.css
 import react.dom.html.ReactHTML.div
 import ui.LyricsReplacementState
 import ui.appTheme
