@@ -74,18 +74,28 @@ kotlin {
                 implementation(npm("js-yaml", "4.1.0"))
             }
         }
-        val copyJsResources by tasks.register<Copy>("copyJsResources") {
-            from("src/jsMain/resources")
-            into("build/js/packages/utaformatix-test/kotlin")
-            mustRunAfter("jsTestTestDevelopmentExecutableCompileSync")
-        }
-        tasks.named("jsBrowserTest") {
-            dependsOn(copyJsResources)
-        }
         val jsTest by getting {
             dependencies {
                 implementation(kotlin("test"))
             }
         }
     }
+}
+
+val copyJsResources by tasks.register<Copy>("copyJsResources") {
+    from("src/jsMain/resources")
+    into("build/js/packages/utaformatix-test/kotlin")
+    mustRunAfter("jsTestTestDevelopmentExecutableCompileSync")
+}
+tasks.named("jsBrowserTest") {
+    dependsOn(copyJsResources)
+}
+val cleanDistributedResources by tasks.register<Delete>("cleanDistributedResources") {
+    listOf("format_templates", "images", "texts").forEach {
+        delete("build/distributions/$it")
+    }
+    mustRunAfter("jsBrowserDistribution")
+}
+tasks.named("build") {
+    dependsOn(cleanDistributedResources)
 }
