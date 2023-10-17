@@ -23,17 +23,11 @@ kotlin {
         binaries.executable()
         browser {
             commonWebpackConfig {
-                cssSupport {
-                    enabled.set(true)
-                }
                 devServer = devServer?.copy(port = 33221)
             }
             testTask {
                 useKarma {
                     useChromeHeadless()
-                    webpackConfig.cssSupport {
-                        enabled.set(true)
-                    }
                 }
             }
         }
