@@ -1,5 +1,3 @@
-config.resolve.modules.push("./src/jsMain/resources");
-
 config.module.rules.push({
     test: /\.vsqx$/i,
     loader: 'raw-loader'

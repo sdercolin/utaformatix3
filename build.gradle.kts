@@ -74,6 +74,13 @@ kotlin {
                 implementation(npm("js-yaml", "4.1.0"))
             }
         }
+        val copyJsResources by tasks.register<Copy>("copyJsResources") {
+            from("src/jsMain/resources")
+            into("build/js/packages/utaformatix-test/kotlin")
+        }
+        tasks.named("jsBrowserTest") {
+            dependsOn(copyJsResources)
+        }
         val jsTest by getting {
             dependencies {
                 implementation(kotlin("test"))
