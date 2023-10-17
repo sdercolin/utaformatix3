@@ -68,17 +68,15 @@ branch.
 
 #### Adding a format support
 
-Please check [Format.kt](https://github.com/sdercolin/utaformatix3/blob/master/src/main/kotlin/model/Format.kt) and its
-usages.
+Please check [Format.kt](src/jsMain/kotlin/model/Format.kt) and its usages.
 
 #### Adding a Language
 
-Please check [Strings.kt](https://github.com/sdercolin/utaformatix3/blob/master/src/main/kotlin/ui/strings/Strings.kt).
+Please check [Strings.kt](src/jsMain/kotlin/ui/strings/Strings.kt).
 
 #### Adding a configurable process
 
-Please
-check [ConfigurationEditor.kt](https://github.com/sdercolin/utaformatix3/blob/master/src/main/kotlin/ui/ConfigurationEditor.kt)
+Please check [ConfigurationEditor.kt](src/jsMain/kotlin/ui/ConfigurationEditor.kt)
 about how the existing processes work.
 
 #### Build/Format check
@@ -89,9 +87,8 @@ Please confirm that the `build` and `ktlintCheck` Gradle tasks pass before submi
 You may find `ktlintFormat` task helpful, which helps fix most format problems.
 
 If your IDE's formatter is conflicting with `ktlint`, please import format settings
-from [.editorconfig](https://github.com/sdercolin/utaformatix3/blob/master/.editorconfig) (IntelliJ IDEA uses it by
-default).
+from [.editorconfig](.editorconfig) (IntelliJ IDEA uses it by default).
 
 ## License
 
-[Apache License, Version 2.0](https://github.com/sdercolin/utaformatix3/blob/master/LICENSE.md)
+[Apache License, Version 2.0](LICENSE.md)
