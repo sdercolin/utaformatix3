@@ -4,7 +4,7 @@
 
 UtaFormatix is an application for converting projects among singing voice synthesizer softwares.
 
-The current version `3.x` is built with [Kotlin for JavaScript](https://kotlinlang.org/docs/reference/js-overview.html)
+The current version `3.x` is built with [Kotlin for JavaScript](https://kotlinlang.org/docs/js-overview.html)
 and [React](https://github.com/facebook/react).
 
 ## Features
@@ -20,6 +20,9 @@ and [React](https://github.com/facebook/react).
     - between CV and VCV
     - between Kana and Romaji
 - Find/Replace texts in the lyrics
+- Lyrics mapping with customized dictionaries
+- Project zooming, changing tempo and time signatures without changing the actual time duration of the contents
+- Project splitting with a max track count in each project for SVP export
 - Convert pitch for the following supported formats
 
 | Format               | Pitch import | Vibrato import | Pitch export |
@@ -54,8 +57,9 @@ If you are developing OSS projects related to singing voice synthesis, you may f
 
 1. Install [IntelliJ IDEA](https://www.jetbrains.com/idea/)
 2. Clone and import as a Gradle project
-3. Configure IDEA's Gradle settings with `JDK 11` and `Use Gradle from: gradle-wrapper.properties file`
-4. Run by `./gradlew run` or Gradle Task `other/run`
+3. Configure IDEA's Gradle settings with `JDK 17` and `Use Gradle Wrapper`
+4. Run by `./gradlew jsRun` or Gradle Task `other/jsRun`
+5. Optionally, run by `./gradlew jsRun --continuous` with live reloading enabled
 
 ## Contribution
 
