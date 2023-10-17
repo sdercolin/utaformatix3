@@ -77,6 +77,7 @@ kotlin {
         val copyJsResources by tasks.register<Copy>("copyJsResources") {
             from("src/jsMain/resources")
             into("build/js/packages/utaformatix-test/kotlin")
+            mustRunAfter("jsTestTestDevelopmentExecutableCompileSync")
         }
         tasks.named("jsBrowserTest") {
             dependsOn(copyJsResources)
