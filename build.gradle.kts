@@ -73,6 +73,7 @@ kotlin {
             }
             runTask {
                 cssSupport.enabled = true
+                devServer = devServer?.copy(port = 33221)
             }
             testTask {
                 useKarma {
