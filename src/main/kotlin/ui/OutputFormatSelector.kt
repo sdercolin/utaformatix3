@@ -83,7 +83,8 @@ private fun ChildrenBuilder.buildFormatList(props: OutputFormatSelectorProps) {
             ListItem {
                 ListItemButton {
                     onClick = {
-                        window.localStorage.clear()
+                        // reset configs when opening ConfigurationEditor from this screen
+                        window.localStorage.removeItem("currentConfigs")
                         props.onSelected(format)
                     }
                     style = jso { padding = 24.px }

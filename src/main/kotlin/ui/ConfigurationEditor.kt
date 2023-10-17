@@ -36,14 +36,17 @@ import react.ChildrenBuilder
 import react.Props
 import react.css.css
 import react.dom.html.ReactHTML.div
+import react.useMemo
 import react.useState
 import ui.common.DialogErrorState
+import ui.common.DialogWarningState
 import ui.common.ProgressProps
 import ui.common.SubState
 import ui.common.errorDialog
 import ui.common.progress
 import ui.common.scopedFC
 import ui.common.title
+import ui.common.warningDialog
 import ui.configuration.ChinesePinyinConversionBlock
 import ui.configuration.JapaneseLyricsConversionBlock
 import ui.configuration.LyricsMappingBlock
@@ -233,6 +236,8 @@ val ConfigurationEditor = scopedFC<ConfigurationEditorProps> { props, scope ->
     )
 
     progress(progress)
+
+    multipleModeWarning(props.projects, props.outputFormat)
 }
 
 private inline fun <reified T> ChildrenBuilder.getStateFromLocalStorage(name: String): T? {
@@ -346,7 +351,7 @@ private fun process(
                 console.log("Finished processing project ${project.name}. ${index + 1}/${props.projects.size}")
                 result
             }
-            listOf(
+            val currentConfigs = mapOf(
                 "japaneseLyricsConversion" to japaneseLyricsConversion,
                 "chinesePinyinConversion" to chinesePinyinConversion,
                 "lyricsReplacement" to lyricsReplacement,
@@ -355,9 +360,8 @@ private fun process(
                 "pitchConversion" to pitchConversion,
                 "projectZoom" to projectZoom,
                 "projectSplit" to projectSplit,
-            ).forEach {
-                window.localStorage.setItem(it.first, json.encodeToString(it.second))
-            }
+            )
+            window.localStorage.setItem("currentConfigs", json.encodeToString(currentConfigs))
 
             // adjust results to make every fileName unique
             val adjustedResults = results.mapIndexed { index, result ->
@@ -385,6 +389,22 @@ private fun process(
             )
         }
     }
+}
+
+private fun ChildrenBuilder.multipleModeWarning(projects: List<Project>, outputFormat: Format) {
+    val shouldWarn = useMemo(projects, outputFormat) {
+        projects.size > 1 && projects.first().format.multipleFile && outputFormat.multipleFile.not()
+    }
+    val (closed, setClosed) = useState(false)
+    warningDialog(
+        id = "isMultipleModeForSingleFileFormat",
+        state = DialogWarningState(
+            isShowing = shouldWarn && !closed,
+            title = string(Strings.MultipleModeForMultipleFileFormatWarningTitle),
+            message = string(Strings.MultipleModeForMultipleFileFormatWarningDescription),
+        ),
+        close = { setClosed(true) },
+    )
 }
 
 private val json = Json {

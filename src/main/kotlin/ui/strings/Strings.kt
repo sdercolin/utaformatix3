@@ -392,6 +392,13 @@ enum class Strings(
         ru = "Далее",
         fr = "Suivant",
     ),
+    ConfirmButton(
+        en = "OK",
+        ja = "OK",
+        zhCN = "确定",
+        ru = "ОК",
+        fr = "OK",
+    ),
     CancelButton(
         en = "Cancel",
         ja = "キャンセル",
@@ -405,6 +412,13 @@ enum class Strings(
         zhCN = "提交报告",
         ru = "Сообщить",
         fr = "Signaler",
+    ),
+    DoNotShownAgainButton(
+        en = "Don't show again",
+        ja = "次回から表示しない",
+        zhCN = "不再显示",
+        ru = "Больше не показывать",
+        fr = "Ne plus afficher",
     ),
     ImportFileDescription(
         en = "Drop files or Click to import",
@@ -795,6 +809,26 @@ enum class Strings(
         fr = "Convertir plusieurs fichiers en même temps. " +
             "Chaque fichier sera enregistré apartment en tant que projet.",
     ),
+    MultipleModeForMultipleFileFormatWarningTitle(
+        en = "You are using the batch conversion mode",
+        ja = "一括変換モードを使用しています",
+        zhCN = "您正在使用批量转换模式",
+    ),
+    MultipleModeForMultipleFileFormatWarningDescription(
+        en = "In the batch conversion mode, every file will be saved separately as a project without being merged.\n" +
+            "Currently you are using this mode with an import format that does not support multiple tracks.\n" +
+            "Please make sure that you don't want to merge the input tracks before continuing.\n" +
+            "If you don't want to use this mode, " +
+            "please return to the Import page and toggle off the \"Batch conversion\" option.",
+        ja = "一括変換モードでは、各ファイルはマージされずにプロジェクトとして別々に保存されます。\n" +
+            "現在、複数トラックをサポートしていないフォーマットでこのモードを使用しています。\n" +
+            "入力トラックがマージされないことをご確認の上、続行してください。\n" +
+            "このモードを使用したくない場合は、インポートページに戻り、「一括変換」オプションをオフにしてください。",
+        zhCN = "在批量转换模式下，每个文件将单独保存为一个工程而不会被合并。\n" +
+            "当前您正在此模式下导入只支持单个轨道的格式。\n" +
+            "请确保您不想合并输入轨道后再继续。\n" +
+            "如果您不想使用此模式，请返回导入页面并关闭“批量转换”选项。",
+    )
     ;
 
     fun get(language: Language): String = when (language) {
