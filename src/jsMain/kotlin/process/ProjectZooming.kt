@@ -20,7 +20,7 @@ fun Project.zoom(factor: Double): Project {
         it.copy(tickPosition = (it.tickPosition * factor).roundToLong(), bpm = it.bpm * factor)
     }
     val timeSignatures = timeSignatures
-        .map { it.copy(measurePosition = (measurePrefix * factor).roundToInt()) }
+        .map { it.copy(measurePosition = (it.measurePosition * factor).roundToInt()) }
         .fold(listOf<TimeSignature>()) { acc, timeSignature ->
             if (acc.isEmpty()) {
                 listOf(timeSignature)
