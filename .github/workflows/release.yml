@@ -52,7 +52,7 @@ jobs:
         run: |
           npm i electron-packager -g
           cp ./package.json ./build/distributions/package.json
-          cp ./main.json ./build/distributions/main.json
+          cp ./main.js ./build/distributions/main.js
           npm run package
 
       - name: compress package
