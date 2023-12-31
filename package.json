@@ -1,0 +1,17 @@
+{
+	"name": "utaformatix_electron",
+	"version": "1.0.0.0",
+	"description": "utaformatix3 on electron without network",
+	"main": "main.js",
+	"scripts": {
+		"test": "electron .",
+		"package": "electron-packager ./build/distributions UtaFormatix --out ./ --platform=win32 --arch=x64 --electron-version 23.2.1 --overwrite"
+	},
+	"author": "",
+	"license": "Apache",
+	"devDependencies": {
+		"electron": "^23.2.1",
+		"electron-builder": "^23.6.0",
+		"electron-packager": "^17.1.2"
+	}
+}
