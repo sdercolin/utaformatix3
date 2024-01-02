@@ -43,6 +43,14 @@ jobs:
           mkdir ../build/distributions/beta
           cp -r build/distributions/* ../build/distributions/beta
 
+      - name: Build Harmoloid
+        run: |
+          git clone https://github.com/sdercolin/harmoloid2
+          cd harmoloid2
+          ./gradlew build
+          mkdir ../build/distributions/harm
+          cp -r build/distributions/* ../build/distributions/harm
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v1
         with:

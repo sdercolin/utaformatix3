@@ -41,6 +41,20 @@ val CustomFooter = FC<CustomFooterProps> { props ->
             Link {
                 color = NamedColor.grey
                 underline = LinkUnderline.hover
+                href = "/beta"
+                +"Beta"
+            }
+            +"　|　"
+            Link {
+                color = NamedColor.grey
+                underline = LinkUnderline.hover
+                href = "/harm"
+                +"Harmoloid2"
+            }
+            +"　|　"
+            Link {
+                color = NamedColor.grey
+                underline = LinkUnderline.hover
                 onClick = { props.onOpenEmbeddedPage(Strings.ReleaseNotesUrl) }
                 +"Release Notes"
             }
