@@ -10,7 +10,6 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.modules.SerializersModule
 import model.ExportResult
 import model.Feature
 import model.FeatureConfig
@@ -64,8 +63,16 @@ import util.runIfAllNotNull
 val ConfigurationEditor = scopedFC<ConfigurationEditorProps> { props, scope ->
     var progress by useState(ProgressProps.Initial)
 
+    val currentConfigs = useMemo {
+        val configs = window.localStorage["currentConfigs"]?.let {
+            json.decodeFromString<Configs>(it)
+        }
+        if (configs != null) console.log("Restored configs from localStorage", configs)
+        configs
+    }
+
     val (japaneseLyricsConversion, setJapaneseLyricsConversion) = useState {
-        getStateFromLocalStorage<JapaneseLyricsConversionState>("japaneseLyricsConversion")?.let {
+        currentConfigs?.japaneseLyricsConversion?.let {
             return@useState it
         }
 
@@ -90,7 +97,7 @@ val ConfigurationEditor = scopedFC<ConfigurationEditorProps> { props, scope ->
         )
     }
     val (chinesePinyinConversion, setChinesePinyinConversion) = useState {
-        getStateFromLocalStorage<ChinesePinyinConversionState>("chinesePinyinConversion")?.let {
+        currentConfigs?.chinesePinyinConversion?.let {
             return@useState it
         }
 
@@ -99,7 +106,7 @@ val ConfigurationEditor = scopedFC<ConfigurationEditorProps> { props, scope ->
         )
     }
     val (lyricsReplacement, setLyricsReplacement) = useState {
-        getStateFromLocalStorage<LyricsReplacementState>("lyricsReplacement")?.let {
+        currentConfigs?.lyricsReplacement?.let {
             return@useState it
         }
 
@@ -111,9 +118,10 @@ val ConfigurationEditor = scopedFC<ConfigurationEditorProps> { props, scope ->
         }
     }
     val (lyricsMapping, setLyricsMapping) = useState {
-        getStateFromLocalStorage<LyricsMappingState>("lyricsMapping")?.let {
+        currentConfigs?.lyricsMapping?.let {
             return@useState it
         }
+
         LyricsMappingState(
             isOn = false,
             presetName = null,
@@ -121,30 +129,31 @@ val ConfigurationEditor = scopedFC<ConfigurationEditorProps> { props, scope ->
         )
     }
     val (slightRestsFilling, setSlightRestsFilling) = useState {
-        getStateFromLocalStorage<SlightRestsFillingState>("slightRestsFilling")?.let {
+        currentConfigs?.slightRestsFilling?.let {
             return@useState it
         }
+
         SlightRestsFillingState(
             true,
             RESTS_FILLING_MAX_LENGTH_DENOMINATOR_DEFAULT,
         )
     }
     val (pitchConversion, setPitchConversion) = useState {
-        getStateFromLocalStorage<PitchConversionState>("pitchConversion")?.let {
-            return@useState it
-        }
+        val isOn = currentConfigs?.pitchConversion?.isOn
+
         val hasPitchData = props.projects.any { Feature.ConvertPitch.isAvailable(it) }
         val isPitchConversionAvailable = hasPitchData &&
             props.outputFormat.availableFeaturesForGeneration.contains(Feature.ConvertPitch)
         PitchConversionState(
             isAvailable = isPitchConversionAvailable,
-            isOn = isPitchConversionAvailable,
+            isOn = isOn ?: isPitchConversionAvailable,
         )
     }
     val (projectZoom, setProjectZoom) = useState {
-        getStateFromLocalStorage<ProjectZoomState>("projectZoom")?.let {
+        currentConfigs?.projectZoom?.let {
             return@useState it
         }
+
         ProjectZoomState(
             isOn = false,
             factor = projectZoomFactorOptions.first(),
@@ -152,13 +161,13 @@ val ConfigurationEditor = scopedFC<ConfigurationEditorProps> { props, scope ->
         )
     }
     val (projectSplit, setProjectSplit) = useState {
-        getStateFromLocalStorage<ProjectSplitState>("projectSplit")?.let {
-            return@useState it
-        }
+        val projectSplit = currentConfigs?.projectSplit
+
         ProjectSplitState(
             isAvailable = props.outputFormat.availableFeaturesForGeneration.contains(Feature.SplitProject),
-            isOn = false,
-            maxTrackCountInput = FeatureConfig.SplitProject.getDefault(props.outputFormat).maxTrackCount.toString(),
+            isOn = projectSplit?.isOn ?: false,
+            maxTrackCountInput = projectSplit?.maxTrackCountInput
+                ?: FeatureConfig.SplitProject.getDefault(props.outputFormat).maxTrackCount.toString(),
         )
     }
     var dialogError by useState(DialogErrorState())
@@ -238,17 +247,6 @@ val ConfigurationEditor = scopedFC<ConfigurationEditorProps> { props, scope ->
     progress(progress)
 
     multipleModeWarning(props.projects, props.outputFormat)
-}
-
-private inline fun <reified T> ChildrenBuilder.getStateFromLocalStorage(name: String): T? {
-    runCatching {
-        window.localStorage[name]?.let {
-            return json.decodeFromString(it)
-        }
-    }.onFailure {
-        console.log(it)
-    }
-    return null
 }
 
 private fun ChildrenBuilder.buildNextButton(
@@ -351,15 +349,15 @@ private fun process(
                 console.log("Finished processing project ${project.name}. ${index + 1}/${props.projects.size}")
                 result
             }
-            val currentConfigs = mapOf(
-                "japaneseLyricsConversion" to japaneseLyricsConversion,
-                "chinesePinyinConversion" to chinesePinyinConversion,
-                "lyricsReplacement" to lyricsReplacement,
-                "lyricsMapping" to lyricsMapping,
-                "slightRestsFilling" to slightRestsFilling,
-                "pitchConversion" to pitchConversion,
-                "projectZoom" to projectZoom,
-                "projectSplit" to projectSplit,
+            val currentConfigs = Configs(
+                japaneseLyricsConversion,
+                chinesePinyinConversion,
+                lyricsReplacement,
+                lyricsMapping,
+                slightRestsFilling,
+                pitchConversion,
+                projectZoom,
+                projectSplit,
             )
             window.localStorage.setItem("currentConfigs", json.encodeToString(currentConfigs))
 
@@ -409,16 +407,6 @@ private fun ChildrenBuilder.multipleModeWarning(projects: List<Project>, outputF
 
 private val json = Json {
     ignoreUnknownKeys = true
-    serializersModule = SerializersModule {
-        polymorphic(SubState::class, JapaneseLyricsConversionState::class, JapaneseLyricsConversionState.serializer())
-        polymorphic(SubState::class, ChinesePinyinConversionState::class, ChinesePinyinConversionState.serializer())
-        polymorphic(SubState::class, LyricsReplacementState::class, LyricsReplacementState.serializer())
-        polymorphic(SubState::class, LyricsMappingState::class, LyricsMappingState.serializer())
-        polymorphic(SubState::class, SlightRestsFillingState::class, SlightRestsFillingState.serializer())
-        polymorphic(SubState::class, PitchConversionState::class, PitchConversionState.serializer())
-        polymorphic(SubState::class, ProjectZoomState::class, ProjectZoomState.serializer())
-        polymorphic(SubState::class, ProjectSplitState::class, ProjectSplitState.serializer())
-    }
 }
 
 external interface ConfigurationEditorProps : Props {
@@ -503,3 +491,15 @@ data class ProjectSplitState(
             maxTrackCount != null && maxTrackCount > 0
         } else true
 }
+
+@Serializable
+data class Configs(
+    val japaneseLyricsConversion: JapaneseLyricsConversionState,
+    val chinesePinyinConversion: ChinesePinyinConversionState,
+    val lyricsReplacement: LyricsReplacementState,
+    val lyricsMapping: LyricsMappingState,
+    val slightRestsFilling: SlightRestsFillingState,
+    val pitchConversion: PitchConversionState,
+    val projectZoom: ProjectZoomState,
+    val projectSplit: ProjectSplitState,
+)
