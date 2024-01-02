@@ -85,7 +85,7 @@ object Ustx {
         val trackMap = List(project.tracks.size) { index: Int ->
             model.Track(
                 id = index,
-                name = "Track ${index + 1}",
+                name = project.tracks[index].trackName ?: "Track ${index + 1}",
                 notes = listOf(),
             )
         }.associateBy { it.id }.toMutableMap()
@@ -193,7 +193,7 @@ object Ustx {
         val template = jsonSerializer.decodeFromString(Project.serializer(), templateJsonText)
         val trackTemplate = template.tracks.first()
         val tracks = project.tracks.map {
-            trackTemplate.copy()
+            trackTemplate.copy(trackName = it.name)
         }
         val voicePartTemplate = template.voiceParts.first()
         val voiceParts = project.tracks.map {
@@ -317,6 +317,7 @@ object Ustx {
         val mute: Boolean = false,
         val solo: Boolean = false,
         val volume: Double = 0.0,
+        @SerialName("track_name") val trackName: String? = null,
     )
 
     @Serializable
