@@ -36,11 +36,11 @@ import kotlin.math.roundToLong
 
 object Svp {
     suspend fun parse(file: File, params: ImportParams): model.Project {
-        val text = file.readText().let {
-            val index = it.lastIndexOf('}')
-            it.take(index + 1)
-        }
-        val project = jsonSerializer.decodeFromString(Project.serializer(), text)
+        val rawProjects = file.readText().split("\u0000")
+            .map { it.trim('\u0000') }
+            .filter { it.isNotBlank() }
+        val projects = rawProjects.map { jsonSerializer.decodeFromString(Project.serializer(), it) }
+        val project = projects.maxBy { it.version ?: 0 }
         val warnings = mutableListOf<ImportWarning>()
         val timeSignatures = project.time.meter?.map {
             TimeSignature(
