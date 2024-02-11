@@ -44,7 +44,7 @@ fun Project.mapLyrics(request: LyricsMappingRequest) = copy(
     tracks = tracks.map { it.replaceLyrics(request) },
 )
 
-fun Track.replaceLyrics(request: LyricsMappingRequest) = copy(
+private fun Track.replaceLyrics(request: LyricsMappingRequest) = copy(
     notes = notes.mapNotNull { note -> note.replaceLyrics(request).takeIf { it.lyric.isNotEmpty() } }
         .validateNotes(),
 )

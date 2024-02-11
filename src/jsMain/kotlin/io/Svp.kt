@@ -108,6 +108,7 @@ object Svp {
             tickOn = tickOn,
             tickOff = tickOn + note.duration / TICK_RATE,
             lyric = note.lyrics.takeUnless { it.isNullOrBlank() } ?: DEFAULT_LYRIC,
+            phoneme = note.phonemes,
         )
     }
 
@@ -250,7 +251,7 @@ object Svp {
                         onset = it.tickOn * TICK_RATE,
                         duration = it.length * TICK_RATE,
                         lyrics = it.lyric,
-                        phonemes = "",
+                        phonemes = it.phoneme ?: "",
                         pitch = it.key,
                         attributes = Attributes(),
                     )

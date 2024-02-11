@@ -33,17 +33,18 @@ data class PhonemesMappingRequest(
     }
 }
 
-fun Project.mapPhonemes(request: PhonemesMappingRequest) = copy(
+fun Project.mapPhonemes(request: PhonemesMappingRequest?) = copy(
     tracks = tracks.map { it.replacePhonemes(request) },
 )
 
-fun Track.replacePhonemes(request: PhonemesMappingRequest) = copy(
-    notes = notes.mapNotNull { note -> note.replacePhonemes(request).takeIf { it.lyric.isNotEmpty() } }
+fun Track.replacePhonemes(request: PhonemesMappingRequest?) = copy(
+    notes = notes.mapNotNull { note -> note.replacePhonemes(request) }
         .validateNotes(),
 )
 
-fun Note.replacePhonemes(request: PhonemesMappingRequest): Note {
+fun Note.replacePhonemes(request: PhonemesMappingRequest?): Note {
     val input = phoneme?.split(" ") ?: return this
+    if (request == null) return copy(phoneme = null)
     val output = mutableListOf<String>()
     var pos = 0
     while (pos <= input.lastIndex) {

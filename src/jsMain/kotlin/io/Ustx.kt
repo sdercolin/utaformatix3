@@ -94,10 +94,20 @@ object Ustx {
             val track = trackMap[trackId] ?: continue
             val tickPrefix = voicePart.position
             val notes = voicePart.notes.map {
+                val rawLyrics = it.lyric
+                // some phonemizers use `lyrics [phonemes]` format
+                val regex = Regex("\\s\\[([^\\[\\]]*)\\]$")
+                val match = regex.find(rawLyrics)
+                val (lyric, phoneme) = if (match == null) {
+                    rawLyrics to null
+                } else {
+                    rawLyrics.take(match.range.first) to rawLyrics.substring(match.range).trim().trim('[', ']')
+                }
                 Note(
                     id = 0,
                     key = it.tone,
-                    lyric = it.lyric,
+                    lyric = lyric,
+                    phoneme = phoneme,
                     tickOn = it.position + tickPrefix,
                     tickOff = it.position + it.duration + tickPrefix,
                 )
@@ -265,12 +275,18 @@ object Ustx {
             if (index == 0) datum.copy(y = firstPitchPointValue) else datum.copy()
         }
         val pitch = template.pitch.copy(data = pitchPoints)
+        val lyric = buildString {
+            append(thisNote.lyric)
+            if (thisNote.phoneme?.isNotBlank() == true) {
+                append(" [${thisNote.phoneme}]")
+            }
+        }
         return Note(
             position = thisNote.tickOn,
             duration = thisNote.length,
             tone = thisNote.key,
             pitch = pitch,
-            lyric = thisNote.lyric,
+            lyric = lyric,
             vibrato = template.vibrato.copy(),
         )
     }

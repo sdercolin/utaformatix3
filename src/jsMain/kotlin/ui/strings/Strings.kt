@@ -313,6 +313,54 @@ enum class Strings(
         ru = "Запишите запись отображения на строку в формате \"{from}={to}\".",
         fr = "Écrivez une entrée de mappage par ligne au format \"{from}={to}\".",
     ),
+    PhonemesConversion(
+        en = "Convert phonemes",
+        ja = "発音記号を変換",
+        zhCN = "转换音素",
+        ru = "Конвертировать фонемы",
+        fr = "Convertir les phonèmes",
+    ),
+    PhonemesConversionEnableMapping(
+        en = "Map phonemes",
+        ja = "発音記号をマッピング",
+        zhCN = "映射音素",
+        ru = "Отобразить фонемы",
+        fr = "Mapper les phonèmes",
+    ),
+    PhonemesConversionEnableMappingDescription(
+        en = "Enable phonemes mapping with a customizable mapping table. If disabled, phonemes are copied as is.",
+        ja = "カスタマイズ可能なマッピングテーブルを使用して発音記号をマッピングします。無効にすると、発音記号はそのままコピーされます。",
+        zhCN = "使用可自定义的映射表映射音素。如果禁用，音素将被直接复制。",
+        ru = "Включить отображение фонем с помощью настраиваемой таблицы отображения. " +
+            "Если отключено, фонемы копируются как есть.",
+        fr = "Activer le mappage des phonèmes avec une table de mappage personnalisable. " +
+            "Si désactivé, les phonèmes sont copiés tels quels.",
+    ),
+    PhonemesMappingPreset(
+        en = "Preset",
+        ja = "プリセット",
+        zhCN = "预设",
+        ru = "Пресет",
+        fr = "Préréglage",
+    ),
+    PhonemesMappingPresetClear(
+        en = "Clear",
+        ja = "クリア",
+        zhCN = "清空",
+        ru = "Очистить",
+        fr = "Effacer",
+    ),
+    PhonemesMappingMapPlaceholder(
+        en = "Write a mapping entry per line in the format of \"{from}={to}\". " +
+            "Whitespace \" \" can be used to combine multiple phonemes as a set.",
+        ja = "「{from}={to}」の形式で、一行に一つのマッピングエントリーを書き込んでください。" +
+            "複数の発音記号をセットとして扱う場合は、空白「 」を使用してください。",
+        zhCN = "请按照“{from}={to}”的格式，每行写入一个映射条目。空格“ ”可以用于将多个音素组合成一个集合。",
+        ru = "Запишите запись отображения на строку в формате \"{from}={to}\". " +
+            "Пробел \" \" можно использовать для объединения нескольких фонем в качестве набора.",
+        fr = "Écrivez une entrée de mappage par ligne au format \"{from}={to}\". " +
+            "L'espace blanc \" \" peut être utilisé pour combiner plusieurs phonèmes en un ensemble.",
+    ),
     ConvertPitchData(
         en = "Convert pitch parameters",
         ja = "ピッチパラメータを変換",

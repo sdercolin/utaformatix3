@@ -13,6 +13,11 @@ enum class Feature(val isAvailable: (Project) -> Boolean) {
     ),
     SplitProject(
         isAvailable = { true },
+    ),
+    ConvertPhonemes(
+        isAvailable = { project ->
+            project.tracks.any { track -> track.notes.any { note -> note.phoneme != null } }
+        },
     )
 }
 
