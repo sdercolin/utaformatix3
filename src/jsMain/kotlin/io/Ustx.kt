@@ -104,7 +104,6 @@ object Ustx {
                     rawLyrics.substring(match.range).trim('[', ']').let { cleanedPhoneme ->
                         rawLyrics.take(match.range.first).trim().ifEmpty { cleanedPhoneme } to cleanedPhoneme
                     }
-
                 }
                 Note(
                     id = 0,
