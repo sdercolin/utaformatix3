@@ -95,13 +95,16 @@ object Ustx {
             val tickPrefix = voicePart.position
             val notes = voicePart.notes.map {
                 val rawLyrics = it.lyric
-                // some phonemizers use `lyrics [phonemes]` format
-                val regex = Regex("\\s\\[([^\\[\\]]*)\\]$")
+                // some phonemizers use `lyrics [phonemes]` or `[phonemes]` format
+                val regex = Regex("\\[([^\\[\\]]*)\\]$")
                 val match = regex.find(rawLyrics)
                 val (lyric, phoneme) = if (match == null) {
                     rawLyrics to null
                 } else {
-                    rawLyrics.take(match.range.first) to rawLyrics.substring(match.range).trim().trim('[', ']')
+                    rawLyrics.substring(match.range).trim('[', ']').let { cleanedPhoneme ->
+                        rawLyrics.take(match.range.first).trim().ifEmpty { cleanedPhoneme } to cleanedPhoneme
+                    }
+
                 }
                 Note(
                     id = 0,
