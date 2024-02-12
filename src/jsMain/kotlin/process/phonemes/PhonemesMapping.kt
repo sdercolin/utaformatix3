@@ -38,8 +38,7 @@ fun Project.mapPhonemes(request: PhonemesMappingRequest?) = copy(
 )
 
 fun Track.replacePhonemes(request: PhonemesMappingRequest?) = copy(
-    notes = notes.mapNotNull { note -> note.replacePhonemes(request) }
-        .validateNotes(),
+    notes = notes.map { note -> note.replacePhonemes(request) }.validateNotes(),
 )
 
 fun Note.replacePhonemes(request: PhonemesMappingRequest?): Note {
