@@ -14,6 +14,7 @@ class PhonemesMappingTest {
             c=C
             d c a=DC' A
             d c=DC
+            sil=
         """.trimIndent(),
     )
 
@@ -59,5 +60,12 @@ class PhonemesMappingTest {
         val note = createNote("d c a m d c")
         val actual = note.replacePhonemes(request).phoneme
         assertEquals("DC' A m DC", actual)
+    }
+
+    @Test
+    fun testMutedPhoneme() {
+        val note = createNote("sil a")
+        val actual = note.replacePhonemes(request).phoneme
+        assertEquals("A", actual)
     }
 }

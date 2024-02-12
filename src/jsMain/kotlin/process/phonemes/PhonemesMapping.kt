@@ -63,5 +63,5 @@ fun Note.replacePhonemes(request: PhonemesMappingRequest?): Note {
             pos++
         }
     }
-    return copy(phoneme = output.joinToString(" "))
+    return copy(phoneme = output.filter { it.isNotBlank() }.joinToString(" "))
 }
