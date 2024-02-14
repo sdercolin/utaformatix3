@@ -1,5 +1,6 @@
 package process.phonemes
 
+import external.require
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 import model.Note
@@ -28,7 +29,14 @@ data class PhonemesMappingRequest(
         fun getPreset(name: String) = requireNotNull(findPreset(name))
 
         val Presets: List<Pair<String, PhonemesMappingRequest>> by lazy {
-            listOf()
+            listOf(
+                "SynthV JA to Vocaloid JA" to PhonemesMappingRequest(
+                    require("./texts/SynthV JA to Vocaloid JA.txt").default as String,
+                ),
+                "Vocaloid JA to SynthV JA" to PhonemesMappingRequest(
+                    require("./texts/Vocaloid JA to SynthV JA.txt").default as String,
+                ),
+            )
         }
     }
 }
