@@ -138,12 +138,17 @@ private fun ChildrenBuilder.buildPhonemesConversionDetail(
                                         )
                                     }
                                 }
-                                PhonemesMappingRequest.Presets.forEach { preset ->
-                                    MenuItem {
-                                        value = preset.first
-                                        +(preset.first)
+                                PhonemesMappingRequest.Presets
+                                    .filter { preset ->
+                                        state.sourceFormat in preset.sourceFormats &&
+                                            state.targetFormat in preset.targetFormats
                                     }
-                                }
+                                    .forEach { preset ->
+                                        MenuItem {
+                                            value = preset.name
+                                            +(preset.name)
+                                        }
+                                    }
                             }
                         }
                         Button {

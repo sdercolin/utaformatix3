@@ -3,7 +3,9 @@ package process.phonemes
 import external.require
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
+import model.Format
 import model.Note
+import model.PhonemesMappingPreset
 import model.Project
 import model.Track
 import process.validateNotes
@@ -24,17 +26,27 @@ data class PhonemesMappingRequest(
 
     companion object {
 
-        fun findPreset(name: String) = Presets.find { it.first == name }?.second
+        fun findPreset(name: String) = Presets.find { it.name == name }?.phonemesMap
 
         fun getPreset(name: String) = requireNotNull(findPreset(name))
 
-        val Presets: List<Pair<String, PhonemesMappingRequest>> by lazy {
+        val Presets: List<PhonemesMappingPreset> by lazy {
             listOf(
-                "SynthV JA to Vocaloid JA" to PhonemesMappingRequest(
-                    require("./texts/SynthV JA to Vocaloid JA.txt").default as String,
+                PhonemesMappingPreset(
+                    sourceFormats = listOf(Format.Svp),
+                    targetFormats = Format.vocaloidFormats,
+                    name = "Japanese",
+                    phonemesMap = PhonemesMappingRequest(
+                        require("./texts/SynthV JA to Vocaloid JA.txt").default as String,
+                    ),
                 ),
-                "Vocaloid JA to SynthV JA" to PhonemesMappingRequest(
-                    require("./texts/Vocaloid JA to SynthV JA.txt").default as String,
+                PhonemesMappingPreset(
+                    sourceFormats = Format.vocaloidFormats,
+                    targetFormats = listOf(Format.Svp),
+                    name = "Japanese",
+                    phonemesMap = PhonemesMappingRequest(
+                        require("./texts/Vocaloid JA to SynthV JA.txt").default as String,
+                    ),
                 ),
             )
         }
