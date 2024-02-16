@@ -145,8 +145,8 @@ private fun ChildrenBuilder.buildPhonemesConversionDetail(
                                 }
                                 PhonemesMappingRequest.Presets
                                     .filter { preset ->
-                                        props.sourceFormat in preset.sourceFormats &&
-                                            props.targetFormat in preset.targetFormats
+                                        props.sourceFormat in preset.sourceFormats + Format.UfData &&
+                                            props.targetFormat in preset.targetFormats + Format.UfData
                                     }
                                     .forEach { preset ->
                                         MenuItem {
