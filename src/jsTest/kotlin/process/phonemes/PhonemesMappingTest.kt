@@ -15,6 +15,10 @@ class PhonemesMappingTest {
             d c a=DC' A
             d c=DC
             sil=
+            s=S
+            sh=SH
+            effff=EF
+            effff d=EF D
         """.trimIndent(),
     )
 
@@ -29,9 +33,9 @@ class PhonemesMappingTest {
 
     @Test
     fun testNoMatch() {
-        val note = createNote("l e")
+        val note = createNote("l o")
         val actual = note.replacePhonemes(request).phoneme
-        assertEquals("l e", actual)
+        assertEquals("l o", actual)
     }
 
     @Test
@@ -67,5 +71,19 @@ class PhonemesMappingTest {
         val note = createNote("sil a")
         val actual = note.replacePhonemes(request).phoneme
         assertEquals("A", actual)
+    }
+
+    @Test
+    fun testSortLength() {
+        val note = createNote("sh")
+        val actual = note.replacePhonemes(request).phoneme
+        assertEquals("SH", actual)
+    }
+
+    @Test
+    fun testSortMultiLength() {
+        val note = createNote("effff d c a")
+        val actual = note.replacePhonemes(request).phoneme
+        assertEquals("EF DC' A", actual)
     }
 }

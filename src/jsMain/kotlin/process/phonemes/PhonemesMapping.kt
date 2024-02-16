@@ -19,7 +19,12 @@ data class PhonemesMappingRequest(
         val from = line.substringBefore("=").trim()
         val to = line.substringAfter("=").trim()
         from to to
-    }.sortedByDescending { it.first.split(" ").size }
+    }.sortedWith { a, b ->
+        val countA = a.first.split(" ").count()
+        val countB = b.first.split(" ").count()
+        if (countA != countB) return@sortedWith countB - countA // descending order
+        a.first.length - b.first.length
+    }
 
     companion object {
 
@@ -42,25 +47,21 @@ fun Track.replacePhonemes(request: PhonemesMappingRequest?) = copy(
 )
 
 fun Note.replacePhonemes(request: PhonemesMappingRequest?): Note {
-    val input = phoneme?.split(" ") ?: return this
     if (request == null) return copy(phoneme = null)
-    val output = mutableListOf<String>()
-    var pos = 0
-    while (pos <= input.lastIndex) {
-        val restInput = input.drop(pos).joinToString(" ")
-        var matched = false
-        for ((key, value) in request.map) {
-            if (restInput.startsWith(key)) {
-                output += value.split(" ")
-                pos += key.split(" ").size
-                matched = true
+    var output = phoneme?.split(" ") ?: return this
+    for ((key, value) in request.map) {
+        val keySplit = key.split(" ")
+        for (i in 0..(output.size - keySplit.size)) {
+            val subList = output.subList(i, i + keySplit.size)
+            if (subList == keySplit) {
+                output = output.subList(0, i) + value.split(" ") +
+                    output.subList(i + keySplit.size, output.size)
+                // once replaced, the count of output is changed, so we could not proceed the replacement.
+                // this means that multiple occurrences of the same phoneme set in one note get replaced only once.
                 break
             }
         }
-        if (!matched) {
-            output += input[pos]
-            pos++
-        }
     }
-    return copy(phoneme = output.filter { it.isNotBlank() }.joinToString(" "))
+    output = output.filter { it.isNotBlank() }
+    return copy(phoneme = output.joinToString(" "))
 }
