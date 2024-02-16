@@ -196,8 +196,6 @@ val ConfigurationEditor = scopedFC<ConfigurationEditorProps> { props, scope ->
             useMapping = false,
             mappingPresetName = null,
             mappingRequest = PhonemesMappingRequest(),
-            sourceFormat = props.projects.first().format,
-            targetFormat = props.outputFormat,
         )
     }
     var dialogError by useState(DialogErrorState())
@@ -237,6 +235,8 @@ val ConfigurationEditor = scopedFC<ConfigurationEditorProps> { props, scope ->
         submitState = setLyricsMapping
     }
     if (phonemesConversion.isAvailable) PhonemesConversionBlock {
+        this.sourceFormat = props.projects.first().format
+        this.targetFormat = props.outputFormat
         initialState = phonemesConversion
         submitState = setPhonemesConversion
     }
@@ -500,8 +500,6 @@ data class PhonemesConversionState(
     val useMapping: Boolean,
     val mappingPresetName: String?,
     val mappingRequest: PhonemesMappingRequest,
-    val sourceFormat: Format,
-    val targetFormat: Format,
 ) : SubState() {
     override val isReady: Boolean get() = if (isAvailable && isOn && useMapping) mappingRequest.isValid else true
 

@@ -22,7 +22,9 @@ data class PhonemesMappingRequest(
         val from = line.substringBefore("=").trim()
         val to = line.substringAfter("=").trim()
         from to to
-    }.sortedByDescending { it.first.split(" ").size }
+    }
+        .sortedByDescending { it.first.length }
+        .sortedByDescending { it.first.split(" ").size }
 
     companion object {
 
@@ -35,7 +37,7 @@ data class PhonemesMappingRequest(
                 PhonemesMappingPreset(
                     sourceFormats = listOf(Format.Svp),
                     targetFormats = Format.vocaloidFormats,
-                    name = "Japanese",
+                    name = "Japanese (SynthV to Vocaloid)",
                     phonemesMap = PhonemesMappingRequest(
                         require("./texts/SynthV JA to Vocaloid JA.txt").default as String,
                     ),
@@ -43,7 +45,7 @@ data class PhonemesMappingRequest(
                 PhonemesMappingPreset(
                     sourceFormats = Format.vocaloidFormats,
                     targetFormats = listOf(Format.Svp),
-                    name = "Japanese",
+                    name = "Japanese (Vocaloid to SynthV)",
                     phonemesMap = PhonemesMappingRequest(
                         require("./texts/Vocaloid JA to SynthV JA.txt").default as String,
                     ),
