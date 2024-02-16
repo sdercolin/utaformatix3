@@ -103,8 +103,10 @@ fun Note.replacePhonemes(request: PhonemesMappingRequest?): Note {
     var pos = 0
     while (pos <= input.lastIndex) {
         val restInput = input.drop(pos).joinToString(" ")
+        println("restInput: $restInput")
         var matched = false
         for ((key, value) in request.map) {
+            println("map key: $key")
             if (restInput.startsWith(key)) {
                 output += value.split(" ")
                 pos += key.split(" ").size
