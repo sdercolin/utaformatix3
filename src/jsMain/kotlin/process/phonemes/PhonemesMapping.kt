@@ -50,6 +50,38 @@ data class PhonemesMappingRequest(
                         require("./texts/Vocaloid JA to SynthV JA.txt").default as String,
                     ),
                 ),
+                PhonemesMappingPreset(
+                    sourceFormats = listOf(Format.Svp),
+                    targetFormats = Format.vocaloidFormats,
+                    name = "English (SynthV to Vocaloid)",
+                    phonemesMap = PhonemesMappingRequest(
+                        require("./texts/SynthV EN to Vocaloid EN.txt").default as String,
+                    ),
+                ),
+                PhonemesMappingPreset(
+                    sourceFormats = listOf(Format.Svp),
+                    targetFormats = listOf(Format.Ustx),
+                    name = "English: ARPAsing (SynthV to OpenUtau)",
+                    phonemesMap = PhonemesMappingRequest(
+                        require("./texts/SynthV EN to OpenUtau ARPAsing.txt").default as String,
+                    ),
+                ),
+                PhonemesMappingPreset(
+                    sourceFormats = listOf(Format.Svp),
+                    targetFormats = listOf(Format.Ustx),
+                    name = "English: X-SAMPA (SynthV to OpenUtau)",
+                    phonemesMap = PhonemesMappingRequest(
+                        require("./texts/SynthV EN to OpenUtau X-SAMPA.txt").default as String,
+                    ),
+                ),
+                PhonemesMappingPreset(
+                    sourceFormats = listOf(Format.Svp),
+                    targetFormats = listOf(Format.Ustx),
+                    name = "English: VCCV (SynthV to OpenUtau)",
+                    phonemesMap = PhonemesMappingRequest(
+                        require("./texts/SynthV EN to OpenUtau VCCV.txt").default as String,
+                    ),
+                ),
             )
         }
     }
