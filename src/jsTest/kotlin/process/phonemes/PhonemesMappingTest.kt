@@ -82,7 +82,6 @@ class PhonemesMappingTest {
 
     @Test
     fun testSortMultiLength() {
-        println(request.map)
         val note = createNote("effff d c a")
         val actual = note.replacePhonemes(request).phoneme
         assertEquals("EF DC' A", actual)
