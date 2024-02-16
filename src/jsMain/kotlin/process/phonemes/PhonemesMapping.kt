@@ -22,8 +22,8 @@ data class PhonemesMappingRequest(
     }.sortedWith { a, b ->
         val countA = a.first.split(" ").count()
         val countB = b.first.split(" ").count()
-        if (countA != countB) return@sortedWith countB - countA // descending order
-        a.first.length - b.first.length
+        if (countA != countB) return@sortedWith countB - countA // descending order of phonemes count
+        b.first.length - a.first.length // descending order of the length
     }
 
     companion object {
