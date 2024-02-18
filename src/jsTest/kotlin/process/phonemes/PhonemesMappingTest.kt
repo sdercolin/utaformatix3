@@ -19,6 +19,8 @@ class PhonemesMappingTest {
             sh=SH
             effff=EF
             effff d=EF D
+            Q=a
+            OI=Q
         """.trimIndent(),
     )
 
@@ -85,5 +87,12 @@ class PhonemesMappingTest {
         val note = createNote("effff d c a")
         val actual = note.replacePhonemes(request).phoneme
         assertEquals("EF DC' A", actual)
+    }
+
+    @Test
+    fun testSameTextDifferentPhoneme() {
+        val note = createNote("OI")
+        val actual = note.replacePhonemes(request).phoneme
+        assertEquals("Q", actual)
     }
 }
