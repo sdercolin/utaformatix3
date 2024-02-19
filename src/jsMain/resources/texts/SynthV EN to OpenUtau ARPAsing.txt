@@ -1,0 +1,8 @@
+ax=ah
+br=
+cl=
+dr=jh r
+dx=d
+pau=
+sil=
+tr=ch r

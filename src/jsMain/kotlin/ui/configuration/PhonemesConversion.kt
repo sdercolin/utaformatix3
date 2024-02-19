@@ -11,6 +11,7 @@ import csstype.em
 import csstype.px
 import emotion.react.css
 import kotlinx.js.jso
+import model.Format
 import mui.icons.material.HelpOutline
 import mui.material.BaseTextFieldProps
 import mui.material.Button
@@ -40,9 +41,12 @@ import ui.common.subFC
 import ui.strings.Strings
 import ui.strings.string
 
-external interface PhonemesConversionProps : SubProps<PhonemesConversionState>
+external interface PhonemesConversionProps : SubProps<PhonemesConversionState> {
+    var sourceFormat: Format
+    var targetFormat: Format
+}
 
-val PhonemesConversionBlock = subFC<PhonemesConversionProps, PhonemesConversionState> { _, state, editState ->
+val PhonemesConversionBlock = subFC<PhonemesConversionProps, PhonemesConversionState> { props, state, editState ->
     FormGroup {
         div {
             configurationSwitch(
@@ -53,10 +57,11 @@ val PhonemesConversionBlock = subFC<PhonemesConversionProps, PhonemesConversionS
         }
     }
 
-    if (state.isOn) buildPhonemesConversionDetail(state, editState)
+    if (state.isOn) buildPhonemesConversionDetail(props, state, editState)
 }
 
 private fun ChildrenBuilder.buildPhonemesConversionDetail(
+    props: PhonemesConversionProps,
     state: PhonemesConversionState,
     editState: (PhonemesConversionState.() -> PhonemesConversionState) -> Unit,
 ) {
@@ -138,12 +143,17 @@ private fun ChildrenBuilder.buildPhonemesConversionDetail(
                                         )
                                     }
                                 }
-                                PhonemesMappingRequest.Presets.forEach { preset ->
-                                    MenuItem {
-                                        value = preset.first
-                                        +(preset.first)
+                                PhonemesMappingRequest.Presets
+                                    .filter { preset ->
+                                        props.sourceFormat in preset.sourceFormats + Format.UfData &&
+                                            props.targetFormat in preset.targetFormats + Format.UfData
                                     }
-                                }
+                                    .forEach { preset ->
+                                        MenuItem {
+                                            value = preset.name
+                                            +(preset.name)
+                                        }
+                                    }
                             }
                         }
                         Button {

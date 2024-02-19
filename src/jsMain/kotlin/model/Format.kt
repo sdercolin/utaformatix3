@@ -135,7 +135,7 @@ enum class Format(
             io.Vsq.generate(project, features)
         },
         possibleLyricsTypes = listOf(RomajiCv, KanaCv),
-        availableFeaturesForGeneration = listOf(ConvertPitch),
+        availableFeaturesForGeneration = listOf(ConvertPitch, ConvertPhonemes),
     ),
     VocaloidMid(
         "mid",

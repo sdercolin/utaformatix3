@@ -235,6 +235,8 @@ val ConfigurationEditor = scopedFC<ConfigurationEditorProps> { props, scope ->
         submitState = setLyricsMapping
     }
     if (phonemesConversion.isAvailable) PhonemesConversionBlock {
+        this.sourceFormat = props.projects.first().format
+        this.targetFormat = props.outputFormat
         initialState = phonemesConversion
         submitState = setPhonemesConversion
     }
