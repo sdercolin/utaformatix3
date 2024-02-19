@@ -149,6 +149,38 @@ data class PhonemesMappingRequest(
                         require("./texts/OpenUtau ARPAsing to OpenUtau VCCV.txt").default as String,
                     ),
                 ),
+                PhonemesMappingPreset(
+                    sourceFormats = listOf(Format.Ustx),
+                    targetFormats = listOf(Format.Svp),
+                    name = "English: VCCV (OpenUtau to SynthV)",
+                    phonemesMap = PhonemesMappingRequest(
+                        require("./texts/OpenUtau VCCV to SynthV EN.txt").default as String,
+                    ),
+                ),
+                PhonemesMappingPreset(
+                    sourceFormats = listOf(Format.Ustx),
+                    targetFormats = Format.vocaloidFormats,
+                    name = "English: VCCV (OpenUtau to Vocaloid)",
+                    phonemesMap = PhonemesMappingRequest(
+                        require("./texts/OpenUtau VCCV to Vocaloid EN.txt").default as String,
+                    ),
+                ),
+                PhonemesMappingPreset(
+                    sourceFormats = listOf(Format.Ustx),
+                    targetFormats = listOf(Format.Ustx),
+                    name = "English: VCCV to ARPAsing (OpenUtau to OpenUtau)",
+                    phonemesMap = PhonemesMappingRequest(
+                        require("./texts/OpenUtau VCCV to OpenUtau ARPAsing.txt").default as String,
+                    ),
+                ),
+                PhonemesMappingPreset(
+                    sourceFormats = listOf(Format.Ustx),
+                    targetFormats = listOf(Format.Ustx),
+                    name = "English: VCCV to X-SAMPA (OpenUtau to OpenUtau)",
+                    phonemesMap = PhonemesMappingRequest(
+                        require("./texts/OpenUtau VCCV to OpenUtau X-SAMPA.txt").default as String,
+                    ),
+                ),
             )
         }
     }
