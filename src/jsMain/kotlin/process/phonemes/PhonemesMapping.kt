@@ -74,7 +74,7 @@ data class PhonemesMappingRequest(
                     targetFormats = listOf(Format.Ustx),
                     name = "English: X-SAMPA (SynthV to OpenUtau)",
                     phonemesMap = PhonemesMappingRequest(
-                        require("./texts/SynthV EN to OpenUtau X-SAMPA.txt").default as String,
+                        require("./texts/SynthV EN to OpenUtau X-SAMPA EN.txt").default as String,
                     ),
                 ),
                 PhonemesMappingPreset(
@@ -106,7 +106,7 @@ data class PhonemesMappingRequest(
                     targetFormats = listOf(Format.Ustx),
                     name = "English: X-SAMPA (Vocaloid to OpenUtau)",
                     phonemesMap = PhonemesMappingRequest(
-                        require("./texts/Vocaloid EN to OpenUtau X-SAMPA.txt").default as String,
+                        require("./texts/Vocaloid EN to OpenUtau X-SAMPA EN.txt").default as String,
                     ),
                 ),
                 PhonemesMappingPreset(
@@ -138,7 +138,7 @@ data class PhonemesMappingRequest(
                     targetFormats = listOf(Format.Ustx),
                     name = "English: ARPAsing to X-SAMPA (OpenUtau to OpenUtau)",
                     phonemesMap = PhonemesMappingRequest(
-                        require("./texts/OpenUtau ARPAsing to OpenUtau X-SAMPA.txt").default as String,
+                        require("./texts/OpenUtau ARPAsing to OpenUtau X-SAMPA EN.txt").default as String,
                     ),
                 ),
                 PhonemesMappingPreset(
@@ -147,6 +147,38 @@ data class PhonemesMappingRequest(
                     name = "English: ARPAsing to VCCV (OpenUtau to OpenUtau)",
                     phonemesMap = PhonemesMappingRequest(
                         require("./texts/OpenUtau ARPAsing to OpenUtau VCCV.txt").default as String,
+                    ),
+                ),
+                PhonemesMappingPreset(
+                    sourceFormats = listOf(Format.Ustx),
+                    targetFormats = listOf(Format.Svp),
+                    name = "English: X-SAMPA (OpenUtau to SynthV)",
+                    phonemesMap = PhonemesMappingRequest(
+                        require("./texts/OpenUtau X-SAMPA EN to SynthV EN.txt").default as String,
+                    ),
+                ),
+                PhonemesMappingPreset(
+                    sourceFormats = listOf(Format.Ustx),
+                    targetFormats = Format.vocaloidFormats,
+                    name = "English: X-SAMPA (OpenUtau to Vocaloid)",
+                    phonemesMap = PhonemesMappingRequest(
+                        require("./texts/OpenUtau X-SAMPA EN to Vocaloid EN.txt").default as String,
+                    ),
+                ),
+                PhonemesMappingPreset(
+                    sourceFormats = listOf(Format.Ustx),
+                    targetFormats = listOf(Format.Ustx),
+                    name = "English: X-SAMPA to ARPAsing (OpenUtau to OpenUtau)",
+                    phonemesMap = PhonemesMappingRequest(
+                        require("./texts/OpenUtau X-SAMPA EN to OpenUtau ARPAsing.txt").default as String,
+                    ),
+                ),
+                PhonemesMappingPreset(
+                    sourceFormats = listOf(Format.Ustx),
+                    targetFormats = listOf(Format.Ustx),
+                    name = "English: X-SAMPA to VCCV (OpenUtau to OpenUtau)",
+                    phonemesMap = PhonemesMappingRequest(
+                        require("./texts/OpenUtau X-SAMPA EN to OpenUtau VCCV.txt").default as String,
                     ),
                 ),
                 PhonemesMappingPreset(
@@ -178,7 +210,7 @@ data class PhonemesMappingRequest(
                     targetFormats = listOf(Format.Ustx),
                     name = "English: VCCV to X-SAMPA (OpenUtau to OpenUtau)",
                     phonemesMap = PhonemesMappingRequest(
-                        require("./texts/OpenUtau VCCV to OpenUtau X-SAMPA.txt").default as String,
+                        require("./texts/OpenUtau VCCV to OpenUtau X-SAMPA EN.txt").default as String,
                     ),
                 ),
             )
