@@ -69,6 +69,13 @@ class PhonemesMappingTest {
     }
 
     @Test
+    fun testRepeatedMultipleMatch() {
+        val note = createNote("d c a d c a")
+        val actual = note.replacePhonemes(request).phoneme
+        assertEquals("DC' A DC' A", actual)
+    }
+
+    @Test
     fun testMutedPhoneme() {
         val note = createNote("sil a")
         val actual = note.replacePhonemes(request).phoneme
