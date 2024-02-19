@@ -133,21 +133,21 @@ fun Track.replacePhonemes(request: PhonemesMappingRequest?) = copy(
 fun Note.replacePhonemes(request: PhonemesMappingRequest?): Note {
     if (request == null) return copy(phoneme = null)
     var rawInput = phoneme?.split(" ") ?: return this
-    var input = rawInput.map{it to true}.toMutableList() // boolean represents the phoneme is not converted yet
-    var output = listOf<Pair<String,Int>>() // int represents index from input phoneme list
+    var input = rawInput.map { it to true }.toMutableList() // boolean represents the phoneme is not converted yet
+    var output = listOf<Pair<String, Int>>() // int represents index from input phoneme list
     for ((key, value) in request.map) {
         val keySplit = key.split(" ")
         for (i in 0..(input.size - keySplit.size)) {
             val subList = input.subList(i, i + keySplit.size)
-            if (subList.map{it.first} == keySplit && subList.map{it.second}.all { it }) {
+            if (subList.map { it.first } == keySplit && subList.map { it.second }.all { it }) {
                 output += Pair(value, i)
-                for (j in 0..subList.size-1) {
+                for (j in 0..subList.size - 1) {
                     subList[j] = Pair(subList[j].first, false)
                 }
             }
         }
     }
-    output += input.mapIndexed { index, pair -> if (pair.second) Pair(pair.first, index) else Pair("",0)}
+    output += input.mapIndexed { index, pair -> if (pair.second) Pair(pair.first, index) else Pair("", 0) }
     output = output.filter { it.first.isNotBlank() }.sortedBy { it.second }
-    return copy(phoneme = output.map{it.first}.joinToString(" "))
+    return copy(phoneme = output.map { it.first }.joinToString(" "))
 }
