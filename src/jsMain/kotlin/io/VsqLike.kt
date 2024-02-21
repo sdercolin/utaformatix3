@@ -209,7 +209,8 @@ object VsqLike {
             }
             lyricsLines.apply {
                 add("[h#${number.padStartZero(4)}]")
-                add("L0=\"${note.lyric}\",\"${note.phoneme ?: "a"}\",0.000000,64,0,0")
+                val lockPhonemes = if (note.phoneme != null) 1 else 0
+                add("L0=\"${note.lyric}\",\"${note.phoneme ?: "a"}\",0.000000,64,0,$lockPhonemes")
             }
         }
 
