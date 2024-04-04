@@ -25,4 +25,6 @@ sn=s n
 sp=s p
 st=s t
 u=ah
+W=aw
 x=ah
+Y=ay
