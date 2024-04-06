@@ -10,6 +10,7 @@
 A=ey
 E=iy
 I=ay
+L=ah l
 O=ow
 Q=oy
 a=aa
@@ -25,4 +26,6 @@ sn=s n
 sp=s p
 st=s t
 u=ah
+W=aw
 x=ah
+Y=ay
