@@ -21,6 +21,8 @@ and [React](https://github.com/facebook/react).
     - between Kana and Romaji
 - Find/Replace texts in the lyrics
 - Lyrics mapping with customized dictionaries
+- Convert phonemes of the notes with or without mapping with customized dictionaries (only available for VOCALOID
+  projects, `.ustx`, `.svp` and `.ufdata`.)
 - Project zooming, changing tempo and time signatures without changing the actual time duration of the contents
 - Project splitting with a max track count in each project for SVP export
 - Convert pitch for the following supported formats
@@ -45,8 +47,8 @@ If you are developing OSS projects related to singing voice synthesis, you may f
 
 ## Contributors
 
-[sdercolin](https://github.com/sdercolin), [ghosrt](https://github.com/ghosrt)
-, [shine5402](https://github.com/shine5402)
+[sdercolin](https://github.com/sdercolin), [ghosrt](https://github.com/ghosrt), [shine5402](https://github.com/shine5402), [adlez27](https://github.com/adlez27), [
+General Nuisance](https://github.com/GeneralNuisance0)
 
 ## Localization help
 

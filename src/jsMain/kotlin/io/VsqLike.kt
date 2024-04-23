@@ -209,7 +209,16 @@ object VsqLike {
             }
             lyricsLines.apply {
                 add("[h#${number.padStartZero(4)}]")
-                add("L0=\"${note.lyric}\",\"${note.phoneme ?: "a"}\",0.000000,64,0,0")
+                val cleanedPhonemes = note.phoneme?.split(" ")?.filter { it.isNotBlank() }?.ifEmpty { null }
+                val phonemes = cleanedPhonemes ?: listOf("a")
+                val phonemesValue = phonemes.joinToString(" ")
+                val phonemesCount = phonemes.count()
+                val lockPhonemes = phonemes.map { "0" }.toMutableList()
+                if (cleanedPhonemes != null) {
+                    lockPhonemes[phonemesCount - 1] = "1"
+                }
+                val lockPhonemesValue = lockPhonemes.joinToString(",")
+                add("L0=\"${note.lyric}\",\"$phonemesValue\",0.000000,64,$lockPhonemesValue")
             }
         }
 

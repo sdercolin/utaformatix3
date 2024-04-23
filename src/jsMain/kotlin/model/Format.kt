@@ -1,6 +1,7 @@
 package model
 
 import io.VsqLike
+import model.Feature.ConvertPhonemes
 import model.Feature.ConvertPitch
 import model.Feature.SplitProject
 import model.JapaneseLyricsType.KanaCv
@@ -31,7 +32,7 @@ enum class Format(
             io.Vsqx.generate(project, features)
         },
         possibleLyricsTypes = listOf(RomajiCv, KanaCv),
-        availableFeaturesForGeneration = listOf(ConvertPitch),
+        availableFeaturesForGeneration = listOf(ConvertPitch, ConvertPhonemes),
     ),
     Vpr(
         "vpr",
@@ -42,7 +43,7 @@ enum class Format(
             io.Vpr.generate(project, features)
         },
         possibleLyricsTypes = listOf(RomajiCv, KanaCv),
-        availableFeaturesForGeneration = listOf(ConvertPitch),
+        availableFeaturesForGeneration = listOf(ConvertPitch, ConvertPhonemes),
     ),
     Ust(
         "ust",
@@ -66,7 +67,7 @@ enum class Format(
             io.Ustx.generate(project, features)
         },
         possibleLyricsTypes = listOf(RomajiCv, RomajiVcv, KanaCv, KanaVcv),
-        availableFeaturesForGeneration = listOf(ConvertPitch),
+        availableFeaturesForGeneration = listOf(ConvertPitch, ConvertPhonemes),
     ),
     Ccs(
         "ccs",
@@ -88,7 +89,7 @@ enum class Format(
             io.Svp.generate(project, features)
         },
         possibleLyricsTypes = listOf(RomajiCv, KanaCv),
-        availableFeaturesForGeneration = listOf(ConvertPitch, SplitProject),
+        availableFeaturesForGeneration = listOf(ConvertPitch, SplitProject, ConvertPhonemes),
     ),
     S5p(
         "s5p",
@@ -134,7 +135,7 @@ enum class Format(
             io.Vsq.generate(project, features)
         },
         possibleLyricsTypes = listOf(RomajiCv, KanaCv),
-        availableFeaturesForGeneration = listOf(ConvertPitch),
+        availableFeaturesForGeneration = listOf(ConvertPitch, ConvertPhonemes),
     ),
     VocaloidMid(
         "mid",
@@ -181,7 +182,7 @@ enum class Format(
             io.UfData.generate(project, features)
         },
         possibleLyricsTypes = listOf(RomajiCv, RomajiVcv, KanaCv, KanaVcv),
-        availableFeaturesForGeneration = listOf(ConvertPitch),
+        availableFeaturesForGeneration = listOf(ConvertPitch, ConvertPhonemes),
     );
 
     private val allExtensions get() = listOf(extension) + otherExtensions
@@ -235,5 +236,8 @@ enum class Format(
                 StandardMid,
                 UfData,
             )
+
+        val vocaloidFormats: List<Format>
+            get() = listOf(Vsq, Vsqx, VocaloidMid, Vpr)
     }
 }

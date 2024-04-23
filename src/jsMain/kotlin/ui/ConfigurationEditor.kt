@@ -30,6 +30,8 @@ import process.lyrics.chinese.convertChineseLyricsToPinyin
 import process.lyrics.japanese.convertJapaneseLyrics
 import process.lyrics.mapLyrics
 import process.lyrics.replaceLyrics
+import process.phonemes.PhonemesMappingRequest
+import process.phonemes.mapPhonemes
 import process.projectZoomFactorOptions
 import process.zoom
 import react.ChildrenBuilder
@@ -50,6 +52,7 @@ import ui.configuration.ChinesePinyinConversionBlock
 import ui.configuration.JapaneseLyricsConversionBlock
 import ui.configuration.LyricsMappingBlock
 import ui.configuration.LyricsReplacementBlock
+import ui.configuration.PhonemesConversionBlock
 import ui.configuration.PitchConversionBlock
 import ui.configuration.ProjectSplitBlock
 import ui.configuration.ProjectZoomBlock
@@ -170,6 +173,31 @@ val ConfigurationEditor = scopedFC<ConfigurationEditorProps> { props, scope ->
                 ?: FeatureConfig.SplitProject.getDefault(props.outputFormat).maxTrackCount.toString(),
         )
     }
+    val (phonemesConversion, setPhonemesConversion) = useState {
+        currentConfigs?.phonemesConversion?.let {
+            return@useState it
+        }
+
+        val hasPhonemes = props.projects.any { Feature.ConvertPhonemes.isAvailable(it) }
+        val isAvailable = hasPhonemes &&
+            props.outputFormat.availableFeaturesForGeneration.contains(Feature.ConvertPhonemes)
+        // Enable for VOCALOID -> VOCALOID or UfData by default
+        val enabledFormats = Format.vocaloidFormats.plus(Format.UfData)
+        val isOn = isAvailable && (
+            (
+                props.projects.all { it.format in enabledFormats } &&
+                    props.outputFormat in enabledFormats
+                ) ||
+                props.projects.all { it.format == props.outputFormat }
+            )
+        PhonemesConversionState(
+            isAvailable = isAvailable,
+            isOn = isOn,
+            useMapping = false,
+            mappingPresetName = null,
+            mappingRequest = PhonemesMappingRequest(),
+        )
+    }
     var dialogError by useState(DialogErrorState())
 
     fun isReady() = listOf(
@@ -206,6 +234,12 @@ val ConfigurationEditor = scopedFC<ConfigurationEditorProps> { props, scope ->
         initialState = lyricsMapping
         submitState = setLyricsMapping
     }
+    if (phonemesConversion.isAvailable) PhonemesConversionBlock {
+        this.sourceFormat = props.projects.first().format
+        this.targetFormat = props.outputFormat
+        initialState = phonemesConversion
+        submitState = setPhonemesConversion
+    }
     SlightRestsFillingBlock {
         initialState = slightRestsFilling
         submitState = setSlightRestsFilling
@@ -235,6 +269,7 @@ val ConfigurationEditor = scopedFC<ConfigurationEditorProps> { props, scope ->
         pitchConversion,
         projectZoom,
         projectSplit,
+        phonemesConversion,
         setProgress = { progress = it },
         onDialogError = { dialogError = it },
     )
@@ -261,6 +296,7 @@ private fun ChildrenBuilder.buildNextButton(
     pitchConversion: PitchConversionState,
     projectZoom: ProjectZoomState,
     projectSplit: ProjectSplitState,
+    phonemesConversion: PhonemesConversionState,
     setProgress: (ProgressProps) -> Unit,
     onDialogError: (DialogErrorState) -> Unit,
 ) {
@@ -284,6 +320,7 @@ private fun ChildrenBuilder.buildNextButton(
                     pitchConversion,
                     projectZoom,
                     projectSplit,
+                    phonemesConversion,
                     setProgress,
                     onDialogError,
                 )
@@ -304,6 +341,7 @@ private fun process(
     pitchConversion: PitchConversionState,
     projectZoom: ProjectZoomState,
     projectSplit: ProjectSplitState,
+    phonemesConversion: PhonemesConversionState,
     setProgress: (ProgressProps) -> Unit,
     onDialogError: (DialogErrorState) -> Unit,
 ) {
@@ -335,6 +373,7 @@ private fun process(
                     .runIf(projectZoom.isOn) {
                         zoom(projectZoom.factorValue)
                     }
+                    .mapPhonemes(phonemesConversion.resolvedMappingRequest)
 
                 val featureConfigs = buildList {
                     if (pitchConversion.isOn) add(FeatureConfig.ConvertPitch)
@@ -358,6 +397,7 @@ private fun process(
                 pitchConversion,
                 projectZoom,
                 projectSplit,
+                phonemesConversion,
             )
             window.localStorage.setItem("currentConfigs", json.encodeToString(currentConfigs))
 
@@ -454,6 +494,34 @@ data class LyricsMappingState(
 }
 
 @Serializable
+data class PhonemesConversionState(
+    val isAvailable: Boolean,
+    val isOn: Boolean,
+    val useMapping: Boolean,
+    val mappingPresetName: String?,
+    val mappingRequest: PhonemesMappingRequest,
+) : SubState() {
+    override val isReady: Boolean get() = if (isAvailable && isOn && useMapping) mappingRequest.isValid else true
+
+    val resolvedMappingRequest: PhonemesMappingRequest?
+        get() = if (isOn) {
+            if (useMapping) {
+                mappingRequest
+            } else {
+                PhonemesMappingRequest("")
+            }
+        } else {
+            null
+        }
+
+    fun updatePresetName() = when {
+        mappingPresetName == null -> this
+        PhonemesMappingRequest.findPreset(mappingPresetName) == mappingRequest -> this
+        else -> copy(mappingPresetName = null)
+    }
+}
+
+@Serializable
 data class SlightRestsFillingState(
     val isOn: Boolean,
     val excludedMaxLengthDenominator: Int,
@@ -502,4 +570,5 @@ data class Configs(
     val pitchConversion: PitchConversionState,
     val projectZoom: ProjectZoomState,
     val projectSplit: ProjectSplitState,
+    val phonemesConversion: PhonemesConversionState,
 )

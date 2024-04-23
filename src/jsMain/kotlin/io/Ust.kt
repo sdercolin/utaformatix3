@@ -47,8 +47,11 @@ object Ust {
         val results = files.map {
             parseFile(it)
         }
-        val projectName = results.firstNotNullOfOrNull { it.projectName }
-            ?: files.first().nameWithoutExtension
+        val projectName = if (files.size == 1) {
+            files.first().nameWithoutExtension
+        } else {
+            files.first().nameWithoutExtension + " (${files.size - 1} more)"
+        }
         val tracks = results.mapIndexed { index, result ->
             val pitch = when {
                 params.simpleImport -> null

@@ -414,6 +414,7 @@ object Vsqx {
                 it.clear()
                 val xSampaCData = document.createCDATASection(model.phoneme)
                 it.appendChild(xSampaCData)
+                it.setAttribute(tagNames.xSampaLock, "1")
             }
         }
         return newNote
@@ -467,6 +468,7 @@ object Vsqx {
         val noteNum: String = "noteNum",
         val lyric: String = "lyric",
         val xSampa: String = "phnms",
+        val xSampaLock: String = "lock",
         val mixer: String = "mixer",
         val vsUnit: String = "vsUnit",
         val trackNum: String = "vsTrackNo",
