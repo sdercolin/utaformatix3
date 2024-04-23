@@ -47,7 +47,8 @@ If you are developing OSS projects related to singing voice synthesis, you may f
 
 ## Contributors
 
-[sdercolin](https://github.com/sdercolin), [ghosrt](https://github.com/ghosrt), [shine5402](https://github.com/shine5402), [adlez27](https://github.com/adlez27)
+[sdercolin](https://github.com/sdercolin), [ghosrt](https://github.com/ghosrt), [shine5402](https://github.com/shine5402), [adlez27](https://github.com/adlez27), [
+General Nuisance](https://github.com/GeneralNuisance0)
 
 ## Localization help
 
