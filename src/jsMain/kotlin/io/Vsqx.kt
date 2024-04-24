@@ -409,7 +409,7 @@ object Vsqx {
             val lyricCData = document.createCDATASection(model.lyric)
             it.appendChild(lyricCData)
         }
-        if (model.phoneme != null) {
+        if (!model.phoneme.isNullOrEmpty()) {
             newNote.getSingleElementByTagName(tagNames.xSampa).also {
                 it.clear()
                 val xSampaCData = document.createCDATASection(model.phoneme)
