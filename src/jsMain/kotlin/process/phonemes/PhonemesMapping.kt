@@ -40,7 +40,7 @@ data class PhonemesMappingRequest(
                 PhonemesMappingPreset(
                     sourceFormats = listOf(Format.Svp),
                     targetFormats = Format.vocaloidFormats,
-                    name = "Japanese (SynthV to Vocaloid)",
+                    name = "Japanese (SynthV to VOCALOID)",
                     phonemesMap = PhonemesMappingRequest(
                         require("./texts/SynthV JA to Vocaloid JA.txt").default as String,
                     ),
@@ -48,7 +48,7 @@ data class PhonemesMappingRequest(
                 PhonemesMappingPreset(
                     sourceFormats = Format.vocaloidFormats,
                     targetFormats = listOf(Format.Svp),
-                    name = "Japanese (Vocaloid to SynthV)",
+                    name = "Japanese (VOCALOID to SynthV)",
                     phonemesMap = PhonemesMappingRequest(
                         require("./texts/Vocaloid JA to SynthV JA.txt").default as String,
                     ),
@@ -56,7 +56,7 @@ data class PhonemesMappingRequest(
                 PhonemesMappingPreset(
                     sourceFormats = listOf(Format.Svp),
                     targetFormats = Format.vocaloidFormats,
-                    name = "English (SynthV to Vocaloid)",
+                    name = "English (SynthV to VOCALOID)",
                     phonemesMap = PhonemesMappingRequest(
                         require("./texts/SynthV EN to Vocaloid EN.txt").default as String,
                     ),
@@ -88,7 +88,7 @@ data class PhonemesMappingRequest(
                 PhonemesMappingPreset(
                     sourceFormats = Format.vocaloidFormats,
                     targetFormats = listOf(Format.Svp),
-                    name = "English (Vocaloid to SynthV)",
+                    name = "English (VOCALOID to SynthV)",
                     phonemesMap = PhonemesMappingRequest(
                         require("./texts/Vocaloid EN to SynthV EN.txt").default as String,
                     ),
@@ -96,7 +96,7 @@ data class PhonemesMappingRequest(
                 PhonemesMappingPreset(
                     sourceFormats = Format.vocaloidFormats,
                     targetFormats = listOf(Format.Ustx),
-                    name = "English: ARPAsing (Vocaloid to OpenUtau)",
+                    name = "English: ARPAsing (VOCALOID to OpenUtau)",
                     phonemesMap = PhonemesMappingRequest(
                         require("./texts/Vocaloid EN to OpenUtau ARPAsing.txt").default as String,
                     ),
@@ -104,7 +104,7 @@ data class PhonemesMappingRequest(
                 PhonemesMappingPreset(
                     sourceFormats = Format.vocaloidFormats,
                     targetFormats = listOf(Format.Ustx),
-                    name = "English: X-SAMPA (Vocaloid to OpenUtau)",
+                    name = "English: X-SAMPA (VOCALOID to OpenUtau)",
                     phonemesMap = PhonemesMappingRequest(
                         require("./texts/Vocaloid EN to OpenUtau X-SAMPA EN.txt").default as String,
                     ),
@@ -112,7 +112,7 @@ data class PhonemesMappingRequest(
                 PhonemesMappingPreset(
                     sourceFormats = Format.vocaloidFormats,
                     targetFormats = listOf(Format.Ustx),
-                    name = "English: VCCV (Vocaloid to OpenUtau)",
+                    name = "English: VCCV (VOCALOID to OpenUtau)",
                     phonemesMap = PhonemesMappingRequest(
                         require("./texts/Vocaloid EN to OpenUtau VCCV.txt").default as String,
                     ),
@@ -128,7 +128,7 @@ data class PhonemesMappingRequest(
                 PhonemesMappingPreset(
                     sourceFormats = listOf(Format.Ustx),
                     targetFormats = Format.vocaloidFormats,
-                    name = "English: ARPAsing (OpenUtau to Vocaloid)",
+                    name = "English: ARPAsing (OpenUtau to VOCALOID)",
                     phonemesMap = PhonemesMappingRequest(
                         require("./texts/OpenUtau ARPAsing to Vocaloid EN.txt").default as String,
                     ),
@@ -160,7 +160,7 @@ data class PhonemesMappingRequest(
                 PhonemesMappingPreset(
                     sourceFormats = listOf(Format.Ustx),
                     targetFormats = Format.vocaloidFormats,
-                    name = "English: X-SAMPA (OpenUtau to Vocaloid)",
+                    name = "English: X-SAMPA (OpenUtau to VOCALOID)",
                     phonemesMap = PhonemesMappingRequest(
                         require("./texts/OpenUtau X-SAMPA EN to Vocaloid EN.txt").default as String,
                     ),
@@ -192,7 +192,7 @@ data class PhonemesMappingRequest(
                 PhonemesMappingPreset(
                     sourceFormats = listOf(Format.Ustx),
                     targetFormats = Format.vocaloidFormats,
-                    name = "English: VCCV (OpenUtau to Vocaloid)",
+                    name = "English: VCCV (OpenUtau to VOCALOID)",
                     phonemesMap = PhonemesMappingRequest(
                         require("./texts/OpenUtau VCCV to Vocaloid EN.txt").default as String,
                     ),

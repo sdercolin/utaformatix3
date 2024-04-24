@@ -159,8 +159,8 @@ object Vpr {
                     duration = it.length,
                     number = it.key,
                     lyric = it.lyric,
-                    phoneme = it.phoneme ?: emptyNote.phoneme,
-                    isProtected = it.phoneme != null,
+                    phoneme = it.phoneme?.ifEmpty { null } ?: emptyNote.phoneme,
+                    isProtected = it.phoneme.isNullOrEmpty().not(),
                 )
             }
             val duration = track.notes.lastOrNull()?.tickOff
