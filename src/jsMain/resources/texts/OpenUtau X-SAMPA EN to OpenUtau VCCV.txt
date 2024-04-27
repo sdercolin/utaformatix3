@@ -1,10 +1,5 @@
 h i=hh E
 h j=hh y
-s p=sp
-s t=st
-s k=sk
-s m=sm
-s n=sn
 ・=
 {~=A ng
 {l=@ l
