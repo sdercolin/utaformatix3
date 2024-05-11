@@ -9,6 +9,7 @@ const val APP_NAME = "UtaFormatix"
 const val APP_VERSION = "3.22"
 
 suspend fun main() {
+    coreJs()
     initializeI18n(Language.English)
     createRoot(document.createElement("div").also { document.body!!.appendChild(it) })
         .render(App.create())

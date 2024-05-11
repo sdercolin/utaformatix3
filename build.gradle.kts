@@ -35,6 +35,8 @@ kotlin {
     sourceSets {
         val jsMain by getting {
             dependencies {
+                implementation(project(":core"))
+
                 // Model
                 implementation("com.sdercolin.utaformatix:utaformatix-data:1.0.0")
 
