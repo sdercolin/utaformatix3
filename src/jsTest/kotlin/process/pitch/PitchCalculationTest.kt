@@ -1,5 +1,7 @@
 package process.pitch
 
+import core.process.pitch.appendPitchPointsForInterpolation
+import core.process.pitch.reduceRepeatedPitchPoints
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

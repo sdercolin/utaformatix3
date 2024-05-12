@@ -1,8 +1,10 @@
 package process.lyrics
 
-import model.Format
-import model.Note
-import model.Track
+import core.model.Format
+import core.model.Note
+import core.model.Track
+import core.process.lyrics.LyricsReplacementRequest
+import core.process.lyrics.replaceLyrics
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

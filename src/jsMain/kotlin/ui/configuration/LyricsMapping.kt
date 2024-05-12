@@ -1,5 +1,6 @@
 package ui.configuration
 
+import core.process.lyrics.LyricsMappingRequest
 import csstype.AlignItems
 import csstype.Display
 import csstype.FlexDirection
@@ -29,7 +30,6 @@ import mui.material.Tooltip
 import mui.material.TooltipPlacement
 import mui.material.Typography
 import mui.material.styles.TypographyVariant
-import process.lyrics.LyricsMappingRequest
 import react.ChildrenBuilder
 import react.create
 import react.dom.html.ReactHTML.div

@@ -2,6 +2,7 @@ package ui
 
 import APP_NAME
 import APP_VERSION
+import core.model.Format
 import csstype.Auto
 import csstype.Length
 import csstype.Margin
@@ -14,7 +15,6 @@ import csstype.vh
 import emotion.react.css
 import kotlinx.browser.window
 import kotlinx.js.jso
-import model.Format
 import mui.icons.material.ArrowBack
 import mui.icons.material.Feedback
 import mui.icons.material.LiveHelp

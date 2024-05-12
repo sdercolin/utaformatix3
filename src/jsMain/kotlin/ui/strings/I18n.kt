@@ -1,14 +1,14 @@
 package ui.strings
 
-import external.require
+import core.external.require
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
-val i18next = require("i18next").default
+val i18next = core.external.require("i18next").default
 
 suspend fun initializeI18n(defaultLanguage: Language) = suspendCoroutine<Unit> { cont ->
-    val reactI18next = require("react-i18next").initReactI18next
-    val languageDetector = require("i18next-browser-languagedetector").default
+    val reactI18next = core.external.require("react-i18next").initReactI18next
+    val languageDetector = core.external.require("i18next-browser-languagedetector").default
     val options = object {}.asDynamic()
     options["detection"] = object {}.also {
         val detection = it.asDynamic()

@@ -1,5 +1,7 @@
 package ui.configuration
 
+import core.model.Format
+import core.process.phonemes.PhonemesMappingRequest
 import csstype.AlignItems
 import csstype.Display
 import csstype.FlexDirection
@@ -11,7 +13,6 @@ import csstype.em
 import csstype.px
 import emotion.react.css
 import kotlinx.js.jso
-import model.Format
 import mui.icons.material.HelpOutline
 import mui.material.BaseTextFieldProps
 import mui.material.Button
@@ -30,7 +31,6 @@ import mui.material.Tooltip
 import mui.material.TooltipPlacement
 import mui.material.Typography
 import mui.material.styles.TypographyVariant
-import process.phonemes.PhonemesMappingRequest
 import react.ChildrenBuilder
 import react.create
 import react.dom.html.ReactHTML.div

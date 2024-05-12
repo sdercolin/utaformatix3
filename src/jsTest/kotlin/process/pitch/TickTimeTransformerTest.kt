@@ -1,6 +1,7 @@
 package process.pitch
 
-import model.Tempo
+import core.model.Tempo
+import core.process.pitch.TickTimeTransformer
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

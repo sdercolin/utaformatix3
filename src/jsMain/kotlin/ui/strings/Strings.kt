@@ -1,7 +1,7 @@
 package ui.strings
 
 import com.sdercolin.utaformatix.data.UtaFormatixDataVersion
-import io.MusicXml.MUSIC_XML_VERSION
+import core.io.MusicXml.MUSIC_XML_VERSION
 import ui.strings.Language.English
 import ui.strings.Language.French
 import ui.strings.Language.Japanese
@@ -561,7 +561,7 @@ enum class Strings(
         zhCN = "https://gist.githubusercontent.com/sdercolin/b5d4cf81434ea381d8836e0015681029/raw",
     ),
     ImportWarningTitle(
-        en = "The following exceptions happened during the import process.",
+        en = "The following exceptions happened during the import core.process.",
         ja = "インポート中に下記の例外が発生しました。",
         zhCN = "导入过程中出现了下列异常。",
         ru = "В процессе импорта произошли следующие исключения.",

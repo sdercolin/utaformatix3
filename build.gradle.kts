@@ -10,9 +10,12 @@ repositories {
     mavenCentral()
 }
 
-configure<org.jlleitschuh.gradle.ktlint.KtlintExtension> {
-    version.set("0.45.2")
-    enableExperimentalRules.set(true)
+allprojects {
+    apply(plugin = "org.jlleitschuh.gradle.ktlint")
+    configure<org.jlleitschuh.gradle.ktlint.KtlintExtension> {
+        version.set("0.45.2")
+        enableExperimentalRules.set(true)
+    }
 }
 
 fun kotlinw(target: String): String =
@@ -37,9 +40,6 @@ kotlin {
             dependencies {
                 implementation(project(":core"))
 
-                // Model
-                implementation("com.sdercolin.utaformatix:utaformatix-data:1.0.0")
-
                 // Kotlin
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core-js:1.6.4")
                 implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.0")
@@ -63,17 +63,12 @@ kotlin {
                 implementation(npm("i18next-browser-languagedetector", "6.0.1"))
 
                 // Others
-                implementation(npm("jszip", "3.5.0"))
                 implementation(npm("stream-browserify", "3.0.0"))
                 implementation(npm("buffer", "6.0.3"))
                 implementation(npm("file-saver", "2.0.5"))
                 implementation(npm("raw-loader", "4.0.2"))
                 implementation(npm("file-loader", "6.2.0"))
-                implementation(npm("encoding-japanese", "1.0.30"))
-                implementation(npm("uuid", "8.3.2"))
-                implementation(npm("midi-parser-js", "4.0.4"))
                 implementation(npm("js-cookie", "2.2.1"))
-                implementation(npm("js-yaml", "4.1.0"))
             }
         }
         val jsTest by getting {
@@ -82,6 +77,14 @@ kotlin {
             }
         }
     }
+}
+
+val copyCoreResources by tasks.register<Copy>("copyCoreResources") {
+    from("core/src/main/resources")
+    into("build/js/packages/utaformatix/kotlin")
+}
+tasks.named("jsProcessResources") {
+    dependsOn(copyCoreResources)
 }
 
 val copyJsResources by tasks.register<Copy>("copyJsResources") {
