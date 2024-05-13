@@ -26,3 +26,13 @@ kotlin {
         }
     }
 }
+
+val cleanDistributedResources by tasks.register<Delete>("cleanDistributedResources") {
+    listOf("format_templates", "images", "texts").forEach {
+        delete("build/distributions/$it")
+    }
+    mustRunAfter("jsBrowserDistribution")
+}
+tasks.named("build") {
+    dependsOn(cleanDistributedResources)
+}
