@@ -17,7 +17,7 @@ fun parseVsqx(file: File): Promise<Document> = parse(listOf(file), Format.Vsqx)
 fun parseVpr(file: File): Promise<Document> = parse(listOf(file), Format.Vpr)
 
 @JsExport
-fun parseUst(files: List<File>): Promise<Document> = parse(files, Format.Ust)
+fun parseUst(files: Array<File>): Promise<Document> = parse(files.toList(), Format.Ust)
 
 @JsExport
 fun parseUstx(file: File): Promise<Document> = parse(listOf(file), Format.Ustx)
@@ -50,7 +50,7 @@ fun parseStandardMid(file: File): Promise<Document> = parse(listOf(file), Format
 fun parsePpsf(file: File): Promise<Document> = parse(listOf(file), Format.Ppsf)
 
 @JsExport
-fun parseUfData(files: List<File>): Promise<Document> = parse(files, Format.UfData)
+fun parseUfData(files: Array<File>): Promise<Document> = parse(files.toList(), Format.UfData)
 
 private fun parse(files: List<File>, format: Format): Promise<Document> = GlobalScope.promise {
     val project = format.parser(files, ImportParams())
