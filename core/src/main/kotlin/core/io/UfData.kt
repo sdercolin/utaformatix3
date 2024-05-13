@@ -95,16 +95,7 @@ object UfData {
     }
 
     fun generate(project: core.model.Project, features: List<FeatureConfig>): ExportResult {
-        val document = Document(
-            formatVersion = UtaFormatixDataVersion,
-            project = Project(
-                name = project.name,
-                tracks = project.tracks.map { generateTrack(it, features) },
-                timeSignatures = project.timeSignatures.map(::generateTimeSignature),
-                tempos = project.tempos.map(::generateTempo),
-                measurePrefix = project.measurePrefix,
-            ),
-        )
+        val document = generateDocument(project)
         val text = jsonSerializer.encodeToString(Document.serializer(), document)
         val blob = Blob(arrayOf(text), BlobPropertyBag("application/octet-stream"))
         val name = format.getFileName(project.name)
@@ -113,6 +104,19 @@ object UfData {
             name,
             listOfNotNull(
                 if (features.contains(Feature.ConvertPitch)) ExportNotification.PitchDataExported else null,
+            ),
+        )
+    }
+
+    fun generateDocument(project: core.model.Project): Document {
+        return Document(
+            formatVersion = UtaFormatixDataVersion,
+            project = Project(
+                name = project.name,
+                tracks = project.tracks.map { generateTrack(it, listOf()) },
+                timeSignatures = project.timeSignatures.map(::generateTimeSignature),
+                tempos = project.tempos.map(::generateTempo),
+                measurePrefix = project.measurePrefix,
             ),
         )
     }
