@@ -10,6 +10,7 @@ import com.sdercolin.utaformatix.data.Tempo
 import com.sdercolin.utaformatix.data.TimeSignature
 import com.sdercolin.utaformatix.data.Track
 import com.sdercolin.utaformatix.data.UtaFormatixDataVersion
+import core.exception.UnsupportedUfDataError
 import core.model.ExportNotification
 import core.model.ExportResult
 import core.model.Feature
@@ -35,6 +36,10 @@ object UfData {
     suspend fun parse(file: File, params: ImportParams): core.model.Project {
         val text = file.readText()
         val document = jsonSerializer.decodeFromString(Document.serializer(), text)
+        return parseDocument(document, listOf(file), params)
+    }
+
+    fun parseDocument(document: Document, inputFiles: List<File>, params: ImportParams): core.model.Project {
         val version = document.formatVersion
         val importWarnings = mutableListOf<ImportWarning>()
         if (version > UtaFormatixDataVersion) {
@@ -47,7 +52,7 @@ object UfData {
         }
         return core.model.Project(
             format = format,
-            inputFiles = listOf(file),
+            inputFiles = inputFiles,
             name = document.project.name,
             tracks = document.project.tracks.mapIndexed { index, track -> parseTrack(index, track, params) },
             timeSignatures = document.project.timeSignatures.map(::parseTimeSignature),

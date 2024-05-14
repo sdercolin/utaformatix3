@@ -14,6 +14,7 @@ kotlin {
         binaries.library()
         browser()
         generateTypeScriptDefinitions()
+        useEsModules()
         dependencies {
             implementation("com.sdercolin.utaformatix:utaformatix-data:1.0.0")
             implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core-js:1.6.4")
@@ -27,12 +28,9 @@ kotlin {
     }
 }
 
-val cleanDistributedResources by tasks.register<Delete>("cleanDistributedResources") {
-    listOf("format_templates", "images", "texts").forEach {
-        delete("build/distributions/$it")
-    }
-    mustRunAfter("jsBrowserDistribution")
-}
-tasks.named("build") {
-    dependsOn(cleanDistributedResources)
+val buildLibrary by tasks.register<Exec>("buildLibrary") {
+    dependsOn("browserProductionLibraryDistribution")
+
+    workingDir("${projectDir}")
+    commandLine("deno", "run", "-A", "build.ts")
 }

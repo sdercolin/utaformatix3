@@ -1,10 +1,10 @@
 @file:OptIn(DelicateCoroutinesApi::class, ExperimentalJsExport::class)
 
-import com.sdercolin.utaformatix.data.Document
 import core.io.UfData
 import core.model.Format
 import core.model.ImportParams
 import core.model.ExportResult
+import core.model.DocumentContainer
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.promise
@@ -12,93 +12,93 @@ import org.w3c.files.File
 import kotlin.js.Promise
 
 @JsExport
-fun parseVsqx(file: File): Promise<Document> = parse(listOf(file), Format.Vsqx)
+fun parseVsqx(file: File): Promise<DocumentContainer> = parse(listOf(file), Format.Vsqx)
 
 @JsExport
-fun parseVpr(file: File): Promise<Document> = parse(listOf(file), Format.Vpr)
+fun parseVpr(file: File): Promise<DocumentContainer> = parse(listOf(file), Format.Vpr)
 
 @JsExport
-fun parseUst(files: Array<File>): Promise<Document> = parse(files.toList(), Format.Ust)
+fun parseUst(files: Array<File>): Promise<DocumentContainer> = parse(files.toList(), Format.Ust)
 
 @JsExport
-fun parseUstx(file: File): Promise<Document> = parse(listOf(file), Format.Ustx)
+fun parseUstx(file: File): Promise<DocumentContainer> = parse(listOf(file), Format.Ustx)
 
 @JsExport
-fun parseCcs(file: File): Promise<Document> = parse(listOf(file), Format.Ccs)
+fun parseCcs(file: File): Promise<DocumentContainer> = parse(listOf(file), Format.Ccs)
 
 @JsExport
-fun parseSvp(file: File): Promise<Document> = parse(listOf(file), Format.Svp)
+fun parseSvp(file: File): Promise<DocumentContainer> = parse(listOf(file), Format.Svp)
 
 @JsExport
-fun parseS5p(file: File): Promise<Document> = parse(listOf(file), Format.S5p)
+fun parseS5p(file: File): Promise<DocumentContainer> = parse(listOf(file), Format.S5p)
 
 @JsExport
-fun parseMusicXml(file: File): Promise<Document> = parse(listOf(file), Format.MusicXml)
+fun parseMusicXml(file: File): Promise<DocumentContainer> = parse(listOf(file), Format.MusicXml)
 
 @JsExport
-fun parseDv(file: File): Promise<Document> = parse(listOf(file), Format.Dv)
+fun parseDv(file: File): Promise<DocumentContainer> = parse(listOf(file), Format.Dv)
 
 @JsExport
-fun parseVsq(file: File): Promise<Document> = parse(listOf(file), Format.Vsq)
+fun parseVsq(file: File): Promise<DocumentContainer> = parse(listOf(file), Format.Vsq)
 
 @JsExport
-fun parseVocaloidMid(file: File): Promise<Document> = parse(listOf(file), Format.VocaloidMid)
+fun parseVocaloidMid(file: File): Promise<DocumentContainer> = parse(listOf(file), Format.VocaloidMid)
 
 @JsExport
-fun parseStandardMid(file: File): Promise<Document> = parse(listOf(file), Format.StandardMid)
+fun parseStandardMid(file: File): Promise<DocumentContainer> = parse(listOf(file), Format.StandardMid)
 
 @JsExport
-fun parsePpsf(file: File): Promise<Document> = parse(listOf(file), Format.Ppsf)
+fun parsePpsf(file: File): Promise<DocumentContainer> = parse(listOf(file), Format.Ppsf)
 
 @JsExport
-fun parseUfData(files: Array<File>): Promise<Document> = parse(files.toList(), Format.UfData)
+fun parseUfData(files: Array<File>): Promise<DocumentContainer> = parse(files.toList(), Format.UfData)
 
-private fun parse(files: List<File>, format: Format): Promise<Document> = GlobalScope.promise {
+private fun parse(files: List<File>, format: Format): Promise<DocumentContainer> = GlobalScope.promise {
     val project = format.parser(files, ImportParams())
-    UfData.generateDocument(project)
+    DocumentContainer(UfData.generateDocument(project))
 }
 
 @JsExport
-fun generateVsqx(document: Document): Promise<ExportResult> = generate(document, Format.Vsqx)
+fun generateVsqx(document: DocumentContainer): Promise<ExportResult> = generate(document, Format.Vsqx)
 
 @JsExport
-fun generateVpr(document: Document): Promise<ExportResult> = generate(document, Format.Vpr)
+fun generateVpr(document: DocumentContainer): Promise<ExportResult> = generate(document, Format.Vpr)
 
 @JsExport
-fun generateUstZip(document: Document): Promise<ExportResult> = generate(document, Format.Ust)
+fun generateUstZip(document: DocumentContainer): Promise<ExportResult> = generate(document, Format.Ust)
 
 @JsExport
-fun generateUstx(document: Document): Promise<ExportResult> = generate(document, Format.Ustx)
+fun generateUstx(document: DocumentContainer): Promise<ExportResult> = generate(document, Format.Ustx)
 
 @JsExport
-fun generateCcs(document: Document): Promise<ExportResult> = generate(document, Format.Ccs)
+fun generateCcs(document: DocumentContainer): Promise<ExportResult> = generate(document, Format.Ccs)
 
 @JsExport
-fun generateSvp(document: Document): Promise<ExportResult> = generate(document, Format.Svp)
+fun generateSvp(document: DocumentContainer): Promise<ExportResult> = generate(document, Format.Svp)
 
 @JsExport
-fun generateS5p(document: Document): Promise<ExportResult> = generate(document, Format.S5p)
+fun generateS5p(document: DocumentContainer): Promise<ExportResult> = generate(document, Format.S5p)
 
 @JsExport
-fun generateMusicXmlZip(document: Document): Promise<ExportResult> = generate(document, Format.MusicXml)
+fun generateMusicXmlZip(document: DocumentContainer): Promise<ExportResult> = generate(document, Format.MusicXml)
 
 @JsExport
-fun generateDv(document: Document): Promise<ExportResult> = generate(document, Format.Dv)
+fun generateDv(document: DocumentContainer): Promise<ExportResult> = generate(document, Format.Dv)
 
 @JsExport
-fun generateVsq(document: Document): Promise<ExportResult> = generate(document, Format.Vsq)
+fun generateVsq(document: DocumentContainer): Promise<ExportResult> = generate(document, Format.Vsq)
 
 @JsExport
-fun generateVocaloidMid(document: Document): Promise<ExportResult> = generate(document, Format.VocaloidMid)
+fun generateVocaloidMid(document: DocumentContainer): Promise<ExportResult> = generate(document, Format.VocaloidMid)
 
 @JsExport
-fun generateStandardMid(document: Document): Promise<ExportResult> = generate(document, Format.StandardMid)
+fun generateStandardMid(document: DocumentContainer): Promise<ExportResult> = generate(document, Format.StandardMid)
 
 @JsExport
-fun generateUfData(document: Document): Promise<ExportResult> = generate(document, Format.UfData)
+fun generateUfData(document: DocumentContainer): Promise<ExportResult> = generate(document, Format.UfData)
 
-private fun generate(document: Document, format: Format): Promise<ExportResult> = GlobalScope.promise {
-    format.generator(document, listOf())
+private fun generate(document: DocumentContainer, format: Format): Promise<ExportResult> = GlobalScope.promise {
+    format.generator(UfData.parseDocument(document.document, listOf(), ImportParams()), listOf())
 }
 
 @JsExport
