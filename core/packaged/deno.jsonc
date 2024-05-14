@@ -1,0 +1,6 @@
+{
+    "publish": {
+        "exclude": ["!core.js", "!core.d.ts", "*.mod.ts"],
+        "include": ["core.js", "core.d.ts", "*.ts", "README.md"]
+    }
+}

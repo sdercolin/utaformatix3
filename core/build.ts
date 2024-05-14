@@ -13,11 +13,17 @@ const modifiedCorePath = `${unbundled}/kotlin/utaformatix-core-modified.mjs`;
 
 let shouldCopy = false;
 if (await Deno.stat(`${unbundled}/package.json`).catch(() => null)) {
-  const unbundledLastModified = await Deno.stat(`${unbundled}/package.json`);
-  const coreLastModified = await Deno.stat(
+  const unbundledStat = await Deno.stat(`${unbundled}/package.json`);
+  const coreStats = await Promise.all([
+    ...await Array.fromAsync(
+      expandGlob(`${buildDir}/packages/utaformatix-core/kotlin/**/*`),
+    ).then((files) => files.map((x) => x.path)),
     `${buildDir}/packages/utaformatix-core/package.json`,
+  ].map((x) => Deno.stat(x)));
+  const coreLastModified = Math.max(
+    ...coreStats.map((x) => x.mtime?.getTime() ?? 0),
   );
-  if (coreLastModified.mtime! > unbundledLastModified.mtime!) {
+  if (coreLastModified > unbundledStat.mtime!.getTime()) {
     console.log("Core has been modified, copying...");
     await Deno.remove(unbundled, { recursive: true });
     shouldCopy = true;

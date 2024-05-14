@@ -51,7 +51,7 @@ fun parseStandardMid(file: File): Promise<DocumentContainer> = parse(listOf(file
 fun parsePpsf(file: File): Promise<DocumentContainer> = parse(listOf(file), Format.Ppsf)
 
 @JsExport
-fun parseUfData(files: Array<File>): Promise<DocumentContainer> = parse(files.toList(), Format.UfData)
+fun parseUfData(file: File): Promise<DocumentContainer> = parse(listOf(file), Format.UfData)
 
 private fun parse(files: List<File>, format: Format): Promise<DocumentContainer> = GlobalScope.promise {
     val project = format.parser(files, ImportParams())
@@ -100,6 +100,3 @@ fun generateUfData(document: DocumentContainer): Promise<ExportResult> = generat
 private fun generate(document: DocumentContainer, format: Format): Promise<ExportResult> = GlobalScope.promise {
     format.generator(UfData.parseDocument(document.document, listOf(), ImportParams()), listOf())
 }
-
-@JsExport
-fun hello(): String = "core"
