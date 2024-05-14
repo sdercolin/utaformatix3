@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE score-partwise PUBLIC "-//Recordare//DTD MusicXML 2.0 Partwise//EN" "http://www.musicxml.org/dtds/partwise.dtd">
+<score-partwise version="2.0">
+    <identification>
+        <encoding>
+            <software>Sinsy</software>
+        </encoding>
+    </identification>
+    <part-list>
+        <score-part id="P1">
+            <part-name>MusicXML Part</part-name>
+        </score-part>
+    </part-list>
+    <part id="P1">
+        
+    <measure number="1">
+            <attributes>
+                <divisions>960</divisions>
+            </attributes>
+            <attributes>
+                <key>
+                    <fifths>0</fifths>
+                    <mode>major</mode>
+                </key>
+            </attributes>
+        <attributes><time><beats>4</beats><beat-type>4</beat-type></time></attributes><sound tempo="120"/><direction><direction-type><metronome><beat-unit>quarter</beat-unit><per-minute>120</per-minute></metronome></direction-type><sound tempo="120"/></direction><note><pitch><step>C</step><octave>4</octave></pitch><duration>960</duration><lyric><syllabic>single</syllabic><text>ど</text></lyric></note><note><pitch><step>D</step><octave>4</octave></pitch><duration>960</duration><lyric><syllabic>single</syllabic><text>れ</text></lyric></note><note><pitch><step>E</step><octave>4</octave></pitch><duration>960</duration><lyric><syllabic>single</syllabic><text>み</text></lyric></note><note><pitch><step>F</step><octave>4</octave></pitch><duration>960</duration><lyric><syllabic>single</syllabic><text>ふぁ</text></lyric></note></measure><measure number="2"><note><pitch><step>G</step><octave>4</octave></pitch><duration>960</duration><lyric><syllabic>single</syllabic><text>そ</text></lyric></note><note><pitch><step>A</step><octave>4</octave></pitch><duration>960</duration><lyric><syllabic>single</syllabic><text>ら</text></lyric></note><note><pitch><step>B</step><octave>4</octave></pitch><duration>960</duration><lyric><syllabic>single</syllabic><text>し</text></lyric></note><note><pitch><step>C</step><octave>5</octave></pitch><duration>960</duration><lyric><syllabic>single</syllabic><text>ど</text></lyric></note></measure><measure number="3"><note><rest/><duration>3840</duration></note></measure></part>
+</score-partwise>
