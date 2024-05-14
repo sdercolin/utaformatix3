@@ -6,12 +6,15 @@ $.setPrintCommand(true);
 
 const testPackageRoot =
   `${import.meta.dirname}/../build/temporary_test_package`;
+const denoRoot = `${import.meta.dirname}/packaged`;
 
-await emptyDir(testPackageRoot);
+$.cd(denoRoot);
+
 console.log("Testing on Deno...");
 await $`deno test -A`;
 
 console.log("Building and testing for npm...");
+await emptyDir(testPackageRoot);
 await build({
   entryPoints: ["./mod.ts"],
   outDir: testPackageRoot,

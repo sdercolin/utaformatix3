@@ -34,3 +34,12 @@ val buildLibrary by tasks.register<Exec>("buildLibrary") {
     workingDir("${projectDir}")
     commandLine("deno", "run", "-A", "build.ts")
 }
+
+val testLibrary by tasks.register<Exec>("testLibrary") {
+    dependsOn(buildLibrary)
+    workingDir("${projectDir}")
+    commandLine("deno", "run", "-A", "test.ts")
+}
+tasks.named("test") {
+    finalizedBy(testLibrary)
+}
