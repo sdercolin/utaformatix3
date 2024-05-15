@@ -1,30 +1,30 @@
 import * as core from "./core.js";
-import type { UfData } from "npm:utaformatix-data@^1.1.0";
+import { Project } from "./project.ts";
 import JSZip from "npm:jszip@^3.10.1";
 
 const createSingleParse = (
   parse: (file: File) => Promise<core.DocumentContainer>,
   ext: string,
 ): SingleParseFunction =>
-async (data): Promise<UfData> => {
+async (data): Promise<Project> => {
   const result = await parse(
     data instanceof File ? data : new File([data], `data.${ext}`),
   );
   const ufData = await core.documentToUfData(result);
-  return JSON.parse(ufData);
+  return new Project(JSON.parse(ufData));
 };
 
 const createMultiParse = (
   parse: (files: File[]) => Promise<core.DocumentContainer>,
   ext: string,
 ): MultiParseFunction =>
-async (...data): Promise<UfData> => {
+async (...data): Promise<Project> => {
   const files = data.map((d, i) =>
     d instanceof File ? d : new File([d], `data_${i}.${ext}`)
   );
   const result = await parse(files);
   const ufData = await core.documentToUfData(result);
-  return JSON.parse(ufData);
+  return new Project(JSON.parse(ufData));
 };
 
 const createSingleGenerate = (
@@ -32,8 +32,8 @@ const createSingleGenerate = (
     document: core.DocumentContainer,
   ) => Promise<core.ExportResult>,
 ): SingleGenerateFunction =>
-async (data: UfData): Promise<Uint8Array> => {
-  const project = await core.ufDataToDocument(JSON.stringify(data));
+async (data: Project): Promise<Uint8Array> => {
+  const project = await core.ufDataToDocument(JSON.stringify(data.toUfData()));
   const result = await generate(project);
   const arrayBuffer = await result.blob.arrayBuffer();
   return new Uint8Array(arrayBuffer);
@@ -41,7 +41,7 @@ async (data: UfData): Promise<Uint8Array> => {
 
 const createUnzip =
   (generate: SingleGenerateFunction) =>
-  async (data: UfData): Promise<Uint8Array[]> => {
+  async (data: Project): Promise<Uint8Array[]> => {
     const zip = await generate(data);
     const zipReader = new JSZip();
     await zipReader.loadAsync(zip);
@@ -51,7 +51,7 @@ const createUnzip =
           [
             // {project name}_{track id}_{track name}.{ext}
             parseInt(
-              file.name.replace(data.project.name + "_", "").split("_")[0],
+              file.name.replace(data.name + "_", "").split("_")[0],
               10,
             ),
             await file.async("uint8array"),
@@ -63,12 +63,12 @@ const createUnzip =
     return files.map(([, data]) => data);
   };
 
-type SingleParseFunction = (data: Uint8Array | File) => Promise<UfData>;
-type MultiParseFunction = (...data: (Uint8Array | File)[]) => Promise<UfData>;
-type SingleGenerateFunction = (data: UfData) => Promise<Uint8Array>;
-type MultiGenerateFunction = (data: UfData) => Promise<Uint8Array[]>;
+type SingleParseFunction = (data: Uint8Array | File) => Promise<Project>;
+type MultiParseFunction = (...data: (Uint8Array | File)[]) => Promise<Project>;
+type SingleGenerateFunction = (data: Project) => Promise<Uint8Array>;
+type MultiGenerateFunction = (data: Project) => Promise<Uint8Array[]>;
 
-export type { UfData };
+export type { Project };
 
 // Parse functions
 
@@ -115,7 +115,10 @@ export const parseSvp: SingleParseFunction = createSingleParse(
 );
 
 /** Parse ust (UTAU's project) file */
-export const parseUst: MultiParseFunction = createMultiParse(core.parseUst, "ust");
+export const parseUst: MultiParseFunction = createMultiParse(
+  core.parseUst,
+  "ust",
+);
 
 /** Parse ustx (OpenUtau's project) file */
 export const parseUstx: SingleParseFunction = createSingleParse(
@@ -166,7 +169,7 @@ export const parseFunctions: Record<string, SingleParseFunction> = {
 };
 
 /** Parse a file based on its extension */
-export const parseAny = async (file: File): Promise<UfData> => {
+export const parseAny = async (file: File): Promise<Project> => {
   const ext = file.name.split(".").pop()?.toLowerCase();
   if (!ext) throw new Error("No file extension");
   const parse = parseFunctions[ext];

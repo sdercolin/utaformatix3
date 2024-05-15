@@ -1,6 +1,7 @@
 import * as uf from "./mod.ts";
 import { expandGlob } from "jsr:@std/fs@^0.224.0/expand-glob";
 import { assertEquals } from "jsr:@std/assert@^0.224.0";
+import { relative } from "jsr:@std/path@^0.221.0/relative";
 const testAssetsDir = `${import.meta.dirname}/testAssets`;
 
 const parserMap = [
@@ -27,7 +28,7 @@ for await (const file of expandGlob("./testAssets/**/*")) {
   }
 
   const [, parse] = parser;
-  const path = file.path.replace(testAssetsDir, ".");
+  const path = relative(testAssetsDir, file.path);
 
   Deno.test(`parse: ${path} using ${parse}`, async () => {
     const data = await Deno.readFile(file.path);
@@ -35,7 +36,7 @@ for await (const file of expandGlob("./testAssets/**/*")) {
   });
 }
 
-Deno.test("parse: MultipleGenerateFunctions can serialize score with correct order", async () => {
+Deno.test("generate: MultipleGenerateFunctions can serialize score with correct order", async () => {
   const with10Tracks = await Deno.readFile(testAssetsDir + "/10tracks.svp");
   const ufdata = await uf.parseSvp(with10Tracks);
 
