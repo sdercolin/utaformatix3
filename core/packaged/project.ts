@@ -1,4 +1,5 @@
 import type { UfData } from "npm:utaformatix-data@^1.1.0";
+import type { JapaneseLyricsType } from "./mod.ts";
 import * as base from "./base.ts";
 type BaseProject = UfData["project"];
 
@@ -19,6 +20,36 @@ export class Project implements BaseProject {
   toUfData(): UfData {
     return structuredClone(this.data);
   }
+
+  /**
+   * Analyzes the type of Japanese lyrics.
+   * @returns Type of Japanese lyrics.
+   */
+  analyzeJapaneseLyricsType(): JapaneseLyricsType {
+    return base.analyzeJapaneseLyricsType(this.data);
+  }
+
+  /**
+   * Converts Japanese lyrics.
+   * @param fromType - Type of Japanese lyrics. Use "auto" to automatically detect the type.
+   * @param targetType - Type of Japanese lyrics.
+   * @param convertVowelConnections - Whether to convert vowel connections. Enable this when exporting to UST.
+   */
+  convertJapaneseLyrics(
+    fromType: JapaneseLyricsType | "auto",
+    targetType: JapaneseLyricsType,
+    convertVowelConnections: boolean,
+  ): Project {
+    const ufData = base.convertJapaneseLyrics(
+      this.data,
+      fromType === "auto" ? this.analyzeJapaneseLyricsType() : fromType,
+      targetType,
+      convertVowelConnections,
+    );
+    return new Project(ufData);
+  }
+
+  // Properties
 
   /** Count of measure prefixes (measures that cannot contain notes, restricted by some editors) */
   get measurePrefix(): BaseProject["measurePrefix"] {
@@ -44,6 +75,8 @@ export class Project implements BaseProject {
   get tracks(): BaseProject["tracks"] {
     return this.data.project.tracks;
   }
+
+  // Parsing
 
   /** Creates a Project instance from ccs (CeVIO's project file) file. */
   static async fromCcs(data: Uint8Array | File): Promise<Project> {
@@ -114,6 +147,8 @@ export class Project implements BaseProject {
   static async fromAny(file: File): Promise<Project> {
     return new Project(await base.parseAny(file));
   }
+
+  // Generation
 
   /** Generates ccs (CeVIO's project file) file from the project. */
   static toCcs(project: Project): Promise<Uint8Array> {

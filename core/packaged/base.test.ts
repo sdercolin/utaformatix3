@@ -1,4 +1,4 @@
-import * as uf from "./mod.ts";
+import * as uf from "./base.ts";
 import { expandGlob } from "jsr:@std/fs@^0.224.0/expand-glob";
 import { assertEquals } from "jsr:@std/assert@^0.224.0";
 import { relative } from "jsr:@std/path@^0.221.0/relative";
@@ -79,3 +79,18 @@ for (
     await uf[name](result);
   });
 }
+
+Deno.test("convertJapaneseLyrics", async () => {
+  const cvc = await Deno.readFile(testAssetsDir + "/tsukuyomi_cvc.ust");
+  const ufdata = await uf.parseUst(cvc);
+
+  const converted = uf.convertJapaneseLyrics(
+    ufdata,
+    "KanaVcv",
+    "KanaCv",
+    false,
+  );
+
+  const lyrics = converted.project.tracks[0].notes.map((note) => note.lyric);
+  assertEquals(lyrics, ["ど", "れ", "み", "ふぁ", "そ", "ら", "し", "ど"]);
+});

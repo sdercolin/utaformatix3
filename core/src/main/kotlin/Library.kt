@@ -6,6 +6,9 @@ import core.model.DocumentContainer
 import core.model.ExportResult
 import core.model.Format
 import core.model.ImportParams
+import core.model.JapaneseLyricsType
+import core.process.lyrics.japanese.analyseJapaneseLyricsTypeForProject
+import core.process.lyrics.japanese.convertJapaneseLyrics
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.promise
@@ -106,16 +109,54 @@ private fun generate(document: DocumentContainer, format: Format): Promise<Expor
 }
 
 @JsExport
-fun documentToUfData(document: DocumentContainer): Promise<String> = GlobalScope.promise {
-    jsonSerializer.encodeToString(Document.serializer(), document.document)
+fun documentToUfData(document: DocumentContainer): String {
+    return jsonSerializer.encodeToString(Document.serializer(), document.document)
 }
 
 @JsExport
-fun ufDataToDocument(documentJson: String): Promise<DocumentContainer> = GlobalScope.promise {
+fun ufDataToDocument(documentJson: String): DocumentContainer {
     val document: Document = jsonSerializer.decodeFromString(documentJson)
-    DocumentContainer(document)
+    return DocumentContainer(document)
 }
 
+@JsExport
+fun documentConvertJapaneseLyrics(
+    document: DocumentContainer,
+    fromType: JapaneseLyricsType,
+    targetType: JapaneseLyricsType,
+    convertVowelConnections: Boolean
+): DocumentContainer {
+    val baseProject = UfData.parseDocument(document.document, listOf(), ImportParams())
+    val project = core.model.Project(
+        format = Format.UfData,
+        inputFiles = listOf(),
+        name = baseProject.name,
+        tracks = baseProject.tracks,
+        timeSignatures = baseProject.timeSignatures,
+        tempos = baseProject.tempos,
+        measurePrefix = baseProject.measurePrefix,
+        importWarnings = baseProject.importWarnings,
+        japaneseLyricsType = fromType,
+    )
+    val converted = convertJapaneseLyrics(
+        project,
+        targetType,
+        if (convertVowelConnections) {
+            Format.Ust
+        } else {
+            Format.UfData
+        },
+    )
+    return DocumentContainer(UfData.generateDocument(converted))
+}
+
+@JsExport
+fun analyzeJapaneseLyricsType(document: DocumentContainer): JapaneseLyricsType {
+    val project = UfData.parseDocument(document.document, listOf(), ImportParams())
+    return analyseJapaneseLyricsTypeForProject(project)
+}
+
+@OptIn(ExperimentalSerializationApi::class)
 val jsonSerializer = Json {
     isLenient = true
     ignoreUnknownKeys = true

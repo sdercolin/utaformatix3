@@ -10,7 +10,7 @@ async (data): Promise<UfData> => {
   const result = await parse(
     data instanceof File ? data : new File([data], `data.${ext}`),
   );
-  const ufData = await core.documentToUfData(result);
+  const ufData = core.documentToUfData(result);
   return JSON.parse(ufData);
 };
 
@@ -23,7 +23,7 @@ async (...data): Promise<UfData> => {
     d instanceof File ? d : new File([d], `data_${i}.${ext}`)
   );
   const result = await parse(files);
-  const ufData = await core.documentToUfData(result);
+  const ufData = core.documentToUfData(result);
   return JSON.parse(ufData);
 };
 
@@ -33,7 +33,7 @@ const createSingleGenerate = (
   ) => Promise<core.ExportResult>,
 ): SingleGenerateFunction =>
 async (data: UfData): Promise<Uint8Array> => {
-  const project = await core.ufDataToDocument(JSON.stringify(data));
+  const project = core.ufDataToDocument(JSON.stringify(data));
   const result = await generate(project);
   const arrayBuffer = await result.blob.arrayBuffer();
   return new Uint8Array(arrayBuffer);
@@ -239,3 +239,43 @@ export const generateUst: MultiGenerateFunction = createUnzip(
 export const generateMusicXml: MultiGenerateFunction = createUnzip(
   createSingleGenerate(core.generateMusicXmlZip),
 );
+
+/**
+ * Converts Japanese lyrics.
+ * @param data - UtaFormatix data.
+ * @param fromType - Type of Japanese lyrics.
+ * @param targetType - Type of Japanese lyrics.
+ * @param convertVowelConnections - Whether to convert vowel connections. Enable this when exporting to UST.
+ */
+export const convertJapaneseLyrics = (
+  data: UfData,
+  fromType: JapaneseLyricsType,
+  targetType: JapaneseLyricsType,
+  convertVowelConnections: boolean,
+): UfData => {
+  const project = core.ufDataToDocument(JSON.stringify(data));
+  const converted = core.documentConvertJapaneseLyrics(
+    project,
+    core.JapaneseLyricsType[fromType],
+    core.JapaneseLyricsType[targetType],
+    convertVowelConnections,
+  );
+  const ufData = core.documentToUfData(converted);
+  return JSON.parse(ufData);
+};
+
+/**
+ * Analyze the type of Japanese lyrics.
+ * @param data - UtaFormatix data.
+ * @returns Type of Japanese lyrics.
+ */
+export const analyzeJapaneseLyricsType = (
+  data: UfData,
+): JapaneseLyricsType => {
+  const project = core.ufDataToDocument(JSON.stringify(data));
+  const type = core.analyzeJapaneseLyricsType(project);
+  return type.name as JapaneseLyricsType;
+};
+
+/** Type of Japanese lyrics */
+export type JapaneseLyricsType = core.JapaneseLyricsType["name"];
