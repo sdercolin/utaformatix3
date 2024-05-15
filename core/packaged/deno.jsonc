@@ -1,5 +1,8 @@
 {
-    "exports": "./mod.ts",
+    "exports": {
+        ".": "./mod.ts",
+        "base": "./base.ts"
+    },
     // TODO: Replace this
     "name": "@sevenc-nanashi/utaformatix-ts",
     "version": "0.1.0",
