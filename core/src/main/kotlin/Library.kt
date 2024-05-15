@@ -111,8 +111,8 @@ fun documentToUfData(document: DocumentContainer): Promise<String> = GlobalScope
 }
 
 @JsExport
-fun ufDataToDocument(document: String): Promise<DocumentContainer> = GlobalScope.promise {
-    val document: Document = jsonSerializer.decodeFromString(document)
+fun ufDataToDocument(documentJson: String): Promise<DocumentContainer> = GlobalScope.promise {
+    val document: Document = jsonSerializer.decodeFromString(documentJson)
     DocumentContainer(document)
 }
 
