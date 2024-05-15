@@ -46,68 +46,73 @@ export class Project implements BaseProject {
   }
 
   /** Creates a Project instance from ccs (CeVIO's project file) file. */
-  static async fromCcs(data: Uint8Array): Promise<Project> {
+  static async fromCcs(data: Uint8Array | File): Promise<Project> {
     return new Project(await base.parseCcs(data));
   }
 
   /** Creates a Project instance from dv (DeepVocal's project file) file. */
-  static async fromDv(data: Uint8Array): Promise<Project> {
+  static async fromDv(data: Uint8Array | File): Promise<Project> {
     return new Project(await base.parseDv(data));
   }
 
   /** Creates a Project instance from MusicXML file file. */
-  static async fromMusicXml(data: Uint8Array): Promise<Project> {
+  static async fromMusicXml(data: Uint8Array | File): Promise<Project> {
     return new Project(await base.parseMusicXml(data));
   }
 
   /** Creates a Project instance from ppsf (Piapro Studio's project file) file. */
-  static async fromPpsf(data: Uint8Array): Promise<Project> {
+  static async fromPpsf(data: Uint8Array | File): Promise<Project> {
     return new Project(await base.parsePpsf(data));
   }
 
   /** Creates a Project instance from s5p (Old Synthesizer V's project file) file. */
-  static async fromS5p(data: Uint8Array): Promise<Project> {
+  static async fromS5p(data: Uint8Array | File): Promise<Project> {
     return new Project(await base.parseS5p(data));
   }
 
   /** Creates a Project instance from Standard MIDI file. */
-  static async fromStandardMid(data: Uint8Array): Promise<Project> {
+  static async fromStandardMid(data: Uint8Array | File): Promise<Project> {
     return new Project(await base.parseStandardMid(data));
   }
 
   /** Creates a Project instance from svp (Synthesizer V's project file) file. */
-  static async fromSvp(data: Uint8Array): Promise<Project> {
+  static async fromSvp(data: Uint8Array | File): Promise<Project> {
     return new Project(await base.parseSvp(data));
   }
 
   /** Creates a Project instance from ust (UTAU's project file) file. */
-  static async fromUst(data: Uint8Array): Promise<Project> {
+  static async fromUst(data: Uint8Array | File): Promise<Project> {
     return new Project(await base.parseUst(data));
   }
 
   /** Creates a Project instance from ustx (OpenUtau's project file) file. */
-  static async fromUstx(data: Uint8Array): Promise<Project> {
+  static async fromUstx(data: Uint8Array | File): Promise<Project> {
     return new Project(await base.parseUstx(data));
   }
 
   /** Creates a Project instance from Vocaloid 1 MIDI file. */
-  static async fromVocaloidMid(data: Uint8Array): Promise<Project> {
+  static async fromVocaloidMid(data: Uint8Array | File): Promise<Project> {
     return new Project(await base.parseVocaloidMid(data));
   }
 
   /** Creates a Project instance from vpr (VOCALOID 5's project file) file. */
-  static async fromVpr(data: Uint8Array): Promise<Project> {
+  static async fromVpr(data: Uint8Array | File): Promise<Project> {
     return new Project(await base.parseVpr(data));
   }
 
   /** Creates a Project instance from vsq (VOCALOID 2's project file) file. */
-  static async fromVsq(data: Uint8Array): Promise<Project> {
+  static async fromVsq(data: Uint8Array | File): Promise<Project> {
     return new Project(await base.parseVsq(data));
   }
 
   /** Creates a Project instance from vsqx (VOCALOID 3/4's project file) file. */
-  static async fromVsqx(data: Uint8Array): Promise<Project> {
+  static async fromVsqx(data: Uint8Array | File): Promise<Project> {
     return new Project(await base.parseVsqx(data));
+  }
+
+  /** Creates a Project instance from file, based on the file extension. */
+  static async fromAny(file: File): Promise<Project> {
+    return new Project(await base.parseAny(file));
   }
 
   /** Generates ccs (CeVIO's project file) file from the project. */
