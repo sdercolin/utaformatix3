@@ -7,13 +7,11 @@ const createSingleParse = (
   ext: string,
 ): SingleParseFunction =>
 async (data): Promise<UfData> => {
-  // Export DocumentContainer, then parse it to UfData
   const result = await parse(
     data instanceof File ? data : new File([data], `data.${ext}`),
   );
-  const ufData = await core.generateUfData(result);
-  const decoded = new TextDecoder().decode(await ufData.blob.arrayBuffer());
-  return JSON.parse(decoded);
+  const ufData = await core.documentToUfData(result);
+  return JSON.parse(ufData);
 };
 
 const createMultiParse = (
@@ -25,9 +23,8 @@ async (...data): Promise<UfData> => {
     d instanceof File ? d : new File([d], `data_${i}.${ext}`)
   );
   const result = await parse(files);
-  const ufData = await core.generateUfData(result);
-  const decoded = new TextDecoder().decode(await ufData.blob.arrayBuffer());
-  return JSON.parse(decoded);
+  const ufData = await core.documentToUfData(result);
+  return JSON.parse(ufData);
 };
 
 const createSingleGenerate = (
@@ -36,10 +33,7 @@ const createSingleGenerate = (
   ) => Promise<core.ExportResult>,
 ): SingleGenerateFunction =>
 async (data: UfData): Promise<Uint8Array> => {
-  const buffer = new TextEncoder().encode(JSON.stringify(data));
-  const project = await core.parseUfData(
-    new File([buffer], "data.ufdata.json"),
-  );
+  const project = await core.ufDataToDocument(JSON.stringify(data));
   const result = await generate(project);
   const arrayBuffer = await result.blob.arrayBuffer();
   return new Uint8Array(arrayBuffer);

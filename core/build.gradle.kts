@@ -31,13 +31,13 @@ kotlin {
 val buildLibrary by tasks.register<Exec>("buildLibrary") {
     dependsOn("browserProductionLibraryDistribution")
 
-    workingDir("${projectDir}")
+    workingDir("$projectDir")
     commandLine("deno", "run", "-A", "build.ts")
 }
 
 val testLibrary by tasks.register<Exec>("testLibrary") {
     dependsOn(buildLibrary)
-    workingDir("${projectDir}")
+    workingDir("$projectDir")
     commandLine("deno", "run", "-A", "test.ts")
 }
 tasks.named("test") {

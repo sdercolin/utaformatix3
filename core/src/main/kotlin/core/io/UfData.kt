@@ -10,7 +10,6 @@ import com.sdercolin.utaformatix.data.Tempo
 import com.sdercolin.utaformatix.data.TimeSignature
 import com.sdercolin.utaformatix.data.Track
 import com.sdercolin.utaformatix.data.UtaFormatixDataVersion
-import core.exception.UnsupportedUfDataError
 import core.model.ExportNotification
 import core.model.ExportResult
 import core.model.Feature

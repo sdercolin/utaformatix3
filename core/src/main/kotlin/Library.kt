@@ -1,13 +1,17 @@
-@file:OptIn(DelicateCoroutinesApi::class, ExperimentalJsExport::class)
+@file:OptIn(DelicateCoroutinesApi::class, ExperimentalJsExport::class, ExperimentalSerializationApi::class)
 
+import com.sdercolin.utaformatix.data.Document
 import core.io.UfData
+import core.model.DocumentContainer
+import core.model.ExportResult
 import core.model.Format
 import core.model.ImportParams
-import core.model.ExportResult
-import core.model.DocumentContainer
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.promise
+import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.json.Json
 import org.w3c.files.File
 import kotlin.js.Promise
 
@@ -99,4 +103,22 @@ fun generateUfData(document: DocumentContainer): Promise<ExportResult> = generat
 
 private fun generate(document: DocumentContainer, format: Format): Promise<ExportResult> = GlobalScope.promise {
     format.generator(UfData.parseDocument(document.document, listOf(), ImportParams()), listOf())
+}
+
+@JsExport
+fun documentToUfData(document: DocumentContainer): Promise<String> = GlobalScope.promise {
+    jsonSerializer.encodeToString(Document.serializer(), document.document)
+}
+
+@JsExport
+fun ufDataToDocument(document: String): Promise<DocumentContainer> = GlobalScope.promise {
+    val document: Document = jsonSerializer.decodeFromString(document)
+    DocumentContainer(document)
+}
+
+val jsonSerializer = Json {
+    isLenient = true
+    ignoreUnknownKeys = true
+    encodeDefaults = true
+    explicitNulls = false
 }
