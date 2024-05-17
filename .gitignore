@@ -1,6 +1,3 @@
 .gradle
 build
 .idea
-
-core/packaged/core.js
-core/packaged/core.d.ts
