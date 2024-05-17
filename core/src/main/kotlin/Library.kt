@@ -2,7 +2,7 @@
 
 import com.sdercolin.utaformatix.data.Document
 import core.io.UfData
-import core.model.DocumentContainer
+import core.model.ProjectContainer
 import core.model.ExportResult
 import core.model.Format
 import core.model.ImportParams
@@ -19,115 +19,115 @@ import org.w3c.files.File
 import kotlin.js.Promise
 
 @JsExport
-fun parseVsqx(file: File): Promise<DocumentContainer> = parse(listOf(file), Format.Vsqx)
+fun parseVsqx(file: File): Promise<ProjectContainer> = parse(listOf(file), Format.Vsqx)
 
 @JsExport
-fun parseVpr(file: File): Promise<DocumentContainer> = parse(listOf(file), Format.Vpr)
+fun parseVpr(file: File): Promise<ProjectContainer> = parse(listOf(file), Format.Vpr)
 
 @JsExport
-fun parseUst(files: Array<File>): Promise<DocumentContainer> = parse(files.toList(), Format.Ust)
+fun parseUst(files: Array<File>): Promise<ProjectContainer> = parse(files.toList(), Format.Ust)
 
 @JsExport
-fun parseUstx(file: File): Promise<DocumentContainer> = parse(listOf(file), Format.Ustx)
+fun parseUstx(file: File): Promise<ProjectContainer> = parse(listOf(file), Format.Ustx)
 
 @JsExport
-fun parseCcs(file: File): Promise<DocumentContainer> = parse(listOf(file), Format.Ccs)
+fun parseCcs(file: File): Promise<ProjectContainer> = parse(listOf(file), Format.Ccs)
 
 @JsExport
-fun parseSvp(file: File): Promise<DocumentContainer> = parse(listOf(file), Format.Svp)
+fun parseSvp(file: File): Promise<ProjectContainer> = parse(listOf(file), Format.Svp)
 
 @JsExport
-fun parseS5p(file: File): Promise<DocumentContainer> = parse(listOf(file), Format.S5p)
+fun parseS5p(file: File): Promise<ProjectContainer> = parse(listOf(file), Format.S5p)
 
 @JsExport
-fun parseMusicXml(file: File): Promise<DocumentContainer> = parse(listOf(file), Format.MusicXml)
+fun parseMusicXml(file: File): Promise<ProjectContainer> = parse(listOf(file), Format.MusicXml)
 
 @JsExport
-fun parseDv(file: File): Promise<DocumentContainer> = parse(listOf(file), Format.Dv)
+fun parseDv(file: File): Promise<ProjectContainer> = parse(listOf(file), Format.Dv)
 
 @JsExport
-fun parseVsq(file: File): Promise<DocumentContainer> = parse(listOf(file), Format.Vsq)
+fun parseVsq(file: File): Promise<ProjectContainer> = parse(listOf(file), Format.Vsq)
 
 @JsExport
-fun parseVocaloidMid(file: File): Promise<DocumentContainer> = parse(listOf(file), Format.VocaloidMid)
+fun parseVocaloidMid(file: File): Promise<ProjectContainer> = parse(listOf(file), Format.VocaloidMid)
 
 @JsExport
-fun parseStandardMid(file: File): Promise<DocumentContainer> = parse(listOf(file), Format.StandardMid)
+fun parseStandardMid(file: File): Promise<ProjectContainer> = parse(listOf(file), Format.StandardMid)
 
 @JsExport
-fun parsePpsf(file: File): Promise<DocumentContainer> = parse(listOf(file), Format.Ppsf)
+fun parsePpsf(file: File): Promise<ProjectContainer> = parse(listOf(file), Format.Ppsf)
 
 @JsExport
-fun parseUfData(file: File): Promise<DocumentContainer> = parse(listOf(file), Format.UfData)
+fun parseUfData(file: File): Promise<ProjectContainer> = parse(listOf(file), Format.UfData)
 
-private fun parse(files: List<File>, format: Format): Promise<DocumentContainer> = GlobalScope.promise {
+private fun parse(files: List<File>, format: Format): Promise<ProjectContainer> = GlobalScope.promise {
     val project = format.parser(files, ImportParams())
-    DocumentContainer(UfData.generateDocument(project))
+    ProjectContainer(project)
 }
 
 @JsExport
-fun generateVsqx(document: DocumentContainer): Promise<ExportResult> = generate(document, Format.Vsqx)
+fun generateVsqx(project: ProjectContainer): Promise<ExportResult> = generate(project, Format.Vsqx)
 
 @JsExport
-fun generateVpr(document: DocumentContainer): Promise<ExportResult> = generate(document, Format.Vpr)
+fun generateVpr(project: ProjectContainer): Promise<ExportResult> = generate(project, Format.Vpr)
 
 @JsExport
-fun generateUstZip(document: DocumentContainer): Promise<ExportResult> = generate(document, Format.Ust)
+fun generateUstZip(project: ProjectContainer): Promise<ExportResult> = generate(project, Format.Ust)
 
 @JsExport
-fun generateUstx(document: DocumentContainer): Promise<ExportResult> = generate(document, Format.Ustx)
+fun generateUstx(project: ProjectContainer): Promise<ExportResult> = generate(project, Format.Ustx)
 
 @JsExport
-fun generateCcs(document: DocumentContainer): Promise<ExportResult> = generate(document, Format.Ccs)
+fun generateCcs(project: ProjectContainer): Promise<ExportResult> = generate(project, Format.Ccs)
 
 @JsExport
-fun generateSvp(document: DocumentContainer): Promise<ExportResult> = generate(document, Format.Svp)
+fun generateSvp(project: ProjectContainer): Promise<ExportResult> = generate(project, Format.Svp)
 
 @JsExport
-fun generateS5p(document: DocumentContainer): Promise<ExportResult> = generate(document, Format.S5p)
+fun generateS5p(project: ProjectContainer): Promise<ExportResult> = generate(project, Format.S5p)
 
 @JsExport
-fun generateMusicXmlZip(document: DocumentContainer): Promise<ExportResult> = generate(document, Format.MusicXml)
+fun generateMusicXmlZip(project: ProjectContainer): Promise<ExportResult> = generate(project, Format.MusicXml)
 
 @JsExport
-fun generateDv(document: DocumentContainer): Promise<ExportResult> = generate(document, Format.Dv)
+fun generateDv(project: ProjectContainer): Promise<ExportResult> = generate(project, Format.Dv)
 
 @JsExport
-fun generateVsq(document: DocumentContainer): Promise<ExportResult> = generate(document, Format.Vsq)
+fun generateVsq(project: ProjectContainer): Promise<ExportResult> = generate(project, Format.Vsq)
 
 @JsExport
-fun generateVocaloidMid(document: DocumentContainer): Promise<ExportResult> = generate(document, Format.VocaloidMid)
+fun generateVocaloidMid(project: ProjectContainer): Promise<ExportResult> = generate(project, Format.VocaloidMid)
 
 @JsExport
-fun generateStandardMid(document: DocumentContainer): Promise<ExportResult> = generate(document, Format.StandardMid)
+fun generateStandardMid(project: ProjectContainer): Promise<ExportResult> = generate(project, Format.StandardMid)
 
 @JsExport
-fun generateUfData(document: DocumentContainer): Promise<ExportResult> = generate(document, Format.UfData)
+fun generateUfData(project: ProjectContainer): Promise<ExportResult> = generate(project, Format.UfData)
 
-private fun generate(document: DocumentContainer, format: Format): Promise<ExportResult> = GlobalScope.promise {
-    format.generator(UfData.parseDocument(document.document, listOf(), ImportParams()), listOf())
+private fun generate(project: ProjectContainer, format: Format): Promise<ExportResult> = GlobalScope.promise {
+    format.generator(project.project, listOf())
 }
 
 @JsExport
-fun documentToUfData(document: DocumentContainer): String {
-    return jsonSerializer.encodeToString(Document.serializer(), document.document)
+fun projectToUfData(project: ProjectContainer): String {
+    return jsonSerializer.encodeToString(Document.serializer(), UfData.generateDocument(project.project))
 }
 
 @JsExport
-fun ufDataToDocument(documentJson: String): DocumentContainer {
+fun ufDataToProject(documentJson: String): ProjectContainer {
     val document: Document = jsonSerializer.decodeFromString(documentJson)
-    return DocumentContainer(document)
+    return ProjectContainer(UfData.parseDocument(document, listOf(), ImportParams()))
 }
 
 @JsExport
 fun documentConvertJapaneseLyrics(
-    document: DocumentContainer,
+    project: ProjectContainer,
     fromType: JapaneseLyricsType,
     targetType: JapaneseLyricsType,
     convertVowelConnections: Boolean
-): DocumentContainer {
-    val baseProject = UfData.parseDocument(document.document, listOf(), ImportParams())
-    val project = core.model.Project(
+): ProjectContainer {
+    val baseProject = project.project
+    val newProject = core.model.Project(
         format = Format.UfData,
         inputFiles = listOf(),
         name = baseProject.name,
@@ -139,7 +139,7 @@ fun documentConvertJapaneseLyrics(
         japaneseLyricsType = fromType,
     )
     val converted = convertJapaneseLyrics(
-        project,
+        newProject,
         targetType,
         if (convertVowelConnections) {
             Format.Ust
@@ -147,13 +147,12 @@ fun documentConvertJapaneseLyrics(
             Format.UfData
         },
     )
-    return DocumentContainer(UfData.generateDocument(converted))
+    return ProjectContainer(converted)
 }
 
 @JsExport
-fun analyzeJapaneseLyricsType(document: DocumentContainer): JapaneseLyricsType {
-    val project = UfData.parseDocument(document.document, listOf(), ImportParams())
-    return analyseJapaneseLyricsTypeForProject(project)
+fun analyzeJapaneseLyricsType(project: ProjectContainer): JapaneseLyricsType {
+    return analyseJapaneseLyricsTypeForProject(project.project)
 }
 
 @OptIn(ExperimentalSerializationApi::class)
