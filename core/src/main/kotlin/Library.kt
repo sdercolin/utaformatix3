@@ -8,7 +8,7 @@ import core.model.Format
 import core.model.ImportParams
 import core.model.JapaneseLyricsType
 import core.process.lyrics.japanese.analyseJapaneseLyricsTypeForProject
-import core.process.lyrics.japanese.convertJapaneseLyrics
+import core.process.lyrics.japanese.convertJapaneseLyrics as convertJapaneseLyricsBase
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.promise
@@ -120,7 +120,7 @@ fun ufDataToProject(documentJson: String): ProjectContainer {
 }
 
 @JsExport
-fun documentConvertJapaneseLyrics(
+fun convertJapaneseLyrics(
     project: ProjectContainer,
     fromType: JapaneseLyricsType,
     targetType: JapaneseLyricsType,
@@ -138,7 +138,7 @@ fun documentConvertJapaneseLyrics(
         importWarnings = baseProject.importWarnings,
         japaneseLyricsType = fromType,
     )
-    val converted = convertJapaneseLyrics(
+    val converted = convertJapaneseLyricsBase(
         newProject,
         targetType,
         if (convertVowelConnections) {
