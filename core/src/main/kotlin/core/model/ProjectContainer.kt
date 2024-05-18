@@ -5,4 +5,4 @@ package core.model
  */
 @OptIn(ExperimentalJsExport::class)
 @JsExport
-class ProjectContainer(internal val project: Project)
+class ProjectContainer internal constructor(internal val project: Project)
