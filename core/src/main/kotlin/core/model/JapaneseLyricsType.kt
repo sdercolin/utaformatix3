@@ -1,5 +1,7 @@
 package core.model
 
+@OptIn(ExperimentalJsExport::class)
+@JsExport
 enum class JapaneseLyricsType(
     val isRomaji: Boolean,
     val isCV: Boolean,
@@ -10,7 +12,7 @@ enum class JapaneseLyricsType(
     KanaCv(false, true),
     KanaVcv(false, false);
 
-    fun findBestConversionTargetIn(outputFormat: Format): JapaneseLyricsType? {
+    fun findBestConversionTargetIn(@Suppress("NON_EXPORTABLE_TYPE") outputFormat: Format): JapaneseLyricsType? {
         outputFormat.suggestedLyricType?.let {
             return it
         }
