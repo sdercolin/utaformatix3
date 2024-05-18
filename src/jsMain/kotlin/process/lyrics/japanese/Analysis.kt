@@ -42,7 +42,11 @@ private fun analyseLyricsTypeForTrack(track: Track): JapaneseLyricsType {
 }
 
 private fun checkNoteType(note: Note): JapaneseLyricsType {
-    val lyric = note.lyric
+    var lyric = note.lyric
+    // Suffix (e.g. "_B4")
+    if (lyric.contains("_")) {
+        lyric = lyric.substring(0, lyric.indexOf("_"))
+    }
     if (lyric.contains(" ")) {
         val mainLyric = lyric.substring(lyric.indexOf(" ") + 1)
         if (mainLyric.isKana) return KanaVcv
