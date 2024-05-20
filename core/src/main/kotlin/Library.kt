@@ -2,13 +2,12 @@
 
 import com.sdercolin.utaformatix.data.Document
 import core.io.UfData
-import core.model.ProjectContainer
 import core.model.ExportResult
 import core.model.Format
 import core.model.ImportParams
 import core.model.JapaneseLyricsType
+import core.model.ProjectContainer
 import core.process.lyrics.japanese.analyseJapaneseLyricsTypeForProject
-import core.process.lyrics.japanese.convertJapaneseLyrics as convertJapaneseLyricsBase
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.promise
@@ -17,6 +16,7 @@ import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import org.w3c.files.File
 import kotlin.js.Promise
+import core.process.lyrics.japanese.convertJapaneseLyrics as convertJapaneseLyricsBase
 
 @JsExport
 fun parseVsqx(file: File): Promise<ProjectContainer> = parse(listOf(file), Format.Vsqx)
@@ -124,7 +124,7 @@ fun convertJapaneseLyrics(
     project: ProjectContainer,
     fromType: JapaneseLyricsType,
     targetType: JapaneseLyricsType,
-    convertVowelConnections: Boolean
+    convertVowelConnections: Boolean,
 ): ProjectContainer {
     val baseProject = project.project
     val newProject = core.model.Project(

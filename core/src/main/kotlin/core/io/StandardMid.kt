@@ -1,6 +1,5 @@
 package core.io
 
-import core.exception.IllegalFileException
 import core.external.Encoding
 import core.model.DEFAULT_LYRIC
 import core.model.ExportResult
@@ -25,11 +24,8 @@ object StandardMid {
 
     suspend fun parse(file: File): Project {
         val midi = Mid.parseMidi(file)
-        if (midi == false) {
-            throw IllegalFileException.IllegalMidiFile()
-        }
-        val timeDivision = midi.timeDivision as Int
-        val midiTracks = midi.track as Array<dynamic>
+        val timeDivision = midi.header.ticksPerBeat as Int
+        val midiTracks = midi.tracks as Array<Array<dynamic>>
 
         val warnings = mutableListOf<ImportWarning>()
         val (tempos, timeSignatures, tickPrefix) = Mid.parseMasterTrack(
@@ -59,7 +55,7 @@ object StandardMid {
         id: Int,
         timeDivision: Int,
         tickPrefix: Long,
-        midiTrack: dynamic,
+        events: Array<dynamic>,
     ): Track {
         var trackName = "Track ${id + 1}"
         val notes = mutableListOf<Note>()
@@ -70,7 +66,6 @@ object StandardMid {
 
         val pendingNotesHeadsWithLyric = mutableMapOf<Int, Note>()
 
-        val events = midiTrack.event as Array<dynamic>
         for (event in events) {
             val delta = MidiUtil.convertInputTimeToStandardTime(event.deltaTime as Int, timeDivision)
             if (delta > 0) {
@@ -85,45 +80,43 @@ object StandardMid {
                 pendingNoteHead = null
             }
             tickPosition += delta
-            when (MidiUtil.MetaType.parse(event.metaType as? Byte)) {
-                MidiUtil.MetaType.Lyric -> {
-                    val lyricBytes = (event.data as String).asByteTypedArray()
+            when (event.type as String) {
+                "lyrics" -> {
+                    val lyricBytes = (event.text as String).asByteTypedArray()
                     val detectedEncoding = Encoding.detect(lyricBytes)
                     pendingLyric = lyricBytes.decode(detectedEncoding)
                 }
-                MidiUtil.MetaType.Text -> {
+                "text" -> {
                     if (pendingLyric == null) {
-                        val textBytes = (event.data as String).asByteTypedArray()
+                        val textBytes = (event.text as String).asByteTypedArray()
                         val detectedEncoding = Encoding.detect(textBytes)
                         pendingLyric = textBytes.decode(detectedEncoding)
                     }
                 }
-                MidiUtil.MetaType.TrackName -> {
-                    val trackNameBytes = (event.data as String).asByteTypedArray()
+                "trackName" -> {
+                    val trackNameBytes = (event.text as String).asByteTypedArray()
                     val detectedEncoding = Encoding.detect(trackNameBytes)
                     trackName = trackNameBytes.decode(detectedEncoding)
                 }
-                else -> when (MidiUtil.EventType.parse(event.type as? Byte)) {
-                    MidiUtil.EventType.NoteOn -> {
-                        val channel = event.channel as Int
-                        val key = event.data[0] as Int
-                        pendingNoteHead = Note(
-                            id = 0,
-                            tickOn = tickPosition,
-                            tickOff = tickPosition,
-                            key = key,
-                            lyric = DEFAULT_LYRIC,
-                        ) to channel
-                    }
-                    MidiUtil.EventType.NoteOff -> {
-                        val channel = event.channel as Int
-                        pendingNotesHeadsWithLyric[channel]?.let {
-                            notes += it.copy(tickOff = tickPosition)
-                        }
-                        pendingNotesHeadsWithLyric.remove(channel)
-                    }
-                    else -> Unit
+                "noteOn" -> {
+                    val channel = event.channel as Int
+                    val key = event.noteNumber as Int
+                    pendingNoteHead = Note(
+                        id = 0,
+                        tickOn = tickPosition,
+                        tickOff = tickPosition,
+                        key = key,
+                        lyric = DEFAULT_LYRIC,
+                    ) to channel
                 }
+                "noteOff" -> {
+                    val channel = event.channel as Int
+                    pendingNotesHeadsWithLyric[channel]?.let {
+                        notes += it.copy(tickOff = tickPosition)
+                    }
+                    pendingNotesHeadsWithLyric.remove(channel)
+                }
+                else -> Unit
             }
         }
         return Track(

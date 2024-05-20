@@ -37,9 +37,6 @@ object VsqLike {
 
     suspend fun match(file: File): Boolean {
         val midi = Mid.parseMidi(file)
-        if (midi == false) {
-            return false
-        }
         val midiTracks = midi.track as Array<dynamic>
         val tracksAsText = Mid.extractVsqTextsFromMetaEvents(midiTracks).filter { it.isNotEmpty() }
         if (tracksAsText.isEmpty()) return false
@@ -51,8 +48,8 @@ object VsqLike {
 
     suspend fun parse(file: File, format: Format, params: ImportParams): Project {
         val midi = Mid.parseMidi(file)
-        val midiTracks = midi.track as Array<dynamic>
-        val timeDivision = midi.timeDivision as Int
+        val timeDivision = midi.header.ticksPerBeat as Int
+        val midiTracks = midi.tracks as Array<Array<dynamic>>
         val warnings = mutableListOf<ImportWarning>()
         val tracksAsText = Mid.extractVsqTextsFromMetaEvents(midiTracks).filter { it.isNotEmpty() }
         val measurePrefix = getMeasurePrefix(tracksAsText.first())
