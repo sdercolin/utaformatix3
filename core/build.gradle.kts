@@ -22,7 +22,7 @@ kotlin {
             implementation(npm("jszip", "3.5.0"))
             implementation(npm("encoding-japanese", "1.0.30"))
             implementation(npm("uuid", "8.3.2"))
-            implementation(npm("midi-parser-js", "4.0.4"))
+            implementation(npm("midi-file", "1.2.4"))
             implementation(npm("js-yaml", "4.1.0"))
         }
     }

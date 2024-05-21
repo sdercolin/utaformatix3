@@ -1,5 +1,6 @@
 package core.io
 
+import core.exception.IllegalFileException
 import core.model.ImportWarning
 import core.model.Project
 import core.model.Tempo
@@ -20,47 +21,40 @@ import org.w3c.files.File
 
 object Mid {
 
-    private fun customInterpreter(
-        metaType: Byte,
-        arrayBuffer: dynamic,
-    ): dynamic {
-        // we need to handle 0x20 `Channel Prefix` meta event,
-        // otherwise the parser will break and all the following data get shifted
-        if (metaType != 0x20.toByte()) return false
-        return arrayOf(arrayBuffer.readInt(1))
-    }
-
     suspend fun parseMidi(file: File): dynamic {
         val bytes = file.readAsArrayBuffer()
-        val midiParser = core.external.require("midi-parser-js")
-        midiParser.customInterpreter = ::customInterpreter
-        return midiParser.parse(Uint8Array(bytes))
+        val midiParser = core.external.require("midi-file")
+        try {
+            return midiParser.parseMidi(Uint8Array(bytes))
+        } catch (e: dynamic) { // parseMidi throws a string, not an Error
+            throw IllegalFileException.IllegalMidiFile()
+        }
     }
 
     fun parseMasterTrack(
         timeDivision: Int,
-        masterTrack: dynamic,
+        events: Array<dynamic>,
         measurePrefix: Int,
         warnings: MutableList<ImportWarning>,
     ): Triple<List<Tempo>, List<TimeSignature>, Long> {
-        val events = masterTrack.event as Array<dynamic>
         var tickPosition = 0
         val tickCounter = TickCounter()
         val rawTempos = mutableListOf<Tempo>()
         val rawTimeSignatures = mutableListOf<TimeSignature>()
         for (event in events) {
             tickPosition += MidiUtil.convertInputTimeToStandardTime(event.deltaTime as Int, timeDivision)
-            when (MidiUtil.MetaType.parse(event.metaType as? Byte)) {
-                MidiUtil.MetaType.Tempo -> {
+            when (event.type as String) {
+                "setTempo" -> {
                     rawTempos.add(
                         Tempo(
                             tickPosition.toLong(),
-                            MidiUtil.convertMidiTempoToBpm(event.data as Int),
+                            MidiUtil.convertMidiTempoToBpm(event.microsecondsPerBeat as Int),
                         ),
                     )
                 }
-                MidiUtil.MetaType.TimeSignature -> {
-                    val (numerator, denominator) = MidiUtil.parseMidiTimeSignature(event.data)
+                "timeSignature" -> {
+                    val numerator = event.numerator as Int
+                    val denominator = event.denominator as Int
                     tickCounter.goToTick(tickPosition.toLong(), numerator, denominator)
                     rawTimeSignatures.add(
                         TimeSignature(
@@ -131,15 +125,15 @@ object Mid {
         return counter.tick
     }
 
-    fun extractVsqTextsFromMetaEvents(midiTracks: Array<dynamic>): List<String> {
+    fun extractVsqTextsFromMetaEvents(midiTracks: Array<Array<dynamic>>): List<String> {
         return midiTracks.drop(1)
             .map { track ->
-                (track.event as Array<dynamic>)
+                track
                     .fold("") { accumulator, element ->
-                        val metaType = MidiUtil.MetaType.parse(element.metaType as? Byte)
-                        if (metaType != MidiUtil.MetaType.Text) accumulator
+                        val metaType = element.type as String
+                        if (metaType != "text") accumulator
                         else {
-                            var text = element.data as String
+                            var text = element.text as String
                             text = text.asByteTypedArray().decode("SJIS")
                             text = text.drop(3)
                             text = text.drop(text.indexOf(':') + 1)
