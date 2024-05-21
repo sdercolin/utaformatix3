@@ -1,7 +1,5 @@
 package core.util
 
-import kotlin.math.pow
-
 object MidiUtil {
 
     private const val StandardTimeDivision = 480
@@ -15,10 +13,6 @@ object MidiUtil {
         NoteOn(0x09);
 
         fun getStatusByte(channel: Int) = ((value.toInt() shl 4) or channel).toByte()
-
-        companion object {
-            fun parse(value: Byte?): EventType? = values().find { it.value == value }
-        }
     }
 
     enum class MetaType(val value: Byte) {
@@ -30,10 +24,6 @@ object MidiUtil {
         EndOfTrack(0x2f);
 
         val eventHeaderBytes get() = listOf(0xff.toByte(), value)
-
-        companion object {
-            fun parse(value: Byte?): MetaType? = values().find { it.value == value }
-        }
     }
 
     fun convertMidiTempoToBpm(midiTempo: Int) =
@@ -41,13 +31,6 @@ object MidiUtil {
 
     fun convertBpmToMidiTempo(bpm: Double) =
         (1000 * 1000 * 60 / bpm).toInt()
-
-    fun parseMidiTimeSignature(data: dynamic): Pair<Int, Int> {
-        data as Array<Int>
-        val numerator = data[0]
-        val denominator = (2f.pow(data[1])).toInt()
-        return numerator to denominator
-    }
 
     fun generateMidiTimeSignatureBytes(numerator: Int, denominator: Int): List<Byte> {
         return listOf(
