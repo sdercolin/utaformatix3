@@ -14,9 +14,7 @@ kotlin {
         binaries.library()
         browser()
         generateTypeScriptDefinitions()
-        if (System.getenv("USE_ES_MODULES") == "true") {
-            useEsModules()
-        }
+        useEsModules()
         dependencies {
             implementation("com.sdercolin.utaformatix:utaformatix-data:1.0.0")
             implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core-js:1.6.4")
