@@ -80,21 +80,29 @@ kotlin {
 }
 
 val copyCoreResources by tasks.register<Copy>("copyCoreResources") {
-    from("core/src/main/resources")
-    into("build/js/packages/utaformatix/kotlin")
+    from("core/src/main/resources") {
+        include("**/*.*")
+    }
+    into("build/js/packages/utaformatix/kotlin/")
 }
 tasks.named("jsProcessResources") {
     dependsOn(copyCoreResources)
 }
 
-val copyJsResources by tasks.register<Copy>("copyJsResources") {
-    from("src/jsMain/resources")
+val copyJsResourcesForTests by tasks.register<Copy>("copyJsResourcesForTests") {
+    from("core/src/main/resources") {
+        include("**/*.*")
+    }
+    from("src/jsMain/resources") {
+        include("**/*.*")
+    }
     into("build/js/packages/utaformatix-test/kotlin")
     mustRunAfter("jsTestTestDevelopmentExecutableCompileSync")
 }
 tasks.named("jsBrowserTest") {
-    dependsOn(copyJsResources)
+    dependsOn(copyJsResourcesForTests)
 }
+
 val cleanDistributedResources by tasks.register<Delete>("cleanDistributedResources") {
     listOf("format_templates", "images", "texts").forEach {
         delete("build/distributions/$it")
