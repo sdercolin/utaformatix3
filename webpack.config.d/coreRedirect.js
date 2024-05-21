@@ -25,7 +25,7 @@ class MyResolverPlugin {
       .tapAsync("MyResolverPlugin", (request, resolveContext, callback) => {
         if (
           resources.includes(request.request) &&
-          !request.path.startsWith(corePath)
+          !request.path.startsWith(resourcePath)
         ) {
           return resolver.doResolve(
             target,
