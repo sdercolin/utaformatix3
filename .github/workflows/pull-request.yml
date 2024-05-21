@@ -22,4 +22,5 @@ jobs:
 
             -   name: Build with Gradle
                 run: |
+                    ./gradlew kotlinUpgradeYarnLock
                     ./gradlew build
