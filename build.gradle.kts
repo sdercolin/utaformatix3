@@ -69,7 +69,6 @@ kotlin {
                 implementation(npm("raw-loader", "4.0.2"))
                 implementation(npm("file-loader", "6.2.0"))
                 implementation(npm("js-cookie", "2.2.1"))
-                implementation(npm("glob", "10.3.15"))
             }
         }
         val jsTest by getting {
