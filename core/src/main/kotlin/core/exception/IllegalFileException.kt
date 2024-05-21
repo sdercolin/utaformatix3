@@ -1,5 +1,7 @@
 package core.exception
 
+@OptIn(ExperimentalJsExport::class)
+@JsExport
 sealed class IllegalFileException(message: String) : Throwable(message) {
     class UnknownVsqVersion : IllegalFileException("Cannot identify the version of the loaded vsqx file.")
     class XmlRootNotFound : IllegalFileException("The root element is not found in the xml file.")
