@@ -26,7 +26,7 @@ object Mid {
         val midiParser = core.external.require("midi-file")
         try {
             return midiParser.parseMidi(Uint8Array(bytes))
-        } catch (e: Throwable) {
+        } catch (e: dynamic) { // parseMidi throws a string, not an Error
             throw IllegalFileException.IllegalMidiFile()
         }
     }
