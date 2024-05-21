@@ -1,5 +1,6 @@
 package core.io
 
+import core.exception.IllegalFileException
 import core.model.ImportWarning
 import core.model.Project
 import core.model.Tempo
@@ -26,7 +27,7 @@ object Mid {
         try {
             return midiParser.parseMidi(Uint8Array(bytes))
         } catch (e: Throwable) {
-            throw IllegalStateException("Failed to parse MIDI file", e)
+            throw IllegalFileException.IllegalMidiFile()
         }
     }
 
