@@ -23,7 +23,11 @@ object Mid {
     suspend fun parseMidi(file: File): dynamic {
         val bytes = file.readAsArrayBuffer()
         val midiParser = core.external.require("midi-file")
-        return midiParser.parseMidi(Uint8Array(bytes))
+        try {
+            return midiParser.parseMidi(Uint8Array(bytes))
+        } catch (e: Throwable) {
+            throw IllegalStateException("Failed to parse MIDI file", e)
+        }
     }
 
     fun parseMasterTrack(
