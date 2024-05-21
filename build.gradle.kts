@@ -84,8 +84,13 @@ val copyCoreResources by tasks.register<Copy>("copyCoreResources") {
         include("**/*.*")
     }
     into("build/js/packages/utaformatix/kotlin/")
+    mustRunAfter("jsProductionExecutableCompileSync")
+    mustRunAfter("jsDevelopmentExecutableCompileSync")
 }
-tasks.named("jsProcessResources") {
+tasks.named("jsBrowserProductionWebpack") {
+    dependsOn(copyCoreResources)
+}
+tasks.named("jsBrowserDevelopmentRun") {
     dependsOn(copyCoreResources)
 }
 
