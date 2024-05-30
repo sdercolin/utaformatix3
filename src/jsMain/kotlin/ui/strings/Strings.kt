@@ -40,14 +40,14 @@ enum class Strings(
         en = "Import Project",
         ja = "プロジェクトをインポート",
         zhCN = "导入工程",
-        ru = "Импортировать проект",
+        ru = "Импортирование проекта",
         fr = "Importation de projet",
     ),
     SelectOutputFormatCaption(
         en = "Select Output Format",
         ja = "出力形式を選ぶ",
         zhCN = "选择输出格式",
-        ru = "Выберите выходной формат",
+        ru = "Выбор выходного формата",
         fr = "Sélectionner le Format de Sortie",
     ),
     ConfigurationEditorCaption(
@@ -275,14 +275,14 @@ enum class Strings(
         en = "Map lyrics to lyrics or phonemes",
         ja = "歌詞を歌詞または発音記号にマッピング",
         zhCN = "将歌词映射到歌词或音素",
-        ru = "Отобразить тексты на тексты или фонемы",
+        ru = "Сопоставление текстов с текстами или фонемами",
         fr = "Mapper les paroles sur les paroles ou les phonèmes",
     ),
     LyricsMappingDescription(
         en = "Only lyrics that is completely same as the key will be mapped. ",
         ja = "キーと完全一致する歌詞のみマッピングされます。",
         zhCN = "只有与键完全相同的歌词才会被映射。",
-        ru = "Будут отображены только тексты, полностью совпадающие с ключом.",
+        ru = "Будут отображены только те тексты, которые полностью совпадают с ключом. ",
         fr = "Seules les paroles qui sont complètement identiques à la clé seront mappées.",
     ),
     LyricsMappingPreset(
@@ -559,6 +559,7 @@ enum class Strings(
         en = "https://gist.githubusercontent.com/sdercolin/b5d4cf81434ea381d8836e0015681029/raw",
         ja = "https://gist.githubusercontent.com/sdercolin/b5d4cf81434ea381d8836e0015681029/raw",
         zhCN = "https://gist.githubusercontent.com/sdercolin/b5d4cf81434ea381d8836e0015681029/raw",
+        ru = "https://gist.githubusercontent.com/KagamineP/71234d007f2674b2f8fd8b74d2ebb8fc/raw",
     ),
     ImportWarningTitle(
         en = "The following exceptions happened during the import core.process.",
