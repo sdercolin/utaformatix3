@@ -106,6 +106,7 @@ data class LyricsReplacementRequest(
                     ),
                 )
 
+
                 Format.Ccs -> items.add(
                     Item(
                         filterType = FilterType.Exact,

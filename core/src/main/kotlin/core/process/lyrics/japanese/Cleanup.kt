@@ -86,8 +86,6 @@ private fun String.cleanupAsKanaCV(): String {
         }
     }
 
-    result = result.replace("っ", "")
-
     return result
 }
 
