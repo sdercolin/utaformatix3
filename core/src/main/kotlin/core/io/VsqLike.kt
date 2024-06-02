@@ -1,7 +1,6 @@
 package core.io
 
 import core.exception.EmptyProjectException
-import core.model.DEFAULT_LYRIC
 import core.model.ExportNotification
 import core.model.ExportResult
 import core.model.Feature
@@ -123,7 +122,7 @@ object VsqLike {
                 }
                 val (lyric, xSampa) = lyricsInfo?.let {
                     it[0].trim('"') to it[1].trim('"')
-                } ?: (DEFAULT_LYRIC to null)
+                } ?: (params.defaultLyric to null)
                 Note(
                     id = 0,
                     key = key,

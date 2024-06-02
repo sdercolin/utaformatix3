@@ -3,7 +3,6 @@ package core.io
 import core.external.JsZip
 import core.external.JsZipOption
 import core.external.generateUUID
-import core.model.DEFAULT_LYRIC
 import core.model.ExportNotification
 import core.model.ExportResult
 import core.model.Feature
@@ -79,37 +78,38 @@ object Svp {
         core.model.Track(
             id = index,
             name = track.name ?: "Track ${index + 1}",
-            notes = parseNotes(track, project)
+            notes = parseNotes(track, project, params.defaultLyric)
                 // for some reasons, svp can have negative positioned notes inside
                 .filter { it.tickOn >= 0 },
             pitch = if (params.simpleImport) null else parsePitch(track, project, tempos),
         ).validateNotes()
     }
 
-    private fun parseNotes(track: Track, project: Project): List<core.model.Note> {
+    private fun parseNotes(track: Track, project: Project, defaultLyric: String): List<core.model.Note> {
         val mainNotes = track.mainGroup?.let { group ->
             val ref = track.mainRef ?: return@let null
-            parseNotesFromGroup(ref, group)
+            parseNotesFromGroup(ref, group, defaultLyric)
         }.orEmpty()
         val extraNotes = track.groups?.flatMap { ref ->
             project.library.find { it.uuid == ref.groupID }
-                ?.let { group -> parseNotesFromGroup(ref, group) }
+                ?.let { group -> parseNotesFromGroup(ref, group, defaultLyric) }
                 .orEmpty()
         }.orEmpty()
         return mainNotes + extraNotes
     }
 
-    private fun parseNotesFromGroup(ref: Ref, group: Group): List<core.model.Note> = group.notes.map { note ->
-        val tickOn = (note.onset + ref.blickOffset) / TICK_RATE
-        core.model.Note(
-            id = 0,
-            key = note.pitch + ref.pitchOffset,
-            tickOn = tickOn,
-            tickOff = tickOn + note.duration / TICK_RATE,
-            lyric = note.lyrics.takeUnless { it.isNullOrBlank() } ?: DEFAULT_LYRIC,
-            phoneme = note.phonemes,
-        )
-    }
+    private fun parseNotesFromGroup(ref: Ref, group: Group, defaultLyric: String): List<core.model.Note> =
+        group.notes.map { note ->
+            val tickOn = (note.onset + ref.blickOffset) / TICK_RATE
+            core.model.Note(
+                id = 0,
+                key = note.pitch + ref.pitchOffset,
+                tickOn = tickOn,
+                tickOff = tickOn + note.duration / TICK_RATE,
+                lyric = note.lyrics.takeUnless { it.isNullOrBlank() } ?: defaultLyric,
+                phoneme = note.phonemes,
+            )
+        }
 
     private fun parsePitch(track: Track, project: Project, tempos: List<core.model.Tempo>): Pitch? {
         val main = track.mainGroup?.let { group ->

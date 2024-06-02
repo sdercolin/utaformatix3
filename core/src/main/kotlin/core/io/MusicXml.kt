@@ -5,9 +5,9 @@ import core.external.JsZip
 import core.external.JsZipOption
 import core.io.MusicXml.MXmlMeasureContent.NoteType
 import core.model.DEFAULT_KEY
-import core.model.DEFAULT_LYRIC
 import core.model.ExportResult
 import core.model.Format
+import core.model.ImportParams
 import core.model.ImportWarning
 import core.model.KEY_IN_OCTAVE
 import core.model.Note
@@ -40,7 +40,7 @@ import org.w3c.files.File
 
 object MusicXml {
 
-    suspend fun parse(file: File): Project {
+    suspend fun parse(file: File, params: ImportParams): Project {
         val projectName = file.nameWithoutExtension
         val text = file.readText()
         val parser = DOMParser()
@@ -57,7 +57,15 @@ object MusicXml {
         val timeSignatures = masterTrackResult.timeSignatures.ifEmpty { listOf(TimeSignature.default) }
         val tempos = masterTrackResult.tempoWithMeasureIndexes.map { it.second }.ifEmpty { listOf(Tempo.default) }
 
-        val tracks = partNodes.mapIndexed { index, element -> parseTrack(index, element, masterTrackResult) }
+        val tracks =
+            partNodes.mapIndexed { index, element ->
+                parseTrack(
+                    index,
+                    element,
+                    masterTrackResult,
+                    params.defaultLyric,
+                )
+            }
 
         return Project(
             format = format,
@@ -129,7 +137,12 @@ object MusicXml {
         )
     }
 
-    private fun parseTrack(trackIndex: Int, partNode: Element, masterTrackResult: MasterTrackParseResult): Track {
+    private fun parseTrack(
+        trackIndex: Int,
+        partNode: Element,
+        masterTrackResult: MasterTrackParseResult,
+        defaultLyric: String
+    ): Track {
         val trackName = "Track ${trackIndex + 1}"
         val notes = mutableListOf<Note>()
         var isInsideNote = false
@@ -168,7 +181,7 @@ object MusicXml {
 
                 val lyric = noteNode.getSingleElementByTagNameOrNull("lyric")
                     ?.getSingleElementByTagNameOrNull("text")
-                    ?.innerValueOrNull ?: DEFAULT_LYRIC
+                    ?.innerValueOrNull ?: defaultLyric
 
                 val note = if (!isInsideNote) {
                     Note(

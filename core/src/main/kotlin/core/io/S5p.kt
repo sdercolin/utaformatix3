@@ -1,6 +1,5 @@
 package core.io
 
-import core.model.DEFAULT_LYRIC
 import core.model.ExportNotification
 import core.model.ExportResult
 import core.model.Feature
@@ -69,7 +68,7 @@ object S5p {
             core.model.Track(
                 id = index,
                 name = track.name ?: "Track ${index + 1}",
-                notes = parseNotes(track),
+                notes = parseNotes(track, params.defaultLyric),
                 pitch = if (params.simpleImport) null else parsePitch(track),
             ).validateNotes()
         }
@@ -91,16 +90,17 @@ object S5p {
         return Pitch(convertedPoints, isAbsolute = false).takeIf { it.data.isNotEmpty() }
     }
 
-    private fun parseNotes(track: Track): List<core.model.Note> = track.notes.filterNotNull().map { note ->
-        val tickOn = note.onset / TICK_RATE
-        core.model.Note(
-            id = 0,
-            key = note.pitch,
-            tickOn = tickOn,
-            tickOff = tickOn + note.duration / TICK_RATE,
-            lyric = note.lyric.takeUnless { it.isNullOrBlank() } ?: DEFAULT_LYRIC,
-        )
-    }
+    private fun parseNotes(track: Track, defaultLyric: String): List<core.model.Note> =
+        track.notes.filterNotNull().map { note ->
+            val tickOn = note.onset / TICK_RATE
+            core.model.Note(
+                id = 0,
+                key = note.pitch,
+                tickOn = tickOn,
+                tickOff = tickOn + note.duration / TICK_RATE,
+                lyric = note.lyric.takeUnless { it.isNullOrBlank() } ?: defaultLyric,
+            )
+        }
 
     fun generate(project: core.model.Project, features: List<FeatureConfig>): ExportResult {
         val jsonText = generateContent(project, features)

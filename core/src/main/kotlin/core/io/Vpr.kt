@@ -2,7 +2,6 @@ package core.io
 
 import core.external.JsZip
 import core.external.JsZipOption
-import core.model.DEFAULT_LYRIC
 import core.model.ExportNotification
 import core.model.ExportResult
 import core.model.Feature
@@ -71,7 +70,7 @@ object Vpr {
                     id = index,
                     tickOn = tickOffset + note.pos,
                     tickOff = tickOffset + note.pos + note.duration,
-                    lyric = note.lyric.takeUnless { it.isNullOrBlank() } ?: DEFAULT_LYRIC,
+                    lyric = note.lyric.takeUnless { it.isNullOrBlank() } ?: params.defaultLyric,
                     key = note.number,
                     phoneme = note.phoneme,
                 )
