@@ -141,7 +141,7 @@ object MusicXml {
         trackIndex: Int,
         partNode: Element,
         masterTrackResult: MasterTrackParseResult,
-        defaultLyric: String
+        defaultLyric: String,
     ): Track {
         val trackName = "Track ${trackIndex + 1}"
         val notes = mutableListOf<Note>()
