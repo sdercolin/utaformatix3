@@ -2,8 +2,8 @@ package core.io
 
 import core.exception.UnsupportedLegacyPpsfError
 import core.external.JsZip
-import core.model.DEFAULT_LYRIC
 import core.model.Format
+import core.model.ImportParams
 import core.model.ImportWarning
 import core.model.Tempo
 import core.model.TimeSignature
@@ -18,7 +18,7 @@ import kotlinx.serialization.json.JsonElement
 import org.w3c.files.File
 
 object Ppsf {
-    suspend fun parse(file: File): core.model.Project {
+    suspend fun parse(file: File, params: ImportParams): core.model.Project {
         val content = readContent(file)
         val warnings = mutableListOf<ImportWarning>()
 
@@ -65,7 +65,7 @@ object Ppsf {
             warnings.add(ImportWarning.TempoNotFound)
         }
 
-        val tracks = content.ppsf.project.dvlTrack.mapIndexed { i, track -> parseTrack(i, track) }
+        val tracks = content.ppsf.project.dvlTrack.mapIndexed { i, track -> parseTrack(i, track, params.defaultLyric) }
 
         return core.model.Project(
             format = format,
@@ -79,13 +79,13 @@ object Ppsf {
         )
     }
 
-    private fun parseTrack(index: Int, dvlTrack: DvlTrack): core.model.Track {
+    private fun parseTrack(index: Int, dvlTrack: DvlTrack, defaultLyric: String): core.model.Track {
         val name = dvlTrack.name ?: "Track ${index + 1}"
         val notes = dvlTrack.events.filter { it.enabled != false }.map {
             core.model.Note(
                 id = 0,
                 key = it.noteNumber,
-                lyric = it.lyric?.takeUnless { lyric -> lyric.isBlank() } ?: DEFAULT_LYRIC,
+                lyric = it.lyric?.takeUnless { lyric -> lyric.isBlank() } ?: defaultLyric,
                 tickOn = it.pos,
                 tickOff = it.pos + it.length,
             )

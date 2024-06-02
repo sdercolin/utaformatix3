@@ -6,4 +6,5 @@ import kotlinx.serialization.Serializable
 data class ImportParams(
     val simpleImport: Boolean = false,
     val multipleMode: Boolean = false,
+    val defaultLyric: String = "あ",
 )

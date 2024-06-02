@@ -105,8 +105,8 @@ enum class Format(
     MusicXml(
         "musicxml",
         otherExtensions = listOf("xml"),
-        parser = { files, _ ->
-            core.io.MusicXml.parse(files.first())
+        parser = { files, params ->
+            core.io.MusicXml.parse(files.first(), params)
         },
         generator = { project, _ ->
             core.io.MusicXml.generate(project)
@@ -152,8 +152,8 @@ enum class Format(
     ),
     StandardMid(
         "mid",
-        parser = { files, _ ->
-            core.io.StandardMid.parse(files.first())
+        parser = { files, params ->
+            core.io.StandardMid.parse(files.first(), params)
         },
         generator = { project, _ ->
             core.io.StandardMid.generate(project)
@@ -165,8 +165,8 @@ enum class Format(
     ),
     Ppsf(
         "ppsf",
-        parser = { files, _ ->
-            core.io.Ppsf.parse(files.first())
+        parser = { files, params ->
+            core.io.Ppsf.parse(files.first(), params)
         },
         generator = { _, _ ->
             throw NotImplementedError()

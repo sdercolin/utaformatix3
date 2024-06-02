@@ -1,7 +1,6 @@
 package core.io
 
 import core.exception.IllegalFileException
-import core.model.DEFAULT_LYRIC
 import core.model.ExportNotification
 import core.model.ExportResult
 import core.model.Feature
@@ -200,7 +199,8 @@ object Vsqx {
                 val key = noteNode.getSingleElementByTagName(tagNames.noteNum).innerValue.toInt()
                 val tickOn = noteNode.getSingleElementByTagName(tagNames.posTick).innerValue.toLong()
                 val length = noteNode.getSingleElementByTagName(tagNames.duration).innerValue.toLong()
-                val lyric = noteNode.getSingleElementByTagNameOrNull(tagNames.lyric)?.innerValueOrNull ?: DEFAULT_LYRIC
+                val lyric =
+                    noteNode.getSingleElementByTagNameOrNull(tagNames.lyric)?.innerValueOrNull ?: params.defaultLyric
                 val xSampa = noteNode.getSingleElementByTagNameOrNull(tagNames.xSampa)?.innerValueOrNull
                 Note(
                     id = index,

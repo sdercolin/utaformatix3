@@ -4,6 +4,7 @@ import core.external.Encoding
 import core.model.DEFAULT_LYRIC
 import core.model.ExportResult
 import core.model.Format
+import core.model.ImportParams
 import core.model.ImportWarning
 import core.model.Note
 import core.model.Project
@@ -22,7 +23,7 @@ import org.w3c.files.File
 
 object StandardMid {
 
-    suspend fun parse(file: File): Project {
+    suspend fun parse(file: File, params: ImportParams): Project {
         val midi = Mid.parseMidi(file)
         val timeDivision = midi.header.ticksPerBeat as Int
         val midiTracks = midi.tracks as Array<Array<dynamic>>
@@ -36,7 +37,7 @@ object StandardMid {
         )
 
         val tracks = midiTracks.drop(1).mapIndexed { index, midiTrack ->
-            parseTrack(index, timeDivision, tickPrefix, midiTrack)
+            parseTrack(index, timeDivision, tickPrefix, midiTrack, params.defaultLyric)
         }
 
         return Project(
@@ -56,6 +57,7 @@ object StandardMid {
         timeDivision: Int,
         tickPrefix: Long,
         events: Array<dynamic>,
+        defaultLyric: String,
     ): Track {
         var trackName = "Track ${id + 1}"
         val notes = mutableListOf<Note>()
@@ -74,7 +76,7 @@ object StandardMid {
                         // cutting note
                         notes += it.copy(tickOff = tickPosition + delta)
                     }
-                    pendingNotesHeadsWithLyric[channel] = noteHead.copy(lyric = pendingLyric ?: DEFAULT_LYRIC)
+                    pendingNotesHeadsWithLyric[channel] = noteHead.copy(lyric = pendingLyric ?: defaultLyric)
                 }
                 pendingLyric = null
                 pendingNoteHead = null
