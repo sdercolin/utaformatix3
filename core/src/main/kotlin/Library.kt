@@ -2,6 +2,7 @@
 
 import com.sdercolin.utaformatix.data.Document
 import core.io.UfData
+import core.model.ConversionParams
 import core.model.ExportResult
 import core.model.FeatureConfig
 import core.model.Format
@@ -75,51 +76,69 @@ private fun parse(files: List<File>, params: ImportParams, format: Format): Prom
     }
 
 @JsExport
-fun generateVsqx(project: ProjectContainer): Promise<ExportResult> = generate(project, Format.Vsqx)
+fun generateVsqx(project: ProjectContainer, params: ConversionParams): Promise<ExportResult> =
+    generate(project, params, Format.Vsqx)
 
 @JsExport
-fun generateVpr(project: ProjectContainer): Promise<ExportResult> = generate(project, Format.Vpr)
+fun generateVpr(project: ProjectContainer, params: ConversionParams): Promise<ExportResult> =
+    generate(project, params, Format.Vpr)
 
 @JsExport
-fun generateUstZip(project: ProjectContainer): Promise<ExportResult> = generate(project, Format.Ust)
+fun generateUstZip(project: ProjectContainer, params: ConversionParams): Promise<ExportResult> =
+    generate(project, params, Format.Ust)
 
 @JsExport
-fun generateUstx(project: ProjectContainer): Promise<ExportResult> = generate(project, Format.Ustx)
+fun generateUstx(project: ProjectContainer, params: ConversionParams): Promise<ExportResult> =
+    generate(project, params, Format.Ustx)
 
 @JsExport
-fun generateCcs(project: ProjectContainer): Promise<ExportResult> = generate(project, Format.Ccs)
+fun generateCcs(project: ProjectContainer, params: ConversionParams): Promise<ExportResult> =
+    generate(project, params, Format.Ccs)
 
 @JsExport
-fun generateSvp(project: ProjectContainer): Promise<ExportResult> = generate(project, Format.Svp)
+fun generateSvp(project: ProjectContainer, params: ConversionParams): Promise<ExportResult> =
+    generate(project, params, Format.Svp)
 
 @JsExport
-fun generateS5p(project: ProjectContainer): Promise<ExportResult> = generate(project, Format.S5p)
+fun generateS5p(project: ProjectContainer, params: ConversionParams): Promise<ExportResult> =
+    generate(project, params, Format.S5p)
 
 @JsExport
-fun generateMusicXmlZip(project: ProjectContainer): Promise<ExportResult> = generate(project, Format.MusicXml)
+fun generateMusicXmlZip(project: ProjectContainer, params: ConversionParams): Promise<ExportResult> =
+    generate(project, params, Format.MusicXml)
 
 @JsExport
-fun generateDv(project: ProjectContainer): Promise<ExportResult> = generate(project, Format.Dv)
+fun generateDv(project: ProjectContainer, params: ConversionParams): Promise<ExportResult> =
+    generate(project, params, Format.Dv)
 
 @JsExport
-fun generateVsq(project: ProjectContainer): Promise<ExportResult> = generate(project, Format.Vsq)
+fun generateVsq(project: ProjectContainer, params: ConversionParams): Promise<ExportResult> =
+    generate(project, params, Format.Vsq)
 
 @JsExport
-fun generateVocaloidMid(project: ProjectContainer): Promise<ExportResult> = generate(project, Format.VocaloidMid)
+fun generateVocaloidMid(project: ProjectContainer, params: ConversionParams): Promise<ExportResult> =
+    generate(project, params, Format.VocaloidMid)
 
 @JsExport
-fun generateStandardMid(project: ProjectContainer): Promise<ExportResult> = generate(project, Format.StandardMid)
+fun generateStandardMid(project: ProjectContainer, params: ConversionParams): Promise<ExportResult> =
+    generate(project, params, Format.StandardMid)
 
 @JsExport
-fun generateUfData(project: ProjectContainer): Promise<ExportResult> = generate(project, Format.UfData)
+fun generateUfData(project: ProjectContainer, params: ConversionParams): Promise<ExportResult> =
+    generate(project, params, Format.UfData)
 
-private fun generate(project: ProjectContainer, format: Format): Promise<ExportResult> = GlobalScope.promise {
-    format.generator(
-        project.project,
-        listOf(
-            FeatureConfig.ConvertPitch,
-        ),
-    )
+private fun generate(project: ProjectContainer, params: ConversionParams, format: Format): Promise<ExportResult> {
+    var features = mutableListOf<FeatureConfig>()
+    if (params.convertPitch) {
+        features.add(FeatureConfig.ConvertPitch)
+    }
+
+    GlobalScope.promise {
+        format.generator(
+            project.project,
+            features,
+        )
+    }
 }
 
 @JsExport
