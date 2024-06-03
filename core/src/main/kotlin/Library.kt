@@ -133,7 +133,7 @@ private fun generate(project: ProjectContainer, params: ConversionParams, format
         features.add(FeatureConfig.ConvertPitch)
     }
 
-    GlobalScope.promise {
+    return GlobalScope.promise {
         format.generator(
             project.project,
             features,
