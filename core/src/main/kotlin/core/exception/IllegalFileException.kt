@@ -17,4 +17,6 @@ sealed class IllegalFileException(message: String) : Throwable(message) {
         )
 
     class IllegalMidiFile : IllegalFileException("Cannot parse this file as a MIDI file.")
+
+    class IllegalTsslnFile : IllegalFileException("Cannot parse this file as a tssln file.")
 }
