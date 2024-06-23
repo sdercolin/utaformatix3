@@ -472,10 +472,10 @@
     estree-walker "^1.0.1"
     picomatch "^2.2.2"
 
-"@sevenc-nanashi/valuetree-ts@npm:@jsr/sevenc-nanashi__valuetree-ts@0.1.2":
-  version "0.1.2"
-  resolved "https://npm.jsr.io/~/11/@jsr/sevenc-nanashi__valuetree-ts/0.1.2.tgz#AFACC4F569FB0BD59D55A1EC5E45C30324F6F0A9"
-  integrity sha512-PacPrHHNWb3V5ao1YvrWZ/xzggMTYEwyzTfDbM4cnHN5gorcKuH8iEgz2NrL7WQuelH2QbTQkH5HyB4qHpR40Q==
+"@sevenc-nanashi/valuetree-ts@npm:@jsr/sevenc-nanashi__valuetree-ts@0.2.0":
+  version "0.2.0"
+  resolved "https://npm.jsr.io/~/11/@jsr/sevenc-nanashi__valuetree-ts/0.2.0.tgz#C54B3DEB79C6EDB635DFF2D1B9E96CA29D513BA8"
+  integrity sha512-dKhOyTjwUxAlzOzynXhrk41Jb+dYkO/GhffXQoeo5UW/Vh62JfA6N0QKmoy004HJ1sv5SMsMD5Toqqrg9+yRKg==
   dependencies:
     "@jsr/sevenc-nanashi__binaryseeker" "^1.0.0"
 

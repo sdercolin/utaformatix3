@@ -13,6 +13,9 @@ object Resources {
     val musicXmlTemplate: String
         get() = require("./format_templates/template.musicxml").default as String
 
+    val tsslnTemplate: Array<Byte>
+        get() =
+            require("./format_templates/template.tssln.json") as Array<Byte>
     val svpTemplate: String
         get() = require("./format_templates/template.svp").default as String
 
