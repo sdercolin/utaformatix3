@@ -178,11 +178,11 @@ enum class Format(
         parser = { files, params ->
             core.io.Tssln.parse(files.first(), params)
         },
-        generator = { project, features ->
-            core.io.Tssln.generate(project, features)
+        generator = { project, _ ->
+            core.io.Tssln.generate(project)
         },
         possibleLyricsTypes = listOf(KanaCv, RomajiCv),
-        availableFeaturesForGeneration = listOf(ConvertPitch, ConvertPhonemes),
+        availableFeaturesForGeneration = listOf(ConvertPhonemes),
     ),
     UfData(
         "ufdata",

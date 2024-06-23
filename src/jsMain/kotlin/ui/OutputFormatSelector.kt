@@ -8,6 +8,7 @@ import core.model.Format.Ppsf
 import core.model.Format.S5p
 import core.model.Format.StandardMid
 import core.model.Format.Svp
+import core.model.Format.Tssln
 import core.model.Format.UfData
 import core.model.Format.Ust
 import core.model.Format.Ustx
@@ -15,7 +16,6 @@ import core.model.Format.VocaloidMid
 import core.model.Format.Vpr
 import core.model.Format.Vsq
 import core.model.Format.Vsqx
-import core.model.Format.Tssln
 import core.model.ImportWarning
 import core.model.Project
 import csstype.FontWeight

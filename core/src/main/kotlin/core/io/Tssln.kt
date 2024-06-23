@@ -3,16 +3,13 @@ package core.io
 import core.exception.IllegalFileException
 import core.external.Resources
 import core.external.ValueTree
-import core.model.ExportResult
-import core.model.FeatureConfig
-import core.model.ImportParams
-import core.util.readAsArrayBuffer
-import org.w3c.files.File
 import core.external.ValueTreeTs
 import core.external.createValueTree
 import core.external.structuredClone
 import core.external.toVariantType
+import core.model.ExportResult
 import core.model.Format
+import core.model.ImportParams
 import core.model.ImportWarning
 import core.model.Note
 import core.model.Project
@@ -20,9 +17,11 @@ import core.model.TICKS_IN_BEAT
 import core.model.Tempo
 import core.model.TimeSignature
 import core.model.Track
-import org.khronos.webgl.Uint8Array
 import core.util.nameWithoutExtension
+import core.util.readAsArrayBuffer
+import org.khronos.webgl.Uint8Array
 import org.w3c.files.Blob
+import org.w3c.files.File
 import kotlin.math.floor
 
 object Tssln {
@@ -81,8 +80,8 @@ object Tssln {
 
                 val pitchStep = noteTree.attributes.PitchStep.value as Int
                 val pitchOctave = noteTree.attributes.PitchOctave.value as Int
-                val rawLyric = noteTree.attributes.Lyric.value as String
-                val lyric = phonemePartPattern.replace(rawLyric, "")
+                val rawLyric = (noteTree.attributes.Lyric.value as String)
+                val lyric = phonemePartPattern.replace(rawLyric, "").takeUnless { it.isBlank() } ?: params.defaultLyric
 
                 val phoneme = (noteTree.attributes.Phoneme.value as String).replace(",", "")
 
@@ -99,7 +98,6 @@ object Tssln {
                         tickOff = (tickOff / TICK_RATE).toLong(),
                     ),
                 )
-
             }
 
             Track(
@@ -136,9 +134,11 @@ object Tssln {
         var currentMeasureIndex = 0
         var beatLength = 4.0
 
-        for (timeSignatureTree in timeSignaturesTree.children.sortedBy {
-            it.attributes.Clock.value as Int
-        }) {
+        for (
+            timeSignatureTree in timeSignaturesTree.children.sortedBy {
+                it.attributes.Clock.value as Int
+            }
+        ) {
             val numerator = timeSignatureTree.attributes.Beats.value as Int
             val denominator = timeSignatureTree.attributes.BeatType.value as Int
             val clock = timeSignatureTree.attributes.Clock.value as Int
@@ -168,7 +168,7 @@ object Tssln {
         return Pair(tempos, timeSignatures)
     }
 
-    fun generate(project: Project, features: List<FeatureConfig>): ExportResult {
+    fun generate(project: Project): ExportResult {
         val baseJson = Resources.tsslnTemplate
 
         val baseTree = ValueTreeTs.parseValueTree(Uint8Array(baseJson))
@@ -192,7 +192,6 @@ object Tssln {
         return project.tracks.map { track ->
             val trackTree = structuredClone(baseTrack)
             trackTree.attributes.Name = (track.name).toVariantType()
-
 
             val pluginData = trackTree.attributes.PluginData.value as Uint8Array
             val pluginDataTree = ValueTreeTs.parseValueTree(pluginData)
@@ -282,9 +281,9 @@ object Tssln {
         }
     }
 
-    private val TICK_RATE = 2.0
+    private const val TICK_RATE = 2.0
 
-    private val phonemePartPattern = Regex("""\[.+?\]""")
+    private val phonemePartPattern = Regex("""\[.+?]""")
 
     private val format = Format.Tssln
 }
