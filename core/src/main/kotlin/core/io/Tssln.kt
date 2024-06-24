@@ -12,6 +12,7 @@ import core.model.Format
 import core.model.ImportParams
 import core.model.ImportWarning
 import core.model.Note
+import core.model.Pitch
 import core.model.Project
 import core.model.TICKS_IN_BEAT
 import core.model.Tempo
@@ -22,7 +23,9 @@ import core.util.readAsArrayBuffer
 import org.khronos.webgl.Uint8Array
 import org.w3c.files.Blob
 import org.w3c.files.File
+import kotlin.math.exp
 import kotlin.math.floor
+import kotlin.math.log2
 
 object Tssln {
     suspend fun parse(file: File, params: ImportParams): Project {
@@ -100,12 +103,51 @@ object Tssln {
                 )
             }
 
+            val pitch = if (!params.simpleImport) {
+                parsePitch(pluginDataTree)
+            } else {
+                null
+            }
+
             Track(
                 id = trackIndex,
                 name = trackName,
                 notes = notes,
+                pitch = if (pitch != null) Pitch(pitch, isAbsolute = true) else null,
             )
         }
+    }
+
+    private fun parsePitch(trackTree: ValueTree): List<Pair<Long, Double?>> {
+        val parameterTree = trackTree.children.first { it.type == "Parameter" }
+        val pitchTree = parameterTree.children.find { it.type == "LogF0CTick" }
+        if (pitchTree == null) {
+            return emptyList()
+        }
+
+        var currentIndex = 0
+        val pitchValues = pitchTree.children.flatMap {
+            val maybeIndex = it.attributes.Index?.value as? Int
+            if (maybeIndex != null) {
+                currentIndex = maybeIndex
+            }
+
+            val repeat = (it.attributes.Repeat?.value ?: 1) as Int
+            val pitchLogFrq = it.attributes.Value.value as Double
+            val pitchFrq = exp(pitchLogFrq)
+
+            val pitchAsMidi = log2(pitchFrq / 440.0) * 12 + 69
+
+            val values = List(repeat) { i ->
+                ((currentIndex + i) / PITCH_TICK_RATE).toLong() to pitchAsMidi
+            }
+
+            currentIndex += repeat
+
+            values
+        }
+
+        return pitchValues
     }
 
     private fun parseMasterTrack(trackTree: ValueTree): Pair<List<Tempo>, List<TimeSignature>> {
@@ -135,9 +177,9 @@ object Tssln {
         var beatLength = 4.0
 
         for (
-            timeSignatureTree in timeSignaturesTree.children.sortedBy {
-                it.attributes.Clock.value as Int
-            }
+        timeSignatureTree in timeSignaturesTree.children.sortedBy {
+            it.attributes.Clock.value as Int
+        }
         ) {
             val numerator = timeSignatureTree.attributes.Beats.value as Int
             val denominator = timeSignatureTree.attributes.BeatType.value as Int
@@ -281,9 +323,10 @@ object Tssln {
         }
     }
 
+    private const val PITCH_TICK_RATE = 0.2
     private const val TICK_RATE = 2.0
 
-    private val phonemePartPattern = Regex("""\[.+?]""")
+    private val phonemePartPattern = Regex("""\[.+?\]""")
 
     private val format = Format.Tssln
 }
