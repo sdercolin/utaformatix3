@@ -173,6 +173,17 @@ enum class Format(
         },
         possibleLyricsTypes = listOf(RomajiCv, KanaCv),
     ),
+    Tssln(
+        "tssln",
+        parser = { files, params ->
+            core.io.Tssln.parse(files.first(), params)
+        },
+        generator = { project, _ ->
+            core.io.Tssln.generate(project)
+        },
+        possibleLyricsTypes = listOf(KanaCv, RomajiCv),
+        availableFeaturesForGeneration = listOf(ConvertPhonemes),
+    ),
     UfData(
         "ufdata",
         parser = { files, params ->
@@ -217,6 +228,7 @@ enum class Format(
                 Dv,
                 Ppsf,
                 StandardMid,
+                Tssln,
                 UfData,
             )
 
@@ -234,6 +246,7 @@ enum class Format(
                 S5p,
                 Dv,
                 StandardMid,
+                Tssln,
                 UfData,
             )
 

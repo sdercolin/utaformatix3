@@ -24,6 +24,9 @@ kotlin {
             implementation(npm("uuid", "8.3.2"))
             implementation(npm("midi-file", "1.2.4"))
             implementation(npm("js-yaml", "4.1.0"))
+            implementation(
+                npm("@sevenc-nanashi/valuetree-ts", "npm:@jsr/sevenc-nanashi__valuetree-ts@0.2.0"),
+            )
         }
     }
 }

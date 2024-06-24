@@ -725,6 +725,13 @@ enum class Strings(
         ru = "Стандартный MIDI-файл",
         fr = "Fichier MIDI standard",
     ),
+    VoiSonaFormatDescription(
+        en = "Project for VoiSona",
+        ja = "VoiSona プロジェクト",
+        zhCN = "VoiSona 工程",
+        ru = "Проект для VoiSona",
+        fr = "Projet pour VoiSona",
+    ),
     ExportButton(
         en = "Export",
         ja = "エクスポート",
