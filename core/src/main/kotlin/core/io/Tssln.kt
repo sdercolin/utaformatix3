@@ -8,6 +8,7 @@ import core.external.createValueTree
 import core.external.structuredClone
 import core.external.toVariantType
 import core.model.ExportResult
+import core.model.FeatureConfig
 import core.model.Format
 import core.model.ImportParams
 import core.model.ImportWarning
@@ -18,6 +19,7 @@ import core.model.TICKS_IN_BEAT
 import core.model.Tempo
 import core.model.TimeSignature
 import core.model.Track
+import core.process.interpolateLinear
 import core.util.nameWithoutExtension
 import core.util.readAsArrayBuffer
 import org.khronos.webgl.Uint8Array
@@ -25,7 +27,10 @@ import org.w3c.files.Blob
 import org.w3c.files.File
 import kotlin.math.exp
 import kotlin.math.floor
+import kotlin.math.ln
+import kotlin.math.log
 import kotlin.math.log2
+import kotlin.math.pow
 
 object Tssln {
     suspend fun parse(file: File, params: ImportParams): Project {
@@ -176,11 +181,9 @@ object Tssln {
         var currentMeasureIndex = 0
         var beatLength = 4.0
 
-        for (
-        timeSignatureTree in timeSignaturesTree.children.sortedBy {
+        for (timeSignatureTree in timeSignaturesTree.children.sortedBy {
             it.attributes.Clock.value as Int
-        }
-        ) {
+        }) {
             val numerator = timeSignatureTree.attributes.Beats.value as Int
             val denominator = timeSignatureTree.attributes.BeatType.value as Int
             val clock = timeSignatureTree.attributes.Clock.value as Int
@@ -210,7 +213,7 @@ object Tssln {
         return Pair(tempos, timeSignatures)
     }
 
-    fun generate(project: Project): ExportResult {
+    fun generate(project: Project, features: List<FeatureConfig>): ExportResult {
         val baseJson = Resources.tsslnTemplate
 
         val baseTree = ValueTreeTs.parseValueTree(Uint8Array(baseJson))
@@ -218,7 +221,7 @@ object Tssln {
         val tracksTree = baseTree.children.first { it.type == "Tracks" }
         val baseTrack = tracksTree.children.first { it.attributes.Type.value == 0 }
 
-        val tracks = generateTracks(baseTrack, project)
+        val tracks = generateTracks(baseTrack, project, features)
         tracksTree.children = tracks.toTypedArray()
 
         val result = ValueTreeTs.dumpValueTree(baseTree)
@@ -230,7 +233,7 @@ object Tssln {
         )
     }
 
-    private fun generateTracks(baseTrack: ValueTree, project: Project): List<ValueTree> {
+    private fun generateTracks(baseTrack: ValueTree, project: Project, features: List<FeatureConfig>): List<ValueTree> {
         return project.tracks.map { track ->
             val trackTree = structuredClone(baseTrack)
             trackTree.attributes.Name = (track.name).toVariantType()
@@ -254,6 +257,58 @@ object Tssln {
             newChildren.addAll(notes)
 
             scoreTree.children = newChildren.toTypedArray()
+
+            if (features.contains(FeatureConfig.ConvertPitch) && track.pitch != null) {
+                val pitchTree = createValueTree()
+                pitchTree.type = "LogF0CTick"
+
+                var prevIndex = 0
+                var prevValue = 0.0
+
+                val pitchDataTrees = track.pitch.data.flatMapIndexed { dataIndex, pitch ->
+                    val (tick, midi) = pitch
+                    if (midi == null) {
+                        return@flatMapIndexed listOf()
+                    }
+                    val pitchFrq = (440.0 * 2.0.pow((midi - 69) / 12.0))
+                    val pitchLogFrq = ln(pitchFrq)
+                    val index = (tick * PITCH_TICK_RATE).toInt()
+
+                    val pitchDataTrees = if (dataIndex == 0) {
+                        val pitchDataTree = createValueTree()
+                        pitchDataTree.type = "Data"
+                        pitchDataTree.attributes.Index = index.toVariantType()
+                        pitchDataTree.attributes.Repeat = 1.toVariantType()
+                        pitchDataTree.attributes.Value = pitchLogFrq.toVariantType()
+
+                        listOf(pitchDataTree)
+                    } else {
+                        val lerpedPitch = listOf(
+                            Pair(prevIndex.toLong(), prevValue),
+                            Pair(index.toLong(), pitchLogFrq),
+                        ).interpolateLinear(1)
+                        if (lerpedPitch == null) {
+                            return@flatMapIndexed listOf()
+                        }
+                        lerpedPitch.subList(1, lerpedPitch.size - 1).map {
+                                val pitchDataTree = createValueTree()
+                                pitchDataTree.type = "Data"
+                                pitchDataTree.attributes.Value = it.second.toVariantType()
+                                pitchDataTree
+                            }
+                    }
+
+                    prevIndex = index
+                    prevValue = pitchLogFrq
+
+                    pitchDataTrees
+                }
+
+                pitchTree.children = pitchDataTrees.toTypedArray()
+
+                val parameterTree = pluginDataTree.children.first { it.type == "Parameter" }
+                parameterTree.children = arrayOf(pitchTree)
+            }
 
             trackTree.attributes.PluginData = (ValueTreeTs.dumpValueTree(pluginDataTree)).toVariantType()
 

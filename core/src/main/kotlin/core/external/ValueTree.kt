@@ -7,7 +7,12 @@ fun createValueTree(): ValueTree {
 }
 
 fun baseVariantType(): dynamic {
-    return js("({type: '', value: undefined})")
+    return js("({type: '', value: undefined})").unsafeCast<VariantType>()
+}
+
+external interface VariantType {
+    var type: String
+    var value: dynamic
 }
 
 fun String.toVariantType(): dynamic {
