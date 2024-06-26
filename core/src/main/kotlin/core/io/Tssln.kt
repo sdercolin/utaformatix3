@@ -7,7 +7,9 @@ import core.external.ValueTreeTs
 import core.external.createValueTree
 import core.external.structuredClone
 import core.external.toVariantType
+import core.model.ExportNotification
 import core.model.ExportResult
+import core.model.Feature
 import core.model.FeatureConfig
 import core.model.Format
 import core.model.ImportParams
@@ -19,7 +21,9 @@ import core.model.TICKS_IN_BEAT
 import core.model.Tempo
 import core.model.TimeSignature
 import core.model.Track
+import core.model.contains
 import core.process.interpolateLinear
+import core.process.pitch.TickTimeTransformer
 import core.util.nameWithoutExtension
 import core.util.readAsArrayBuffer
 import org.khronos.webgl.Uint8Array
@@ -226,14 +230,19 @@ object Tssln {
 
         val result = ValueTreeTs.dumpValueTree(baseTree)
 
+        val notifications = listOfNotNull(
+            if (features.contains(Feature.ConvertPitch)) ExportNotification.PitchDataExported else null,
+        )
+
         return ExportResult(
             Blob(arrayOf(result)),
             project.name + ".tssln",
-            listOf(),
+            notifications,
         )
     }
 
     private fun generateTracks(baseTrack: ValueTree, project: Project, features: List<FeatureConfig>): List<ValueTree> {
+        val transformer = TickTimeTransformer(project.tempos)
         return project.tracks.map { track ->
             val trackTree = structuredClone(baseTrack)
             trackTree.attributes.Name = (track.name).toVariantType()
@@ -258,56 +267,23 @@ object Tssln {
 
             scoreTree.children = newChildren.toTypedArray()
 
-            if (features.contains(FeatureConfig.ConvertPitch) && track.pitch != null) {
-                val pitchTree = createValueTree()
-                pitchTree.type = "LogF0CTick"
-
-                var prevIndex = 0
-                var prevValue = 0.0
-
-                val pitchDataTrees = track.pitch.data.flatMapIndexed { dataIndex, pitch ->
-                    val (tick, midi) = pitch
-                    if (midi == null) {
-                        return@flatMapIndexed listOf()
-                    }
-                    val pitchFrq = (440.0 * 2.0.pow((midi - 69) / 12.0))
-                    val pitchLogFrq = ln(pitchFrq)
-                    val index = (tick * PITCH_TICK_RATE).toInt()
-
-                    val pitchDataTrees = if (dataIndex == 0) {
-                        val pitchDataTree = createValueTree()
-                        pitchDataTree.type = "Data"
-                        pitchDataTree.attributes.Index = index.toVariantType()
-                        pitchDataTree.attributes.Repeat = 1.toVariantType()
-                        pitchDataTree.attributes.Value = pitchLogFrq.toVariantType()
-
-                        listOf(pitchDataTree)
-                    } else {
-                        val lerpedPitch = listOf(
-                            Pair(prevIndex.toLong(), prevValue),
-                            Pair(index.toLong(), pitchLogFrq),
-                        ).interpolateLinear(1)
-                        if (lerpedPitch == null) {
-                            return@flatMapIndexed listOf()
-                        }
-                        lerpedPitch.subList(1, lerpedPitch.size - 1).map {
-                                val pitchDataTree = createValueTree()
-                                pitchDataTree.type = "Data"
-                                pitchDataTree.attributes.Value = it.second.toVariantType()
-                                pitchDataTree
-                            }
-                    }
-
-                    prevIndex = index
-                    prevValue = pitchLogFrq
-
-                    pitchDataTrees
-                }
-
-                pitchTree.children = pitchDataTrees.toTypedArray()
-
+            if (features.contains(FeatureConfig.ConvertPitch) && track.pitch != null && track.pitch.data.isNotEmpty()) {
+                val timePitchTree = generatePitches(
+                    "LogF0",
+                    track.pitch.data.filter { it.second != null }.map {
+                        Pair((transformer.tickToSec(it.first) * PITCH_SECOND_RATE).toLong(), it.second!!)
+                    }.distinctBy { it.first },
+                    150, // 0.25s
+                )
+                val tickPitchTree = generatePitches(
+                    "LogF0CTick",
+                    track.pitch.data.filter { it.second != null }.map {
+                        Pair((it.first * PITCH_TICK_RATE).toLong(), it.second!!)
+                    }.distinctBy { it.first },
+                    96, // 1 beat
+                )
                 val parameterTree = pluginDataTree.children.first { it.type == "Parameter" }
-                parameterTree.children = arrayOf(pitchTree)
+                parameterTree.children = arrayOf(timePitchTree, tickPitchTree)
             }
 
             trackTree.attributes.PluginData = (ValueTreeTs.dumpValueTree(pluginDataTree)).toVariantType()
@@ -327,6 +303,60 @@ object Tssln {
 
             tempoTree
         }
+    }
+
+    private fun generatePitches(type: String, pitches: List<Pair<Long, Double>>, maxConcatLength: Int): ValueTree {
+        val tickPitchTree = createValueTree()
+        tickPitchTree.type = type
+
+        var prevIndex: Long = (-maxConcatLength - 1).toLong()
+        var prevValue = 0.0
+
+        val pitchDataTrees = pitches.flatMap { pitch ->
+            val (index, midi) = pitch
+            val pitchFrq = (440.0 * 2.0.pow((midi - 69) / 12.0))
+            val pitchLogFrq = ln(pitchFrq)
+
+            val pitchDataTrees = if ((index - prevIndex) > maxConcatLength) {
+                val pitchDataTree = createValueTree()
+                pitchDataTree.type = "Data"
+                pitchDataTree.attributes.Index = index.toVariantType()
+                pitchDataTree.attributes.Repeat = 1.toVariantType()
+                pitchDataTree.attributes.Value = pitchLogFrq.toVariantType()
+
+                listOf(pitchDataTree)
+            } else {
+                val lerpedPitch = listOf(
+                    Pair(prevIndex, prevValue),
+                    Pair(index, pitchLogFrq),
+                ).interpolateLinear(1)
+                if (lerpedPitch == null) {
+                    return@flatMap listOf()
+                }
+
+                lerpedPitch.subList(1, lerpedPitch.size - 1).map {
+                    val pitchDataTree = createValueTree()
+                    pitchDataTree.type = "Data"
+                    pitchDataTree.attributes.Value = it.second.toVariantType()
+                    pitchDataTree
+                }
+            }
+
+            prevIndex = index
+            prevValue = pitchLogFrq
+
+            pitchDataTrees
+        }
+
+        val firstIndex = pitches.first().first
+        val length = pitches.last().first - firstIndex
+
+        // Somehow the value is multiplied with 3
+        tickPitchTree.attributes.Length = (length.toInt() * 3 + 3).toVariantType()
+
+        tickPitchTree.children = pitchDataTrees.toTypedArray()
+
+        return tickPitchTree
     }
 
     private fun generateTimeSignatures(timeSignatures: List<TimeSignature>): List<ValueTree> {
@@ -378,6 +408,7 @@ object Tssln {
         }
     }
 
+    private const val PITCH_SECOND_RATE = 600.0
     private const val PITCH_TICK_RATE = 0.2
     private const val TICK_RATE = 2.0
 

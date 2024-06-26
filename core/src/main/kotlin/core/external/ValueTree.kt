@@ -29,6 +29,14 @@ fun Int.toVariantType(): dynamic {
 
     return value
 }
+fun Long.toVariantType(): dynamic {
+    val value = baseVariantType()
+    value.type = "int64"
+    val digits = this.toString()
+    value.value = js("BigInt(digits)")
+
+    return value
+}
 fun Double.toVariantType(): dynamic {
     val value = baseVariantType()
     value.type = "double"

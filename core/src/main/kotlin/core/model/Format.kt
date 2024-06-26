@@ -182,7 +182,7 @@ enum class Format(
             core.io.Tssln.generate(project, features)
         },
         possibleLyricsTypes = listOf(KanaCv, RomajiCv),
-        availableFeaturesForGeneration = listOf(ConvertPhonemes),
+        availableFeaturesForGeneration = listOf(ConvertPitch, ConvertPhonemes),
     ),
     UfData(
         "ufdata",
