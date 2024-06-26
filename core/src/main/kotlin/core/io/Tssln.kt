@@ -3,10 +3,11 @@ package core.io
 import core.exception.IllegalFileException
 import core.external.Resources
 import core.external.ValueTree
-import core.external.ValueTreeTs
-import core.external.createValueTree
+import core.external.parseValueTree
+import core.external.dumpValueTree
+import core.model.createValueTree
 import core.external.structuredClone
-import core.external.toVariantType
+import core.model.toVariantType
 import core.model.ExportResult
 import core.model.Format
 import core.model.ImportParams
@@ -27,7 +28,7 @@ import kotlin.math.floor
 object Tssln {
     suspend fun parse(file: File, params: ImportParams): Project {
         val blob = file.readAsArrayBuffer()
-        val valueTree = ValueTreeTs.parseValueTree(
+        val valueTree = parseValueTree(
             Uint8Array(blob),
         )
 
@@ -62,7 +63,7 @@ object Tssln {
         return trackTrees.mapIndexed { trackIndex, trackTree ->
             val trackName = trackTree.attributes.Name.value as String
             val pluginData = trackTree.attributes.PluginData.value as Uint8Array
-            val pluginDataTree = ValueTreeTs.parseValueTree(pluginData)
+            val pluginDataTree = parseValueTree(pluginData)
 
             if (pluginDataTree.type != "StateInformation") {
                 throw IllegalFileException.IllegalTsslnFile()
@@ -110,7 +111,7 @@ object Tssln {
 
     private fun parseMasterTrack(trackTree: ValueTree): Pair<List<Tempo>, List<TimeSignature>> {
         val pluginData = trackTree.attributes.PluginData.value as Uint8Array
-        val pluginDataTree = ValueTreeTs.parseValueTree(pluginData)
+        val pluginDataTree = parseValueTree(pluginData)
         if (pluginDataTree.type != "StateInformation") {
             throw IllegalFileException.IllegalTsslnFile()
         }
@@ -134,11 +135,9 @@ object Tssln {
         var currentMeasureIndex = 0
         var beatLength = 4.0
 
-        for (
-            timeSignatureTree in timeSignaturesTree.children.sortedBy {
-                it.attributes.Clock.value as Int
-            }
-        ) {
+        for (timeSignatureTree in timeSignaturesTree.children.sortedBy {
+            it.attributes.Clock.value as Int
+        }) {
             val numerator = timeSignatureTree.attributes.Beats.value as Int
             val denominator = timeSignatureTree.attributes.BeatType.value as Int
             val clock = timeSignatureTree.attributes.Clock.value as Int
@@ -171,7 +170,7 @@ object Tssln {
     fun generate(project: Project): ExportResult {
         val baseJson = Resources.tsslnTemplate
 
-        val baseTree = ValueTreeTs.parseValueTree(Uint8Array(baseJson))
+        val baseTree = parseValueTree(Uint8Array(baseJson))
 
         val tracksTree = baseTree.children.first { it.type == "Tracks" }
         val baseTrack = tracksTree.children.first { it.attributes.Type.value == 0 }
@@ -179,7 +178,7 @@ object Tssln {
         val tracks = generateTracks(baseTrack, project)
         tracksTree.children = tracks.toTypedArray()
 
-        val result = ValueTreeTs.dumpValueTree(baseTree)
+        val result = dumpValueTree(baseTree)
 
         return ExportResult(
             Blob(arrayOf(result)),
@@ -194,7 +193,7 @@ object Tssln {
             trackTree.attributes.Name = (track.name).toVariantType()
 
             val pluginData = trackTree.attributes.PluginData.value as Uint8Array
-            val pluginDataTree = ValueTreeTs.parseValueTree(pluginData)
+            val pluginDataTree = parseValueTree(pluginData)
 
             val songTree = pluginDataTree.children.first { it.type == "Song" }
 
@@ -213,7 +212,7 @@ object Tssln {
 
             scoreTree.children = newChildren.toTypedArray()
 
-            trackTree.attributes.PluginData = (ValueTreeTs.dumpValueTree(pluginDataTree)).toVariantType()
+            trackTree.attributes.PluginData = dumpValueTree(pluginDataTree).toVariantType()
 
             trackTree
         }
