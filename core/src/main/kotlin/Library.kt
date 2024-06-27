@@ -66,6 +66,9 @@ fun parseStandardMid(file: File, params: ImportParams): Promise<ProjectContainer
 fun parsePpsf(file: File, params: ImportParams): Promise<ProjectContainer> = parse(listOf(file), params, Format.Ppsf)
 
 @JsExport
+fun parseTssln(file: File, params: ImportParams): Promise<ProjectContainer> = parse(listOf(file), params, Format.Tssln)
+
+@JsExport
 fun parseUfData(file: File, params: ImportParams): Promise<ProjectContainer> =
     parse(listOf(file), params, Format.UfData)
 
@@ -124,11 +127,15 @@ fun generateStandardMid(project: ProjectContainer, params: ConversionParams): Pr
     generate(project, params, Format.StandardMid)
 
 @JsExport
+fun generateTssln(project: ProjectContainer, params: ConversionParams): Promise<ExportResult> =
+    generate(project, params, Format.Tssln)
+
+@JsExport
 fun generateUfData(project: ProjectContainer, params: ConversionParams): Promise<ExportResult> =
     generate(project, params, Format.UfData)
 
 private fun generate(project: ProjectContainer, params: ConversionParams, format: Format): Promise<ExportResult> {
-    var features = mutableListOf<FeatureConfig>()
+    val features = mutableListOf<FeatureConfig>()
     if (params.convertPitch) {
         features.add(FeatureConfig.ConvertPitch)
     }
