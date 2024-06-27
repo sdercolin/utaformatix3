@@ -135,7 +135,7 @@ fun generateUfData(project: ProjectContainer, params: ConversionParams): Promise
     generate(project, params, Format.UfData)
 
 private fun generate(project: ProjectContainer, params: ConversionParams, format: Format): Promise<ExportResult> {
-    var features = mutableListOf<FeatureConfig>()
+    val features = mutableListOf<FeatureConfig>()
     if (params.convertPitch) {
         features.add(FeatureConfig.ConvertPitch)
     }
