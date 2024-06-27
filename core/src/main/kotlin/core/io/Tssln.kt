@@ -59,11 +59,22 @@ object Tssln {
         )
     }
 
+    private fun parsePluginData(pluginData: Uint8Array): ValueTree {
+        val pluginDataTree = parseValueTree(pluginData)
+        if (pluginDataTree.type.startsWith("VST")) {
+            val actualData = Uint8Array(pluginData.length - 48)
+            actualData.set(pluginData.subarray(48, pluginData.length))
+
+            return parseValueTree(actualData)
+        }
+        return pluginDataTree
+    }
+
     private fun parseTracks(trackTrees: List<ValueTree>, params: ImportParams): List<Track> {
         return trackTrees.mapIndexed { trackIndex, trackTree ->
             val trackName = trackTree.attributes.Name.value as String
             val pluginData = trackTree.attributes.PluginData.value as Uint8Array
-            val pluginDataTree = parseValueTree(pluginData)
+            val pluginDataTree = parsePluginData(pluginData)
 
             if (pluginDataTree.type != "StateInformation") {
                 throw IllegalFileException.IllegalTsslnFile()
@@ -111,7 +122,7 @@ object Tssln {
 
     private fun parseMasterTrack(trackTree: ValueTree): Pair<List<Tempo>, List<TimeSignature>> {
         val pluginData = trackTree.attributes.PluginData.value as Uint8Array
-        val pluginDataTree = parseValueTree(pluginData)
+        val pluginDataTree = parsePluginData(pluginData)
         if (pluginDataTree.type != "StateInformation") {
             throw IllegalFileException.IllegalTsslnFile()
         }
@@ -136,9 +147,9 @@ object Tssln {
         var beatLength = 4.0
 
         for (
-            timeSignatureTree in timeSignaturesTree.children.sortedBy {
-                it.attributes.Clock.value as Int
-            }
+        timeSignatureTree in timeSignaturesTree.children.sortedBy {
+            it.attributes.Clock.value as Int
+        }
         ) {
             val numerator = timeSignatureTree.attributes.Beats.value as Int
             val denominator = timeSignatureTree.attributes.BeatType.value as Int
