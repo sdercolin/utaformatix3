@@ -284,7 +284,7 @@ object Tssln {
 
     private const val TICK_RATE = 2.0
 
-    private val phonemePartPattern = Regex("""\[.+?]""")
+    private val phonemePartPattern = Regex("""\[.+?\]""")
 
     private val format = Format.Tssln
 }

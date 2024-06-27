@@ -36,7 +36,7 @@ object VsqLike {
 
     suspend fun match(file: File): Boolean {
         val midi = Mid.parseMidi(file)
-        val midiTracks = midi.track as Array<dynamic>
+        val midiTracks = midi.tracks as Array<dynamic>
         val tracksAsText = Mid.extractVsqTextsFromMetaEvents(midiTracks).filter { it.isNotEmpty() }
         if (tracksAsText.isEmpty()) return false
         return tracksAsText.any { track ->
