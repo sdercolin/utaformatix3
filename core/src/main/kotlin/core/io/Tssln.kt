@@ -284,7 +284,10 @@ object Tssln {
 
     private const val TICK_RATE = 2.0
 
-    private val phonemePartPattern = Regex("""\[.+?]""")
+    // NOTE: Do not remove backslash of `\]`, even if IDEA warns to remove this.
+    // In Kotlin, it's not necessary to escape ending `]` in character class.
+    // But in JS, it's necessary to escape it.
+    private val phonemePartPattern = Regex("""\[.+?\]""")
 
     private val format = Format.Tssln
 }
