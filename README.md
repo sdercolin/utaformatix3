@@ -11,10 +11,10 @@ and [React](https://github.com/facebook/react).
 
 - Supported importing
   formats: `.vsqx(3/4)`, `.vpr`, `.vsq`, `.mid(VOCALOID)`, `.mid(standard)`, `.ust`, `.ustx`, `.ccs`,`.xml(MusicXML)`
-  , `.musicxml`, `.svp`, `.s5p`, `.dv`, `.ppsf(NT)`, `.ufdata`
+  , `.musicxml`, `.svp`, `.s5p`, `.dv`, `.ppsf(NT)`, `.tssln`, `.ufdata`
 - Supported exporting
   formats: `.vsqx(4)`, `.vpr`, `.vsq`, `.mid(VOCALOID)`, `.mid(standard)`, `.ust`, `.ustx`, `.ccs`, `.xml(MusicXML)`
-  , `.svp`, `.s5p`, `.dv`, `.ufdata`
+  , `.svp`, `.s5p`, `.dv`, `.tssln`, `.ufdata`
 - Keep information including: tracks, notes, tempo labels, time signatures
 - Detect and convert Japanese lyrics types
     - between CV and VCV
@@ -37,6 +37,7 @@ and [React](https://github.com/facebook/react).
 | SVP                  | ✓            | ✓              | ✓            |
 | S5P                  | ✓            |                | ✓            |
 | DV                   | ✓            | ✓              | ✓            |
+| Tssln                | ✓            |                |              |
 
 ## Open format published (.ufdata)
 
@@ -48,7 +49,7 @@ If you are developing OSS projects related to singing voice synthesis, you may f
 ## Contributors
 
 [sdercolin](https://github.com/sdercolin), [ghosrt](https://github.com/ghosrt), [shine5402](https://github.com/shine5402), [adlez27](https://github.com/adlez27), [
-General Nuisance](https://github.com/GeneralNuisance0)
+General Nuisance](https://github.com/GeneralNuisance0), [sevenc-nanashi](https://github.com/sevenc-nanashi)
 
 ## Localization help
 
