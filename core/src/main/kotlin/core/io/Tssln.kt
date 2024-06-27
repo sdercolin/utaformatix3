@@ -147,9 +147,9 @@ object Tssln {
         var beatLength = 4.0
 
         for (
-        timeSignatureTree in timeSignaturesTree.children.sortedBy {
-            it.attributes.Clock.value as Int
-        }
+            timeSignatureTree in timeSignaturesTree.children.sortedBy {
+                it.attributes.Clock.value as Int
+            }
         ) {
             val numerator = timeSignatureTree.attributes.Beats.value as Int
             val denominator = timeSignatureTree.attributes.BeatType.value as Int
