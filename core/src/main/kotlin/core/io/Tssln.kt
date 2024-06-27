@@ -3,11 +3,9 @@ package core.io
 import core.exception.IllegalFileException
 import core.external.Resources
 import core.external.ValueTree
-import core.external.parseValueTree
 import core.external.dumpValueTree
-import core.model.createValueTree
+import core.external.parseValueTree
 import core.external.structuredClone
-import core.model.toVariantType
 import core.model.ExportResult
 import core.model.Format
 import core.model.ImportParams
@@ -18,6 +16,8 @@ import core.model.TICKS_IN_BEAT
 import core.model.Tempo
 import core.model.TimeSignature
 import core.model.Track
+import core.model.createValueTree
+import core.model.toVariantType
 import core.util.nameWithoutExtension
 import core.util.readAsArrayBuffer
 import org.khronos.webgl.Uint8Array
@@ -135,9 +135,11 @@ object Tssln {
         var currentMeasureIndex = 0
         var beatLength = 4.0
 
-        for (timeSignatureTree in timeSignaturesTree.children.sortedBy {
-            it.attributes.Clock.value as Int
-        }) {
+        for (
+            timeSignatureTree in timeSignaturesTree.children.sortedBy {
+                it.attributes.Clock.value as Int
+            }
+        ) {
             val numerator = timeSignatureTree.attributes.Beats.value as Int
             val denominator = timeSignatureTree.attributes.BeatType.value as Int
             val clock = timeSignatureTree.attributes.Clock.value as Int

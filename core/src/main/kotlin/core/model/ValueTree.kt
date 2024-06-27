@@ -55,4 +55,3 @@ fun Uint8Array.toVariantType(): dynamic {
 
     return value
 }
-
