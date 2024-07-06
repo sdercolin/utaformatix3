@@ -1,17 +1,22 @@
 package ui
 
+import core.exception.UnsupportedFileFormatError
+import core.exception.UnsupportedLegacyPpsfError
+import core.io.ImportParamsJson
+import core.model.Format
+import core.model.ImportParams
+import core.model.Project
+import core.util.extensionName
+import core.util.runCatchingCancellable
+import core.util.toList
+import core.util.waitFileSelection
 import csstype.VerticalAlign
 import csstype.px
 import emotion.react.css
-import exception.UnsupportedFileFormatError
-import io.ImportParamsJson
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.js.jso
-import model.Format
-import model.ImportParams
-import model.Project
 import mui.icons.material.HelpOutline
 import mui.material.AlertColor
 import mui.material.FormControlLabel
@@ -41,10 +46,6 @@ import ui.external.Cookies
 import ui.external.react.FileDrop
 import ui.strings.Strings
 import ui.strings.string
-import util.extensionName
-import util.runCatchingCancellable
-import util.toList
-import util.waitFileSelection
 
 val Importer = scopedFC<ImporterProps> { props, scope ->
     var loadingProgress by useState(ProgressProps.Initial)
@@ -56,7 +57,11 @@ val Importer = scopedFC<ImporterProps> { props, scope ->
         val onError = { t: Throwable ->
             console.log(t)
             if (t is UnsupportedFileFormatError) {
-                snackbarError = SnackbarErrorState(true, t.message)
+                val message = when (t) {
+                    is UnsupportedLegacyPpsfError -> string(Strings.UnsupportedLegacyPpsfError)
+                    else -> t.message ?: t.toString()
+                }
+                snackbarError = SnackbarErrorState(true, message)
             } else {
                 dialogError = DialogErrorState(
                     isShowing = true,

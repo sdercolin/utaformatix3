@@ -1,28 +1,28 @@
 package ui
 
+import core.model.Format
+import core.model.Format.Ccs
+import core.model.Format.Dv
+import core.model.Format.MusicXml
+import core.model.Format.Ppsf
+import core.model.Format.S5p
+import core.model.Format.StandardMid
+import core.model.Format.Svp
+import core.model.Format.Tssln
+import core.model.Format.UfData
+import core.model.Format.Ust
+import core.model.Format.Ustx
+import core.model.Format.VocaloidMid
+import core.model.Format.Vpr
+import core.model.Format.Vsq
+import core.model.Format.Vsqx
+import core.model.ImportWarning
+import core.model.Project
 import csstype.FontWeight
 import csstype.px
 import emotion.react.css
-import external.Resources
 import kotlinx.browser.window
 import kotlinx.js.jso
-import model.Format
-import model.Format.Ccs
-import model.Format.Dv
-import model.Format.MusicXml
-import model.Format.Ppsf
-import model.Format.S5p
-import model.Format.StandardMid
-import model.Format.Svp
-import model.Format.UfData
-import model.Format.Ust
-import model.Format.Ustx
-import model.Format.VocaloidMid
-import model.Format.Vpr
-import model.Format.Vsq
-import model.Format.Vsqx
-import model.ImportWarning
-import model.Project
 import mui.material.Alert
 import mui.material.AlertColor
 import mui.material.AlertTitle
@@ -174,6 +174,7 @@ private val Format.description: String?
         Ppsf -> null
         StandardMid -> Strings.StandardMidDescription
         UfData -> Strings.UfDataFormatDescription
+        Tssln -> Strings.VoiSonaFormatDescription
     }?.let { string(it) }
 
 private val Format.iconPath: String?
@@ -192,6 +193,7 @@ private val Format.iconPath: String?
         Ppsf -> null
         StandardMid -> Resources.standardMidiIcon
         UfData -> Resources.ufdataIcon
+        Tssln -> Resources.tsslnIcon
     }
 
 external interface OutputFormatSelectorProps : Props {

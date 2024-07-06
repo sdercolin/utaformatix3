@@ -1,5 +1,6 @@
 package ui
 
+import core.util.runCatchingCancellable
 import csstype.px
 import emotion.react.css
 import kotlinx.browser.window
@@ -11,7 +12,6 @@ import react.useEffect
 import react.useState
 import ui.common.scopedFC
 import ui.external.react.Markdown
-import util.runCatchingCancellable
 
 val EmbeddedPage = scopedFC<EmbeddedPageProps> { props, scope ->
     var url: String? by useState { props.url }

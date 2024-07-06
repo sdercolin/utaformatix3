@@ -1,5 +1,8 @@
 package ui.configuration
 
+import core.model.Project
+import core.process.needWarningZoom
+import core.process.projectZoomFactorOptions
 import csstype.Length
 import csstype.Margin
 import csstype.VerticalAlign
@@ -7,7 +10,6 @@ import csstype.em
 import csstype.px
 import emotion.react.css
 import kotlinx.js.jso
-import model.Project
 import mui.icons.material.ErrorOutline
 import mui.icons.material.HelpOutline
 import mui.material.BaseTextFieldProps
@@ -26,8 +28,6 @@ import mui.material.TooltipPlacement
 import mui.material.Typography
 import mui.material.styles.TypographyVariant
 import mui.system.sx
-import process.needWarningZoom
-import process.projectZoomFactorOptions
 import react.ChildrenBuilder
 import react.ReactNode
 import react.dom.html.ReactHTML.div

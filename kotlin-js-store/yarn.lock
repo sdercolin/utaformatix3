@@ -280,6 +280,11 @@
     "@jridgewell/resolve-uri" "^3.1.0"
     "@jridgewell/sourcemap-codec" "^1.4.14"
 
+"@jsr/sevenc-nanashi__binaryseeker@^1.0.0":
+  version "1.0.0"
+  resolved "https://npm.jsr.io/~/11/@jsr/sevenc-nanashi__binaryseeker/1.0.0.tgz#4C4A478A37281DB5CF13018A6DAB5532C34C1995"
+  integrity sha512-aaVVAuCXw4YwZVeqOd4IzqvzVD8iA4ODl0Ta31m87sjGm3mQxo5/Whg+LDFcFekUUve78JKXgjWSX1DckwbO0Q==
+
 "@leichtgewicht/ip-codec@^2.0.1":
   version "2.0.4"
   resolved "https://registry.yarnpkg.com/@leichtgewicht/ip-codec/-/ip-codec-2.0.4.tgz#b2ac626d6cb9c8718ab459166d4bb405b8ffa78b"
@@ -466,6 +471,13 @@
     "@types/estree" "0.0.39"
     estree-walker "^1.0.1"
     picomatch "^2.2.2"
+
+"@sevenc-nanashi/valuetree-ts@npm:@jsr/sevenc-nanashi__valuetree-ts@0.2.1":
+  version "0.2.1"
+  resolved "https://npm.jsr.io/~/11/@jsr/sevenc-nanashi__valuetree-ts/0.2.1.tgz#3495BD76DAEE8C017E6445F318661B6FA8222D58"
+  integrity sha512-I2ezsDocwuBu9ItJRNZ094Z9DTf1K1SNLfQR8NL2FVDT/YMFrzqPrjilxATwjEK7so8Qw580myZVH5e6/S3V2Q==
+  dependencies:
+    "@jsr/sevenc-nanashi__binaryseeker" "^1.0.0"
 
 "@socket.io/component-emitter@~3.1.0":
   version "3.1.0"
@@ -2626,10 +2638,10 @@ micromatch@^4.0.2:
     braces "^3.0.2"
     picomatch "^2.3.1"
 
-midi-parser-js@4.0.4:
-  version "4.0.4"
-  resolved "https://registry.yarnpkg.com/midi-parser-js/-/midi-parser-js-4.0.4.tgz#4b0af504e1fdc78409d27fb17473fbb61eee53cc"
-  integrity sha512-yCCUNemjDET40SPslUbAyi7lClSS+ttcBAWNY337kJouRFsEtIql38Fp4p5xfODkltFvuqHJL9JytnZIrzpJbw==
+midi-file@1.2.4:
+  version "1.2.4"
+  resolved "https://registry.yarnpkg.com/midi-file/-/midi-file-1.2.4.tgz#e5803a8fc79cdd1692ac6ef6b1491043b397eb87"
+  integrity sha512-B5SnBC6i2bwJIXTY9MElIydJwAmnKx+r5eJ1jknTLetzLflEl0GWveuBB6ACrQpecSRkOB6fhTx1PwXk2BVxnA==
 
 mime-db@1.52.0, "mime-db@>= 1.43.0 < 2":
   version "1.52.0"

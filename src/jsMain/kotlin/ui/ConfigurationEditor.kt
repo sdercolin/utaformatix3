@@ -1,5 +1,28 @@
 package ui
 
+import core.model.ExportResult
+import core.model.Feature
+import core.model.FeatureConfig
+import core.model.Format
+import core.model.JapaneseLyricsType
+import core.model.Project
+import core.model.TICKS_IN_FULL_NOTE
+import core.process.RESTS_FILLING_MAX_LENGTH_DENOMINATOR_DEFAULT
+import core.process.evalFractionOrNull
+import core.process.fillRests
+import core.process.lyrics.LyricsMappingRequest
+import core.process.lyrics.LyricsReplacementRequest
+import core.process.lyrics.chinese.convertChineseLyricsToPinyin
+import core.process.lyrics.japanese.convertJapaneseLyrics
+import core.process.lyrics.mapLyrics
+import core.process.lyrics.replaceLyrics
+import core.process.phonemes.PhonemesMappingRequest
+import core.process.phonemes.mapPhonemes
+import core.process.projectZoomFactorOptions
+import core.process.zoom
+import core.util.runCatchingCancellable
+import core.util.runIf
+import core.util.runIfAllNotNull
 import csstype.px
 import emotion.react.css
 import kotlinx.browser.window
@@ -10,30 +33,10 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import model.ExportResult
-import model.Feature
-import model.FeatureConfig
-import model.Format
-import model.JapaneseLyricsType
-import model.Project
-import model.TICKS_IN_FULL_NOTE
 import mui.material.Button
 import mui.material.ButtonColor
 import mui.material.ButtonVariant
 import org.w3c.dom.get
-import process.RESTS_FILLING_MAX_LENGTH_DENOMINATOR_DEFAULT
-import process.evalFractionOrNull
-import process.fillRests
-import process.lyrics.LyricsMappingRequest
-import process.lyrics.LyricsReplacementRequest
-import process.lyrics.chinese.convertChineseLyricsToPinyin
-import process.lyrics.japanese.convertJapaneseLyrics
-import process.lyrics.mapLyrics
-import process.lyrics.replaceLyrics
-import process.phonemes.PhonemesMappingRequest
-import process.phonemes.mapPhonemes
-import process.projectZoomFactorOptions
-import process.zoom
 import react.ChildrenBuilder
 import react.Props
 import react.dom.html.ReactHTML.div
@@ -59,9 +62,6 @@ import ui.configuration.ProjectZoomBlock
 import ui.configuration.SlightRestsFillingBlock
 import ui.strings.Strings
 import ui.strings.string
-import util.runCatchingCancellable
-import util.runIf
-import util.runIfAllNotNull
 
 val ConfigurationEditor = scopedFC<ConfigurationEditorProps> { props, scope ->
     var progress by useState(ProgressProps.Initial)

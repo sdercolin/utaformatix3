@@ -1,7 +1,7 @@
 package ui.strings
 
 import com.sdercolin.utaformatix.data.UtaFormatixDataVersion
-import io.MusicXml.MUSIC_XML_VERSION
+import core.io.MusicXml.MUSIC_XML_VERSION
 import ui.strings.Language.English
 import ui.strings.Language.French
 import ui.strings.Language.Japanese
@@ -40,14 +40,14 @@ enum class Strings(
         en = "Import Project",
         ja = "プロジェクトをインポート",
         zhCN = "导入工程",
-        ru = "Импортировать проект",
+        ru = "Импортирование проекта",
         fr = "Importation de projet",
     ),
     SelectOutputFormatCaption(
         en = "Select Output Format",
         ja = "出力形式を選ぶ",
         zhCN = "选择输出格式",
-        ru = "Выберите выходной формат",
+        ru = "Выбор выходного формата",
         fr = "Sélectionner le Format de Sortie",
     ),
     ConfigurationEditorCaption(
@@ -275,14 +275,14 @@ enum class Strings(
         en = "Map lyrics to lyrics or phonemes",
         ja = "歌詞を歌詞または発音記号にマッピング",
         zhCN = "将歌词映射到歌词或音素",
-        ru = "Отобразить тексты на тексты или фонемы",
+        ru = "Сопоставление текстов с текстами или фонемами",
         fr = "Mapper les paroles sur les paroles ou les phonèmes",
     ),
     LyricsMappingDescription(
         en = "Only lyrics that is completely same as the key will be mapped. ",
         ja = "キーと完全一致する歌詞のみマッピングされます。",
         zhCN = "只有与键完全相同的歌词才会被映射。",
-        ru = "Будут отображены только тексты, полностью совпадающие с ключом.",
+        ru = "Будут отображены только те тексты, которые полностью совпадают с ключом. ",
         fr = "Seules les paroles qui sont complètement identiques à la clé seront mappées.",
     ),
     LyricsMappingPreset(
@@ -477,15 +477,15 @@ enum class Strings(
     ),
     ImportFileSubDescription(
         en = "Supported file types: VSQX, VPR, VSQ, MID, USTs," +
-            " USTX, CCS, MUSICXML, XML, SVP, S5P, DV, PPSF(NT), UFDATA",
+            " USTX, CCS, MUSICXML, XML, SVP, S5P, DV, PPSF(NT), TSSLN, UFDATA",
         ja = "サポートされているファイル形式：VSQX、VPR、VSQ、MID、UST（複数可）、" +
-            "USTX、CCS、MUSICXML、XML、SVP、S5P、DV、PPSF（NT）、UFDATA",
+            "USTX、CCS、MUSICXML、XML、SVP、S5P、DV、PPSF（NT）、TSSLN、UFDATA",
         zhCN = "支持的文件类型：VSQX、VPR、VSQ、MID、UST（允许复数个）、" +
-            "USTX、CCS、MUSICXML、XML、SVP、S5P、DV、PPSF（NT）、UFDATA",
+            "USTX、CCS、MUSICXML、XML、SVP、S5P、DV、PPSF（NT）、TSSLN、UFDATA",
         ru = "Поддерживаемые форматы файлов: VSQx, VPR, VSQ, MID, UST," +
-            " USTX, CCS, MusicXML, XML, SVP, S5P, DV, PPSF(NT), UFDATA",
+            " USTX, CCS, MusicXML, XML, SVP, S5P, DV, PPSF(NT), TSSLN, UFDATA",
         fr = "Types de fichiers pris en charge : VSQX, VPR, VSQ, MID, USTs," +
-            " USTX, CCS, MUSICXML, XML, SVP, S5P, DV, PPSF(NT), UFDATA",
+            " USTX, CCS, MUSICXML, XML, SVP, S5P, DV, PPSF(NT), TSSLN, UFDATA",
     ),
     UnsupportedFileTypeImportError(
         en = "Unsupported file type",
@@ -559,9 +559,10 @@ enum class Strings(
         en = "https://gist.githubusercontent.com/sdercolin/b5d4cf81434ea381d8836e0015681029/raw",
         ja = "https://gist.githubusercontent.com/sdercolin/b5d4cf81434ea381d8836e0015681029/raw",
         zhCN = "https://gist.githubusercontent.com/sdercolin/b5d4cf81434ea381d8836e0015681029/raw",
+        ru = "https://gist.githubusercontent.com/KagamineP/71234d007f2674b2f8fd8b74d2ebb8fc/raw",
     ),
     ImportWarningTitle(
-        en = "The following exceptions happened during the import process.",
+        en = "The following exceptions happened during the import core.process.",
         ja = "インポート中に下記の例外が発生しました。",
         zhCN = "导入过程中出现了下列异常。",
         ru = "В процессе импорта произошли следующие исключения.",
@@ -723,6 +724,13 @@ enum class Strings(
         zhCN = "标准MIDI文件",
         ru = "Стандартный MIDI-файл",
         fr = "Fichier MIDI standard",
+    ),
+    VoiSonaFormatDescription(
+        en = "Project for VoiSona",
+        ja = "VoiSona プロジェクト",
+        zhCN = "VoiSona 工程",
+        ru = "Проект для VoiSona",
+        fr = "Projet pour VoiSona",
     ),
     ExportButton(
         en = "Export",

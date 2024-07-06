@@ -1,6 +1,8 @@
 package process.phonemes
 
-import model.Note
+import core.model.Note
+import core.process.phonemes.PhonemesMappingRequest
+import core.process.phonemes.replacePhonemes
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

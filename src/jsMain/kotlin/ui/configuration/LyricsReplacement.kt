@@ -1,5 +1,6 @@
 package ui.configuration
 
+import core.process.lyrics.LyricsReplacementRequest
 import csstype.AlignSelf
 import csstype.Display
 import csstype.Length
@@ -34,7 +35,6 @@ import mui.material.TooltipPlacement
 import mui.material.Typography
 import mui.material.styles.TypographyVariant
 import mui.system.sx
-import process.lyrics.LyricsReplacementRequest
 import react.ChildrenBuilder
 import react.ElementType
 import react.create

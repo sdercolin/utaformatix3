@@ -1,5 +1,6 @@
 package ui.configuration
 
+import core.process.restsFillingMaxLengthDenominatorOptions
 import csstype.Length
 import csstype.Margin
 import csstype.VerticalAlign
@@ -24,7 +25,6 @@ import mui.material.TooltipPlacement
 import mui.material.Typography
 import mui.material.styles.TypographyVariant
 import mui.system.sx
-import process.restsFillingMaxLengthDenominatorOptions
 import react.ChildrenBuilder
 import react.ReactNode
 import react.dom.html.ReactHTML.div

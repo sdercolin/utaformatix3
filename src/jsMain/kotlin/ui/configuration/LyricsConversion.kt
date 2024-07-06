@@ -1,12 +1,12 @@
 package ui.configuration
 
+import core.model.Format
+import core.model.JapaneseLyricsType
+import core.model.Project
 import csstype.Length
 import csstype.Margin
 import csstype.px
 import emotion.react.css
-import model.Format
-import model.JapaneseLyricsType
-import model.Project
 import mui.material.FormControl
 import mui.material.FormControlLabel
 import mui.material.FormControlMargin
