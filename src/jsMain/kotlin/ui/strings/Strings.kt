@@ -562,7 +562,7 @@ enum class Strings(
         ru = "https://gist.githubusercontent.com/KagamineP/71234d007f2674b2f8fd8b74d2ebb8fc/raw",
     ),
     ImportWarningTitle(
-        en = "The following exceptions happened during the import core.process.",
+        en = "The following exceptions happened during the import process.",
         ja = "インポート中に下記の例外が発生しました。",
         zhCN = "导入过程中出现了下列异常。",
         ru = "В процессе импорта произошли следующие исключения.",
