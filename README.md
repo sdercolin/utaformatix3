@@ -37,7 +37,6 @@ and [React](https://github.com/facebook/react).
 | SVP                  | ✓            | ✓              | ✓            |
 | S5P                  | ✓            |                | ✓            |
 | DV                   | ✓            | ✓              | ✓            |
-| Tssln                | ✓            |                |              |
 
 ## Open format published (.ufdata)
 
