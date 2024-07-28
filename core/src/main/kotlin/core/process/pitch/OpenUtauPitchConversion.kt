@@ -53,10 +53,12 @@ fun pitchFromUstxPart(notes: List<Note>, pitchData: OpenUtauPartPitchData, tempo
         val points = mutableListOf<Pair<Long, Double>>()
         var lastPointShape = OpenUtauNotePitchData.Shape.EaseInOut
         val noteStartInMillis = tickTimeTransformer.tickToMilliSec(note.tickOn)
+        val keyPointPositions = mutableListOf<Long>()
         for (rawPoint in notePitch.points) {
             val x = tickTimeTransformer.milliSecToTick(noteStartInMillis + rawPoint.x)
                 .coerceAtLeast(lastKeyPos + SAFE_SAMPLING_INTERVAL_TICK)
             lastKeyPos = x
+            keyPointPositions.add(x)
             val y = rawPoint.y / 10
             val thisPoint = x to y
             val lastPoint = points.lastOrNull()
@@ -74,7 +76,8 @@ fun pitchFromUstxPart(notes: List<Note>, pitchData: OpenUtauPartPitchData, tempo
         val pointsInNoteWithVibrato = pointsIn
             .appendUtauNoteVibrato(notePitch.vibrato, note, tickTimeTransformer, SAMPLING_INTERVAL_TICK)
         val pointsWithVibrato = pointsBefore + pointsInNoteWithVibrato + pointsAfter
-        notePointsList.add(pointsWithVibrato.resampled(SAMPLING_INTERVAL_TICK))
+        val pointsResampled = pointsWithVibrato.resampled(SAMPLING_INTERVAL_TICK, keyPointPositions)
+        notePointsList.add(pointsResampled)
     }
 
     // Divide note with points into sections,
@@ -250,10 +253,18 @@ private fun MutableList<Pair<Long, Double>>.appendStartAndEndPoint(note: Note) {
     }
 }
 
-private fun List<Pair<Long, Double>>.resampled(interval: Long): List<Pair<Long, Double>> =
+private fun List<Pair<Long, Double>>.resampled(
+    interval: Long,
+    keyPointPositions: List<Long> = emptyList(),
+): List<Pair<Long, Double>> =
     groupBy { it.first / interval * interval }
         .map { (mergedTick, points) ->
-            mergedTick to points.map { it.second }.average()
+            val keyPoint = points.find { it.first in keyPointPositions }
+            if (keyPoint != null) {
+                mergedTick to keyPoint.second
+            } else {
+                mergedTick to points.map { it.second }.average()
+            }
         }
         .sortedBy { it.first }
         .fold(listOf()) { acc, point ->
