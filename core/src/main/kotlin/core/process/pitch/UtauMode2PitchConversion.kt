@@ -13,6 +13,11 @@ import core.util.runIf
 
 private const val SAMPLING_INTERVAL_TICK = 4L
 
+// Not smaller than the sampling interval of the pitch data used in pitch generation targeting any format.
+// This is used for placing two key points far enough to ensure they are not merged by the resampling process.
+// See also: core.process.pitch.OpenUtauPitchConversion.kt
+private const val SAFE_SAMPLING_INTERVAL_TICK = 5L
+
 data class UtauMode2TrackPitchData(
     val notes: List<UtauMode2NotePitchData?>,
 )
@@ -87,12 +92,15 @@ fun pitchFromUtauMode2Track(pitchData: UtauMode2TrackPitchData?, notes: List<Not
     val pitchPoints = mutableListOf<Pair<Long, Double>>()
     var lastNote: Note? = null
     var pendingPitchPoints = listOf<Pair<Long, Double>>()
+    var lastKeyPos = -SAFE_SAMPLING_INTERVAL_TICK
     for ((note, notePitch) in notePitches) {
         val points = mutableListOf<Pair<Long, Double>>()
         val noteStartInMillis = tickTimeTransformer.tickToMilliSec(note.tickOn)
         if (notePitch?.start != null) {
             var posInMillis = noteStartInMillis + notePitch.start
             var tickPos = tickTimeTransformer.milliSecToTick(posInMillis)
+                .coerceAtLeast(lastKeyPos + SAFE_SAMPLING_INTERVAL_TICK)
+            lastKeyPos = tickPos
             val startShift =
                 if (note.tickOn == lastNote?.tickOff) {
                     // always same value as the last note
@@ -108,6 +116,8 @@ fun pitchFromUtauMode2Track(pitchData: UtauMode2TrackPitchData?, notes: List<Not
                 val curveType = notePitch.curveTypes.getOrNull(index) ?: ""
                 posInMillis += width
                 tickPos = tickTimeTransformer.milliSecToTick(posInMillis)
+                    .coerceAtLeast(lastKeyPos + SAFE_SAMPLING_INTERVAL_TICK)
+                lastKeyPos = tickPos
                 val thisPoint = tickPos to (shift / 10)
                 val lastPoint = points.last()
                 if (thisPoint.second != lastPoint.second) {
