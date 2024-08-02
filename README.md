@@ -34,6 +34,7 @@ and [React](https://github.com/facebook/react).
 | UST(mode1)           | ✓            | N/A            | ✓            |
 | USTX                 | ✓            | ✓              | ✓            |
 | CCS                  | ✓            |                | ✓            |
+| TSSLN                | N/A          |                |N/A            |
 | SVP                  | ✓            | ✓              | ✓            |
 | S5P                  | ✓            |                | ✓            |
 | DV                   | ✓            | ✓              | ✓            |
