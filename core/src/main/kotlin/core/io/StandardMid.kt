@@ -36,8 +36,14 @@ object StandardMid {
             warnings,
         )
 
-        val tracks = midiTracks.drop(1).mapIndexed { index, midiTrack ->
+        val tracks = midiTracks.mapIndexed { index, midiTrack ->
             parseTrack(index, timeDivision, tickPrefix, midiTrack, params.defaultLyric)
+        }.toMutableList()
+
+        // Some MIDIs uses their first track only for metadata.
+        // If the first track is empty, we remove it (No one wants an empty track).
+        if (tracks[0].notes.isEmpty()) {
+            tracks.removeAt(0)
         }
 
         return Project(
