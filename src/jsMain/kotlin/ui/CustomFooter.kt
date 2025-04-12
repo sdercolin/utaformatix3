@@ -22,7 +22,14 @@ val CustomFooter =
                 css {
                     color = NamedColor.grey
                 }
-                +"UtaFormatix © 2015 - 2023　|　"
+                Link {
+                    color = NamedColor.grey
+                    underline = LinkUnderline.hover
+                    href = "https://github.com/sdercolin/utaformatix3?tab=License-1-ov-file#readme"
+                    target = AnchorTarget._blank
+                    +"UtaFormatix © 2020 sdercolin"
+                }
+                +"　|　"
                 Link {
                     color = NamedColor.grey
                     underline = LinkUnderline.hover
