@@ -215,4 +215,5 @@ val jsonSerializer = Json {
     ignoreUnknownKeys = true
     encodeDefaults = true
     explicitNulls = false
+    coerceInputValues = true
 }

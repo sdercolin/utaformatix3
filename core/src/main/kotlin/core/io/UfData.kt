@@ -28,6 +28,7 @@ import org.w3c.files.File
 
 /**
  * IO logics for UtaFormatix Data.
+ *
  * @see [com.sdercolin.utaformatix.data.Document]
  */
 object UfData {
@@ -147,7 +148,7 @@ object UfData {
         return Track(
             name = track.name,
             notes = notes,
-            pitch = pitch,
+            pitch = pitch ?: Pitch(),
         )
     }
 

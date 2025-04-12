@@ -6,6 +6,7 @@ plugins {
 group = "com.sdercolin.utaformatix"
 
 repositories {
+    mavenLocal()
     mavenCentral()
 }
 
@@ -16,7 +17,7 @@ kotlin {
         generateTypeScriptDefinitions()
         useEsModules()
         dependencies {
-            implementation("com.sdercolin.utaformatix:utaformatix-data:1.0.0")
+            implementation("com.sdercolin.utaformatix:utaformatix-data:1.1.0")
             implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core-js:1.6.4")
             implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.0")
             implementation(npm("jszip", "3.5.0"))

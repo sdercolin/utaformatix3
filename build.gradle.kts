@@ -1,12 +1,13 @@
 plugins {
-    kotlin("multiplatform") version "1.8.22"
-    kotlin("plugin.serialization") version "1.8.22"
+    kotlin("multiplatform") version "2.1.20"
+    kotlin("plugin.serialization") version "2.1.20"
     id("org.jlleitschuh.gradle.ktlint") version "10.3.0"
 }
 
 group = "com.sdercolin.utaformatix"
 
 repositories {
+    mavenLocal()
     mavenCentral()
 }
 
@@ -39,6 +40,7 @@ kotlin {
         val jsMain by getting {
             dependencies {
                 implementation(project(":core"))
+                implementation("com.sdercolin.utaformatix:utaformatix-data:1.1.0")
 
                 // Kotlin
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core-js:1.6.4")
