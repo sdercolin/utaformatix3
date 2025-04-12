@@ -19,18 +19,19 @@ data class OpenUtauNotePitchData(
     val points: List<Point>,
     val vibrato: UtauNoteVibratoParams,
 ) {
-
     data class Point(
         val x: Double, // milliSec
         val y: Double, // 10 cents
         val shape: Shape,
     )
 
-    enum class Shape(val textValue: String) {
+    enum class Shape(
+        val textValue: String,
+    ) {
         EaseIn("i"),
         EaseOut("o"),
         EaseInOut("io"),
-        Linear("l")
+        Linear("l"),
     }
 }
 
@@ -44,7 +45,11 @@ data class OpenUtauPartPitchData(
     )
 }
 
-fun pitchFromUstxPart(notes: List<Note>, pitchData: OpenUtauPartPitchData, tempos: List<Tempo>): Pitch? {
+fun pitchFromUstxPart(
+    notes: List<Note>,
+    pitchData: OpenUtauPartPitchData,
+    tempos: List<Tempo>,
+): Pitch? {
     // Extract pitch points from notes
     val notePointsList = mutableListOf<List<Pair<Long, Double>>>()
     val tickTimeTransformer = TickTimeTransformer(tempos)
@@ -55,8 +60,10 @@ fun pitchFromUstxPart(notes: List<Note>, pitchData: OpenUtauPartPitchData, tempo
         val noteStartInMillis = tickTimeTransformer.tickToMilliSec(note.tickOn)
         val keyPointPositions = mutableListOf<Long>()
         for (rawPoint in notePitch.points) {
-            val x = tickTimeTransformer.milliSecToTick(noteStartInMillis + rawPoint.x)
-                .coerceAtLeast(lastKeyPos + SAFE_SAMPLING_INTERVAL_TICK)
+            val x =
+                tickTimeTransformer
+                    .milliSecToTick(noteStartInMillis + rawPoint.x)
+                    .coerceAtLeast(lastKeyPos + SAFE_SAMPLING_INTERVAL_TICK)
             lastKeyPos = x
             keyPointPositions.add(x)
             val y = rawPoint.y / 10
@@ -73,8 +80,9 @@ fun pitchFromUstxPart(notes: List<Note>, pitchData: OpenUtauPartPitchData, tempo
         points.appendStartAndEndPoint(note)
         val (pointsBefore, pointsNotBefore) = points.partition { it.first < note.tickOn }
         val (pointsAfter, pointsIn) = pointsNotBefore.partition { it.first > note.tickOff }
-        val pointsInNoteWithVibrato = pointsIn
-            .appendUtauNoteVibrato(notePitch.vibrato, note, tickTimeTransformer, SAMPLING_INTERVAL_TICK)
+        val pointsInNoteWithVibrato =
+            pointsIn
+                .appendUtauNoteVibrato(notePitch.vibrato, note, tickTimeTransformer, SAMPLING_INTERVAL_TICK)
         val pointsWithVibrato = pointsBefore + pointsInNoteWithVibrato + pointsAfter
         val pointsResampled = pointsWithVibrato.resampled(SAMPLING_INTERVAL_TICK, keyPointPositions)
         notePointsList.add(pointsResampled)
@@ -115,10 +123,11 @@ fun pitchFromUstxPart(notes: List<Note>, pitchData: OpenUtauPartPitchData, tempo
             // Adjust y
             // If before this note's start point, use the previous note as base
             val prevNote = lastNote
-            points = points.map { (x, y) ->
-                val baseY = if (prevNote != null && x < note.tickOn) prevNote.key - note.key else 0
-                x to (y - baseY)
-            }
+            points =
+                points.map { (x, y) ->
+                    val baseY = if (prevNote != null && x < note.tickOn) prevNote.key - note.key else 0
+                    x to (y - baseY)
+                }
 
             pointsByNote.add(points)
             lastNote = note
@@ -126,45 +135,50 @@ fun pitchFromUstxPart(notes: List<Note>, pitchData: OpenUtauPartPitchData, tempo
         val nextSectionBorder = section.last().first.tickOff
 
         // Merge points from all notes in the section
-        val pointsInSection = pointsByNote
-            .reduce { acc, list -> acc + list }
-            .groupBy { it.first }
-            .filter { it.key in sectionBorder..nextSectionBorder }
-            .map { (tick, points) ->
-                tick to points.sumOf { it.second }
-            }
+        val pointsInSection =
+            pointsByNote
+                .reduce { acc, list -> acc + list }
+                .groupBy { it.first }
+                .filter { it.key in sectionBorder..nextSectionBorder }
+                .map { (tick, points) ->
+                    tick to points.sumOf { it.second }
+                }
 
         allPointsFromNote.addAll(pointsInSection)
         sectionBorder = nextSectionBorder
     }
 
     // Extract curve points
-    val curvePoints = pitchData.points
-        .map { it.x to (it.y.toDouble() / 100) }
-        .resampled(SAMPLING_INTERVAL_TICK)
+    val curvePoints =
+        pitchData.points
+            .map { it.x to (it.y.toDouble() / 100) }
+            .resampled(SAMPLING_INTERVAL_TICK)
 
     // Merge points from all notes and curve
-    val pitchPoints = (allPointsFromNote + curvePoints)
-        .groupBy { it.first }
-        .map { (tick, points) ->
-            tick to points.sumOf { it.second }
-        }
-        .sortedBy { it.first }
-        .filter { it.first >= 0 }
+    val pitchPoints =
+        (allPointsFromNote + curvePoints)
+            .groupBy { it.first }
+            .map { (tick, points) ->
+                tick to points.sumOf { it.second }
+            }.sortedBy { it.first }
+            .filter { it.first >= 0 }
 
     return if (pitchPoints.isEmpty()) null else Pitch(pitchPoints, isAbsolute = false)
 }
 
-fun mergePitchFromUstxParts(first: Pitch?, second: Pitch?): Pitch? {
+fun mergePitchFromUstxParts(
+    first: Pitch?,
+    second: Pitch?,
+): Pitch? {
     if (first == null) return second
     if (second == null) return first
-    val data = (first.data + second.data)
-        .mapNotNull { point -> point.second?.let { point.first to it } }
-        .groupBy { it.first }
-        .map { (tick, points) ->
-            tick to points.sumOf { it.second }
-        }
-        .sortedBy { it.first }
+    val data =
+        (first.data + second.data)
+            .mapNotNull { point -> point.second?.let { point.first to it } }
+            .groupBy { it.first }
+            .map { (tick, points) ->
+                tick to points.sumOf { it.second }
+            }.sortedBy { it.first }
     return first.copy(data = data)
 }
 
@@ -175,7 +189,8 @@ fun Pitch?.reduceRepeatedPitchPointsFromUstxTrack(): Pitch? {
 
 fun Pitch?.toOpenUtauPitchData(notes: List<Note>): List<Pair<Long, Double>> {
     val data = this?.getRelativeData(notes) ?: return listOf()
-    return data.map { it.first to (it.second * 100).roundToInt().toDouble() }
+    return data
+        .map { it.first to (it.second * 100).roundToInt().toDouble() }
         .appendPitchPointsForOpenUtauOutput()
         .reduceRepeatedPitchPoints()
 }
@@ -186,12 +201,13 @@ private fun interpolate(
     shape: OpenUtauNotePitchData.Shape,
 ): List<Pair<Long, Double>> {
     val input = listOf(lastPoint, thisPoint)
-    val output = when (shape) {
-        OpenUtauNotePitchData.Shape.EaseIn -> input.interpolateCosineEaseIn(SAMPLING_INTERVAL_TICK)
-        OpenUtauNotePitchData.Shape.EaseOut -> input.interpolateCosineEaseOut(SAMPLING_INTERVAL_TICK)
-        OpenUtauNotePitchData.Shape.EaseInOut -> input.interpolateCosineEaseInOut(SAMPLING_INTERVAL_TICK)
-        OpenUtauNotePitchData.Shape.Linear -> input.interpolateLinear(SAMPLING_INTERVAL_TICK)
-    }
+    val output =
+        when (shape) {
+            OpenUtauNotePitchData.Shape.EaseIn -> input.interpolateCosineEaseIn(SAMPLING_INTERVAL_TICK)
+            OpenUtauNotePitchData.Shape.EaseOut -> input.interpolateCosineEaseOut(SAMPLING_INTERVAL_TICK)
+            OpenUtauNotePitchData.Shape.EaseInOut -> input.interpolateCosineEaseInOut(SAMPLING_INTERVAL_TICK)
+            OpenUtauNotePitchData.Shape.Linear -> input.interpolateLinear(SAMPLING_INTERVAL_TICK)
+        }
     return output.orEmpty()
 }
 
@@ -228,8 +244,9 @@ private fun MutableList<Pair<Long, Double>>.appendStartAndEndPoint(note: Note) {
                 val firstPointAfter = first { it.first > start }
 
                 // Linear interpolation
-                val k = (firstPointAfter.second - lastPointBefore.second) /
-                    (firstPointAfter.first - lastPointBefore.first)
+                val k =
+                    (firstPointAfter.second - lastPointBefore.second) /
+                        (firstPointAfter.first - lastPointBefore.first)
                 val y = lastPointBefore.second + (start - lastPointBefore.first) * k
                 add(indexOf(firstPointAfter), start to y)
             }
@@ -244,8 +261,9 @@ private fun MutableList<Pair<Long, Double>>.appendStartAndEndPoint(note: Note) {
             else -> {
                 val lastPointBefore = last { it.first < end }
                 val firstPointAfter = first { it.first > end }
-                val k = (firstPointAfter.second - lastPointBefore.second) /
-                    (firstPointAfter.first - lastPointBefore.first)
+                val k =
+                    (firstPointAfter.second - lastPointBefore.second) /
+                        (firstPointAfter.first - lastPointBefore.first)
                 val y = lastPointBefore.second + (end - lastPointBefore.first) * k
                 add(indexOf(firstPointAfter), end to y)
             }
@@ -265,8 +283,7 @@ private fun List<Pair<Long, Double>>.resampled(
             } else {
                 mergedTick to points.map { it.second }.average()
             }
-        }
-        .sortedBy { it.first }
+        }.sortedBy { it.first }
         .fold(listOf()) { acc, point ->
             val lastPoint = acc.lastOrNull()
             if (lastPoint == null) {

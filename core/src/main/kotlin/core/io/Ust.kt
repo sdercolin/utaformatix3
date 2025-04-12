@@ -43,46 +43,57 @@ import org.w3c.files.File
 import kotlin.math.roundToLong
 
 object Ust {
-    suspend fun parse(files: List<File>, params: ImportParams): Project {
-        val results = files.map {
-            parseFile(it)
-        }
-        val projectName = if (files.size == 1) {
-            files.first().nameWithoutExtension
-        } else {
-            files.first().nameWithoutExtension + " (${files.size - 1} more)"
-        }
-        val tracks = results.mapIndexed { index, result ->
-            val pitch = when {
-                params.simpleImport -> null
-                result.isMode2 -> pitchFromUtauMode2Track(
-                    result.pitchDataMode2,
-                    result.notes,
-                    result.tempos,
-                )
-                else -> pitchFromUtauMode1Track(result.pitchDataMode1, result.notes)
+    suspend fun parse(
+        files: List<File>,
+        params: ImportParams,
+    ): Project {
+        val results =
+            files.map {
+                parseFile(it)
             }
-            Track(
-                id = index,
-                name = result.file.nameWithoutExtension,
-                notes = result.notes,
-                pitch = pitch,
-            ).validateNotes()
-        }
+        val projectName =
+            if (files.size == 1) {
+                files.first().nameWithoutExtension
+            } else {
+                files.first().nameWithoutExtension + " (${files.size - 1} more)"
+            }
+        val tracks =
+            results.mapIndexed { index, result ->
+                val pitch =
+                    when {
+                        params.simpleImport -> null
+                        result.isMode2 ->
+                            pitchFromUtauMode2Track(
+                                result.pitchDataMode2,
+                                result.notes,
+                                result.tempos,
+                            )
+                        else -> pitchFromUtauMode1Track(result.pitchDataMode1, result.notes)
+                    }
+                Track(
+                    id = index,
+                    name = result.file.nameWithoutExtension,
+                    notes = result.notes,
+                    pitch = pitch,
+                ).validateNotes()
+            }
         val warnings = mutableListOf<ImportWarning>()
-        val tempos = results.firstOrNull { it.tempos.isNotEmpty() }?.tempos
-            ?.let {
-                // fix extremely large tempo
-                if (it.first().tickPosition == 0L && it.first().bpm > MAX_ACCEPTED_BPM) {
-                    warnings.add(ImportWarning.DefaultTempoFixed(it.first().bpm))
-                    listOf(Tempo.default) + it.drop(1)
-                } else {
-                    it
+        val tempos =
+            results
+                .firstOrNull { it.tempos.isNotEmpty() }
+                ?.tempos
+                ?.let {
+                    // fix extremely large tempo
+                    if (it.first().tickPosition == 0L && it.first().bpm > MAX_ACCEPTED_BPM) {
+                        warnings.add(ImportWarning.DefaultTempoFixed(it.first().bpm))
+                        listOf(Tempo.default) + it.drop(1)
+                    } else {
+                        it
+                    }
                 }
-            }
-            ?: listOf(Tempo.default).also {
-                warnings.add(ImportWarning.TempoNotFound)
-            }
+                ?: listOf(Tempo.default).also {
+                    warnings.add(ImportWarning.TempoNotFound)
+                }
         warnings.addAll(
             results.flatMap { result ->
                 val ignoredTempos = result.tempos - tempos.toSet()
@@ -184,18 +195,19 @@ object Ust {
                             widths = pendingPBW.orEmpty(),
                             shifts = pendingPBY.orEmpty(),
                             curveTypes = pendingPBM.orEmpty(),
-                            vibratoParams = pendingVBR?.takeIf { it.size > 1 }?.let {
-                                // length(%), period(milliSec), depth(cent), easeIn(%), easeOut(%), phase(%), shift(%)
-                                UtauNoteVibratoParams(
-                                    length = it[0],
-                                    period = it[1],
-                                    depth = it.getOrNull(2) ?: 0.0,
-                                    fadeIn = it.getOrNull(3) ?: 0.0,
-                                    fadeOut = it.getOrNull(4) ?: 0.0,
-                                    phaseShift = it.getOrNull(5) ?: 0.0,
-                                    shift = it.getOrNull(6) ?: 0.0,
-                                )
-                            },
+                            vibratoParams =
+                                pendingVBR?.takeIf { it.size > 1 }?.let {
+                                    // length(%), period(milliSec), depth(cent), easeIn(%), easeOut(%), phase(%), shift(%)
+                                    UtauNoteVibratoParams(
+                                        length = it[0],
+                                        period = it[1],
+                                        depth = it.getOrNull(2) ?: 0.0,
+                                        fadeIn = it.getOrNull(3) ?: 0.0,
+                                        fadeOut = it.getOrNull(4) ?: 0.0,
+                                        phaseShift = it.getOrNull(5) ?: 0.0,
+                                        shift = it.getOrNull(6) ?: 0.0,
+                                    )
+                                },
                         ),
                     )
                     notePitchDataListMode1.add(
@@ -275,21 +287,19 @@ object Ust {
                 }
             }
         }
-        val tempoList = tempos
-            .map { (tick, bpm) -> Tempo(tick, bpm) }
-            .sortedBy { it.tickPosition }
+        val tempoList =
+            tempos
+                .map { (tick, bpm) -> Tempo(tick, bpm) }
+                .sortedBy { it.tickPosition }
         val pitchDataMode1 = notePitchDataListMode1.ifEmpty { null }?.let { UtauMode1TrackPitchData(it) }
         val pitchDataMode2 = notePitchDataListMode2.ifEmpty { null }?.let { UtauMode2TrackPitchData(it) }
         return FileParseResult(file, projectName, notes, tempoList, isMode2, pitchDataMode1, pitchDataMode2)
     }
 
-    private fun parseMode1PitchData(
-        pitchString: String,
-    ): List<Double> {
-        return pitchString.split(",").map { pitchPointString ->
+    private fun parseMode1PitchData(pitchString: String): List<Double> =
+        pitchString.split(",").map { pitchPointString ->
             pitchPointString.toDoubleOrNull() ?: 0.0
         }
-    }
 
     private data class FileParseResult(
         val file: File,
@@ -301,7 +311,10 @@ object Ust {
         val pitchDataMode2: UtauMode2TrackPitchData?,
     )
 
-    suspend fun generate(project: Project, features: List<FeatureConfig>): ExportResult {
+    suspend fun generate(
+        project: Project,
+        features: List<FeatureConfig>,
+    ): ExportResult {
         val zip = JsZip()
         for (track in project.tracks) {
             val content = generateTrackContent(project, track, features)
@@ -320,19 +333,28 @@ object Ust {
         return ExportResult(blob, name, notifications)
     }
 
-    private fun generateTrackContent(project: Project, track: Track, features: List<FeatureConfig>): String {
-        val builder = object {
-            var content = ""
-                private set
+    private fun generateTrackContent(
+        project: Project,
+        track: Track,
+        features: List<FeatureConfig>,
+    ): String {
+        val builder =
+            object {
+                var content = ""
+                    private set
 
-            fun appendLine(line: String) {
-                content += "$line$LINE_SEPARATOR"
+                fun appendLine(line: String) {
+                    content += "$line$LINE_SEPARATOR"
+                }
             }
-        }
         builder.appendLine("[#VERSION]")
         builder.appendLine("UST Version1.2")
         builder.appendLine("[#SETTING]")
-        val bpm = project.tempos.first().bpm.toFixed(2)
+        val bpm =
+            project.tempos
+                .first()
+                .bpm
+                .toFixed(2)
         builder.appendLine("Tempo=$bpm")
         builder.appendLine("Tracks=1")
         builder.appendLine("ProjectName=${track.name}")
@@ -349,12 +371,18 @@ object Ust {
 
         fun getNextTempo() = nextTempoIndex?.let { project.tempos[it] }
 
-        val pitchDataMode1 = if (features.contains(Feature.ConvertPitch)) {
-            pitchToUtauMode1Track(track.pitch, track.notes)
-        } else null
-        val pitchDataMode2 = if (features.contains(Feature.ConvertPitch)) {
-            pitchToUtauMode2Track(track.pitch, track.notes, project.tempos)
-        } else null
+        val pitchDataMode1 =
+            if (features.contains(Feature.ConvertPitch)) {
+                pitchToUtauMode1Track(track.pitch, track.notes)
+            } else {
+                null
+            }
+        val pitchDataMode2 =
+            if (features.contains(Feature.ConvertPitch)) {
+                pitchToUtauMode2Track(track.pitch, track.notes, project.tempos)
+            } else {
+                null
+            }
         for ((index, note) in track.notes.withIndex()) {
             if (tickPos < note.tickOn) {
                 val nextTempo = getNextTempo()
@@ -413,15 +441,17 @@ object Ust {
                 builder.appendLine("PBW=1,${mode2Pitch?.widths?.joinToString(",") { it.toString() }}")
                 builder.appendLine(
                     "PBY=${mode2Pitch?.startShift},${
-                    mode2Pitch?.shifts
-                        ?.joinToString(",") { it.toString() }
+                        mode2Pitch?.shifts
+                            ?.joinToString(",") { it.toString() }
                     }",
                 )
                 builder.appendLine("PBM=${mode2Pitch?.curveTypes?.joinToString(",")}")
                 if (mode2Pitch?.vibratoParams != null) {
-                    val vibratoText = mode2Pitch.vibratoParams.let {
-                        listOf(it.length, it.period, it.depth, it.fadeIn, it.fadeOut, it.phaseShift, it.shift)
-                    }.joinToString(",")
+                    val vibratoText =
+                        mode2Pitch.vibratoParams
+                            .let {
+                                listOf(it.length, it.period, it.depth, it.fadeIn, it.fadeOut, it.phaseShift, it.shift)
+                            }.joinToString(",")
                     builder.appendLine(vibratoText)
                 }
             }
@@ -438,9 +468,10 @@ object Ust {
         return substring(index + 1).takeIf { it.isNotBlank() }
     }
 
-    private fun makeMode1PitchDataString(notePitch: UtauMode1NotePitchData?): String? {
-        return notePitch?.pitchPoints?.joinToString(separator = ",") { it.toInt().toString() }
-    }
+    private fun makeMode1PitchDataString(notePitch: UtauMode1NotePitchData?): String? =
+        notePitch?.pitchPoints?.joinToString(separator = ",") {
+            it.toInt().toString()
+        }
 
     const val MODE1_PITCH_SAMPLING_INTERVAL_TICK = 5L
     const val MODE2_PITCH_MAX_POINT_COUNT = 50L

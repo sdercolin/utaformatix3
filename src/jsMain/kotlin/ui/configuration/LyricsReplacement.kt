@@ -49,38 +49,42 @@ import ui.strings.string
 
 external interface LyricsReplacementProps : SubProps<LyricsReplacementState>
 
-val LyricsReplacementBlock = subFC<LyricsReplacementProps, LyricsReplacementState> { _, state, editState ->
-    FormGroup {
-        div {
-            configurationSwitch(
-                isOn = state.isOn,
-                onSwitched = { editState { copy(isOn = it) } },
-                labelStrings = Strings.LyricsReplacement,
-            )
-            Tooltip {
-                val text = string(
-                    Strings.LyricsReplacementDescription,
-                    "regex" to string(Strings.LyricsReplacementMatchTypeRegex),
-                    "matchType" to string(Strings.LyricsReplacementMatchTypeLabel),
-                    "to" to string(Strings.LyricsReplacementToTextLabel),
+val LyricsReplacementBlock =
+    subFC<LyricsReplacementProps, LyricsReplacementState> { _, state, editState ->
+        FormGroup {
+            div {
+                configurationSwitch(
+                    isOn = state.isOn,
+                    onSwitched = { editState { copy(isOn = it) } },
+                    labelStrings = Strings.LyricsReplacement,
                 )
-                title = div.create {
-                    css { whiteSpace = WhiteSpace.preLine }
-                    +text
-                }
-                placement = TooltipPlacement.right
-                disableInteractive = false
-                HelpOutline {
-                    style = jso {
-                        verticalAlign = VerticalAlign.middle
+                Tooltip {
+                    val text =
+                        string(
+                            Strings.LyricsReplacementDescription,
+                            "regex" to string(Strings.LyricsReplacementMatchTypeRegex),
+                            "matchType" to string(Strings.LyricsReplacementMatchTypeLabel),
+                            "to" to string(Strings.LyricsReplacementToTextLabel),
+                        )
+                    title =
+                        div.create {
+                            css { whiteSpace = WhiteSpace.preLine }
+                            +text
+                        }
+                    placement = TooltipPlacement.right
+                    disableInteractive = false
+                    HelpOutline {
+                        style =
+                            jso {
+                                verticalAlign = VerticalAlign.middle
+                            }
                     }
                 }
             }
         }
-    }
 
-    if (state.isOn) buildLyricsReplacementDetail(state, editState)
-}
+        if (state.isOn) buildLyricsReplacementDetail(state, editState)
+    }
 
 private fun ChildrenBuilder.buildLyricsReplacementDetail(
     state: LyricsReplacementState,
@@ -95,11 +99,12 @@ private fun ChildrenBuilder.buildLyricsReplacementDetail(
             elevation = 0
             div {
                 css {
-                    margin = Margin(
-                        horizontal = 24.px,
-                        top = 16.px,
-                        bottom = 24.px,
-                    )
+                    margin =
+                        Margin(
+                            horizontal = 24.px,
+                            top = 16.px,
+                            bottom = 24.px,
+                        )
                     paddingTop = 8.px
                     paddingBottom = 8.px
                 }
@@ -129,6 +134,7 @@ private fun ChildrenBuilder.buildLyricsReplacementItem(
     editState: (LyricsReplacementState.() -> LyricsReplacementState) -> Unit,
 ) {
     val item = request.items[index]
+
     fun editRequest(block: LyricsReplacementRequest.() -> LyricsReplacementRequest) {
         editState { copy(request = request.block()) }
     }
@@ -151,11 +157,12 @@ private fun ChildrenBuilder.buildLyricsReplacementItem(
             +string(Strings.LyricsReplacementItemLabel, "number" to (index + 1).toString())
         }
         FormControl {
-            style = jso {
-                marginLeft = 2.em
-                marginTop = 8.px
-                marginBottom = 8.px
-            }
+            style =
+                jso {
+                    marginLeft = 2.em
+                    marginTop = 8.px
+                    marginBottom = 8.px
+                }
             variant = FormControlVariant.standard
             focused = false
             FormLabel {
@@ -183,11 +190,12 @@ private fun ChildrenBuilder.buildLyricsReplacementItem(
             }
         }
         FormControl {
-            style = jso {
-                marginLeft = 2.em
-                marginTop = 8.px
-                marginBottom = 8.px
-            }
+            style =
+                jso {
+                    marginLeft = 2.em
+                    marginTop = 8.px
+                    marginBottom = 8.px
+                }
 
             focused = false
             FormLabel {
@@ -209,11 +217,12 @@ private fun ChildrenBuilder.buildLyricsReplacementItem(
             }
         }
         FormControl {
-            style = jso {
-                marginLeft = 2.em
-                marginTop = 8.px
-                marginBottom = 8.px
-            }
+            style =
+                jso {
+                    marginLeft = 2.em
+                    marginTop = 8.px
+                    marginBottom = 8.px
+                }
             variant = FormControlVariant.standard
             focused = false
             FormLabel {
@@ -241,11 +250,12 @@ private fun ChildrenBuilder.buildLyricsReplacementItem(
             }
         }
         FormControl {
-            style = jso {
-                marginLeft = 2.em
-                marginTop = 8.px
-                marginBottom = 8.px
-            }
+            style =
+                jso {
+                    marginLeft = 2.em
+                    marginTop = 8.px
+                    marginBottom = 8.px
+                }
             focused = false
             FormLabel {
                 focused = false
@@ -266,11 +276,12 @@ private fun ChildrenBuilder.buildLyricsReplacementItem(
             }
         }
         FormControl {
-            style = jso {
-                marginLeft = 2.em
-                marginTop = 8.px
-                marginBottom = 8.px
-            }
+            style =
+                jso {
+                    marginLeft = 2.em
+                    marginTop = 8.px
+                    marginBottom = 8.px
+                }
             focused = false
             FormLabel {
                 focused = false
@@ -292,12 +303,13 @@ private fun ChildrenBuilder.buildLyricsReplacementItem(
         IconButton {
             color = IconButtonColor.inherit
             disabled = index == 0
-            style = jso {
-                margin = 5.px
-                marginLeft = 20.px
-                height = Length.fitContent
-                alignSelf = AlignSelf.center
-            }
+            style =
+                jso {
+                    margin = 5.px
+                    marginLeft = 20.px
+                    height = Length.fitContent
+                    alignSelf = AlignSelf.center
+                }
             onClick = {
                 editRequest { moveUp(index) }
             }
@@ -306,11 +318,12 @@ private fun ChildrenBuilder.buildLyricsReplacementItem(
         IconButton {
             color = IconButtonColor.inherit
             disabled = index == request.items.size - 1
-            style = jso {
-                margin = 5.px
-                height = Length.fitContent
-                alignSelf = AlignSelf.center
-            }
+            style =
+                jso {
+                    margin = 5.px
+                    height = Length.fitContent
+                    alignSelf = AlignSelf.center
+                }
             onClick = {
                 editRequest { moveDown(index) }
             }
@@ -318,11 +331,12 @@ private fun ChildrenBuilder.buildLyricsReplacementItem(
         }
         IconButton {
             color = IconButtonColor.secondary
-            style = jso {
-                margin = 5.px
-                height = Length.fitContent
-                alignSelf = AlignSelf.center
-            }
+            style =
+                jso {
+                    margin = 5.px
+                    height = Length.fitContent
+                    alignSelf = AlignSelf.center
+                }
             onClick = {
                 editRequest { remove(index) }
             }
@@ -332,18 +346,20 @@ private fun ChildrenBuilder.buildLyricsReplacementItem(
 }
 
 private val LyricsReplacementRequest.FilterType.strings
-    get() = when (this) {
-        LyricsReplacementRequest.FilterType.None -> Strings.LyricsReplacementFilterTypeNone
-        LyricsReplacementRequest.FilterType.Exact -> Strings.LyricsReplacementFilterTypeExact
-        LyricsReplacementRequest.FilterType.Containing -> Strings.LyricsReplacementFilterTypeContaining
-        LyricsReplacementRequest.FilterType.Prefix -> Strings.LyricsReplacementFilterTypePrefix
-        LyricsReplacementRequest.FilterType.Suffix -> Strings.LyricsReplacementFilterTypeSuffix
-        LyricsReplacementRequest.FilterType.Regex -> Strings.LyricsReplacementFilterTypeRegex
-    }
+    get() =
+        when (this) {
+            LyricsReplacementRequest.FilterType.None -> Strings.LyricsReplacementFilterTypeNone
+            LyricsReplacementRequest.FilterType.Exact -> Strings.LyricsReplacementFilterTypeExact
+            LyricsReplacementRequest.FilterType.Containing -> Strings.LyricsReplacementFilterTypeContaining
+            LyricsReplacementRequest.FilterType.Prefix -> Strings.LyricsReplacementFilterTypePrefix
+            LyricsReplacementRequest.FilterType.Suffix -> Strings.LyricsReplacementFilterTypeSuffix
+            LyricsReplacementRequest.FilterType.Regex -> Strings.LyricsReplacementFilterTypeRegex
+        }
 
 private val LyricsReplacementRequest.MatchType.strings
-    get() = when (this) {
-        LyricsReplacementRequest.MatchType.All -> Strings.LyricsReplacementMatchTypeAll
-        LyricsReplacementRequest.MatchType.Exact -> Strings.LyricsReplacementMatchTypeExact
-        LyricsReplacementRequest.MatchType.Regex -> Strings.LyricsReplacementMatchTypeRegex
-    }
+    get() =
+        when (this) {
+            LyricsReplacementRequest.MatchType.All -> Strings.LyricsReplacementMatchTypeAll
+            LyricsReplacementRequest.MatchType.Exact -> Strings.LyricsReplacementMatchTypeExact
+            LyricsReplacementRequest.MatchType.Regex -> Strings.LyricsReplacementMatchTypeRegex
+        }

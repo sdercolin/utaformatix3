@@ -26,7 +26,10 @@ data class UtauMode1NotePitchData(
     val pitchPoints: List<Double>?,
 )
 
-fun pitchFromUtauMode1Track(pitchData: UtauMode1TrackPitchData?, notes: List<Note>): Pitch? {
+fun pitchFromUtauMode1Track(
+    pitchData: UtauMode1TrackPitchData?,
+    notes: List<Note>,
+): Pitch? {
     pitchData ?: return null
     val notePitches = notes.zip(pitchData.notes)
     val pitchPoints = mutableListOf<Pair<Long, Double>>()
@@ -42,7 +45,10 @@ fun pitchFromUtauMode1Track(pitchData: UtauMode1TrackPitchData?, notes: List<Not
     return Pitch(pitchPoints, false).getAbsoluteData(notes)?.let { Pitch(it, true) }
 }
 
-fun pitchToUtauMode1Track(pitch: Pitch?, notes: List<Note>): UtauMode1TrackPitchData? {
+fun pitchToUtauMode1Track(
+    pitch: Pitch?,
+    notes: List<Note>,
+): UtauMode1TrackPitchData? {
     pitch ?: return null
     return UtauMode1TrackPitchData(
         notes.map { note ->

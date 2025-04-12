@@ -8,14 +8,16 @@ import core.model.JapaneseLyricsType.RomajiVcv
 import core.model.JapaneseLyricsType.Unknown
 import core.model.Track
 
-fun cleanupJapaneseLyrics(tracks: List<Track>, type: JapaneseLyricsType) =
-    when (type) {
-        Unknown -> tracks
-        RomajiCv -> tracks.cleanupJapaneseLyrics { it.cleanupAsRomajiCV() }
-        RomajiVcv -> tracks.cleanupJapaneseLyrics { it.cleanupAsRomajiVCV() }
-        KanaCv -> tracks.cleanupJapaneseLyrics { it.cleanupAsKanaCV() }
-        KanaVcv -> tracks.cleanupJapaneseLyrics { it.cleanupAsKanaVCV() }
-    }
+fun cleanupJapaneseLyrics(
+    tracks: List<Track>,
+    type: JapaneseLyricsType,
+) = when (type) {
+    Unknown -> tracks
+    RomajiCv -> tracks.cleanupJapaneseLyrics { it.cleanupAsRomajiCV() }
+    RomajiVcv -> tracks.cleanupJapaneseLyrics { it.cleanupAsRomajiVCV() }
+    KanaCv -> tracks.cleanupJapaneseLyrics { it.cleanupAsKanaCV() }
+    KanaVcv -> tracks.cleanupJapaneseLyrics { it.cleanupAsKanaVCV() }
+}
 
 private fun String.cleanupAsRomajiCV(): String {
     if (this.isEmpty()) return this
@@ -122,9 +124,10 @@ private fun String.cleanupAsKanaVCV(): String {
 private fun List<Track>.cleanupJapaneseLyrics(noteCleanup: (String) -> String) =
     map { track ->
         track.copy(
-            notes = track.notes.map { note ->
-                note.copy(lyric = noteCleanup(note.lyric))
-            },
+            notes =
+                track.notes.map { note ->
+                    note.copy(lyric = noteCleanup(note.lyric))
+                },
         )
     }
 

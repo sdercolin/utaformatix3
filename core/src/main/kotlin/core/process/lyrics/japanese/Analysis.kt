@@ -13,14 +13,19 @@ import core.model.Track
 fun analyseJapaneseLyricsTypeForProject(project: Project): JapaneseLyricsType {
     if (project.tracks.isEmpty()) return Unknown
 
-    val maxNoteCountInAllTracks = project.tracks.maxByOrNull { it.notes.count() }!!.notes.count()
+    val maxNoteCountInAllTracks =
+        project.tracks
+            .maxByOrNull { it.notes.count() }!!
+            .notes
+            .count()
     val minNoteCountForAvailableTrack = maxNoteCountInAllTracks * MIN_NOTE_RATIO_FOR_AVAILABLE_TRACK
 
-    val availableResults = project.tracks
-        .filter { it.notes.count() >= minNoteCountForAvailableTrack }
-        .map { analyseLyricsTypeForTrack(it) }
-        .distinct()
-        .filter { it != Unknown }
+    val availableResults =
+        project.tracks
+            .filter { it.notes.count() >= minNoteCountForAvailableTrack }
+            .map { analyseLyricsTypeForTrack(it) }
+            .distinct()
+            .filter { it != Unknown }
 
     return if (availableResults.count() > 1) {
         Unknown
@@ -32,9 +37,11 @@ fun analyseJapaneseLyricsTypeForProject(project: Project): JapaneseLyricsType {
 private fun analyseLyricsTypeForTrack(track: Track): JapaneseLyricsType {
     val total = track.notes.count()
     val types = track.notes.map { checkNoteType(it) }
-    val typePercentages = JapaneseLyricsType.values()
-        .map { type -> type to types.count { it == type } }
-        .map { it.first to (it.second.toDouble() / total) }
+    val typePercentages =
+        JapaneseLyricsType
+            .values()
+            .map { type -> type to types.count { it == type } }
+            .map { it.first to (it.second.toDouble() / total) }
     return typePercentages
         .find { it.second > MIN_RELIABLE_PERCENTAGE }
         ?.first

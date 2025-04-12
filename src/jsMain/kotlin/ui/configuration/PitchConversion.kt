@@ -17,24 +17,26 @@ import ui.strings.string
 
 external interface PitchConversionProps : SubProps<PitchConversionState>
 
-val PitchConversionBlock = subFC<PitchConversionProps, PitchConversionState> { _, state, editState ->
-    FormGroup {
-        div {
-            configurationSwitch(
-                isOn = state.isOn,
-                onSwitched = { editState { copy(isOn = it) } },
-                labelStrings = Strings.ConvertPitchData,
-            )
-            Tooltip {
-                title = ReactNode(string(Strings.ConvertPitchDataDescription))
-                placement = TooltipPlacement.right
-                disableInteractive = false
-                ErrorOutline {
-                    style = jso {
-                        verticalAlign = VerticalAlign.middle
+val PitchConversionBlock =
+    subFC<PitchConversionProps, PitchConversionState> { _, state, editState ->
+        FormGroup {
+            div {
+                configurationSwitch(
+                    isOn = state.isOn,
+                    onSwitched = { editState { copy(isOn = it) } },
+                    labelStrings = Strings.ConvertPitchData,
+                )
+                Tooltip {
+                    title = ReactNode(string(Strings.ConvertPitchDataDescription))
+                    placement = TooltipPlacement.right
+                    disableInteractive = false
+                    ErrorOutline {
+                        style =
+                            jso {
+                                verticalAlign = VerticalAlign.middle
+                            }
                     }
                 }
             }
         }
     }
-}

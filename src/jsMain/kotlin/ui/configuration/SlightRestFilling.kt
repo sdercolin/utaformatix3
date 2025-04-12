@@ -37,29 +37,31 @@ import ui.strings.string
 
 external interface SlightRestsFillingProps : SubProps<SlightRestsFillingState>
 
-val SlightRestsFillingBlock = subFC<SlightRestsFillingProps, SlightRestsFillingState> { _, state, editState ->
-    FormGroup {
-        div {
-            configurationSwitch(
-                isOn = state.isOn,
-                onSwitched = { editState { copy(isOn = it) } },
-                labelStrings = Strings.SlightRestsFilling,
-            )
-            Tooltip {
-                title = ReactNode(string(Strings.SlightRestsFillingDescription))
-                placement = TooltipPlacement.right
-                disableInteractive = false
-                HelpOutline {
-                    style = jso {
-                        verticalAlign = VerticalAlign.middle
+val SlightRestsFillingBlock =
+    subFC<SlightRestsFillingProps, SlightRestsFillingState> { _, state, editState ->
+        FormGroup {
+            div {
+                configurationSwitch(
+                    isOn = state.isOn,
+                    onSwitched = { editState { copy(isOn = it) } },
+                    labelStrings = Strings.SlightRestsFilling,
+                )
+                Tooltip {
+                    title = ReactNode(string(Strings.SlightRestsFillingDescription))
+                    placement = TooltipPlacement.right
+                    disableInteractive = false
+                    HelpOutline {
+                        style =
+                            jso {
+                                verticalAlign = VerticalAlign.middle
+                            }
                     }
                 }
             }
         }
-    }
 
-    if (state.isOn) buildRestsFillingDetail(state, editState)
-}
+        if (state.isOn) buildRestsFillingDetail(state, editState)
+    }
 
 private fun ChildrenBuilder.buildRestsFillingDetail(
     state: SlightRestsFillingState,
@@ -73,15 +75,17 @@ private fun ChildrenBuilder.buildRestsFillingDetail(
         Paper {
             elevation = 0
             Box {
-                style = jso {
-                    margin = Margin(
-                        left = 24.px,
-                        right = 48.px,
-                        top = 16.px,
-                        bottom = 16.px,
-                    )
-                    paddingBottom = 8.px
-                }
+                style =
+                    jso {
+                        margin =
+                            Margin(
+                                left = 24.px,
+                                right = 48.px,
+                                top = 16.px,
+                                bottom = 16.px,
+                            )
+                        paddingBottom = 8.px
+                    }
                 sx { minWidth = 15.em }
                 FormControl {
                     margin = FormControlMargin.normal

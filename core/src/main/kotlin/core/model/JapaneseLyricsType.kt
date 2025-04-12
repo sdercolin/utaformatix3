@@ -10,9 +10,12 @@ enum class JapaneseLyricsType(
     RomajiCv(true, true),
     RomajiVcv(true, false),
     KanaCv(false, true),
-    KanaVcv(false, false);
+    KanaVcv(false, false),
+    ;
 
-    fun findBestConversionTargetIn(@Suppress("NON_EXPORTABLE_TYPE") outputFormat: Format): JapaneseLyricsType? {
+    fun findBestConversionTargetIn(
+        @Suppress("NON_EXPORTABLE_TYPE") outputFormat: Format,
+    ): JapaneseLyricsType? {
         outputFormat.suggestedLyricType?.let {
             return it
         }

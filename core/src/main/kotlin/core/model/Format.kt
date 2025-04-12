@@ -194,7 +194,8 @@ enum class Format(
         },
         possibleLyricsTypes = listOf(RomajiCv, RomajiVcv, KanaCv, KanaVcv),
         availableFeaturesForGeneration = listOf(ConvertPitch, ConvertPhonemes),
-    );
+    ),
+    ;
 
     private val allExtensions get() = listOf(extension) + otherExtensions
 
@@ -212,43 +213,44 @@ enum class Format(
     val displayName get() = alias ?: name
 
     companion object {
-
         val importable: List<Format>
-            get() = listOf(
-                Vsqx,
-                Vpr,
-                Vsq,
-                VocaloidMid,
-                Ust,
-                Ustx,
-                Ccs,
-                MusicXml,
-                Svp,
-                S5p,
-                Dv,
-                Ppsf,
-                StandardMid,
-                Tssln,
-                UfData,
-            )
+            get() =
+                listOf(
+                    Vsqx,
+                    Vpr,
+                    Vsq,
+                    VocaloidMid,
+                    Ust,
+                    Ustx,
+                    Ccs,
+                    MusicXml,
+                    Svp,
+                    S5p,
+                    Dv,
+                    Ppsf,
+                    StandardMid,
+                    Tssln,
+                    UfData,
+                )
 
         val exportable: List<Format>
-            get() = listOf(
-                Vsqx,
-                Vpr,
-                Vsq,
-                VocaloidMid,
-                Ust,
-                Ustx,
-                Ccs,
-                MusicXml,
-                Svp,
-                S5p,
-                Dv,
-                StandardMid,
-                Tssln,
-                UfData,
-            )
+            get() =
+                listOf(
+                    Vsqx,
+                    Vpr,
+                    Vsq,
+                    VocaloidMid,
+                    Ust,
+                    Ustx,
+                    Ccs,
+                    MusicXml,
+                    Svp,
+                    S5p,
+                    Dv,
+                    StandardMid,
+                    Tssln,
+                    UfData,
+                )
 
         val vocaloidFormats: List<Format>
             get() = listOf(Vsq, Vsqx, VocaloidMid, Vpr)

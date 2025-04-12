@@ -41,12 +41,17 @@ fun List<Pair<Long, Double>>.appendUtauNoteVibrato(
 
     val start = noteLength - vibratoLength
     val vibrato = { t: Double ->
-        if (t < start) 0.0
-        else {
-            val easeInFactor = ((t - start) / easeInLength).coerceIn(0.0..1.0)
-                .takeIf { it.isFinite() } ?: 1.0
-            val easeOutFactor = ((noteLength - t) / easeOutLength).coerceIn(0.0..1.0)
-                .takeIf { it.isFinite() } ?: 1.0
+        if (t < start) {
+            0.0
+        } else {
+            val easeInFactor =
+                ((t - start) / easeInLength)
+                    .coerceIn(0.0..1.0)
+                    .takeIf { it.isFinite() } ?: 1.0
+            val easeOutFactor =
+                ((noteLength - t) / easeOutLength)
+                    .coerceIn(0.0..1.0)
+                    .takeIf { it.isFinite() } ?: 1.0
             val x = 2 * PI * (frequency * (t - start) - phase)
             depth * easeInFactor * easeOutFactor * (sin(x) + shift)
         }
@@ -55,10 +60,11 @@ fun List<Pair<Long, Double>>.appendUtauNoteVibrato(
     val noteStartInMillis = tickTimeTransformer.tickToMilliSec(thisNote.tickOn)
 
     // get approximate interval for interpolation
-    val sampleIntervalInMillis = tickTimeTransformer.tickDistanceToMilliSec(
-        tickStart = thisNote.tickOn,
-        tickEnd = thisNote.tickOn + sampleIntervalTick,
-    )
+    val sampleIntervalInMillis =
+        tickTimeTransformer.tickDistanceToMilliSec(
+            tickStart = thisNote.tickOn,
+            tickEnd = thisNote.tickOn + sampleIntervalTick,
+        )
 
     return map { (tickTimeTransformer.tickToMilliSec(it.first) - noteStartInMillis) to it.second }
         .fold(listOf<Pair<Double, Double>>()) { acc, inputPoint ->
@@ -76,8 +82,7 @@ fun List<Pair<Long, Double>>.appendUtauNoteVibrato(
                 val interpolatedPoints = interpolatedXs.map { x -> x to (lastPoint.second + vibrato(x)) }
                 acc + interpolatedPoints + newPoint
             }
-        }
-        .map { (milliSecFromNoteStart, value) ->
+        }.map { (milliSecFromNoteStart, value) ->
             val tick = tickTimeTransformer.milliSecToTick(milliSecFromNoteStart + noteStartInMillis)
             tick to value
         }

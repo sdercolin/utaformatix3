@@ -142,22 +142,27 @@ enum class Strings(
         fr = "Remplacer les paroles",
     ),
     LyricsReplacementDescription(
-        en = "Replace lyrics that pass the filter.\n- Presets are loaded according to original format and " +
-            "target format.\n- If you use \"{{regex}}\" as the \"{{matchType}}\", " +
-            "you can use placeholders like \"\$1\", \"$2\", etc. in \"{{to}}\" to fill in the captured groups.",
-        ja = "フィルターに合致する歌詞を置き換える。\n・一部のフォーマットではプリセットが自動的に適用されます。\n" +
-            "・「{{matchType}}」で「{{regex}}」使用する場合、「{{to}}」に「$1」、「$2」などのプレースホルダーを用いて、" +
-            "キャプチャされたグループを入れることができます。",
-        zhCN = "替换可通过过滤器的歌词。\n・转换部分格式时，预设将会被加载。\n・在使用「{{regex}}」的「{{matchType}}」时" +
-            "，您可以在「{{to}}」中使用「$1」、「$2」等占位符来填充被捕获的组。",
-        ru = "Замените тексты, которые проходят фильтр.\n- Пресеты загружаются в соответсвии с " +
-            "исходным и целевым форматом.\n- Если вы используете \"{{regex}}\" в качестве " +
-            "\"{{matchType}}\", вы можете использовать заполнители типа \"\$1\", \"$2\", и т.д. " +
-            "в \"{{to}}\" для заполнения захваченных групп.",
-        fr = "Remplacez les paroles qui passent le filtre.\n- Les préréglages sont chargés en fonction " +
-            "du format d'origine et du format cible. Si vous utilisez \"{{regex}}\" comme \"{{matchType}}\", " +
-            "vous pouvez utiliser des caractères de remplacement comme \"\$1\", \"$2\", etc. dans \"{{to}}\" " +
-            "pour remplir les groupes capturés.",
+        en =
+            "Replace lyrics that pass the filter.\n- Presets are loaded according to original format and " +
+                "target format.\n- If you use \"{{regex}}\" as the \"{{matchType}}\", " +
+                "you can use placeholders like \"\$1\", \"$2\", etc. in \"{{to}}\" to fill in the captured groups.",
+        ja =
+            "フィルターに合致する歌詞を置き換える。\n・一部のフォーマットではプリセットが自動的に適用されます。\n" +
+                "・「{{matchType}}」で「{{regex}}」使用する場合、「{{to}}」に「$1」、「$2」などのプレースホルダーを用いて、" +
+                "キャプチャされたグループを入れることができます。",
+        zhCN =
+            "替换可通过过滤器的歌词。\n・转换部分格式时，预设将会被加载。\n・在使用「{{regex}}」的「{{matchType}}」时" +
+                "，您可以在「{{to}}」中使用「$1」、「$2」等占位符来填充被捕获的组。",
+        ru =
+            "Замените тексты, которые проходят фильтр.\n- Пресеты загружаются в соответсвии с " +
+                "исходным и целевым форматом.\n- Если вы используете \"{{regex}}\" в качестве " +
+                "\"{{matchType}}\", вы можете использовать заполнители типа \"\$1\", \"$2\", и т.д. " +
+                "в \"{{to}}\" для заполнения захваченных групп.",
+        fr =
+            "Remplacez les paroles qui passent le filtre.\n- Les préréglages sont chargés en fonction " +
+                "du format d'origine et du format cible. Si vous utilisez \"{{regex}}\" comme \"{{matchType}}\", " +
+                "vous pouvez utiliser des caractères de remplacement comme \"\$1\", \"$2\", etc. dans \"{{to}}\" " +
+                "pour remplir les groupes capturés.",
     ),
     LyricsReplacementItemLabel(
         en = "#{{number}}",
@@ -331,10 +336,12 @@ enum class Strings(
         en = "Enable phonemes mapping with a customizable mapping table. If disabled, phonemes are copied as is.",
         ja = "カスタマイズ可能なマッピングテーブルを使用して発音記号をマッピングします。無効にすると、発音記号はそのままコピーされます。",
         zhCN = "使用可自定义的映射表映射音素。如果禁用，音素将被直接复制。",
-        ru = "Включить отображение фонем с помощью настраиваемой таблицы отображения. " +
-            "Если отключено, фонемы копируются как есть.",
-        fr = "Activer le mappage des phonèmes avec une table de mappage personnalisable. " +
-            "Si désactivé, les phonèmes sont copiés tels quels.",
+        ru =
+            "Включить отображение фонем с помощью настраиваемой таблицы отображения. " +
+                "Если отключено, фонемы копируются как есть.",
+        fr =
+            "Activer le mappage des phonèmes avec une table de mappage personnalisable. " +
+                "Si désactivé, les phonèmes sont copiés tels quels.",
     ),
     PhonemesMappingPreset(
         en = "Preset",
@@ -351,15 +358,19 @@ enum class Strings(
         fr = "Effacer",
     ),
     PhonemesMappingMapPlaceholder(
-        en = "Write a mapping entry per line in the format of \"{from}={to}\". " +
-            "Whitespace \" \" can be used to combine multiple phonemes as a set.",
-        ja = "「{from}={to}」の形式で、一行に一つのマッピングエントリーを書き込んでください。" +
-            "複数の発音記号をセットとして扱う場合は、空白「 」を使用してください。",
+        en =
+            "Write a mapping entry per line in the format of \"{from}={to}\". " +
+                "Whitespace \" \" can be used to combine multiple phonemes as a set.",
+        ja =
+            "「{from}={to}」の形式で、一行に一つのマッピングエントリーを書き込んでください。" +
+                "複数の発音記号をセットとして扱う場合は、空白「 」を使用してください。",
         zhCN = "请按照“{from}={to}”的格式，每行写入一个映射条目。空格“ ”可以用于将多个音素组合成一个集合。",
-        ru = "Запишите запись отображения на строку в формате \"{from}={to}\". " +
-            "Пробел \" \" можно использовать для объединения нескольких фонем в качестве набора.",
-        fr = "Écrivez une entrée de mappage par ligne au format \"{from}={to}\". " +
-            "L'espace blanc \" \" peut être utilisé pour combiner plusieurs phonèmes en un ensemble.",
+        ru =
+            "Запишите запись отображения на строку в формате \"{from}={to}\". " +
+                "Пробел \" \" можно использовать для объединения нескольких фонем в качестве набора.",
+        fr =
+            "Écrivez une entrée de mappage par ligne au format \"{from}={to}\". " +
+                "L'espace blanc \" \" peut être utilisé pour combiner plusieurs phonèmes en un ensemble.",
     ),
     ConvertPitchData(
         en = "Convert pitch parameters",
@@ -383,27 +394,34 @@ enum class Strings(
         fr = "Zoom avant/arrière du projet",
     ),
     ProjectZoomDescription(
-        en = "Change Bpm and notes in parallel so that the actual singing speed is kept. For example," +
-            "with factor 2, 60 bpm becomes 120 bpm and all notes become twice the length",
-        ja = "実際の速度を変更しないようBpmやノートなどを同時に変更します。例えば、60 bmpの曲に因子2をかけると、" +
-            "120 bpm になり、すべてのノートの長さも二倍になります。",
-        zhCN = "在不改变实际曲速的前提下同时改变Bpm数值与音符长度。例如，在60 bpm的乐曲中使用2倍的缩放，则乐曲变为120bpm，" +
-            "同时所有音符的长度也翻倍。",
-        ru = "Изменение частоты ударов в минуту и нот параллельно, чтобы сохранить фактическую скорость пения." +
-            " Например, с коэффициентом 2 60 ударов в минуту становятся 120 ударов в минуту," +
-            " и все ноты становятся в два раза длиннее",
-        fr = "Changez les bpm et les notes en parallèle afin de conserver la vitesse réelle du chant." +
-            " Par exemple, avec le facteur 2, 60 bpm devient 120 bpm," +
-            " et toutes les notes deviennent deux fois plus longues.",
+        en =
+            "Change Bpm and notes in parallel so that the actual singing speed is kept. For example," +
+                "with factor 2, 60 bpm becomes 120 bpm and all notes become twice the length",
+        ja =
+            "実際の速度を変更しないようBpmやノートなどを同時に変更します。例えば、60 bmpの曲に因子2をかけると、" +
+                "120 bpm になり、すべてのノートの長さも二倍になります。",
+        zhCN =
+            "在不改变实际曲速的前提下同时改变Bpm数值与音符长度。例如，在60 bpm的乐曲中使用2倍的缩放，则乐曲变为120bpm，" +
+                "同时所有音符的长度也翻倍。",
+        ru =
+            "Изменение частоты ударов в минуту и нот параллельно, чтобы сохранить фактическую скорость пения." +
+                " Например, с коэффициентом 2 60 ударов в минуту становятся 120 ударов в минуту," +
+                " и все ноты становятся в два раза длиннее",
+        fr =
+            "Changez les bpm et les notes en parallèle afin de conserver la vitesse réelle du chant." +
+                " Par exemple, avec le facteur 2, 60 bpm devient 120 bpm," +
+                " et toutes les notes deviennent deux fois plus longues.",
     ),
     ProjectZoomWarning(
         en = "Current settings may be destructive because some time signatures have to be moved to measure heads.",
         ja = "この設定ではプロジェクトを適切に変換できないことがあります。一部の拍子記号を小節の始まりに移動させることになります。",
         zhCN = "该设定可能无法正确转换本工程。一部分的节拍记号将被移动到最近的小节的开始位置。",
-        ru = "Текущие настройки могут быть разрушительными," +
-            " поскольку для измерения головок необходимо переместить некоторые временные сигнатуры.",
-        fr = "Les paramètres actuels peuvent être destructeurs," +
-            " car certaines signatures temporelles seront déplacées au début de la mesure.",
+        ru =
+            "Текущие настройки могут быть разрушительными," +
+                " поскольку для измерения головок необходимо переместить некоторые временные сигнатуры.",
+        fr =
+            "Les paramètres actuels peuvent être destructeurs," +
+                " car certaines signatures temporelles seront déplacées au début de la mesure.",
     ),
     ProjectZoomLabel(
         en = "Factor",
@@ -476,16 +494,21 @@ enum class Strings(
         fr = "Déposer les fichiers ou Cliquer ici pour importer",
     ),
     ImportFileSubDescription(
-        en = "Supported file types: VSQX, VPR, VSQ, MID, USTs," +
-            " USTX, CCS, MUSICXML, XML, SVP, S5P, DV, PPSF(NT), TSSLN, UFDATA",
-        ja = "サポートされているファイル形式：VSQX、VPR、VSQ、MID、UST（複数可）、" +
-            "USTX、CCS、MUSICXML、XML、SVP、S5P、DV、PPSF（NT）、TSSLN、UFDATA",
-        zhCN = "支持的文件类型：VSQX、VPR、VSQ、MID、UST（允许复数个）、" +
-            "USTX、CCS、MUSICXML、XML、SVP、S5P、DV、PPSF（NT）、TSSLN、UFDATA",
-        ru = "Поддерживаемые форматы файлов: VSQx, VPR, VSQ, MID, UST," +
-            " USTX, CCS, MusicXML, XML, SVP, S5P, DV, PPSF(NT), TSSLN, UFDATA",
-        fr = "Types de fichiers pris en charge : VSQX, VPR, VSQ, MID, USTs," +
-            " USTX, CCS, MUSICXML, XML, SVP, S5P, DV, PPSF(NT), TSSLN, UFDATA",
+        en =
+            "Supported file types: VSQX, VPR, VSQ, MID, USTs," +
+                " USTX, CCS, MUSICXML, XML, SVP, S5P, DV, PPSF(NT), TSSLN, UFDATA",
+        ja =
+            "サポートされているファイル形式：VSQX、VPR、VSQ、MID、UST（複数可）、" +
+                "USTX、CCS、MUSICXML、XML、SVP、S5P、DV、PPSF（NT）、TSSLN、UFDATA",
+        zhCN =
+            "支持的文件类型：VSQX、VPR、VSQ、MID、UST（允许复数个）、" +
+                "USTX、CCS、MUSICXML、XML、SVP、S5P、DV、PPSF（NT）、TSSLN、UFDATA",
+        ru =
+            "Поддерживаемые форматы файлов: VSQx, VPR, VSQ, MID, UST," +
+                " USTX, CCS, MusicXML, XML, SVP, S5P, DV, PPSF(NT), TSSLN, UFDATA",
+        fr =
+            "Types de fichiers pris en charge : VSQX, VPR, VSQ, MID, USTs," +
+                " USTX, CCS, MUSICXML, XML, SVP, S5P, DV, PPSF(NT), TSSLN, UFDATA",
     ),
     UnsupportedFileTypeImportError(
         en = "Unsupported file type",
@@ -499,8 +522,9 @@ enum class Strings(
         ja = "レガシー ppsf ファイル形式はサポートされていません（Piapro Studio NTのみサポートされています）",
         zhCN = "不支持旧版ppsf文件格式（仅支持 ppsf for Piapro Studio NT）",
         ru = "Устаревший формат файла ppsf не поддерживается. (Поддерживается только ppsf от Piapro Studio NT)",
-        fr = "Le format de fichier ppsf hérité n'est pas pris en charge (seul ppsf pour Piapro Studio NT " +
-            "est pris en charge)",
+        fr =
+            "Le format de fichier ppsf hérité n'est pas pris en charge (seul ppsf pour Piapro Studio NT " +
+                "est pris en charge)",
     ),
     MultipleFileImportError(
         en = "Multiple files of {{format}} could not be imported in one go",
@@ -524,15 +548,18 @@ enum class Strings(
         fr = "Une erreur s'est produite pendant le processus",
     ),
     ErrorDialogDescription(
-        en = "If you find any problems, please help us collect error information" +
-            " for better performance of this application by submitting a feedback report.",
+        en =
+            "If you find any problems, please help us collect error information" +
+                " for better performance of this application by submitting a feedback report.",
         ja = "サービス向上のためにエラー情報を収集しております。問題を発見した場合、フィードバックにご協力をお願いします。",
         zhCN = "如您在使用中发现问题，您可以向我们提交反馈表单。感谢您对本应用的改善所提供的帮助！",
-        ru = "Если вы обнаружите какие-либо проблемы, пожалуйста, помогите нам собрать информацию об ошибках" +
-            "  для повышения производительности этого приложения, отправив отчет об обратной связи.",
-        fr = "Si vous rencontrez des problèmes, aidez-nous à collecter des informations sur les erreurs" +
-            " pour une meilleure performance de cette application en soumettant" +
-            " un rapport de vos retours. (SEULEMENT EN ANGLAIS)",
+        ru =
+            "Если вы обнаружите какие-либо проблемы, пожалуйста, помогите нам собрать информацию об ошибках" +
+                "  для повышения производительности этого приложения, отправив отчет об обратной связи.",
+        fr =
+            "Si vous rencontrez des problèmes, aidez-nous à collecter des informations sur les erreurs" +
+                " pour une meilleure performance de cette application en soumettant" +
+                " un rapport de vos retours. (SEULEMENT EN ANGLAIS)",
     ),
     ReportUrl(
         en = "https://forms.gle/3Es3ZomcYKNHWBvp6",
@@ -611,14 +638,17 @@ enum class Strings(
         fr = "- Aucune signature rythmique n'a trouvé dans le projet importé.",
     ),
     ImportWarningTimeSignatureIgnoredInTrack(
-        en = "- Time signature label ({{timeSignature}}) at measure {{measure}}" +
-            " in Track {{number}}: [{{name}}] was ignored.",
+        en =
+            "- Time signature label ({{timeSignature}}) at measure {{measure}}" +
+                " in Track {{number}}: [{{name}}] was ignored.",
         ja = "- トラック{{number}}：[{{name}}]の小節{{measure}}にある拍子記号（{{timeSignature}}）を読み込めませんでした。",
         zhCN = "- 未能读取音轨{{number}}: [{{name}}]中小节{{measure}}处的节拍记号（{{timeSignature}}）。",
-        ru = "- Метка временной сигнатуры ({{TimeSignature}}) при измерении {{measure}}" +
-            " в треке {{number}}: [{{name}}] была проигнорирована.",
-        fr = "La signature rythmique ({{timeSignature}}) à la mesure {{measure}}" +
-            " de la piste {{number}} : [{{name}}]] a été ignoré.",
+        ru =
+            "- Метка временной сигнатуры ({{TimeSignature}}) при измерении {{measure}}" +
+                " в треке {{number}}: [{{name}}] была проигнорирована.",
+        fr =
+            "La signature rythmique ({{timeSignature}}) à la mesure {{measure}}" +
+                " de la piste {{number}} : [{{name}}]] a été ignoré.",
     ),
     ImportWarningTimeSignatureIgnoredInPreMeasure(
         en = "- Time signature label ({{timeSignature}}) in pre-measures was ignored.",
@@ -628,10 +658,12 @@ enum class Strings(
         fr = "- La signature rythmique ({{timeSignature}}) dans les pré-mesures a été ignorée.",
     ),
     ImportWarningIncompatibleFormatSerializationVersion(
-        en = "- Some data may have been lost because the input file has an incompatible serialization version:" +
-            " {{dataVersion}}. Current version is {{currentVersion}}.",
-        ja = "- 入力ファイルのシリアライゼーションバージョン {{dataVersion}} への互換性がないため、すべてのデータを読み込んでいない" +
-            "可能性があります。現在のバージョンは {{currentVersion}} です。",
+        en =
+            "- Some data may have been lost because the input file has an incompatible serialization version:" +
+                " {{dataVersion}}. Current version is {{currentVersion}}.",
+        ja =
+            "- 入力ファイルのシリアライゼーションバージョン {{dataVersion}} への互換性がないため、すべてのデータを読み込んでいない" +
+                "可能性があります。現在のバージョンは {{currentVersion}} です。",
         zhCN = "- 因为导入的文件的序列化版本 {{dataVersion}} 与当前版本不兼容，部分数据可能丢失。当前版本：{{currentVersion}}。",
     ),
     VsqxFormatDescription(
@@ -750,33 +782,43 @@ enum class Strings(
         en = "Phonemes of all notes were set to \"a\". Please reset them to make it sound correctly.",
         ja = "全てのノートの発音記号が\"a\"に設定されました。正確に発音させるには発音記号をリセットしてください。",
         zhCN = "所有音符的音素都被设为了\"a\"。请重置音素以使其正确发音。",
-        ru = "Фонемы всех нот были установлены на \"a\"." +
-            " Пожалуйста, сбросьте их, чтобы они звучали правильно.",
-        fr = "Les phonèmes de toutes les notes ont été réglés sur \"a\"." +
-            " Veuillez les réinitialiser pour que le son soit correct.",
+        ru =
+            "Фонемы всех нот были установлены на \"a\"." +
+                " Пожалуйста, сбросьте их, чтобы они звучали правильно.",
+        fr =
+            "Les phonèmes de toutes les notes ont été réglés sur \"a\"." +
+                " Veuillez les réinitialiser pour que le son soit correct.",
     ),
     ExportNotificationPhonemeResetRequiredV4(
-        en = "Phonemes of all notes were set to \"a\"." +
-            " Please use \"Lyrics\" -> \"Convert Phonemes\" in the menu of VOCALOID4 to reset them.",
-        ja = "全てのノートの発音記号が\"a\"に設定されました。" +
-            "VOCALOID4のメニューから「歌詞」->「発音記号変換」機能で発音記号をリセットしてください。",
+        en =
+            "Phonemes of all notes were set to \"a\"." +
+                " Please use \"Lyrics\" -> \"Convert Phonemes\" in the menu of VOCALOID4 to reset them.",
+        ja =
+            "全てのノートの発音記号が\"a\"に設定されました。" +
+                "VOCALOID4のメニューから「歌詞」->「発音記号変換」機能で発音記号をリセットしてください。",
         zhCN = "所有音符的音素都被设为了\"a\"。请使用VOCALOID4菜单中的「歌词」->「音位变换」功能来重置音素。",
-        ru = "Фонемы всех нот были установлены на \"a\"." +
-            " Пожалуйста, воспользуйтесь \"Lyrics\" -> \"Convert Phonemes\" в меню VOCALOID4 чтобы сбросить их.",
-        fr = "Les phonèmes de toutes les notes ont été réglés sur \"a\"." +
-            " Veuillez utiliser \"Lyrics\" -> \"Convert Phonemes\" dans le menu de VOCALOID4 pour les réinitialiser.",
+        ru =
+            "Фонемы всех нот были установлены на \"a\"." +
+                " Пожалуйста, воспользуйтесь \"Lyrics\" -> \"Convert Phonemes\" в меню VOCALOID4 чтобы сбросить их.",
+        fr =
+            "Les phonèmes de toutes les notes ont été réglés sur \"a\"." +
+                " Veuillez utiliser \"Lyrics\" -> \"Convert Phonemes\" dans le menu de VOCALOID4 pour les réinitialiser.",
     ),
     ExportNotificationPhonemeResetRequiredV5(
-        en = "Phonemes of all notes were set to \"a\". Please use \"Job\" -> \"Convert Phonemes to Match Languages\"" +
-            " in the menu of VOCALOID5 to reset them.",
-        ja = "全てのノートの発音記号が\"a\"に設定されました。" +
-            "VOCALOID5のメニューから「ジョブ」->「発音記号を言語に合わせて変換」機能で発音記号をリセットしてください。",
+        en =
+            "Phonemes of all notes were set to \"a\". Please use \"Job\" -> \"Convert Phonemes to Match Languages\"" +
+                " in the menu of VOCALOID5 to reset them.",
+        ja =
+            "全てのノートの発音記号が\"a\"に設定されました。" +
+                "VOCALOID5のメニューから「ジョブ」->「発音記号を言語に合わせて変換」機能で発音記号をリセットしてください。",
         zhCN = "所有音符的音素都被设为了\"a\"。请使用VOCALOID5菜单中的「任务」->「发音符号匹配」功能来重置音素。",
-        ru = "Фонемы всех нот были установлены на \"a\"." +
-            " Пожалуйста, воспользуйтесь \"Job\" -> \"Convert Phonemes to Match Languages\"" +
-            " в меню VOCALOID5 чтобы сбросить их.",
-        fr = "Les phonèmes de toutes les notes ont été réglés sur \"a\". Veuillez utiliser \"Lyrics\" ->" +
-            " \"Convert Phonemes to Match Languages\" dans le menu de VOCALOID5 pour les réinitialiser.",
+        ru =
+            "Фонемы всех нот были установлены на \"a\"." +
+                " Пожалуйста, воспользуйтесь \"Job\" -> \"Convert Phonemes to Match Languages\"" +
+                " в меню VOCALOID5 чтобы сбросить их.",
+        fr =
+            "Les phonèmes de toutes les notes ont été réglés sur \"a\". Veuillez utiliser \"Lyrics\" ->" +
+                " \"Convert Phonemes to Match Languages\" dans le menu de VOCALOID5 pour les réinitialiser.",
     ),
     ExportNotificationTimeSignatureIgnored(
         en = "Could not convert time signatures to the target format.",
@@ -786,27 +828,34 @@ enum class Strings(
         fr = "Impossible de convertir les signatures rythmiques au format cible.",
     ),
     ExportNotificationPitchDataExported(
-        en = "Some pitch parameters were exported. For a higher reproduction accuracy," +
-            " you may need to turn off pitch transition and vibrato settings in the target editor.",
-        ja = "ピッチパラメータが出力されました。出力側のエディターでピッチ推移やビブラートなどの設定を削除することで、より高い精度でピッチを" +
-            "再現できる場合があります。",
+        en =
+            "Some pitch parameters were exported. For a higher reproduction accuracy," +
+                " you may need to turn off pitch transition and vibrato settings in the target editor.",
+        ja =
+            "ピッチパラメータが出力されました。出力側のエディターでピッチ推移やビブラートなどの設定を削除することで、より高い精度でピッチを" +
+                "再現できる場合があります。",
         zhCN = "生成的文件中带有音高参数。您可能需要在对象编辑器中关闭音高平滑设置及颤音设置以达到更高的重现精度。",
-        ru = "Некоторые параметры высоты тона были экспортированы. Для более высокой точности" +
-            "воспроизведения, возможно вам потребуется отключить настройки высоты тона и" +
-            " вибрато в целевом редакторе.",
-        fr = "Certains paramètres de hauteur ont été exportés. Pour une plus grande précision," +
-            " vous devrez peut-être désactiver les paramètres de transition de hauteur" +
-            " et de vibrato dans l'éditeur cible.",
+        ru =
+            "Некоторые параметры высоты тона были экспортированы. Для более высокой точности" +
+                "воспроизведения, возможно вам потребуется отключить настройки высоты тона и" +
+                " вибрато в целевом редакторе.",
+        fr =
+            "Certains paramètres de hauteur ont été exportés. Pour une plus grande précision," +
+                " vous devrez peut-être désactiver les paramètres de transition de hauteur" +
+                " et de vibrato dans l'éditeur cible.",
     ),
     ExportNotificationDataOverLengthLimitIgnored(
         en = "Data exceeding length limit ignored. Please check if your output includes all your intended data.",
-        ja = "一部のデータが長さ制限を超えているため、すべてのデータを出力することができませんでした。意図したデータが出力結果にすべて" +
-            "入っているかどうかを確認してください。",
+        ja =
+            "一部のデータが長さ制限を超えているため、すべてのデータを出力することができませんでした。意図したデータが出力結果にすべて" +
+                "入っているかどうかを確認してください。",
         zhCN = "部分数据超过了长度限制而被忽略，请检查生成的文件是否完整包含您所需要的数据。",
-        ru = "Данные, превышающие предельную длину, игнорируются. Пожалуйста, проверьте," +
-            " включает ли ваш вывод все предполагаемые данные.",
-        fr = "Les données dépassant la limite de longueur sont ignorées." +
-            " Veuillez vérifier que votre exportation inclut toutes les données prévues.",
+        ru =
+            "Данные, превышающие предельную длину, игнорируются. Пожалуйста, проверьте," +
+                " включает ли ваш вывод все предполагаемые данные.",
+        fr =
+            "Les données dépassant la limite de longueur sont ignorées." +
+                " Veuillez vérifier que votre exportation inclut toutes les données prévues.",
     ),
     SlightRestsFilling(
         en = "Fill short rests",
@@ -862,8 +911,9 @@ enum class Strings(
         ja = "複数のファイルを一括で変換します。各ファイルはプロジェクトとして別々に保存されます。",
         zhCN = "一次性转换多个文件。每个文件将单独保存为一个工程。",
         ru = "Преобразовать несколько файлов одновременно. Каждый файл будет сохранен отдельно в качестве проекта.",
-        fr = "Convertir plusieurs fichiers en même temps. " +
-            "Chaque fichier sera enregistré apartment en tant que projet.",
+        fr =
+            "Convertir plusieurs fichiers en même temps. " +
+                "Chaque fichier sera enregistré apartment en tant que projet.",
     ),
     MultipleModeForMultipleFileFormatWarningTitle(
         en = "You are using the batch conversion mode",
@@ -871,32 +921,39 @@ enum class Strings(
         zhCN = "您正在使用批量转换模式",
     ),
     MultipleModeForMultipleFileFormatWarningDescription(
-        en = "In the batch conversion mode, every file will be saved separately as a project without being merged.\n" +
-            "Currently you are using this mode with an import format that does not support multiple tracks.\n" +
-            "Please make sure that you don't want to merge the input tracks before continuing.\n" +
-            "If you don't want to use this mode, " +
-            "please return to the Import page and toggle off the \"Batch conversion\" option.",
-        ja = "一括変換モードでは、各ファイルはマージされずにプロジェクトとして別々に保存されます。\n" +
-            "現在、複数トラックをサポートしていないフォーマットでこのモードを使用しています。\n" +
-            "入力トラックがマージされないことをご確認の上、続行してください。\n" +
-            "このモードを使用したくない場合は、インポートページに戻り、「一括変換」オプションをオフにしてください。",
-        zhCN = "在批量转换模式下，每个文件将单独保存为一个工程而不会被合并。\n" +
-            "当前您正在此模式下导入只支持单个轨道的格式。\n" +
-            "请确保您不想合并输入轨道后再继续。\n" +
-            "如果您不想使用此模式，请返回导入页面并关闭“批量转换”选项。",
-    )
+        en =
+            "In the batch conversion mode, every file will be saved separately as a project without being merged.\n" +
+                "Currently you are using this mode with an import format that does not support multiple tracks.\n" +
+                "Please make sure that you don't want to merge the input tracks before continuing.\n" +
+                "If you don't want to use this mode, " +
+                "please return to the Import page and toggle off the \"Batch conversion\" option.",
+        ja =
+            "一括変換モードでは、各ファイルはマージされずにプロジェクトとして別々に保存されます。\n" +
+                "現在、複数トラックをサポートしていないフォーマットでこのモードを使用しています。\n" +
+                "入力トラックがマージされないことをご確認の上、続行してください。\n" +
+                "このモードを使用したくない場合は、インポートページに戻り、「一括変換」オプションをオフにしてください。",
+        zhCN =
+            "在批量转换模式下，每个文件将单独保存为一个工程而不会被合并。\n" +
+                "当前您正在此模式下导入只支持单个轨道的格式。\n" +
+                "请确保您不想合并输入轨道后再继续。\n" +
+                "如果您不想使用此模式，请返回导入页面并关闭“批量转换”选项。",
+    ),
     ;
 
-    fun get(language: Language): String = when (language) {
-        English -> en
-        French -> fr
-        Japanese -> ja
-        SimplifiedChinese -> zhCN
-        Russian -> ru
-    }
+    fun get(language: Language): String =
+        when (language) {
+            English -> en
+            French -> fr
+            Japanese -> ja
+            SimplifiedChinese -> zhCN
+            Russian -> ru
+        }
 }
 
-fun string(key: Strings, vararg params: Pair<String, String>): String {
+fun string(
+    key: Strings,
+    vararg params: Pair<String, String>,
+): String {
     val options = object {}.asDynamic()
     params.forEach { (key, value) ->
         options[key] = value

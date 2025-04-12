@@ -11,8 +11,11 @@ fun MutableList<Byte>.addBlock(
     littleEndian: Boolean = true,
     lengthInVariableLength: Boolean = false,
 ) {
-    if (lengthInVariableLength) addIntVariableLengthBigEndian(block.count())
-    else addInt(block.count(), littleEndian)
+    if (lengthInVariableLength) {
+        addIntVariableLengthBigEndian(block.count())
+    } else {
+        addInt(block.count(), littleEndian)
+    }
     addAll(block)
 }
 
@@ -21,8 +24,11 @@ fun MutableList<Byte>.addList(
     littleEndian: Boolean = true,
     lengthInVariableLength: Boolean = false,
 ) {
-    if (lengthInVariableLength) addIntVariableLengthBigEndian(list.count())
-    else addInt(list.count(), littleEndian)
+    if (lengthInVariableLength) {
+        addIntVariableLengthBigEndian(list.count())
+    } else {
+        addInt(list.count(), littleEndian)
+    }
     addAll(list.flatten())
 }
 
@@ -31,15 +37,22 @@ fun MutableList<Byte>.addListBlock(
     littleEndian: Boolean = true,
     lengthInVariableLength: Boolean = false,
 ) {
-    val block = mutableListOf<Byte>().apply {
-        if (lengthInVariableLength) addIntVariableLengthBigEndian(list.count())
-        else addInt(list.count(), littleEndian)
-        addAll(list.flatten())
-    }
+    val block =
+        mutableListOf<Byte>().apply {
+            if (lengthInVariableLength) {
+                addIntVariableLengthBigEndian(list.count())
+            } else {
+                addInt(list.count(), littleEndian)
+            }
+            addAll(list.flatten())
+        }
     addBlock(block, littleEndian, lengthInVariableLength)
 }
 
-fun MutableList<Byte>.addInt(int: Int, littleEndian: Boolean = true) {
+fun MutableList<Byte>.addInt(
+    int: Int,
+    littleEndian: Boolean = true,
+) {
     val view = DataView(ArrayBuffer(Int.SIZE_BYTES))
     view.setInt32(0, int, littleEndian = littleEndian)
     addArrayBuffer(view.buffer)
@@ -66,16 +79,26 @@ fun MutableList<Byte>.addIntVariableLengthBigEndian(int: Int) {
     addAll(bytes)
 }
 
-fun MutableList<Byte>.addShort(short: Short, littleEndian: Boolean = true) {
+fun MutableList<Byte>.addShort(
+    short: Short,
+    littleEndian: Boolean = true,
+) {
     val view = DataView(ArrayBuffer(Short.SIZE_BYTES))
     view.setInt16(0, short, littleEndian = littleEndian)
     addArrayBuffer(view.buffer)
 }
 
-fun MutableList<Byte>.addString(string: String, littleEndian: Boolean = true, lengthInVariableLength: Boolean = false) {
+fun MutableList<Byte>.addString(
+    string: String,
+    littleEndian: Boolean = true,
+    lengthInVariableLength: Boolean = false,
+) {
     val bytes = string.encodeToByteArray().toList()
-    if (lengthInVariableLength) addIntVariableLengthBigEndian(bytes.count())
-    else addInt(bytes.count(), littleEndian)
+    if (lengthInVariableLength) {
+        addIntVariableLengthBigEndian(bytes.count())
+    } else {
+        addInt(bytes.count(), littleEndian)
+    }
     addAll(bytes)
 }
 

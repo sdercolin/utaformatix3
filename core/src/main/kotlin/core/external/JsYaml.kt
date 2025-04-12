@@ -4,5 +4,6 @@ package core.external
 @JsNonModule
 external object JsYaml {
     fun load(text: String): dynamic
+
     fun dump(`object`: dynamic): String
 }

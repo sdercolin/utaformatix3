@@ -12,7 +12,6 @@ data class VocaloidPartPitchData(
     val pit: List<Event>,
     val pbs: List<Event>,
 ) {
-
     data class Event(
         val pos: Long,
         val value: Int,
@@ -29,47 +28,55 @@ private const val MIN_BREAK_LENGTH_BETWEEN_PITCH_SECTIONS = 480L
 private const val BORDER_APPEND_RADIUS = 5L
 
 fun pitchFromVocaloidParts(dataByParts: List<VocaloidPartPitchData>): Pitch? {
-    val pitchRawDataByPart = dataByParts.map { part ->
-        val pit = part.pit
-        val pbs = part.pbs
-        val pitMultipliedByPbs = mutableMapOf<Long, Int>()
-        var pitIndex = 0
-        var pbsCurrentValue = DEFAULT_PITCH_BEND_SENSITIVITY
-        for (pbsEvent in pbs) {
-            for (i in pitIndex..pit.lastIndex) {
-                val pitEvent = pit[i]
-                if (pitEvent.pos < pbsEvent.pos) {
+    val pitchRawDataByPart =
+        dataByParts.map { part ->
+            val pit = part.pit
+            val pbs = part.pbs
+            val pitMultipliedByPbs = mutableMapOf<Long, Int>()
+            var pitIndex = 0
+            var pbsCurrentValue = DEFAULT_PITCH_BEND_SENSITIVITY
+            for (pbsEvent in pbs) {
+                for (i in pitIndex..pit.lastIndex) {
+                    val pitEvent = pit[i]
+                    if (pitEvent.pos < pbsEvent.pos) {
+                        pitMultipliedByPbs[pitEvent.pos] = pitEvent.value * pbsCurrentValue
+                        if (i == pit.lastIndex) pitIndex = i
+                    } else {
+                        pitIndex = i
+                        break
+                    }
+                }
+                pbsCurrentValue = pbsEvent.value
+            }
+            if (pitIndex < pit.lastIndex) {
+                for (i in pitIndex..pit.lastIndex) {
+                    val pitEvent = pit[i]
                     pitMultipliedByPbs[pitEvent.pos] = pitEvent.value * pbsCurrentValue
-                    if (i == pit.lastIndex) pitIndex = i
-                } else {
-                    pitIndex = i
-                    break
                 }
             }
-            pbsCurrentValue = pbsEvent.value
+            pitMultipliedByPbs.mapKeys { it.key + part.startPos }
         }
-        if (pitIndex < pit.lastIndex) {
-            for (i in pitIndex..pit.lastIndex) {
-                val pitEvent = pit[i]
-                pitMultipliedByPbs[pitEvent.pos] = pitEvent.value * pbsCurrentValue
+    val pitchRawData =
+        pitchRawDataByPart
+            .map { it.toList() }
+            .fold(listOf<Pair<Long, Int>>()) { accumulator, element ->
+                val firstPos = element.firstOrNull()?.first
+                if (firstPos == null) {
+                    accumulator
+                } else {
+                    val firstInvalidIndexInPrevious =
+                        accumulator.indexOfFirst { it.first >= firstPos }.takeIf { it >= 0 }
+                    if (firstInvalidIndexInPrevious == null) {
+                        accumulator + element
+                    } else {
+                        accumulator.take(firstInvalidIndexInPrevious) + element
+                    }
+                }
             }
+    val data =
+        pitchRawData.map { (pos, value) ->
+            pos to value.toDouble() / PITCH_MAX_VALUE
         }
-        pitMultipliedByPbs.mapKeys { it.key + part.startPos }
-    }
-    val pitchRawData = pitchRawDataByPart.map { it.toList() }
-        .fold(listOf<Pair<Long, Int>>()) { accumulator, element ->
-            val firstPos = element.firstOrNull()?.first
-            if (firstPos == null) accumulator
-            else {
-                val firstInvalidIndexInPrevious =
-                    accumulator.indexOfFirst { it.first >= firstPos }.takeIf { it >= 0 }
-                if (firstInvalidIndexInPrevious == null) accumulator + element
-                else accumulator.take(firstInvalidIndexInPrevious) + element
-            }
-        }
-    val data = pitchRawData.map { (pos, value) ->
-        pos to value.toDouble() / PITCH_MAX_VALUE
-    }
     return Pitch(data, isAbsolute = false).takeIf { it.data.isNotEmpty() }
 }
 
@@ -109,7 +116,8 @@ fun Pitch.generateForVocaloid(notes: List<Note>): VocaloidPartPitchData? {
             pit.add(
                 Event(
                     pitchPos,
-                    (pitchValue * PITCH_MAX_VALUE / pbsForThisSection).roundToInt()
+                    (pitchValue * PITCH_MAX_VALUE / pbsForThisSection)
+                        .roundToInt()
                         .coerceIn(-PITCH_MAX_VALUE, PITCH_MAX_VALUE),
                 ),
             )

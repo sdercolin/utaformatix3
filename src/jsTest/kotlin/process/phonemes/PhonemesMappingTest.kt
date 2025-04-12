@@ -7,33 +7,35 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class PhonemesMappingTest {
+    private val request =
+        PhonemesMappingRequest(
+            mapText =
+                """
+                a=A
+                b=B
+                c a=C' A
+                c=C
+                d c a=DC' A
+                d c=DC
+                sil=
+                s=S
+                sh=SH
+                effff=EF
+                effff d=EF D
+                Q=a
+                OI=Q
+                """.trimIndent(),
+        )
 
-    private val request = PhonemesMappingRequest(
-        mapText = """
-            a=A
-            b=B
-            c a=C' A
-            c=C
-            d c a=DC' A
-            d c=DC
-            sil=
-            s=S
-            sh=SH
-            effff=EF
-            effff d=EF D
-            Q=a
-            OI=Q
-        """.trimIndent(),
-    )
-
-    private fun createNote(phoneme: String) = Note(
-        id = 0,
-        key = 60,
-        lyric = "",
-        tickOn = 0L,
-        tickOff = 480L,
-        phoneme = phoneme,
-    )
+    private fun createNote(phoneme: String) =
+        Note(
+            id = 0,
+            key = 60,
+            lyric = "",
+            tickOn = 0L,
+            tickOff = 480L,
+            phoneme = phoneme,
+        )
 
     @Test
     fun testNoMatch() {

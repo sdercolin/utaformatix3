@@ -39,8 +39,10 @@ import org.w3c.files.Blob
 import org.w3c.files.File
 
 object MusicXml {
-
-    suspend fun parse(file: File, params: ImportParams): Project {
+    suspend fun parse(
+        file: File,
+        params: ImportParams,
+    ): Project {
         val projectName = file.nameWithoutExtension
         val text = file.readText()
         val parser = DOMParser()
@@ -50,9 +52,10 @@ object MusicXml {
         val partNodes = rootNode.getElementListByTagName("part")
 
         val warnings = mutableListOf<ImportWarning>()
-        val masterTrack = partNodes.firstOrNull {
-            it.getElementListByTagName("measure").isNotEmpty()
-        } ?: throw IllegalFileException.XmlElementNotFound("measure")
+        val masterTrack =
+            partNodes.firstOrNull {
+                it.getElementListByTagName("measure").isNotEmpty()
+            } ?: throw IllegalFileException.XmlElementNotFound("measure")
         val masterTrackResult = parseMasterTrack(masterTrack, warnings)
         val timeSignatures = masterTrackResult.timeSignatures.ifEmpty { listOf(TimeSignature.default) }
         val tempos = masterTrackResult.tempoWithMeasureIndexes.map { it.second }.ifEmpty { listOf(Tempo.default) }
@@ -79,12 +82,19 @@ object MusicXml {
         )
     }
 
-    private fun parseMasterTrack(partNode: Element, warnings: MutableList<ImportWarning>): MasterTrackParseResult {
+    private fun parseMasterTrack(
+        partNode: Element,
+        warnings: MutableList<ImportWarning>,
+    ): MasterTrackParseResult {
         val measureNodes = partNode.getElementListByTagName("measure")
-        val divisions = measureNodes.first()
-            .getElementListByTagName("attributes")
-            .flatMap { it.getElementListByTagName("divisions") }
-            .first().innerValue.toLong()
+        val divisions =
+            measureNodes
+                .first()
+                .getElementListByTagName("attributes")
+                .flatMap { it.getElementListByTagName("divisions") }
+                .first()
+                .innerValue
+                .toLong()
         val importTickRate = TICKS_IN_BEAT.toDouble() / divisions
         val tempos = mutableListOf<Pair<Int, Tempo>>()
         val timeSignatures = mutableListOf<TimeSignature>()
@@ -92,31 +102,32 @@ object MusicXml {
         var tickPosition = 0L
         var currentTimeSignature = TimeSignature.default
         measureNodes.forEachIndexed { index, measureNode ->
-            val timeSignature = measureNode.getElementListByTagName("attributes")
-                .flatMap { it.getElementListByTagName("time") }
-                .firstOrNull()
-                ?.let { timeNode ->
-                    TimeSignature(
-                        measurePosition = index,
-                        numerator = timeNode.getSingleElementByTagName("beats").innerValue.toInt(),
-                        denominator = timeNode.getSingleElementByTagName("beat-type").innerValue.toInt(),
-                    )
-                }
-                ?.also {
-                    timeSignatures.add(it)
-                    currentTimeSignature = it
-                }
-                ?: currentTimeSignature
+            val timeSignature =
+                measureNode
+                    .getElementListByTagName("attributes")
+                    .flatMap { it.getElementListByTagName("time") }
+                    .firstOrNull()
+                    ?.let { timeNode ->
+                        TimeSignature(
+                            measurePosition = index,
+                            numerator = timeNode.getSingleElementByTagName("beats").innerValue.toInt(),
+                            denominator = timeNode.getSingleElementByTagName("beat-type").innerValue.toInt(),
+                        )
+                    }?.also {
+                        timeSignatures.add(it)
+                        currentTimeSignature = it
+                    }
+                    ?: currentTimeSignature
 
-            measureNode.getElementListByTagName("sound")
+            measureNode
+                .getElementListByTagName("sound")
                 .firstOrNull { it.hasAttribute("tempo") }
                 ?.let { soundNode ->
                     Tempo(
                         tickPosition = tickPosition,
                         bpm = soundNode.getAttribute("tempo")!!.toDouble(),
                     )
-                }
-                ?.also {
+                }?.also {
                     tempos.add(index to it)
                 }
 
@@ -150,52 +161,62 @@ object MusicXml {
         partNode.getElementListByTagName("measure").forEachIndexed { index, measureNode ->
             var tickPosition = masterTrackResult.measureBorders[index]
             measureNode.getElementListByTagName("note").forEach { noteNode ->
-                val duration = noteNode.getSingleElementByTagNameOrNull("duration")
-                    ?.innerValue?.toLongOrNull()?.times(importTickRate)?.toLong()
-                    ?: if (noteNode.getSingleElementByTagNameOrNull("grace") != null) {
-                        return@forEach
-                    } else {
-                        throw IllegalFileException.XmlElementNotFound("duration")
-                    }
+                val duration =
+                    noteNode
+                        .getSingleElementByTagNameOrNull("duration")
+                        ?.innerValue
+                        ?.toLongOrNull()
+                        ?.times(importTickRate)
+                        ?.toLong()
+                        ?: if (noteNode.getSingleElementByTagNameOrNull("grace") != null) {
+                            return@forEach
+                        } else {
+                            throw IllegalFileException.XmlElementNotFound("duration")
+                        }
                 if (noteNode.getElementListByTagName("rest").isNotEmpty()) {
                     tickPosition += duration
                     return@forEach
                 }
 
-                val key = noteNode.getSingleElementByTagNameOrNull("pitch")?.let { pitchNode ->
-                    val step = pitchNode.getSingleElementByTagName("step").innerValue
-                    val alter = pitchNode.getSingleElementByTagNameOrNull("alter")?.innerValueOrNull?.toInt()
-                    val relativeKey = when (step) {
-                        "C" -> 0
-                        "D" -> 2
-                        "E" -> 4
-                        "F" -> 5
-                        "G" -> 7
-                        "A" -> 9
-                        "B" -> 11
-                        else -> throw IllegalStateException()
-                    } + (alter ?: 0)
-                    val octave = pitchNode.getSingleElementByTagName("octave").innerValue.toInt() + 1
-                    octave * KEY_IN_OCTAVE + relativeKey
-                } ?: DEFAULT_KEY
+                val key =
+                    noteNode.getSingleElementByTagNameOrNull("pitch")?.let { pitchNode ->
+                        val step = pitchNode.getSingleElementByTagName("step").innerValue
+                        val alter = pitchNode.getSingleElementByTagNameOrNull("alter")?.innerValueOrNull?.toInt()
+                        val relativeKey =
+                            when (step) {
+                                "C" -> 0
+                                "D" -> 2
+                                "E" -> 4
+                                "F" -> 5
+                                "G" -> 7
+                                "A" -> 9
+                                "B" -> 11
+                                else -> throw IllegalStateException()
+                            } + (alter ?: 0)
+                        val octave = pitchNode.getSingleElementByTagName("octave").innerValue.toInt() + 1
+                        octave * KEY_IN_OCTAVE + relativeKey
+                    } ?: DEFAULT_KEY
 
-                val lyric = noteNode.getSingleElementByTagNameOrNull("lyric")
-                    ?.getSingleElementByTagNameOrNull("text")
-                    ?.innerValueOrNull ?: defaultLyric
+                val lyric =
+                    noteNode
+                        .getSingleElementByTagNameOrNull("lyric")
+                        ?.getSingleElementByTagNameOrNull("text")
+                        ?.innerValueOrNull ?: defaultLyric
 
-                val note = if (!isInsideNote) {
-                    Note(
-                        id = 0,
-                        key = key,
-                        lyric = lyric,
-                        tickOn = tickPosition,
-                        tickOff = tickPosition + duration,
-                    )
-                } else {
-                    notes.removeLast().let {
-                        it.copy(tickOff = it.tickOff + duration)
+                val note =
+                    if (!isInsideNote) {
+                        Note(
+                            id = 0,
+                            key = key,
+                            lyric = lyric,
+                            tickOn = tickPosition,
+                            tickOff = tickPosition + duration,
+                        )
+                    } else {
+                        notes.removeLast().let {
+                            it.copy(tickOff = it.tickOff + duration)
+                        }
                     }
-                }
 
                 tickPosition += duration
                 notes.add(note)
@@ -236,7 +257,10 @@ object MusicXml {
         return ExportResult(blob, name, listOf())
     }
 
-    private fun generateTrackContent(project: Project, track: Track): String {
+    private fun generateTrackContent(
+        project: Project,
+        track: Track,
+    ): String {
         val keyTicks = project.getKeyTicks(track)
         val measures = getMeasures(keyTicks, project.timeSignatures)
 
@@ -249,11 +273,12 @@ object MusicXml {
         partNode.removeChild(firstMeasureNode)
 
         measures.forEachIndexed { index, measure ->
-            val measureNode = document.generateMeasureNode(
-                measure,
-                index,
-                if (index == 0) firstMeasureNode else null,
-            )
+            val measureNode =
+                document.generateMeasureNode(
+                    measure,
+                    index,
+                    if (index == 0) firstMeasureNode else null,
+                )
             partNode.appendChild(measureNode)
         }
 
@@ -261,7 +286,11 @@ object MusicXml {
         return serializer.serializeToString(document)
     }
 
-    private fun Document.generateMeasureNode(measure: MXmlMeasure, index: Int, baseMeasureNode: Element?): Element {
+    private fun Document.generateMeasureNode(
+        measure: MXmlMeasure,
+        index: Int,
+        baseMeasureNode: Element?,
+    ): Element {
         val node = baseMeasureNode?.clone() ?: createElement("measure")
         node.setAttribute("number", (index + 1).toString())
         measure.timeSignature?.let { timeSignature ->
@@ -271,15 +300,18 @@ object MusicXml {
         }
         for (content in measure.contents) {
             when (content) {
-                is MXmlMeasureContent.Tempo -> generateNodesForTempo(content).forEach {
-                    node.appendChild(it)
-                }
-                is MXmlMeasureContent.Rest -> generateRestNode(content).also {
-                    node.appendChild(it)
-                }
-                is MXmlMeasureContent.Note -> generateNoteNode(content).also {
-                    node.appendChild(it)
-                }
+                is MXmlMeasureContent.Tempo ->
+                    generateNodesForTempo(content).forEach {
+                        node.appendChild(it)
+                    }
+                is MXmlMeasureContent.Rest ->
+                    generateRestNode(content).also {
+                        node.appendChild(it)
+                    }
+                is MXmlMeasureContent.Note ->
+                    generateNoteNode(content).also {
+                        node.appendChild(it)
+                    }
             }
         }
         return node
@@ -298,22 +330,24 @@ object MusicXml {
         }
 
     private fun Document.generateNodesForTempo(tempo: MXmlMeasureContent.Tempo): List<Element> {
-        val soundNode = createElement("sound").also {
-            it.setAttribute("tempo", tempo.bpm.toString())
-        }
-        val directionNode = createElement("direction").also { directionNode ->
-            appendNewChildTo(directionNode, "direction-type") { directionTypeNode ->
-                appendNewChildTo(directionTypeNode, "metronome") { metronomeNode ->
-                    appendNewChildTo(metronomeNode, "beat-unit") {
-                        it.appendText("quarter")
-                    }
-                    appendNewChildTo(metronomeNode, "per-minute") {
-                        it.appendText(tempo.bpm.toString())
+        val soundNode =
+            createElement("sound").also {
+                it.setAttribute("tempo", tempo.bpm.toString())
+            }
+        val directionNode =
+            createElement("direction").also { directionNode ->
+                appendNewChildTo(directionNode, "direction-type") { directionTypeNode ->
+                    appendNewChildTo(directionTypeNode, "metronome") { metronomeNode ->
+                        appendNewChildTo(metronomeNode, "beat-unit") {
+                            it.appendText("quarter")
+                        }
+                        appendNewChildTo(metronomeNode, "per-minute") {
+                            it.appendText(tempo.bpm.toString())
+                        }
                     }
                 }
+                directionNode.appendChild(soundNode.clone())
             }
-            directionNode.appendChild(soundNode.clone())
-        }
         return listOf(
             soundNode,
             directionNode,
@@ -332,21 +366,22 @@ object MusicXml {
         createElement("note").also { noteNode ->
             appendNewChildTo(noteNode, "pitch") { pitchNode ->
                 val octave = (note.note.key / KEY_IN_OCTAVE) - 1
-                val (step, alter) = when (note.note.key % KEY_IN_OCTAVE) {
-                    0 -> "C" to 0
-                    1 -> "C" to 1
-                    2 -> "D" to 0
-                    3 -> "D" to 1
-                    4 -> "E" to 0
-                    5 -> "F" to 0
-                    6 -> "F" to 1
-                    7 -> "G" to 0
-                    8 -> "G" to 1
-                    9 -> "A" to 0
-                    10 -> "A" to 1
-                    11 -> "B" to 0
-                    else -> throw IllegalStateException()
-                }
+                val (step, alter) =
+                    when (note.note.key % KEY_IN_OCTAVE) {
+                        0 -> "C" to 0
+                        1 -> "C" to 1
+                        2 -> "D" to 0
+                        3 -> "D" to 1
+                        4 -> "E" to 0
+                        5 -> "F" to 0
+                        6 -> "F" to 1
+                        7 -> "G" to 0
+                        8 -> "G" to 1
+                        9 -> "A" to 0
+                        10 -> "A" to 1
+                        11 -> "B" to 0
+                        else -> throw IllegalStateException()
+                    }
                 appendNewChildTo(pitchNode, "step") {
                     it.appendText(step)
                 }
@@ -362,11 +397,12 @@ object MusicXml {
             appendNewChildTo(noteNode, "duration") {
                 it.appendText(note.duration.toString())
             }
-            val tieType = when (note.type) {
-                NoteType.Begin -> "start"
-                NoteType.End -> "stop"
-                else -> null
-            }
+            val tieType =
+                when (note.type) {
+                    NoteType.Begin -> "start"
+                    NoteType.End -> "stop"
+                    else -> null
+                }
             if (tieType != null) {
                 appendNewChildTo(noteNode, "tie") {
                     it.setAttribute("type", tieType)
@@ -380,7 +416,11 @@ object MusicXml {
             appendLyricNode(noteNode, note.type, note.note.lyric)
         }
 
-    private fun Document.appendLyricNode(noteNode: Element, type: NoteType, lyric: String) {
+    private fun Document.appendLyricNode(
+        noteNode: Element,
+        type: NoteType,
+        lyric: String,
+    ) {
         appendNewChildTo(noteNode, "lyric") { lyricNode ->
             appendNewChildTo(lyricNode, "syllabic") {
                 it.appendText(
@@ -398,19 +438,22 @@ object MusicXml {
         }
     }
 
-    private fun Project.applyTickRate() = copy(
-        tempos = tempos.map { it.copy(tickPosition = (it.tickPosition * DEFAULT_TICK_RATE_CEVIO).toLong()) },
-        tracks = tracks.map { track ->
-            track.copy(
-                notes = track.notes.map {
-                    it.copy(
-                        tickOn = (it.tickOn * DEFAULT_TICK_RATE_CEVIO).toLong(),
-                        tickOff = (it.tickOff * DEFAULT_TICK_RATE_CEVIO).toLong(),
+    private fun Project.applyTickRate() =
+        copy(
+            tempos = tempos.map { it.copy(tickPosition = (it.tickPosition * DEFAULT_TICK_RATE_CEVIO).toLong()) },
+            tracks =
+                tracks.map { track ->
+                    track.copy(
+                        notes =
+                            track.notes.map {
+                                it.copy(
+                                    tickOn = (it.tickOn * DEFAULT_TICK_RATE_CEVIO).toLong(),
+                                    tickOff = (it.tickOff * DEFAULT_TICK_RATE_CEVIO).toLong(),
+                                )
+                            },
                     )
                 },
-            )
-        },
-    )
+        )
 
     private fun Project.getKeyTicks(track: Track): List<KeyTick> {
         val tempos = tempos.map { KeyTick.WithTempo(it.tickPosition, it) }
@@ -419,7 +462,10 @@ object MusicXml {
         return (noteEnds + tempos + noteStarts).sortedBy { it.tick }
     }
 
-    private fun getMeasures(keyTicks: List<KeyTick>, timeSignatures: List<TimeSignature>): List<MXmlMeasure> {
+    private fun getMeasures(
+        keyTicks: List<KeyTick>,
+        timeSignatures: List<TimeSignature>,
+    ): List<MXmlMeasure> {
         val tickCounter = TickCounter(ticksInFullNote = (TICKS_IN_FULL_NOTE * DEFAULT_TICK_RATE_CEVIO).toLong())
         val measureBorderTicks = mutableListOf(0L)
         for (timeSignature in timeSignatures) {
@@ -443,16 +489,19 @@ object MusicXml {
         }
         measureBorderTicks.add(measureBorderTicks.last() + tickCounter.ticksInMeasure)
 
-        val keyTicksWithMeasureBorders = measureBorderTicks.zipWithNext()
-            .map { borderPair ->
-                borderPair to keyTicks.filter {
-                    if (it is KeyTick.WithNoteEnd) {
-                        it.tick > borderPair.first && it.tick <= borderPair.second
-                    } else {
-                        it.tick >= borderPair.first && it.tick < borderPair.second
-                    }
+        val keyTicksWithMeasureBorders =
+            measureBorderTicks
+                .zipWithNext()
+                .map { borderPair ->
+                    borderPair to
+                        keyTicks.filter {
+                            if (it is KeyTick.WithNoteEnd) {
+                                it.tick > borderPair.first && it.tick <= borderPair.second
+                            } else {
+                                it.tick >= borderPair.first && it.tick < borderPair.second
+                            }
+                        }
                 }
-            }
 
         var currentContentGroup: MutableList<MXmlMeasureContent>
         val contentGroupBorderPairMap = mutableMapOf<Pair<Long, Long>, List<MXmlMeasureContent>>()
@@ -523,7 +572,8 @@ object MusicXml {
             contentGroupBorderPairMap[borderPair] = (currentContentGroup)
         }
 
-        return contentGroupBorderPairMap.toList()
+        return contentGroupBorderPairMap
+            .toList()
             .sortedBy { it.first.first }
             .mapIndexed { index, (borderPair, contents) ->
                 MXmlMeasure(
@@ -535,10 +585,23 @@ object MusicXml {
             }
     }
 
-    private sealed class KeyTick(val tick: Long) {
-        class WithTempo(tick: Long, val tempo: Tempo) : KeyTick(tick)
-        class WithNoteStart(tick: Long, val note: Note) : KeyTick(tick)
-        class WithNoteEnd(tick: Long, val note: Note) : KeyTick(tick)
+    private sealed class KeyTick(
+        val tick: Long,
+    ) {
+        class WithTempo(
+            tick: Long,
+            val tempo: Tempo,
+        ) : KeyTick(tick)
+
+        class WithNoteStart(
+            tick: Long,
+            val note: Note,
+        ) : KeyTick(tick)
+
+        class WithNoteEnd(
+            tick: Long,
+            val note: Note,
+        ) : KeyTick(tick)
     }
 
     private data class MXmlMeasure(
@@ -549,15 +612,25 @@ object MusicXml {
     )
 
     private sealed class MXmlMeasureContent {
-        class Tempo(val bpm: Double) : MXmlMeasureContent()
-        class Rest(val duration: Long) : MXmlMeasureContent()
-        class Note(val duration: Long, val note: core.model.Note, val type: NoteType) : MXmlMeasureContent()
+        class Tempo(
+            val bpm: Double,
+        ) : MXmlMeasureContent()
+
+        class Rest(
+            val duration: Long,
+        ) : MXmlMeasureContent()
+
+        class Note(
+            val duration: Long,
+            val note: core.model.Note,
+            val type: NoteType,
+        ) : MXmlMeasureContent()
 
         enum class NoteType {
             Begin,
             Middle,
             End,
-            Single
+            Single,
         }
     }
 

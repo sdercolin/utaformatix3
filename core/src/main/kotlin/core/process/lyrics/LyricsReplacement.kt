@@ -12,27 +12,36 @@ import kotlinx.serialization.Serializable
 data class LyricsReplacementRequest(
     val items: List<Item> = listOf(Item()),
 ) {
-
     val isValid get() = items.all { it.isValid }
 
-    fun update(editIndex: Int, updater: Item.() -> Item) = copy(
+    fun update(
+        editIndex: Int,
+        updater: Item.() -> Item,
+    ) = copy(
         items = items.mapIndexed { index, item -> item.runIf(index == editIndex) { updater() } },
     )
 
     fun moveUp(index: Int) = move(index, -1)
+
     fun moveDown(index: Int) = move(index, 1)
+
     fun add() = copy(items = items + Item())
+
     fun remove(index: Int) = copy(items = items.filterIndexed { i, _ -> i != index })
 
-    private fun move(index: Int, indexDiff: Int): LyricsReplacementRequest {
+    private fun move(
+        index: Int,
+        indexDiff: Int,
+    ): LyricsReplacementRequest {
         val targetIndex = index + indexDiff
-        val items = List(items.size) { i ->
-            when (i) {
-                index -> items[targetIndex]
-                targetIndex -> items[index]
-                else -> items[i]
+        val items =
+            List(items.size) { i ->
+                when (i) {
+                    index -> items[targetIndex]
+                    targetIndex -> items[index]
+                    else -> items[i]
+                }
             }
-        }
         return copy(items = items)
     }
 
@@ -45,8 +54,9 @@ data class LyricsReplacementRequest(
         val to: String = "",
     ) {
         val isValid
-            get() = (filterType == FilterType.None || filter.isNotEmpty()) &&
-                (matchType == MatchType.All || from.isNotEmpty())
+            get() =
+                (filterType == FilterType.None || filter.isNotEmpty()) &&
+                    (matchType == MatchType.All || from.isNotEmpty())
 
         fun doReplace(lyric: String): String {
             if (filter(lyric).not()) return lyric
@@ -57,14 +67,15 @@ data class LyricsReplacementRequest(
             }
         }
 
-        private fun filter(lyric: String): Boolean = when (filterType) {
-            FilterType.None -> true
-            FilterType.Exact -> lyric == filter
-            FilterType.Containing -> lyric.contains(filter)
-            FilterType.Prefix -> lyric.startsWith(filter)
-            FilterType.Suffix -> lyric.endsWith(filter)
-            FilterType.Regex -> lyric.matches(filter.toRegex())
-        }
+        private fun filter(lyric: String): Boolean =
+            when (filterType) {
+                FilterType.None -> true
+                FilterType.Exact -> lyric == filter
+                FilterType.Containing -> lyric.contains(filter)
+                FilterType.Prefix -> lyric.startsWith(filter)
+                FilterType.Suffix -> lyric.endsWith(filter)
+                FilterType.Regex -> lyric.matches(filter.toRegex())
+            }
     }
 
     enum class FilterType {
@@ -73,7 +84,8 @@ data class LyricsReplacementRequest(
         Containing,
         Prefix,
         Suffix,
-        Regex;
+        Regex,
+        ;
 
         fun needsFilter(): Boolean = this != None
     }
@@ -81,73 +93,82 @@ data class LyricsReplacementRequest(
     enum class MatchType {
         All,
         Exact,
-        Regex;
+        Regex,
+        ;
 
         fun needsFrom(): Boolean = this != All
     }
 
-    fun doReplace(lyric: String): String = items.fold(lyric) { acc, item ->
-        item.doReplace(acc)
-    }
+    fun doReplace(lyric: String): String =
+        items.fold(lyric) { acc, item ->
+            item.doReplace(acc)
+        }
 
     companion object {
-
-        fun getPreset(fromFormat: Format, toFormat: Format): LyricsReplacementRequest? {
+        fun getPreset(
+            fromFormat: Format,
+            toFormat: Format,
+        ): LyricsReplacementRequest? {
             val items = mutableListOf<Item>()
 
             when (fromFormat) {
-                Format.Ust -> items.add(
-                    Item(
-                        filterType = FilterType.Suffix,
-                        filter = "R",
-                        matchType = MatchType.All,
-                        from = "",
-                        to = "",
-                    ),
-                )
+                Format.Ust ->
+                    items.add(
+                        Item(
+                            filterType = FilterType.Suffix,
+                            filter = "R",
+                            matchType = MatchType.All,
+                            from = "",
+                            to = "",
+                        ),
+                    )
 
-                Format.Ccs -> items.add(
-                    Item(
-                        filterType = FilterType.Exact,
-                        filter = "ー",
-                        matchType = MatchType.All,
-                        from = "",
-                        to = "-",
-                    ),
-                )
+                Format.Ccs ->
+                    items.add(
+                        Item(
+                            filterType = FilterType.Exact,
+                            filter = "ー",
+                            matchType = MatchType.All,
+                            from = "",
+                            to = "-",
+                        ),
+                    )
 
-                Format.Ustx -> items.add(
-                    Item(
-                        filterType = FilterType.Exact,
-                        filter = "+",
-                        matchType = MatchType.All,
-                        from = "",
-                        to = "-",
-                    ),
-                )
+                Format.Ustx ->
+                    items.add(
+                        Item(
+                            filterType = FilterType.Exact,
+                            filter = "+",
+                            matchType = MatchType.All,
+                            from = "",
+                            to = "-",
+                        ),
+                    )
                 else -> Unit
             }
 
             when (toFormat) {
-                Format.Ccs -> items.add(
-                    Item(
-                        filterType = FilterType.Exact,
-                        filter = "-",
-                        matchType = MatchType.All,
-                        from = "",
-                        to = "ー",
-                    ),
-                )
+                Format.Ccs ->
+                    items.add(
+                        Item(
+                            filterType = FilterType.Exact,
+                            filter = "-",
+                            matchType = MatchType.All,
+                            from = "",
+                            to = "ー",
+                        ),
+                    )
 
-                Format.Ustx -> items.add(
-                    Item(
-                        filterType = FilterType.Exact,
-                        filter = "-",
-                        matchType = MatchType.All,
-                        from = "",
-                        to = "+",
-                    ),
-                )
+                Format.Ustx ->
+                    items.add(
+                        Item(
+                            filterType = FilterType.Exact,
+                            filter = "-",
+                            matchType = MatchType.All,
+                            from = "",
+                            to = "+",
+                        ),
+                    )
                 else -> Unit
             }
 
@@ -156,15 +177,20 @@ data class LyricsReplacementRequest(
     }
 }
 
-fun Project.replaceLyrics(request: LyricsReplacementRequest) = copy(
-    tracks = tracks.map { it.replaceLyrics(request) },
-)
+fun Project.replaceLyrics(request: LyricsReplacementRequest) =
+    copy(
+        tracks = tracks.map { it.replaceLyrics(request) },
+    )
 
-fun Track.replaceLyrics(request: LyricsReplacementRequest) = copy(
-    notes = notes.mapNotNull { note -> note.replaceLyrics(request).takeIf { it.lyric.isNotEmpty() } }
-        .validateNotes(),
-)
+fun Track.replaceLyrics(request: LyricsReplacementRequest) =
+    copy(
+        notes =
+            notes
+                .mapNotNull { note -> note.replaceLyrics(request).takeIf { it.lyric.isNotEmpty() } }
+                .validateNotes(),
+    )
 
-private fun Note.replaceLyrics(request: LyricsReplacementRequest) = copy(
-    lyric = request.doReplace(lyric),
-)
+private fun Note.replaceLyrics(request: LyricsReplacementRequest) =
+    copy(
+        lyric = request.doReplace(lyric),
+    )

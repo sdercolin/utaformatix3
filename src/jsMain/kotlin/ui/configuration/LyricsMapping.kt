@@ -42,33 +42,36 @@ import ui.strings.string
 
 external interface LyricsMappingProps : SubProps<LyricsMappingState>
 
-val LyricsMappingBlock = subFC<LyricsMappingProps, LyricsMappingState> { _, state, editState ->
-    FormGroup {
-        div {
-            configurationSwitch(
-                isOn = state.isOn,
-                onSwitched = { editState { copy(isOn = it) } },
-                labelStrings = Strings.LyricsMapping,
-            )
-            Tooltip {
-                val text = string(Strings.LyricsMappingDescription)
-                title = div.create {
-                    css { whiteSpace = WhiteSpace.preLine }
-                    +text
-                }
-                placement = TooltipPlacement.right
-                disableInteractive = false
-                HelpOutline {
-                    style = jso {
-                        verticalAlign = VerticalAlign.middle
+val LyricsMappingBlock =
+    subFC<LyricsMappingProps, LyricsMappingState> { _, state, editState ->
+        FormGroup {
+            div {
+                configurationSwitch(
+                    isOn = state.isOn,
+                    onSwitched = { editState { copy(isOn = it) } },
+                    labelStrings = Strings.LyricsMapping,
+                )
+                Tooltip {
+                    val text = string(Strings.LyricsMappingDescription)
+                    title =
+                        div.create {
+                            css { whiteSpace = WhiteSpace.preLine }
+                            +text
+                        }
+                    placement = TooltipPlacement.right
+                    disableInteractive = false
+                    HelpOutline {
+                        style =
+                            jso {
+                                verticalAlign = VerticalAlign.middle
+                            }
                     }
                 }
             }
         }
-    }
 
-    if (state.isOn) buildLyricsMappingDetail(state, editState)
-}
+        if (state.isOn) buildLyricsMappingDetail(state, editState)
+    }
 
 private fun ChildrenBuilder.buildLyricsMappingDetail(
     state: LyricsMappingState,
@@ -83,19 +86,21 @@ private fun ChildrenBuilder.buildLyricsMappingDetail(
             elevation = 0
             div {
                 css {
-                    margin = Margin(
-                        horizontal = 24.px,
-                        top = 16.px,
-                        bottom = 24.px,
-                    )
+                    margin =
+                        Margin(
+                            horizontal = 24.px,
+                            top = 16.px,
+                            bottom = 24.px,
+                        )
                 }
                 FormGroup {
                     div {
-                        style = jso {
-                            display = Display.flex
-                            flexDirection = FlexDirection.row
-                            alignItems = AlignItems.flexEnd
-                        }
+                        style =
+                            jso {
+                                display = Display.flex
+                                flexDirection = FlexDirection.row
+                                alignItems = AlignItems.flexEnd
+                            }
                         FormControl {
                             margin = FormControlMargin.normal
                             variant = FormControlVariant.standard
@@ -130,10 +135,11 @@ private fun ChildrenBuilder.buildLyricsMappingDetail(
                             }
                         }
                         Button {
-                            style = jso {
-                                marginLeft = 24.px
-                                marginBottom = 12.px
-                            }
+                            style =
+                                jso {
+                                    marginLeft = 24.px
+                                    marginBottom = 12.px
+                                }
                             variant = ButtonVariant.outlined
                             color = ButtonColor.secondary
                             onClick = {
@@ -152,17 +158,20 @@ private fun ChildrenBuilder.buildLyricsMappingDetail(
                     div {
                         TextField {
                             multiline = true
-                            style = jso {
-                                marginTop = 8.px
-                                marginBottom = 8.px
-                                width = 25.em
-                            }
-                            (this.unsafeCast<StandardTextFieldProps>()).InputProps = jso {
-                                style = jso {
-                                    paddingTop = 12.px
-                                    paddingBottom = 12.px
+                            style =
+                                jso {
+                                    marginTop = 8.px
+                                    marginBottom = 8.px
+                                    width = 25.em
                                 }
-                            }
+                            (this.unsafeCast<StandardTextFieldProps>()).InputProps =
+                                jso {
+                                    style =
+                                        jso {
+                                            paddingTop = 12.px
+                                            paddingBottom = 12.px
+                                        }
+                                }
                             minRows = 10
                             maxRows = 10
                             placeholder = string(Strings.LyricsMappingMapPlaceholder)
@@ -177,10 +186,11 @@ private fun ChildrenBuilder.buildLyricsMappingDetail(
                         }
                     }
                     div {
-                        style = jso {
-                            paddingTop = 12.px
-                            paddingBottom = 16.px
-                        }
+                        style =
+                            jso {
+                                paddingTop = 12.px
+                                paddingBottom = 16.px
+                            }
                         configurationSwitch(
                             isOn = state.request.mapToPhonemes,
                             onSwitched = {

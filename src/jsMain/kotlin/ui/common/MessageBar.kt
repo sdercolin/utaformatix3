@@ -15,10 +15,11 @@ fun ChildrenBuilder.messageBar(
     close: () -> Unit,
     color: AlertColor,
 ) = Snackbar {
-    anchorOrigin = jso {
-        vertical = SnackbarOriginVertical.bottom
-        horizontal = SnackbarOriginHorizontal.center
-    }
+    anchorOrigin =
+        jso {
+            vertical = SnackbarOriginVertical.bottom
+            horizontal = SnackbarOriginHorizontal.center
+        }
     autoHideDuration = 5000 // ms
     open = isShowing
     onClose = { _, _ -> close() }

@@ -46,33 +46,41 @@ import org.w3c.files.BlobPropertyBag
 import org.w3c.files.File
 
 object Ccs {
-    suspend fun parse(file: File, params: ImportParams): Project {
+    suspend fun parse(
+        file: File,
+        params: ImportParams,
+    ): Project {
         val projectName = file.nameWithoutExtension
         val text = file.readText()
         val parser = DOMParser()
         val document = parser.parseFromString(text, "text/xml") as XMLDocument
 
         val scenarioNode = document.documentElement ?: throw IllegalFileException.XmlRootNotFound()
-        val sceneNode = scenarioNode
-            .getSingleElementByTagName("Sequence")
-            .getSingleElementByTagName("Scene")
-        val unitNodes = sceneNode
-            .getSingleElementByTagName("Units")
-            .getElementListByTagName("Unit")
-            .filter { it.getAttribute("Category") == "SingerSong" }
-        val groupNodes = sceneNode
-            .getSingleElementByTagName("Groups")
-            .getElementListByTagName("Group")
-            .filter { it.getAttribute("Category") == "SingerSong" }
+        val sceneNode =
+            scenarioNode
+                .getSingleElementByTagName("Sequence")
+                .getSingleElementByTagName("Scene")
+        val unitNodes =
+            sceneNode
+                .getSingleElementByTagName("Units")
+                .getElementListByTagName("Unit")
+                .filter { it.getAttribute("Category") == "SingerSong" }
+        val groupNodes =
+            sceneNode
+                .getSingleElementByTagName("Groups")
+                .getElementListByTagName("Group")
+                .filter { it.getAttribute("Category") == "SingerSong" }
 
-        val results = unitNodes.mapIndexed { index, unitNode ->
-            val groupId = unitNode.getAttribute("Group")
-            val group = groupId?.let { id ->
-                groupNodes.find { it.getAttribute("Id") == id }
+        val results =
+            unitNodes.mapIndexed { index, unitNode ->
+                val groupId = unitNode.getAttribute("Group")
+                val group =
+                    groupId?.let { id ->
+                        groupNodes.find { it.getAttribute("Id") == id }
+                    }
+                val trackName = group?.getAttribute("Name")
+                parseTrack(index, unitNode, trackName, params)
             }
-            val trackName = group?.getAttribute("Name")
-            parseTrack(index, unitNode, trackName, params)
-        }
 
         val tracks = results.map { it.track }
         val warnings = mutableListOf<ImportWarning>()
@@ -95,9 +103,10 @@ object Ccs {
         results: List<TrackParseResult>,
         warnings: MutableList<ImportWarning>,
     ): MutableList<Tempo> {
-        val tempos = (
-            results.firstOrNull { it.tempos.isNotEmpty() }?.tempos
-                ?: listOf(Tempo.default).also { warnings.add(ImportWarning.TempoNotFound) }
+        val tempos =
+            (
+                results.firstOrNull { it.tempos.isNotEmpty() }?.tempos
+                    ?: listOf(Tempo.default).also { warnings.add(ImportWarning.TempoNotFound) }
             ).toMutableList()
 
         warnings.addAll(
@@ -108,9 +117,10 @@ object Ccs {
         )
 
         // Delete all tempo tags inside prefix, add apply the last as the first
-        val firstTempoIndex = tempos
-            .last { it.tickPosition <= 0 }
-            .let { tempos.indexOf(it) }
+        val firstTempoIndex =
+            tempos
+                .last { it.tickPosition <= 0 }
+                .let { tempos.indexOf(it) }
         repeat(firstTempoIndex) {
             val removed = tempos.removeAt(0)
             warnings.add(ImportWarning.TempoIgnoredInPreMeasure(removed))
@@ -123,9 +133,10 @@ object Ccs {
         results: List<TrackParseResult>,
         warnings: MutableList<ImportWarning>,
     ): List<TimeSignature> {
-        val timeSignatures = (
-            results.firstOrNull { it.timeSignatures.isNotEmpty() }?.timeSignatures
-                ?: listOf(TimeSignature.default).also { warnings.add(ImportWarning.TimeSignatureNotFound) }
+        val timeSignatures =
+            (
+                results.firstOrNull { it.timeSignatures.isNotEmpty() }?.timeSignatures
+                    ?: listOf(TimeSignature.default).also { warnings.add(ImportWarning.TimeSignatureNotFound) }
             ).toMutableList()
 
         warnings.addAll(
@@ -136,9 +147,10 @@ object Ccs {
         )
 
         // Delete all time signatures inside prefix, add apply the last as the first
-        val firstTimeSignatureIndex = timeSignatures
-            .last { it.measurePosition <= 0 }
-            .let { timeSignatures.indexOf(it) }
+        val firstTimeSignatureIndex =
+            timeSignatures
+                .last { it.measurePosition <= 0 }
+                .let { timeSignatures.indexOf(it) }
         repeat(firstTimeSignatureIndex) {
             val removed = timeSignatures.removeAt(0)
             warnings.add(ImportWarning.TimeSignatureIgnoredInPreMeasure(removed))
@@ -147,11 +159,18 @@ object Ccs {
         return timeSignatures.toList()
     }
 
-    private fun parseTrack(index: Int, unitNode: Element, name: String?, params: ImportParams): TrackParseResult {
-        val timeNodes = unitNode
-            .getSingleElementByTagNameOrNull("Song")
-            ?.getSingleElementByTagNameOrNull("Beat")
-            ?.getElementListByTagName("Time").orEmpty()
+    private fun parseTrack(
+        index: Int,
+        unitNode: Element,
+        name: String?,
+        params: ImportParams,
+    ): TrackParseResult {
+        val timeNodes =
+            unitNode
+                .getSingleElementByTagNameOrNull("Song")
+                ?.getSingleElementByTagNameOrNull("Beat")
+                ?.getElementListByTagName("Time")
+                .orEmpty()
 
         val tickCounter = TickCounter(TICK_RATE)
         var timeSignatures = listOf<TimeSignature>()
@@ -168,46 +187,58 @@ object Ccs {
 
         timeSignatures = timeSignatures.map { it.copy(measurePosition = it.measurePosition - FIXED_MEASURE_PREFIX) }
 
-        val tempos = unitNode
-            .getSingleElementByTagNameOrNull("Song")
-            ?.getSingleElementByTagNameOrNull("Tempo")
-            ?.getElementListByTagName("Sound").orEmpty()
-            .mapNotNull {
-                val tick = it.getAttribute("Clock")?.toLongOrNull()
-                    ?.let { tick -> (tick / TICK_RATE).toLong() }
-                    ?.minus(tickPrefix)
-                    ?: return@mapNotNull null
-                val bpm = it.getAttribute("Tempo")?.toDoubleOrNull()
-                    ?: return@mapNotNull null
-                Tempo(tick, bpm)
-            }
-            .toMutableList()
+        val tempos =
+            unitNode
+                .getSingleElementByTagNameOrNull("Song")
+                ?.getSingleElementByTagNameOrNull("Tempo")
+                ?.getElementListByTagName("Sound")
+                .orEmpty()
+                .mapNotNull {
+                    val tick =
+                        it
+                            .getAttribute("Clock")
+                            ?.toLongOrNull()
+                            ?.let { tick -> (tick / TICK_RATE).toLong() }
+                            ?.minus(tickPrefix)
+                            ?: return@mapNotNull null
+                    val bpm =
+                        it.getAttribute("Tempo")?.toDoubleOrNull()
+                            ?: return@mapNotNull null
+                    Tempo(tick, bpm)
+                }.toMutableList()
 
-        val notes = unitNode
-            .getSingleElementByTagNameOrNull("Song")
-            ?.getSingleElementByTagNameOrNull("Score")
-            ?.getElementListByTagName("Note").orEmpty()
-            .mapIndexed { noteIndex, element ->
-                val tickOn = (element.getRequiredAttributeAsLong("Clock") / TICK_RATE).toLong().minus(tickPrefix)
-                val tickOff = tickOn +
-                    (element.getRequiredAttributeAsLong("Duration") / TICK_RATE).toLong()
-                val pitchStep = element.getRequiredAttributeAsInteger("PitchStep")
-                val pitchOctave = element.getRequiredAttributeAsInteger("PitchOctave") - OCTAVE_OFFSET
-                val key = pitchStep + pitchOctave * KEY_IN_OCTAVE
-                val lyric = element.getRequiredAttribute("Lyric")
-                Note(noteIndex, key, lyric, tickOn, tickOff)
-            }
+        val notes =
+            unitNode
+                .getSingleElementByTagNameOrNull("Song")
+                ?.getSingleElementByTagNameOrNull("Score")
+                ?.getElementListByTagName("Note")
+                .orEmpty()
+                .mapIndexed { noteIndex, element ->
+                    val tickOn = (element.getRequiredAttributeAsLong("Clock") / TICK_RATE).toLong().minus(tickPrefix)
+                    val tickOff =
+                        tickOn +
+                            (element.getRequiredAttributeAsLong("Duration") / TICK_RATE).toLong()
+                    val pitchStep = element.getRequiredAttributeAsInteger("PitchStep")
+                    val pitchOctave = element.getRequiredAttributeAsInteger("PitchOctave") - OCTAVE_OFFSET
+                    val key = pitchStep + pitchOctave * KEY_IN_OCTAVE
+                    val lyric = element.getRequiredAttribute("Lyric")
+                    Note(noteIndex, key, lyric, tickOn, tickOff)
+                }
 
         val pitch =
-            if (params.simpleImport) null
-            else unitNode
-                .getSingleElementByTagNameOrNull("Song")
-                ?.getSingleElementByTagNameOrNull("Parameter")
-                ?.getSingleElementByTagNameOrNull("LogF0")
-                ?.getElementListByTagName("Data").orEmpty()
-                .mapNotNull { parsePitchData(it) }
-                .let { CevioTrackPitchData(it, tempos, tickPrefix) }
-                .let { pitchFromCevioTrack(it) }
+            if (params.simpleImport) {
+                null
+            } else {
+                unitNode
+                    .getSingleElementByTagNameOrNull("Song")
+                    ?.getSingleElementByTagNameOrNull("Parameter")
+                    ?.getSingleElementByTagNameOrNull("LogF0")
+                    ?.getElementListByTagName("Data")
+                    .orEmpty()
+                    .mapNotNull { parsePitchData(it) }
+                    .let { CevioTrackPitchData(it, tempos, tickPrefix) }
+                    .let { pitchFromCevioTrack(it) }
+            }
 
         val trackName = name ?: "Track ${index + 1}"
         val track = Track(index, trackName, notes, pitch).validateNotes()
@@ -222,7 +253,10 @@ object Ccs {
         return CevioTrackPitchData.Event(index, repeat, value)
     }
 
-    private fun getTickPrefix(timeSignatures: List<TimeSignature>, measurePrefix: Int): Long {
+    private fun getTickPrefix(
+        timeSignatures: List<TimeSignature>,
+        measurePrefix: Int,
+    ): Long {
         val counter = TickCounter()
         timeSignatures
             .filter { it.measurePosition < measurePrefix }
@@ -237,7 +271,10 @@ object Ccs {
         val timeSignatures: List<TimeSignature>,
     )
 
-    fun generate(project: Project, features: List<FeatureConfig>): ExportResult {
+    fun generate(
+        project: Project,
+        features: List<FeatureConfig>,
+    ): ExportResult {
         val document = generateContent(project, features)
         val serializer = XMLSerializer()
         val content = serializer.serializeToString(document)
@@ -252,14 +289,18 @@ object Ccs {
         )
     }
 
-    private fun generateContent(project: Project, features: List<FeatureConfig>): Document {
+    private fun generateContent(
+        project: Project,
+        features: List<FeatureConfig>,
+    ): Document {
         val text = core.external.Resources.ccsTemplate
         val parser = DOMParser()
         val document = parser.parseFromString(text, "text/xml") as XMLDocument
         val scenarioNode = requireNotNull(document.documentElement)
-        val sceneNode = scenarioNode
-            .getSingleElementByTagName("Sequence")
-            .getSingleElementByTagName("Scene")
+        val sceneNode =
+            scenarioNode
+                .getSingleElementByTagName("Sequence")
+                .getSingleElementByTagName("Scene")
 
         val unitsNodes = sceneNode.getSingleElementByTagName("Units")
         val emptyUnitNode = unitsNodes.getSingleElementByTagName("Unit")
@@ -271,14 +312,16 @@ object Ccs {
         val measurePrefix = FIXED_MEASURE_PREFIX
         val tickPrefix = (project.timeSignatures.first().ticksInMeasure * TICK_RATE * measurePrefix).toLong()
 
-        val tempos = emptyUnitNode
-            .getSingleElementByTagName("Song")
-            .getSingleElementByTagName("Tempo")
+        val tempos =
+            emptyUnitNode
+                .getSingleElementByTagName("Song")
+                .getSingleElementByTagName("Tempo")
         setupTempoNodes(tempos, project.tempos, tickPrefix)
 
-        val beats = emptyUnitNode
-            .getSingleElementByTagName("Song")
-            .getSingleElementByTagName("Beat")
+        val beats =
+            emptyUnitNode
+                .getSingleElementByTagName("Song")
+                .getSingleElementByTagName("Beat")
         setupBeatNodes(beats, project.timeSignatures, tickPrefix)
 
         project.tracks.forEach { model ->
@@ -345,9 +388,10 @@ object Ccs {
         models: List<Note>,
         tickPrefix: Long,
     ) {
-        val score = unitNode
-            .getSingleElementByTagName("Song")
-            .getSingleElementByTagName("Score")
+        val score =
+            unitNode
+                .getSingleElementByTagName("Song")
+                .getSingleElementByTagName("Score")
         models.forEach {
             val newNote = document.createElement("Note")
             newNote.setAttribute("Clock", (it.tickOn * TICK_RATE + tickPrefix).toLong().toString())
@@ -366,15 +410,17 @@ object Ccs {
         tempos: List<Tempo>,
         tickPrefix: Long,
     ) {
-        val data = trackModel.pitch
-            ?.generateForCevio(trackModel.notes, tempos, (tickPrefix / TICK_RATE).toLong()) ?: return
-        val dataNodes = data.events.map {
-            val newDataNode = document.createElement("Data")
-            if (it.index != null) newDataNode.setAttribute("Index", it.index.toString())
-            if (it.repeat != null) newDataNode.setAttribute("Repeat", it.repeat.toString())
-            newDataNode.appendText(it.value.toString())
-            newDataNode
-        }
+        val data =
+            trackModel.pitch
+                ?.generateForCevio(trackModel.notes, tempos, (tickPrefix / TICK_RATE).toLong()) ?: return
+        val dataNodes =
+            data.events.map {
+                val newDataNode = document.createElement("Data")
+                if (it.index != null) newDataNode.setAttribute("Index", it.index.toString())
+                if (it.repeat != null) newDataNode.setAttribute("Repeat", it.repeat.toString())
+                newDataNode.appendText(it.value.toString())
+                newDataNode
+            }
         val songNode = unitNode.getSingleElementByTagName("Song")
         document.appendNewChildTo(songNode, "Parameter") { parameterNode ->
             document.appendNewChildTo(parameterNode, "LogF0") { logF0Node ->

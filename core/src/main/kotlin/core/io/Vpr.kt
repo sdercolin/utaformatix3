@@ -27,29 +27,41 @@ import org.w3c.files.Blob
 import org.w3c.files.File
 
 object Vpr {
-    suspend fun parse(file: File, params: ImportParams): core.model.Project {
+    suspend fun parse(
+        file: File,
+        params: ImportParams,
+    ): core.model.Project {
         val content = readContent(file)
         val warnings = mutableListOf<ImportWarning>()
-        val tracks = content.tracks.mapIndexed { index, track ->
-            parseTrack(track, index, params)
-        }
-        val timeSignatures = content.masterTrack?.timeSig?.events?.map {
-            TimeSignature(
-                measurePosition = it.bar,
-                numerator = it.numer,
-                denominator = it.denom,
-            )
-        }?.takeIf { it.isNotEmpty() } ?: listOf(TimeSignature.default).also {
-            warnings.add(ImportWarning.TimeSignatureNotFound)
-        }
-        val tempos = content.masterTrack?.tempo?.events?.map {
-            core.model.Tempo(
-                tickPosition = it.pos,
-                bpm = it.value.toDouble() / BPM_RATE,
-            )
-        }?.takeIf { it.isNotEmpty() } ?: listOf(core.model.Tempo.default).also {
-            warnings.add(ImportWarning.TempoNotFound)
-        }
+        val tracks =
+            content.tracks.mapIndexed { index, track ->
+                parseTrack(track, index, params)
+            }
+        val timeSignatures =
+            content.masterTrack
+                ?.timeSig
+                ?.events
+                ?.map {
+                    TimeSignature(
+                        measurePosition = it.bar,
+                        numerator = it.numer,
+                        denominator = it.denom,
+                    )
+                }?.takeIf { it.isNotEmpty() } ?: listOf(TimeSignature.default).also {
+                warnings.add(ImportWarning.TimeSignatureNotFound)
+            }
+        val tempos =
+            content.masterTrack
+                ?.tempo
+                ?.events
+                ?.map {
+                    core.model.Tempo(
+                        tickPosition = it.pos,
+                        bpm = it.value.toDouble() / BPM_RATE,
+                    )
+                }?.takeIf { it.isNotEmpty() } ?: listOf(core.model.Tempo.default).also {
+                warnings.add(ImportWarning.TempoNotFound)
+            }
         return core.model.Project(
             format = format,
             inputFiles = listOf(file),
@@ -62,63 +74,79 @@ object Vpr {
         )
     }
 
-    private fun parseTrack(track: Track, trackIndex: Int, params: ImportParams): core.model.Track {
-        val notes = track.parts
-            .flatMap { part -> part.notes.map { part.pos to it } }
-            .mapIndexed { index, (tickOffset, note) ->
-                core.model.Note(
-                    id = index,
-                    tickOn = tickOffset + note.pos,
-                    tickOff = tickOffset + note.pos + note.duration,
-                    lyric = note.lyric.takeUnless { it.isNullOrBlank() } ?: params.defaultLyric,
-                    key = note.number,
-                    phoneme = note.phoneme,
-                )
-            }
+    private fun parseTrack(
+        track: Track,
+        trackIndex: Int,
+        params: ImportParams,
+    ): core.model.Track {
+        val notes =
+            track.parts
+                .flatMap { part -> part.notes.map { part.pos to it } }
+                .mapIndexed { index, (tickOffset, note) ->
+                    core.model.Note(
+                        id = index,
+                        tickOn = tickOffset + note.pos,
+                        tickOff = tickOffset + note.pos + note.duration,
+                        lyric = note.lyric.takeUnless { it.isNullOrBlank() } ?: params.defaultLyric,
+                        key = note.number,
+                        phoneme = note.phoneme,
+                    )
+                }
         val pitch = if (params.simpleImport) null else parsePitchData(track)
-        return core.model.Track(
-            id = trackIndex,
-            name = track.name ?: "Track ${trackIndex + 1}",
-            notes = notes,
-            pitch = pitch,
-        ).validateNotes()
+        return core.model
+            .Track(
+                id = trackIndex,
+                name = track.name ?: "Track ${trackIndex + 1}",
+                notes = notes,
+                pitch = pitch,
+            ).validateNotes()
     }
 
     private fun parsePitchData(track: Track): Pitch? {
-        val dataByParts = track.parts.map { part ->
-            VocaloidPartPitchData(
-                startPos = part.pos,
-                pit = part.getControllerEvents(PITCH_BEND_NAME)
-                    .map { VocaloidPartPitchData.Event.fromPair(it.pos to it.value.toInt()) },
-                pbs = part.getControllerEvents(PITCH_BEND_SENSITIVITY_NAME)
-                    .map { VocaloidPartPitchData.Event.fromPair(it.pos to it.value.toInt()) },
-            )
-        }
+        val dataByParts =
+            track.parts.map { part ->
+                VocaloidPartPitchData(
+                    startPos = part.pos,
+                    pit =
+                        part
+                            .getControllerEvents(PITCH_BEND_NAME)
+                            .map { VocaloidPartPitchData.Event.fromPair(it.pos to it.value.toInt()) },
+                    pbs =
+                        part
+                            .getControllerEvents(PITCH_BEND_SENSITIVITY_NAME)
+                            .map { VocaloidPartPitchData.Event.fromPair(it.pos to it.value.toInt()) },
+                )
+            }
         return pitchFromVocaloidParts(dataByParts)
     }
 
     private suspend fun readContent(file: File): Project {
         val binary = file.readBinary()
         val zip = JsZip().loadAsync(binary).await()
-        val vprEntry = possibleJsonPaths.let {
-            it.forEach { path ->
-                val vprFile = zip.file(path)
-                if (vprFile != null) return@let vprFile
+        val vprEntry =
+            possibleJsonPaths.let {
+                it.forEach { path ->
+                    val vprFile = zip.file(path)
+                    if (vprFile != null) return@let vprFile
+                }
+                null
             }
-            null
-        }
         val text = requireNotNull(vprEntry).async("string").await() as String
         return jsonSerializer.decodeFromString(Project.serializer(), text)
     }
 
-    suspend fun generate(project: core.model.Project, features: List<FeatureConfig>): ExportResult {
+    suspend fun generate(
+        project: core.model.Project,
+        features: List<FeatureConfig>,
+    ): ExportResult {
         val jsonText = generateContent(project, features)
         val zip = JsZip()
         zip.file(possibleJsonPaths.first(), jsonText)
-        val option = JsZipOption().also {
-            it.type = "blob"
-            it.mimeType = "application/octet-stream"
-        }
+        val option =
+            JsZipOption().also {
+                it.type = "blob"
+                it.mimeType = "application/octet-stream"
+            }
         val blob = zip.generateAsync(option).await() as Blob
         val name = format.getFileName(project.name)
         return ExportResult(
@@ -131,50 +159,62 @@ object Vpr {
         )
     }
 
-    private fun generateContent(project: core.model.Project, features: List<FeatureConfig>): String {
+    private fun generateContent(
+        project: core.model.Project,
+        features: List<FeatureConfig>,
+    ): String {
         val template = core.external.Resources.vprTemplate
         val vpr = jsonSerializer.decodeFromString(Project.serializer(), template)
         var endTick = 0L
         vpr.title = project.name
         val tickCounter = TickCounter()
-        val timeSigEvents = project.timeSignatures.map {
-            tickCounter.goToMeasure(it)
-            TimeSigEvent(bar = it.measurePosition, denom = it.denominator, numer = it.numerator)
-        }
+        val timeSigEvents =
+            project.timeSignatures.map {
+                tickCounter.goToMeasure(it)
+                TimeSigEvent(bar = it.measurePosition, denom = it.denominator, numer = it.numerator)
+            }
         vpr.masterTrack!!.timeSig!!.events = timeSigEvents
         endTick = endTick.coerceAtLeast(tickCounter.outputTick)
-        val tempoEvents = project.tempos.map {
-            TempoEvent(pos = it.tickPosition, value = (it.bpm * BPM_RATE).toInt())
-        }
+        val tempoEvents =
+            project.tempos.map {
+                TempoEvent(pos = it.tickPosition, value = (it.bpm * BPM_RATE).toInt())
+            }
         vpr.masterTrack!!.tempo!!.events = tempoEvents
         endTick = endTick.coerceAtLeast(tempoEvents.maxOfOrNull { it.pos } ?: 0)
         val emptyTrack = vpr.tracks.first()
-        val emptyNote = emptyTrack.parts.first().notes.first()
-        val tracks = project.tracks.map { track ->
-            val notes = track.notes.map {
-                emptyNote.copy(
-                    pos = it.tickOn,
-                    duration = it.length,
-                    number = it.key,
-                    lyric = it.lyric,
-                    phoneme = it.phoneme?.ifEmpty { null } ?: emptyNote.phoneme,
-                    isProtected = it.phoneme.isNullOrEmpty().not(),
+        val emptyNote =
+            emptyTrack.parts
+                .first()
+                .notes
+                .first()
+        val tracks =
+            project.tracks.map { track ->
+                val notes =
+                    track.notes.map {
+                        emptyNote.copy(
+                            pos = it.tickOn,
+                            duration = it.length,
+                            number = it.key,
+                            lyric = it.lyric,
+                            phoneme = it.phoneme?.ifEmpty { null } ?: emptyNote.phoneme,
+                            isProtected = it.phoneme.isNullOrEmpty().not(),
+                        )
+                    }
+                val duration = track.notes.lastOrNull()?.tickOff
+                val controllers = if (features.contains(Feature.ConvertPitch)) generatePitchData(track) else null
+                val part =
+                    duration?.let {
+                        emptyTrack.parts.first().copy(
+                            duration = it,
+                            notes = notes,
+                            controllers = controllers,
+                        )
+                    }
+                emptyTrack.copy(
+                    name = track.name,
+                    parts = listOfNotNull(part),
                 )
             }
-            val duration = track.notes.lastOrNull()?.tickOff
-            val controllers = if (features.contains(Feature.ConvertPitch)) generatePitchData(track) else null
-            val part = duration?.let {
-                emptyTrack.parts.first().copy(
-                    duration = it,
-                    notes = notes,
-                    controllers = controllers,
-                )
-            }
-            emptyTrack.copy(
-                name = track.name,
-                parts = listOfNotNull(part),
-            )
-        }
         vpr.tracks = tracks
         endTick = endTick.coerceAtLeast(tracks.maxOfOrNull { it.parts.firstOrNull()?.duration ?: 0 } ?: 0)
         vpr.masterTrack!!.loop!!.end = endTick
@@ -196,25 +236,28 @@ object Vpr {
             controllers.add(
                 Controller(
                     name = PITCH_BEND_NAME,
-                    events = pitchRawData.pit.map {
-                        ControllerEvent(pos = it.pos, value = it.value.toLong())
-                    },
+                    events =
+                        pitchRawData.pit.map {
+                            ControllerEvent(pos = it.pos, value = it.value.toLong())
+                        },
                 ),
             )
         }
         return controllers.takeIf { it.isNotEmpty() }
     }
 
-    private val jsonSerializer = Json {
-        isLenient = true
-        ignoreUnknownKeys = true
-    }
+    private val jsonSerializer =
+        Json {
+            isLenient = true
+            ignoreUnknownKeys = true
+        }
 
     private const val BPM_RATE = 100.0
-    private val possibleJsonPaths = listOf(
-        "Project\\sequence.json",
-        "Project/sequence.json",
-    )
+    private val possibleJsonPaths =
+        listOf(
+            "Project\\sequence.json",
+            "Project/sequence.json",
+        )
 
     private const val PITCH_BEND_NAME = "pitchBend"
     private const val PITCH_BEND_SENSITIVITY_NAME = "pitchBendSens"

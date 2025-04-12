@@ -21,6 +21,7 @@ fun <P : SubProps<T>, T : SubState> subFC(
     block: ChildrenBuilder.(props: P, state: T, editState: (T.() -> T) -> Unit) -> Unit,
 ) = FC<P> { props ->
     var state by useState(props.initialState)
+
     fun editState(editor: T.() -> T) {
         val newState = editor(state)
         state = newState

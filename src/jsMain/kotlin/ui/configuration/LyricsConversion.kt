@@ -43,14 +43,16 @@ val JapaneseLyricsConversionBlock =
             )
         }
 
-        if (state.isOn) buildLyricsDetail(
-            props = props,
-            detectedType = state.detectedType,
-            fromLyricsType = state.fromType,
-            setFromLyricsType = { editState { copy(fromType = it) } },
-            toLyricsType = state.toType,
-            setToLyricsType = { editState { copy(toType = it) } },
-        )
+        if (state.isOn) {
+            buildLyricsDetail(
+                props = props,
+                detectedType = state.detectedType,
+                fromLyricsType = state.fromType,
+                setFromLyricsType = { editState { copy(fromType = it) } },
+                toLyricsType = state.toType,
+                setToLyricsType = { editState { copy(toType = it) } },
+            )
+        }
     }
 
 private fun ChildrenBuilder.buildLyricsDetail(
@@ -70,26 +72,29 @@ private fun ChildrenBuilder.buildLyricsDetail(
             elevation = 0
             div {
                 css {
-                    margin = Margin(
-                        horizontal = 24.px,
-                        top = 16.px,
-                        bottom = 24.px,
-                    )
+                    margin =
+                        Margin(
+                            horizontal = 24.px,
+                            top = 16.px,
+                            bottom = 24.px,
+                        )
                 }
                 FormGroup {
                     buildLyricsTypeControl(
-                        labelText = string(
-                            Strings.FromLyricsTypeLabel,
-                            "type" to detectedType.text,
-                        ),
+                        labelText =
+                            string(
+                                Strings.FromLyricsTypeLabel,
+                                "type" to detectedType.text,
+                            ),
                         type = fromLyricsType,
                         setType = setFromLyricsType,
-                        lyricTypeOptions = listOf(
-                            JapaneseLyricsType.RomajiCv,
-                            JapaneseLyricsType.RomajiVcv,
-                            JapaneseLyricsType.KanaCv,
-                            JapaneseLyricsType.KanaVcv,
-                        ),
+                        lyricTypeOptions =
+                            listOf(
+                                JapaneseLyricsType.RomajiCv,
+                                JapaneseLyricsType.RomajiVcv,
+                                JapaneseLyricsType.KanaCv,
+                                JapaneseLyricsType.KanaVcv,
+                            ),
                     )
 
                     buildLyricsTypeControl(
@@ -126,13 +131,15 @@ private fun ChildrenBuilder.buildLyricsTypeControl(
             lyricTypeOptions.forEach { lyricsType ->
                 FormControlLabel {
                     value = lyricsType.name
-                    control = Radio.create {
-                        color = RadioColor.secondary
-                    }
-                    label = Typography.create {
-                        variant = TypographyVariant.subtitle2
-                        +lyricsType.text
-                    }
+                    control =
+                        Radio.create {
+                            color = RadioColor.secondary
+                        }
+                    label =
+                        Typography.create {
+                            variant = TypographyVariant.subtitle2
+                            +lyricsType.text
+                        }
                 }
             }
         }
@@ -142,10 +149,11 @@ private fun ChildrenBuilder.buildLyricsTypeControl(
 private val JapaneseLyricsType.text get() = string(strings)
 
 private val JapaneseLyricsType.strings
-    get() = when (this) {
-        JapaneseLyricsType.RomajiCv -> Strings.LyricsTypeRomajiCV
-        JapaneseLyricsType.RomajiVcv -> Strings.LyricsTypeRomajiVCV
-        JapaneseLyricsType.KanaCv -> Strings.LyricsTypeKanaCV
-        JapaneseLyricsType.KanaVcv -> Strings.LyricsTypeKanaVCV
-        JapaneseLyricsType.Unknown -> Strings.LyricsTypeUnknown
-    }
+    get() =
+        when (this) {
+            JapaneseLyricsType.RomajiCv -> Strings.LyricsTypeRomajiCV
+            JapaneseLyricsType.RomajiVcv -> Strings.LyricsTypeRomajiVCV
+            JapaneseLyricsType.KanaCv -> Strings.LyricsTypeKanaCV
+            JapaneseLyricsType.KanaVcv -> Strings.LyricsTypeKanaVCV
+            JapaneseLyricsType.Unknown -> Strings.LyricsTypeUnknown
+        }

@@ -9,6 +9,7 @@ sealed class StageInfo(
     val stage: Stage,
 ) {
     object Import : StageInfo(Stage.Import)
+
     data class SelectOutputFormat(
         val projects: List<Project>,
     ) : StageInfo(Stage.SelectOutputFormat)

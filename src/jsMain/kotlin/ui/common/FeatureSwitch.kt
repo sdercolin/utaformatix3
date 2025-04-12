@@ -17,14 +17,15 @@ fun ChildrenBuilder.configurationSwitch(
 ) {
     FormControlLabel {
         label = ReactNode(string(labelStrings))
-        control = Switch.create {
-            color = SwitchColor.secondary
-            checked = isOn
-            onChange = { event, _ ->
-                val checked = event.target.checked
-                onSwitched(checked)
+        control =
+            Switch.create {
+                color = SwitchColor.secondary
+                checked = isOn
+                onChange = { event, _ ->
+                    val checked = event.target.checked
+                    onSwitched(checked)
+                }
             }
-        }
         labelPlacement = LabelPlacement.end
     }
 }

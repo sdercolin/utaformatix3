@@ -26,18 +26,25 @@ import org.w3c.files.File
 import kotlin.math.floor
 
 object Tssln {
-    suspend fun parse(file: File, params: ImportParams): Project {
+    suspend fun parse(
+        file: File,
+        params: ImportParams,
+    ): Project {
         val blob = file.readAsArrayBuffer()
-        val valueTree = parseValueTree(
-            Uint8Array(blob),
-        )
+        val valueTree =
+            parseValueTree(
+                Uint8Array(blob),
+            )
 
         if (valueTree.type != "TSSolution") {
             throw IllegalFileException.IllegalTsslnFile()
         }
 
         val trackTrees =
-            valueTree.children.first { it.type == "Tracks" }.children.filter { it.attributes.Type.value == 0 }
+            valueTree.children
+                .first { it.type == "Tracks" }
+                .children
+                .filter { it.attributes.Type.value == 0 }
 
         val masterTrackResult = parseMasterTrack(trackTrees.first())
         val tempos = masterTrackResult.first
@@ -70,8 +77,11 @@ object Tssln {
         return pluginDataTree
     }
 
-    private fun parseTracks(trackTrees: List<ValueTree>, params: ImportParams): List<Track> {
-        return trackTrees.mapIndexed { trackIndex, trackTree ->
+    private fun parseTracks(
+        trackTrees: List<ValueTree>,
+        params: ImportParams,
+    ): List<Track> =
+        trackTrees.mapIndexed { trackIndex, trackTree ->
             val trackName = trackTree.attributes.Name.value as String
             val pluginData = trackTree.attributes.PluginData.value as Uint8Array
             val pluginDataTree = parsePluginData(pluginData)
@@ -118,7 +128,6 @@ object Tssln {
                 notes = notes,
             )
         }
-    }
 
     private fun parseMasterTrack(trackTree: ValueTree): Pair<List<Tempo>, List<TimeSignature>> {
         val pluginData = trackTree.attributes.PluginData.value as Uint8Array
@@ -131,12 +140,13 @@ object Tssln {
 
         val tempoTree = songTree.children.first { it.type == "Tempo" }
 
-        val tempos = tempoTree.children.map {
-            Tempo(
-                ((it.attributes.Clock.value as Int) / TICK_RATE).toLong(),
-                it.attributes.Tempo.value as Double,
-            )
-        }
+        val tempos =
+            tempoTree.children.map {
+                Tempo(
+                    ((it.attributes.Clock.value as Int) / TICK_RATE).toLong(),
+                    it.attributes.Tempo.value as Double,
+                )
+            }
 
         val timeSignaturesTree = songTree.children.first { it.type == "Beat" }
 
@@ -147,9 +157,9 @@ object Tssln {
         var beatLength = 4.0
 
         for (
-            timeSignatureTree in timeSignaturesTree.children.sortedBy {
-                it.attributes.Clock.value as Int
-            }
+        timeSignatureTree in timeSignaturesTree.children.sortedBy {
+            it.attributes.Clock.value as Int
+        }
         ) {
             val numerator = timeSignatureTree.attributes.Beats.value as Int
             val denominator = timeSignatureTree.attributes.BeatType.value as Int
@@ -200,8 +210,11 @@ object Tssln {
         )
     }
 
-    private fun generateTracks(baseTrack: ValueTree, project: Project): List<ValueTree> {
-        return project.tracks.map { track ->
+    private fun generateTracks(
+        baseTrack: ValueTree,
+        project: Project,
+    ): List<ValueTree> =
+        project.tracks.map { track ->
             val trackTree = structuredClone(baseTrack)
             trackTree.attributes.Name = (track.name).toVariantType()
 
@@ -229,10 +242,9 @@ object Tssln {
 
             trackTree
         }
-    }
 
-    private fun generateTempos(tempos: List<Tempo>): List<ValueTree> {
-        return tempos.map {
+    private fun generateTempos(tempos: List<Tempo>): List<ValueTree> =
+        tempos.map {
             val tempoTree = createValueTree()
             tempoTree.type = "Sound"
             val attributes: dynamic = js("{}")
@@ -242,7 +254,6 @@ object Tssln {
 
             tempoTree
         }
-    }
 
     private fun generateTimeSignatures(timeSignatures: List<TimeSignature>): List<ValueTree> {
         val timeSignatureTrees = mutableListOf<ValueTree>()
@@ -275,8 +286,8 @@ object Tssln {
         return timeSignatureTrees
     }
 
-    private fun generateNotes(track: Track): List<ValueTree> {
-        return track.notes.map {
+    private fun generateNotes(track: Track): List<ValueTree> =
+        track.notes.map {
             val noteTree = createValueTree()
             noteTree.type = "Note"
             val attributes: dynamic = js("{}")
@@ -291,7 +302,6 @@ object Tssln {
 
             noteTree
         }
-    }
 
     private const val TICK_RATE = 2.0
 

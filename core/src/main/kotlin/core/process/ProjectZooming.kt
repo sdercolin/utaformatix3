@@ -7,48 +7,52 @@ import kotlin.math.ceil
 import kotlin.math.roundToInt
 import kotlin.math.roundToLong
 
-fun Project.needWarningZoom(factor: Double): Boolean {
-    return timeSignatures.any {
+fun Project.needWarningZoom(factor: Double): Boolean =
+    timeSignatures.any {
         val newPosition = it.measurePosition * factor
         ceil(newPosition) != newPosition
     }
-}
 
 fun Project.zoom(factor: Double): Project {
     val tracks = tracks.map { it.zoom(factor) }
-    val tempos = tempos.map {
-        it.copy(tickPosition = (it.tickPosition * factor).roundToLong(), bpm = it.bpm * factor)
-    }
-    val timeSignatures = timeSignatures
-        .map { it.copy(measurePosition = (it.measurePosition * factor).roundToInt()) }
-        .fold(listOf<TimeSignature>()) { acc, timeSignature ->
-            if (acc.isEmpty()) {
-                listOf(timeSignature)
-            } else {
-                val prev = acc.last()
-                if (prev.measurePosition == timeSignature.measurePosition) {
-                    acc
+    val tempos =
+        tempos.map {
+            it.copy(tickPosition = (it.tickPosition * factor).roundToLong(), bpm = it.bpm * factor)
+        }
+    val timeSignatures =
+        timeSignatures
+            .map { it.copy(measurePosition = (it.measurePosition * factor).roundToInt()) }
+            .fold(listOf<TimeSignature>()) { acc, timeSignature ->
+                if (acc.isEmpty()) {
+                    listOf(timeSignature)
                 } else {
-                    acc + timeSignature
+                    val prev = acc.last()
+                    if (prev.measurePosition == timeSignature.measurePosition) {
+                        acc
+                    } else {
+                        acc + timeSignature
+                    }
                 }
             }
-        }
 
     return copy(tracks = tracks, tempos = tempos, timeSignatures = timeSignatures)
 }
 
 private fun Track.zoom(factor: Double): Track {
-    val notes = notes.map {
-        it.copy(
-            tickOn = (it.tickOn * factor).roundToLong(),
-            tickOff = (it.tickOff * factor).roundToLong(),
+    val notes =
+        notes.map {
+            it.copy(
+                tickOn = (it.tickOn * factor).roundToLong(),
+                tickOff = (it.tickOff * factor).roundToLong(),
+            )
+        }
+    val pitch =
+        pitch?.copy(
+            data =
+                pitch.data.map { (tick, value) ->
+                    (tick * factor).roundToLong() to value
+                },
         )
-    }
-    val pitch = pitch?.copy(
-        data = pitch.data.map { (tick, value) ->
-            (tick * factor).roundToLong() to value
-        },
-    )
     return copy(notes = notes, pitch = pitch)
 }
 

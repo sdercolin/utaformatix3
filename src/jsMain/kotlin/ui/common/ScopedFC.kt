@@ -8,14 +8,13 @@ import react.FC
 import react.Props
 import react.useEffectOnce
 
-fun <P : Props> scopedFC(
-    block: ChildrenBuilder.(props: P, scope: CoroutineScope) -> Unit,
-) = FC<P> { props ->
-    val scope = CoroutineScope(Dispatchers.Default)
+fun <P : Props> scopedFC(block: ChildrenBuilder.(props: P, scope: CoroutineScope) -> Unit) =
+    FC<P> { props ->
+        val scope = CoroutineScope(Dispatchers.Default)
 
-    useEffectOnce {
-        cleanup { scope.cancel() }
+        useEffectOnce {
+            cleanup { scope.cancel() }
+        }
+
+        block(props, scope)
     }
-
-    block(props, scope)
-}

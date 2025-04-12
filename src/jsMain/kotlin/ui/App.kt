@@ -49,65 +49,70 @@ import ui.strings.Language
 import ui.strings.Strings
 import ui.strings.string
 
-val App = FC<Props> {
-    var stageInfoStack: List<StageInfo> by useState(listOf(StageInfo.Import))
+val App =
+    FC<Props> {
+        var stageInfoStack: List<StageInfo> by useState(listOf(StageInfo.Import))
 
-    @Suppress("ASSIGNED_BUT_NEVER_ACCESSED_VARIABLE")
-    var language: Language? by useState(null)
+        @Suppress("ASSIGNED_BUT_NEVER_ACCESSED_VARIABLE")
+        var language: Language? by useState(null)
 
-    fun pushStage(stageInfo: StageInfo) {
-        val stack = stageInfoStack.toMutableList()
-        if (stageInfoStack.last().stage == stageInfo.stage) {
-            stack.removeAt(stack.lastIndex)
-        }
-        stack.add(stageInfo)
-        stageInfoStack = stack
-    }
-
-    fun popStage() {
-        stageInfoStack = stageInfoStack.dropLast(1)
-    }
-
-    fun popAllStages() {
-        stageInfoStack = stageInfoStack.take(1)
-    }
-
-    fun getStageInfo() = stageInfoStack.last()
-
-    ThemeProvider {
-        theme = appTheme
-        CssBaseline {}
-        div {
-            css {
-                height = 100.vh
+        fun pushStage(stageInfo: StageInfo) {
+            val stack = stageInfoStack.toMutableList()
+            if (stageInfoStack.last().stage == stageInfo.stage) {
+                stack.removeAt(stack.lastIndex)
             }
+            stack.add(stageInfo)
+            stageInfoStack = stack
+        }
+
+        fun popStage() {
+            stageInfoStack = stageInfoStack.dropLast(1)
+        }
+
+        fun popAllStages() {
+            stageInfoStack = stageInfoStack.take(1)
+        }
+
+        fun getStageInfo() = stageInfoStack.last()
+
+        ThemeProvider {
+            theme = appTheme
+            CssBaseline {}
             div {
                 css {
-                    height = Length.fitContent
-                    minHeight = 95.vh
+                    height = 100.vh
                 }
+                div {
+                    css {
+                        height = Length.fitContent
+                        minHeight = 95.vh
+                    }
 
-                Container {
-                    maxWidth = "xl"
-                    buildAppBar(pushStage = { pushStage(it) }, onChangeLanguage = { language = it })
-                    buildStepper(getStageInfo().stage.index)
-                    buildBody(getStageInfo(), pushStage = { pushStage(it) }, popAllStages = { popAllStages() })
+                    Container {
+                        maxWidth = "xl"
+                        buildAppBar(pushStage = { pushStage(it) }, onChangeLanguage = { language = it })
+                        buildStepper(getStageInfo().stage.index)
+                        buildBody(getStageInfo(), pushStage = { pushStage(it) }, popAllStages = { popAllStages() })
+                    }
                 }
+                CustomFooter {
+                    onOpenEmbeddedPage = { urlKey -> pushStage(StageInfo.ExtraPage(urlKey)) }
+                }
+                buildBackButton(stageInfoStack, onClickBackButton = { popStage() })
             }
-            CustomFooter {
-                onOpenEmbeddedPage = { urlKey -> pushStage(StageInfo.ExtraPage(urlKey)) }
-            }
-            buildBackButton(stageInfoStack, onClickBackButton = { popStage() })
         }
     }
-}
 
-private fun ChildrenBuilder.buildAppBar(pushStage: (StageInfo) -> Unit, onChangeLanguage: (Language) -> Unit) {
+private fun ChildrenBuilder.buildAppBar(
+    pushStage: (StageInfo) -> Unit,
+    onChangeLanguage: (Language) -> Unit,
+) {
     AppBar {
         position = AppBarPosition.fixed
-        style = jso {
-            background = appTheme.palette.primary.main
-        }
+        style =
+            jso {
+                background = appTheme.palette.primary.main
+            }
         Toolbar {
             Typography {
                 css {
@@ -158,9 +163,10 @@ private fun ChildrenBuilder.buildStepper(stageIndex: Int) {
         css {
             margin = Margin(horizontal = 0.px, vertical = 24.px)
         }
-        style = jso {
-            background = NamedColor.transparent
-        }
+        style =
+            jso {
+                background = NamedColor.transparent
+            }
         activeStep = stageIndex
         Stage.forStepper.forEachIndexed { index, stage ->
             Step {
@@ -173,53 +179,66 @@ private fun ChildrenBuilder.buildStepper(stageIndex: Int) {
     }
 }
 
-private fun ChildrenBuilder.buildBody(stageInfo: StageInfo, pushStage: (StageInfo) -> Unit, popAllStages: () -> Unit) {
+private fun ChildrenBuilder.buildBody(
+    stageInfo: StageInfo,
+    pushStage: (StageInfo) -> Unit,
+    popAllStages: () -> Unit,
+) {
     div {
         css {
             margin = Margin(horizontal = 24.px, vertical = 0.px)
         }
         when (stageInfo) {
-            is StageInfo.Import -> Importer {
-                formats = Format.importable
-                onImported = { pushStage(StageInfo.SelectOutputFormat(it)) }
-            }
-            is StageInfo.SelectOutputFormat -> OutputFormatSelector {
-                formats = Format.exportable
-                projects = stageInfo.projects
-                onSelected = { pushStage(StageInfo.Configure(stageInfo.projects, it)) }
-            }
-            is StageInfo.Configure -> ConfigurationEditor {
-                projects = stageInfo.projects
-                outputFormat = stageInfo.outputFormat
-                onFinished = { result, format ->
-                    pushStage(StageInfo.Export(result, format))
+            is StageInfo.Import ->
+                Importer {
+                    formats = Format.importable
+                    onImported = { pushStage(StageInfo.SelectOutputFormat(it)) }
                 }
-            }
-            is StageInfo.Export -> Exporter {
-                format = stageInfo.outputFormat
-                results = stageInfo.results
-                onRestart = { popAllStages() }
-            }
-            is StageInfo.ExtraPage -> EmbeddedPage {
-                url = string(stageInfo.urlKey)
-            }
+            is StageInfo.SelectOutputFormat ->
+                OutputFormatSelector {
+                    formats = Format.exportable
+                    projects = stageInfo.projects
+                    onSelected = { pushStage(StageInfo.Configure(stageInfo.projects, it)) }
+                }
+            is StageInfo.Configure ->
+                ConfigurationEditor {
+                    projects = stageInfo.projects
+                    outputFormat = stageInfo.outputFormat
+                    onFinished = { result, format ->
+                        pushStage(StageInfo.Export(result, format))
+                    }
+                }
+            is StageInfo.Export ->
+                Exporter {
+                    format = stageInfo.outputFormat
+                    results = stageInfo.results
+                    onRestart = { popAllStages() }
+                }
+            is StageInfo.ExtraPage ->
+                EmbeddedPage {
+                    url = string(stageInfo.urlKey)
+                }
         }
     }
 }
 
-private fun ChildrenBuilder.buildBackButton(stageInfoStack: List<StageInfo>, onClickBackButton: () -> Unit) {
+private fun ChildrenBuilder.buildBackButton(
+    stageInfoStack: List<StageInfo>,
+    onClickBackButton: () -> Unit,
+) {
     if (stageInfoStack.count() <= 1) return
     Fab {
         size = Size.large
         color = FabColor.primary
         onClick = { onClickBackButton() }
-        style = jso {
-            position = Position.fixed
-            top = Auto.auto
-            left = Auto.auto
-            bottom = 32.px
-            right = 32.px
-        }
+        style =
+            jso {
+                position = Position.fixed
+                top = Auto.auto
+                left = Auto.auto
+                bottom = 32.px
+                right = 32.px
+            }
         ArrowBack()
     }
 }

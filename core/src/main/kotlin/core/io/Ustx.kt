@@ -26,10 +26,12 @@ import org.w3c.files.BlobPropertyBag
 import org.w3c.files.File
 
 object Ustx {
-
     private const val PITCH_CURVE_ABBR = "pitd"
 
-    suspend fun parse(file: File, params: ImportParams): core.model.Project {
+    suspend fun parse(
+        file: File,
+        params: ImportParams,
+    ): core.model.Project {
         val yamlText = file.readText()
         val yaml = JsYaml.load(yamlText)
         val jsonText = JSON.stringify(yaml)
@@ -85,53 +87,71 @@ object Ustx {
         params: ImportParams,
         tempos: List<core.model.Tempo>,
     ): List<core.model.Track> {
-        val trackMap = List(project.tracks.size) { index: Int ->
-            core.model.Track(
-                id = index,
-                name = project.tracks[index].trackName ?: "Track ${index + 1}",
-                notes = listOf(),
-            )
-        }.associateBy { it.id }.toMutableMap()
+        val trackMap =
+            List(project.tracks.size) { index: Int ->
+                core.model.Track(
+                    id = index,
+                    name = project.tracks[index].trackName ?: "Track ${index + 1}",
+                    notes = listOf(),
+                )
+            }.associateBy { it.id }.toMutableMap()
         for (voicePart in project.voiceParts) {
             val trackId = voicePart.trackNo
             val track = trackMap[trackId] ?: continue
             val tickPrefix = voicePart.position
-            val notes = voicePart.notes.map {
-                val rawLyrics = it.lyric
-                // some phonemizers use `lyrics [phonemes]` or `[phonemes]` format
-                val regex = Regex("\\[([^\\[\\]]*)\\]$")
-                val match = regex.find(rawLyrics)
-                val (lyric, phoneme) = if (match == null) {
-                    rawLyrics to null
-                } else {
-                    rawLyrics.substring(match.range).trim('[', ']').let { cleanedPhoneme ->
-                        rawLyrics.take(match.range.first).trim().ifEmpty { cleanedPhoneme } to cleanedPhoneme
-                    }
+            val notes =
+                voicePart.notes.map {
+                    val rawLyrics = it.lyric
+                    // some phonemizers use `lyrics [phonemes]` or `[phonemes]` format
+                    val regex = Regex("\\[([^\\[\\]]*)\\]$")
+                    val match = regex.find(rawLyrics)
+                    val (lyric, phoneme) =
+                        if (match == null) {
+                            rawLyrics to null
+                        } else {
+                            rawLyrics.substring(match.range).trim('[', ']').let { cleanedPhoneme ->
+                                rawLyrics.take(match.range.first).trim().ifEmpty { cleanedPhoneme } to cleanedPhoneme
+                            }
+                        }
+                    Note(
+                        id = 0,
+                        key = it.tone,
+                        lyric = lyric,
+                        phoneme = phoneme,
+                        tickOn = it.position + tickPrefix,
+                        tickOff = it.position + it.duration + tickPrefix,
+                    )
                 }
-                Note(
-                    id = 0,
-                    key = it.tone,
-                    lyric = lyric,
-                    phoneme = phoneme,
-                    tickOn = it.position + tickPrefix,
-                    tickOff = it.position + it.duration + tickPrefix,
-                )
-            }
-            val notePitches = if (params.simpleImport) null
-            else voicePart.notes.map { note -> parseNotePitch(note) }
+            val notePitches =
+                if (params.simpleImport) {
+                    null
+                } else {
+                    voicePart.notes.map { note -> parseNotePitch(note) }
+                }
             val (validatedNotes, validatedNotePitches) = getValidatedNotes(notes, notePitches)
 
-            val pitchCurve = if (params.simpleImport) null
-            else voicePart.curves.orEmpty().find { it.abbr == PITCH_CURVE_ABBR }?.let { curve ->
-                curve.xs.zip(curve.ys).map { OpenUtauPartPitchData.Point(it.first + tickPrefix, it.second.toInt()) }
-            }
-            val pitch: core.model.Pitch? = if (validatedNotePitches?.isNotEmpty() == true || pitchCurve != null) {
-                val partPitchData = OpenUtauPartPitchData(
-                    pitchCurve.orEmpty(),
-                    validatedNotePitches.orEmpty(),
-                )
-                pitchFromUstxPart(validatedNotes, partPitchData, tempos)
-            } else null
+            val pitchCurve =
+                if (params.simpleImport) {
+                    null
+                } else {
+                    voicePart.curves.orEmpty().find { it.abbr == PITCH_CURVE_ABBR }?.let { curve ->
+                        curve.xs
+                            .zip(
+                                curve.ys,
+                            ).map { OpenUtauPartPitchData.Point(it.first + tickPrefix, it.second.toInt()) }
+                    }
+                }
+            val pitch: core.model.Pitch? =
+                if (validatedNotePitches?.isNotEmpty() == true || pitchCurve != null) {
+                    val partPitchData =
+                        OpenUtauPartPitchData(
+                            pitchCurve.orEmpty(),
+                            validatedNotePitches.orEmpty(),
+                        )
+                    pitchFromUstxPart(validatedNotes, partPitchData, tempos)
+                } else {
+                    null
+                }
             val mergedPitch = mergePitchFromUstxParts(track.pitch, pitch)
             val newTrack = track.copy(notes = track.notes + validatedNotes, pitch = mergedPitch)
             trackMap[trackId] = newTrack
@@ -142,31 +162,34 @@ object Ustx {
                     notes = it.notes.mapIndexed { index, note -> note.copy(id = index) },
                     pitch = it.pitch.reduceRepeatedPitchPointsFromUstxTrack(),
                 )
-            }
-            .sortedBy { it.id }
+            }.sortedBy { it.id }
     }
 
     private fun parseNotePitch(note: Note): OpenUtauNotePitchData {
-        val points = note.pitch.data.map {
-            OpenUtauNotePitchData.Point(
-                x = it.x,
-                y = it.y,
-                shape = OpenUtauNotePitchData.Shape.values()
-                    .find { shape -> shape.textValue == it.shape }
-                    ?: OpenUtauNotePitchData.Shape.EaseInOut,
-            )
-        }
-        val vibrato = note.vibrato.let {
-            UtauNoteVibratoParams(
-                length = it.length,
-                period = it.period,
-                depth = it.depth,
-                fadeIn = it.`in`,
-                fadeOut = it.out,
-                phaseShift = it.shift,
-                shift = it.drift,
-            )
-        }
+        val points =
+            note.pitch.data.map {
+                OpenUtauNotePitchData.Point(
+                    x = it.x,
+                    y = it.y,
+                    shape =
+                        OpenUtauNotePitchData.Shape
+                            .values()
+                            .find { shape -> shape.textValue == it.shape }
+                            ?: OpenUtauNotePitchData.Shape.EaseInOut,
+                )
+            }
+        val vibrato =
+            note.vibrato.let {
+                UtauNoteVibratoParams(
+                    length = it.length,
+                    period = it.period,
+                    depth = it.depth,
+                    fadeIn = it.`in`,
+                    fadeOut = it.out,
+                    phaseShift = it.shift,
+                    shift = it.drift,
+                )
+            }
         return OpenUtauNotePitchData(points, vibrato)
     }
 
@@ -188,7 +211,10 @@ object Ustx {
         return validatedNotes to validatedNotePitches
     }
 
-    fun generate(project: core.model.Project, features: List<FeatureConfig>): ExportResult {
+    fun generate(
+        project: core.model.Project,
+        features: List<FeatureConfig>,
+    ): ExportResult {
         val yamlText = generateContent(project, features)
         val blob = Blob(arrayOf(yamlText), BlobPropertyBag("application/octet-stream"))
         val name = format.getFileName(project.name)
@@ -201,40 +227,48 @@ object Ustx {
         )
     }
 
-    private fun generateContent(project: core.model.Project, features: List<FeatureConfig>): String {
+    private fun generateContent(
+        project: core.model.Project,
+        features: List<FeatureConfig>,
+    ): String {
         val templateYamlText = core.external.Resources.ustxTemplate
         val templateYaml = JsYaml.load(templateYamlText)
         val templateJsonText = JSON.stringify(templateYaml)
         val template = jsonSerializer.decodeFromString(Project.serializer(), templateJsonText)
         val trackTemplate = template.tracks.first()
-        val tracks = project.tracks.map {
-            trackTemplate.copy(trackName = it.name)
-        }
+        val tracks =
+            project.tracks.map {
+                trackTemplate.copy(trackName = it.name)
+            }
         val voicePartTemplate = template.voiceParts.first()
-        val voiceParts = project.tracks.map {
-            generateVoicePart(voicePartTemplate, it, features)
-        }
-        val ustx = template.copy(
-            name = project.name,
-            bpm = project.tempos.first().bpm,
-            beatPerBar = project.timeSignatures.first().numerator,
-            beatUnit = project.timeSignatures.first().denominator,
-            tempos = project.tempos.map {
-                Tempo(
-                    position = it.tickPosition,
-                    bpm = it.bpm,
-                )
-            },
-            timeSignatures = project.timeSignatures.map {
-                TimeSignature(
-                    barPosition = it.measurePosition,
-                    beatPerBar = it.numerator,
-                    beatUnit = it.denominator,
-                )
-            },
-            tracks = tracks,
-            voiceParts = voiceParts,
-        )
+        val voiceParts =
+            project.tracks.map {
+                generateVoicePart(voicePartTemplate, it, features)
+            }
+        val ustx =
+            template.copy(
+                name = project.name,
+                bpm = project.tempos.first().bpm,
+                beatPerBar = project.timeSignatures.first().numerator,
+                beatUnit = project.timeSignatures.first().denominator,
+                tempos =
+                    project.tempos.map {
+                        Tempo(
+                            position = it.tickPosition,
+                            bpm = it.bpm,
+                        )
+                    },
+                timeSignatures =
+                    project.timeSignatures.map {
+                        TimeSignature(
+                            barPosition = it.measurePosition,
+                            beatPerBar = it.numerator,
+                            beatUnit = it.denominator,
+                        )
+                    },
+                tracks = tracks,
+                voiceParts = voiceParts,
+            )
         val jsonText = jsonSerializer.encodeToString(Project.serializer(), ustx)
         return JsYaml.dump(JSON.parse(jsonText))
     }
@@ -275,21 +309,24 @@ object Ustx {
         lastNote: core.model.Note?,
         thisNote: core.model.Note,
     ): Note {
-        val firstPitchPointValue = if (lastNote?.tickOff == thisNote.tickOn) {
-            (lastNote.key - thisNote.key) * 10.0 // the unit is 10 cents
-        } else {
-            0.0
-        }
-        val pitchPoints = template.pitch.data.mapIndexed { index: Int, datum: Datum ->
-            if (index == 0) datum.copy(y = firstPitchPointValue) else datum.copy()
-        }
-        val pitch = template.pitch.copy(data = pitchPoints)
-        val lyric = buildString {
-            append(thisNote.lyric)
-            if (thisNote.phoneme?.isNotBlank() == true) {
-                append(" [${thisNote.phoneme}]")
+        val firstPitchPointValue =
+            if (lastNote?.tickOff == thisNote.tickOn) {
+                (lastNote.key - thisNote.key) * 10.0 // the unit is 10 cents
+            } else {
+                0.0
             }
-        }
+        val pitchPoints =
+            template.pitch.data.mapIndexed { index: Int, datum: Datum ->
+                if (index == 0) datum.copy(y = firstPitchPointValue) else datum.copy()
+            }
+        val pitch = template.pitch.copy(data = pitchPoints)
+        val lyric =
+            buildString {
+                append(thisNote.lyric)
+                if (thisNote.phoneme?.isNotBlank() == true) {
+                    append(" [${thisNote.phoneme}]")
+                }
+            }
         return Note(
             position = thisNote.tickOn,
             duration = thisNote.length,
@@ -300,10 +337,11 @@ object Ustx {
         )
     }
 
-    private val jsonSerializer = Json {
-        isLenient = true
-        ignoreUnknownKeys = true
-    }
+    private val jsonSerializer =
+        Json {
+            isLenient = true
+            ignoreUnknownKeys = true
+        }
 
     @Serializable
     private data class Project(

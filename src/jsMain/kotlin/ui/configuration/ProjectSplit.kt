@@ -35,28 +35,30 @@ import ui.strings.string
 
 external interface ProjectSplitProps : SubProps<ProjectSplitState>
 
-val ProjectSplitBlock = subFC<ProjectSplitProps, ProjectSplitState> { _, state, editState ->
-    FormGroup {
-        div {
-            configurationSwitch(
-                isOn = state.isOn,
-                onSwitched = { editState { copy(isOn = it) } },
-                labelStrings = Strings.ProjectSplit,
-            )
-            Tooltip {
-                title = ReactNode(string(Strings.ProjectSplitDescription))
-                placement = TooltipPlacement.right
-                disableInteractive = false
-                HelpOutline {
-                    style = jso {
-                        verticalAlign = VerticalAlign.middle
+val ProjectSplitBlock =
+    subFC<ProjectSplitProps, ProjectSplitState> { _, state, editState ->
+        FormGroup {
+            div {
+                configurationSwitch(
+                    isOn = state.isOn,
+                    onSwitched = { editState { copy(isOn = it) } },
+                    labelStrings = Strings.ProjectSplit,
+                )
+                Tooltip {
+                    title = ReactNode(string(Strings.ProjectSplitDescription))
+                    placement = TooltipPlacement.right
+                    disableInteractive = false
+                    HelpOutline {
+                        style =
+                            jso {
+                                verticalAlign = VerticalAlign.middle
+                            }
                     }
                 }
             }
         }
+        if (state.isOn) buildProjectSplitDetail(state, editState)
     }
-    if (state.isOn) buildProjectSplitDetail(state, editState)
-}
 
 private fun ChildrenBuilder.buildProjectSplitDetail(
     state: ProjectSplitState,
@@ -70,15 +72,17 @@ private fun ChildrenBuilder.buildProjectSplitDetail(
         Paper {
             elevation = 0
             Box {
-                style = jso {
-                    margin = Margin(
-                        left = 24.px,
-                        right = 48.px,
-                        top = 16.px,
-                        bottom = 16.px,
-                    )
-                    paddingBottom = 8.px
-                }
+                style =
+                    jso {
+                        margin =
+                            Margin(
+                                left = 24.px,
+                                right = 48.px,
+                                top = 16.px,
+                                bottom = 16.px,
+                            )
+                        paddingBottom = 8.px
+                    }
                 sx { minWidth = 15.em }
                 FormControl {
                     FormLabel {

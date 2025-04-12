@@ -63,226 +63,256 @@ import ui.configuration.SlightRestsFillingBlock
 import ui.strings.Strings
 import ui.strings.string
 
-val ConfigurationEditor = scopedFC<ConfigurationEditorProps> { props, scope ->
-    var progress by useState(ProgressProps.Initial)
+val ConfigurationEditor =
+    scopedFC<ConfigurationEditorProps> { props, scope ->
+        var progress by useState(ProgressProps.Initial)
 
-    val currentConfigs = useMemo {
-        val configs = window.localStorage["currentConfigs"]?.let {
-            json.decodeFromString<Configs>(it)
+        val currentConfigs =
+            useMemo {
+                val configs =
+                    window.localStorage["currentConfigs"]?.let {
+                        json.decodeFromString<Configs>(it)
+                    }
+                if (configs != null) console.log("Restored configs from localStorage", configs)
+                configs
+            }
+
+        val (japaneseLyricsConversion, setJapaneseLyricsConversion) =
+            useState {
+                currentConfigs?.japaneseLyricsConversion?.let {
+                    return@useState it
+                }
+
+                val japaneseLyricsAnalysedType =
+                    props.projects
+                        .map { it.japaneseLyricsType }
+                        .distinct()
+                        .singleOrNull() ?: JapaneseLyricsType.Unknown
+                val doJapaneseLyricsConversion = japaneseLyricsAnalysedType != JapaneseLyricsType.Unknown
+                val fromLyricsType: JapaneseLyricsType?
+                val toLyricsType: JapaneseLyricsType?
+
+                if (doJapaneseLyricsConversion) {
+                    fromLyricsType = japaneseLyricsAnalysedType
+                    toLyricsType = japaneseLyricsAnalysedType.findBestConversionTargetIn(props.outputFormat)
+                } else {
+                    fromLyricsType = null
+                    toLyricsType = null
+                }
+                JapaneseLyricsConversionState(
+                    doJapaneseLyricsConversion,
+                    japaneseLyricsAnalysedType,
+                    fromLyricsType,
+                    toLyricsType,
+                )
+            }
+        val (chinesePinyinConversion, setChinesePinyinConversion) =
+            useState {
+                currentConfigs?.chinesePinyinConversion?.let {
+                    return@useState it
+                }
+
+                ChinesePinyinConversionState(
+                    isOn = false,
+                )
+            }
+        val (lyricsReplacement, setLyricsReplacement) =
+            useState {
+                currentConfigs?.lyricsReplacement?.let {
+                    return@useState it
+                }
+
+                val preset = LyricsReplacementRequest.getPreset(props.projects.first().format, props.outputFormat)
+                if (preset == null) {
+                    LyricsReplacementState(false, LyricsReplacementRequest())
+                } else {
+                    LyricsReplacementState(true, preset)
+                }
+            }
+        val (lyricsMapping, setLyricsMapping) =
+            useState {
+                currentConfigs?.lyricsMapping?.let {
+                    return@useState it
+                }
+
+                LyricsMappingState(
+                    isOn = false,
+                    presetName = null,
+                    request = LyricsMappingRequest(),
+                )
+            }
+        val (slightRestsFilling, setSlightRestsFilling) =
+            useState {
+                currentConfigs?.slightRestsFilling?.let {
+                    return@useState it
+                }
+
+                SlightRestsFillingState(
+                    true,
+                    RESTS_FILLING_MAX_LENGTH_DENOMINATOR_DEFAULT,
+                )
+            }
+        val (pitchConversion, setPitchConversion) =
+            useState {
+                val isOn = currentConfigs?.pitchConversion?.isOn
+
+                val hasPitchData = props.projects.any { Feature.ConvertPitch.isAvailable(it) }
+                val isPitchConversionAvailable =
+                    hasPitchData &&
+                        props.outputFormat.availableFeaturesForGeneration.contains(Feature.ConvertPitch)
+                PitchConversionState(
+                    isAvailable = isPitchConversionAvailable,
+                    isOn = isOn ?: isPitchConversionAvailable,
+                )
+            }
+        val (projectZoom, setProjectZoom) =
+            useState {
+                currentConfigs?.projectZoom?.let {
+                    return@useState it
+                }
+
+                ProjectZoomState(
+                    isOn = false,
+                    factor = projectZoomFactorOptions.first(),
+                    hasWarning = false,
+                )
+            }
+        val (projectSplit, setProjectSplit) =
+            useState {
+                val projectSplit = currentConfigs?.projectSplit
+
+                ProjectSplitState(
+                    isAvailable = props.outputFormat.availableFeaturesForGeneration.contains(Feature.SplitProject),
+                    isOn = projectSplit?.isOn ?: false,
+                    maxTrackCountInput =
+                        projectSplit?.maxTrackCountInput
+                            ?: FeatureConfig.SplitProject
+                                .getDefault(props.outputFormat)
+                                .maxTrackCount
+                                .toString(),
+                )
+            }
+        val (phonemesConversion, setPhonemesConversion) =
+            useState {
+                currentConfigs?.phonemesConversion?.let {
+                    return@useState it
+                }
+
+                val hasPhonemes = props.projects.any { Feature.ConvertPhonemes.isAvailable(it) }
+                val isAvailable =
+                    hasPhonemes &&
+                        props.outputFormat.availableFeaturesForGeneration.contains(Feature.ConvertPhonemes)
+                // Enable for VOCALOID -> VOCALOID or UfData by default
+                val enabledFormats = Format.vocaloidFormats.plus(Format.UfData)
+                val isOn =
+                    isAvailable &&
+                        (
+                            (
+                                props.projects.all { it.format in enabledFormats } &&
+                                    props.outputFormat in enabledFormats
+                            ) ||
+                                props.projects.all { it.format == props.outputFormat }
+                        )
+                PhonemesConversionState(
+                    isAvailable = isAvailable,
+                    isOn = isOn,
+                    useMapping = false,
+                    mappingPresetName = null,
+                    mappingRequest = PhonemesMappingRequest(),
+                )
+            }
+        var dialogError by useState(DialogErrorState())
+
+        fun isReady() =
+            listOf(
+                japaneseLyricsConversion,
+                chinesePinyinConversion,
+                lyricsReplacement,
+                lyricsMapping,
+                slightRestsFilling,
+                pitchConversion,
+                projectZoom,
+                projectSplit,
+            ).all { it.isReady }
+
+        fun closeErrorDialog() {
+            dialogError = dialogError.copy(isShowing = false)
         }
-        if (configs != null) console.log("Restored configs from localStorage", configs)
-        configs
-    }
 
-    val (japaneseLyricsConversion, setJapaneseLyricsConversion) = useState {
-        currentConfigs?.japaneseLyricsConversion?.let {
-            return@useState it
+        title(Strings.ConfigurationEditorCaption)
+        JapaneseLyricsConversionBlock {
+            this.projects = props.projects
+            this.outputFormat = props.outputFormat
+            initialState = japaneseLyricsConversion
+            submitState = setJapaneseLyricsConversion
         }
-
-        val japaneseLyricsAnalysedType =
-            props.projects.map { it.japaneseLyricsType }.distinct().singleOrNull() ?: JapaneseLyricsType.Unknown
-        val doJapaneseLyricsConversion = japaneseLyricsAnalysedType != JapaneseLyricsType.Unknown
-        val fromLyricsType: JapaneseLyricsType?
-        val toLyricsType: JapaneseLyricsType?
-
-        if (doJapaneseLyricsConversion) {
-            fromLyricsType = japaneseLyricsAnalysedType
-            toLyricsType = japaneseLyricsAnalysedType.findBestConversionTargetIn(props.outputFormat)
-        } else {
-            fromLyricsType = null
-            toLyricsType = null
+        ChinesePinyinConversionBlock {
+            initialState = chinesePinyinConversion
+            submitState = setChinesePinyinConversion
         }
-        JapaneseLyricsConversionState(
-            doJapaneseLyricsConversion,
-            japaneseLyricsAnalysedType,
-            fromLyricsType,
-            toLyricsType,
+        LyricsReplacementBlock {
+            initialState = lyricsReplacement
+            submitState = setLyricsReplacement
+        }
+        LyricsMappingBlock {
+            initialState = lyricsMapping
+            submitState = setLyricsMapping
+        }
+        if (phonemesConversion.isAvailable) {
+            PhonemesConversionBlock {
+                this.sourceFormat = props.projects.first().format
+                this.targetFormat = props.outputFormat
+                initialState = phonemesConversion
+                submitState = setPhonemesConversion
+            }
+        }
+        SlightRestsFillingBlock {
+            initialState = slightRestsFilling
+            submitState = setSlightRestsFilling
+        }
+        if (pitchConversion.isAvailable) {
+            PitchConversionBlock {
+                initialState = pitchConversion
+                submitState = setPitchConversion
+            }
+        }
+        ProjectZoomBlock {
+            this.projects = props.projects
+            initialState = projectZoom
+            submitState = setProjectZoom
+        }
+        if (projectSplit.isAvailable) {
+            ProjectSplitBlock {
+                initialState = projectSplit
+                submitState = setProjectSplit
+            }
+        }
+        buildNextButton(
+            scope,
+            props,
+            isEnabled = isReady(),
+            japaneseLyricsConversion,
+            chinesePinyinConversion,
+            lyricsReplacement,
+            lyricsMapping,
+            slightRestsFilling,
+            pitchConversion,
+            projectZoom,
+            projectSplit,
+            phonemesConversion,
+            setProgress = { progress = it },
+            onDialogError = { dialogError = it },
         )
-    }
-    val (chinesePinyinConversion, setChinesePinyinConversion) = useState {
-        currentConfigs?.chinesePinyinConversion?.let {
-            return@useState it
-        }
 
-        ChinesePinyinConversionState(
-            isOn = false,
+        errorDialog(
+            state = dialogError,
+            close = { closeErrorDialog() },
         )
-    }
-    val (lyricsReplacement, setLyricsReplacement) = useState {
-        currentConfigs?.lyricsReplacement?.let {
-            return@useState it
-        }
 
-        val preset = LyricsReplacementRequest.getPreset(props.projects.first().format, props.outputFormat)
-        if (preset == null) {
-            LyricsReplacementState(false, LyricsReplacementRequest())
-        } else {
-            LyricsReplacementState(true, preset)
-        }
-    }
-    val (lyricsMapping, setLyricsMapping) = useState {
-        currentConfigs?.lyricsMapping?.let {
-            return@useState it
-        }
+        progress(progress)
 
-        LyricsMappingState(
-            isOn = false,
-            presetName = null,
-            request = LyricsMappingRequest(),
-        )
+        multipleModeWarning(props.projects, props.outputFormat)
     }
-    val (slightRestsFilling, setSlightRestsFilling) = useState {
-        currentConfigs?.slightRestsFilling?.let {
-            return@useState it
-        }
-
-        SlightRestsFillingState(
-            true,
-            RESTS_FILLING_MAX_LENGTH_DENOMINATOR_DEFAULT,
-        )
-    }
-    val (pitchConversion, setPitchConversion) = useState {
-        val isOn = currentConfigs?.pitchConversion?.isOn
-
-        val hasPitchData = props.projects.any { Feature.ConvertPitch.isAvailable(it) }
-        val isPitchConversionAvailable = hasPitchData &&
-            props.outputFormat.availableFeaturesForGeneration.contains(Feature.ConvertPitch)
-        PitchConversionState(
-            isAvailable = isPitchConversionAvailable,
-            isOn = isOn ?: isPitchConversionAvailable,
-        )
-    }
-    val (projectZoom, setProjectZoom) = useState {
-        currentConfigs?.projectZoom?.let {
-            return@useState it
-        }
-
-        ProjectZoomState(
-            isOn = false,
-            factor = projectZoomFactorOptions.first(),
-            hasWarning = false,
-        )
-    }
-    val (projectSplit, setProjectSplit) = useState {
-        val projectSplit = currentConfigs?.projectSplit
-
-        ProjectSplitState(
-            isAvailable = props.outputFormat.availableFeaturesForGeneration.contains(Feature.SplitProject),
-            isOn = projectSplit?.isOn ?: false,
-            maxTrackCountInput = projectSplit?.maxTrackCountInput
-                ?: FeatureConfig.SplitProject.getDefault(props.outputFormat).maxTrackCount.toString(),
-        )
-    }
-    val (phonemesConversion, setPhonemesConversion) = useState {
-        currentConfigs?.phonemesConversion?.let {
-            return@useState it
-        }
-
-        val hasPhonemes = props.projects.any { Feature.ConvertPhonemes.isAvailable(it) }
-        val isAvailable = hasPhonemes &&
-            props.outputFormat.availableFeaturesForGeneration.contains(Feature.ConvertPhonemes)
-        // Enable for VOCALOID -> VOCALOID or UfData by default
-        val enabledFormats = Format.vocaloidFormats.plus(Format.UfData)
-        val isOn = isAvailable && (
-            (
-                props.projects.all { it.format in enabledFormats } &&
-                    props.outputFormat in enabledFormats
-                ) ||
-                props.projects.all { it.format == props.outputFormat }
-            )
-        PhonemesConversionState(
-            isAvailable = isAvailable,
-            isOn = isOn,
-            useMapping = false,
-            mappingPresetName = null,
-            mappingRequest = PhonemesMappingRequest(),
-        )
-    }
-    var dialogError by useState(DialogErrorState())
-
-    fun isReady() = listOf(
-        japaneseLyricsConversion,
-        chinesePinyinConversion,
-        lyricsReplacement,
-        lyricsMapping,
-        slightRestsFilling,
-        pitchConversion,
-        projectZoom,
-        projectSplit,
-    ).all { it.isReady }
-
-    fun closeErrorDialog() {
-        dialogError = dialogError.copy(isShowing = false)
-    }
-
-    title(Strings.ConfigurationEditorCaption)
-    JapaneseLyricsConversionBlock {
-        this.projects = props.projects
-        this.outputFormat = props.outputFormat
-        initialState = japaneseLyricsConversion
-        submitState = setJapaneseLyricsConversion
-    }
-    ChinesePinyinConversionBlock {
-        initialState = chinesePinyinConversion
-        submitState = setChinesePinyinConversion
-    }
-    LyricsReplacementBlock {
-        initialState = lyricsReplacement
-        submitState = setLyricsReplacement
-    }
-    LyricsMappingBlock {
-        initialState = lyricsMapping
-        submitState = setLyricsMapping
-    }
-    if (phonemesConversion.isAvailable) PhonemesConversionBlock {
-        this.sourceFormat = props.projects.first().format
-        this.targetFormat = props.outputFormat
-        initialState = phonemesConversion
-        submitState = setPhonemesConversion
-    }
-    SlightRestsFillingBlock {
-        initialState = slightRestsFilling
-        submitState = setSlightRestsFilling
-    }
-    if (pitchConversion.isAvailable) PitchConversionBlock {
-        initialState = pitchConversion
-        submitState = setPitchConversion
-    }
-    ProjectZoomBlock {
-        this.projects = props.projects
-        initialState = projectZoom
-        submitState = setProjectZoom
-    }
-    if (projectSplit.isAvailable) ProjectSplitBlock {
-        initialState = projectSplit
-        submitState = setProjectSplit
-    }
-    buildNextButton(
-        scope,
-        props,
-        isEnabled = isReady(),
-        japaneseLyricsConversion,
-        chinesePinyinConversion,
-        lyricsReplacement,
-        lyricsMapping,
-        slightRestsFilling,
-        pitchConversion,
-        projectZoom,
-        projectSplit,
-        phonemesConversion,
-        setProgress = { progress = it },
-        onDialogError = { dialogError = it },
-    )
-
-    errorDialog(
-        state = dialogError,
-        close = { closeErrorDialog() },
-    )
-
-    progress(progress)
-
-    multipleModeWarning(props.projects, props.outputFormat)
-}
 
 private fun ChildrenBuilder.buildNextButton(
     scope: CoroutineScope,
@@ -348,71 +378,79 @@ private fun process(
     scope.launch {
         runCatchingCancellable {
             val format = props.outputFormat
-            val results = props.projects.mapIndexed { index, inputProject ->
-                setProgress(ProgressProps(isShowing = true, total = props.projects.size, current = index + 1))
-                val project = inputProject
-                    .runIf(japaneseLyricsConversion.isOn) {
-                        val fromType = japaneseLyricsConversion.fromType
-                        val toType = japaneseLyricsConversion.toType
-                        runIfAllNotNull(fromType, toType) { nonNullFromType, nonNullToType ->
-                            convertJapaneseLyrics(copy(japaneseLyricsType = nonNullFromType), nonNullToType, format)
+            val results =
+                props.projects.mapIndexed { index, inputProject ->
+                    setProgress(ProgressProps(isShowing = true, total = props.projects.size, current = index + 1))
+                    val project =
+                        inputProject
+                            .runIf(japaneseLyricsConversion.isOn) {
+                                val fromType = japaneseLyricsConversion.fromType
+                                val toType = japaneseLyricsConversion.toType
+                                runIfAllNotNull(fromType, toType) { nonNullFromType, nonNullToType ->
+                                    convertJapaneseLyrics(
+                                        copy(japaneseLyricsType = nonNullFromType),
+                                        nonNullToType,
+                                        format,
+                                    )
+                                }
+                            }.runIf(chinesePinyinConversion.isOn) {
+                                convertChineseLyricsToPinyin(this)
+                            }.runIf(lyricsReplacement.isOn) {
+                                replaceLyrics(lyricsReplacement.request)
+                            }.runIf(lyricsMapping.isOn) {
+                                mapLyrics(lyricsMapping.request)
+                            }.runIf(slightRestsFilling.isOn) {
+                                fillRests(slightRestsFilling.excludedMaxLength)
+                            }.runIf(projectZoom.isOn) {
+                                zoom(projectZoom.factorValue)
+                            }.mapPhonemes(phonemesConversion.resolvedMappingRequest)
+
+                    val featureConfigs =
+                        buildList {
+                            if (pitchConversion.isOn) add(FeatureConfig.ConvertPitch)
+                            if (projectSplit.isOn) {
+                                add(
+                                    FeatureConfig.SplitProject(projectSplit.maxTrackCountInput.toInt()),
+                                )
+                            }
+                        }.filter {
+                            it.type.isAvailable.invoke(project) &&
+                                format.availableFeaturesForGeneration.contains(it.type)
                         }
-                    }
-                    .runIf(chinesePinyinConversion.isOn) {
-                        convertChineseLyricsToPinyin(this)
-                    }
-                    .runIf(lyricsReplacement.isOn) {
-                        replaceLyrics(lyricsReplacement.request)
-                    }
-                    .runIf(lyricsMapping.isOn) {
-                        mapLyrics(lyricsMapping.request)
-                    }
-                    .runIf(slightRestsFilling.isOn) {
-                        fillRests(slightRestsFilling.excludedMaxLength)
-                    }
-                    .runIf(projectZoom.isOn) {
-                        zoom(projectZoom.factorValue)
-                    }
-                    .mapPhonemes(phonemesConversion.resolvedMappingRequest)
 
-                val featureConfigs = buildList {
-                    if (pitchConversion.isOn) add(FeatureConfig.ConvertPitch)
-                    if (projectSplit.isOn) add(FeatureConfig.SplitProject(projectSplit.maxTrackCountInput.toInt()))
-                }.filter {
-                    it.type.isAvailable.invoke(project) &&
-                        format.availableFeaturesForGeneration.contains(it.type)
+                    delay(100)
+                    val result = format.generator.invoke(project, featureConfigs)
+                    console.log("Finished processing project ${project.name}. ${index + 1}/${props.projects.size}")
+                    result
                 }
-
-                delay(100)
-                val result = format.generator.invoke(project, featureConfigs)
-                console.log("Finished processing project ${project.name}. ${index + 1}/${props.projects.size}")
-                result
-            }
-            val currentConfigs = Configs(
-                japaneseLyricsConversion,
-                chinesePinyinConversion,
-                lyricsReplacement,
-                lyricsMapping,
-                slightRestsFilling,
-                pitchConversion,
-                projectZoom,
-                projectSplit,
-                phonemesConversion,
-            )
+            val currentConfigs =
+                Configs(
+                    japaneseLyricsConversion,
+                    chinesePinyinConversion,
+                    lyricsReplacement,
+                    lyricsMapping,
+                    slightRestsFilling,
+                    pitchConversion,
+                    projectZoom,
+                    projectSplit,
+                    phonemesConversion,
+                )
             window.localStorage.setItem("currentConfigs", json.encodeToString(currentConfigs))
 
             // adjust results to make every fileName unique
-            val adjustedResults = results.mapIndexed { index, result ->
-                val fileName = result.fileName
-                val adjustedFileName = if (results.any { it != result && it.fileName == fileName }) {
-                    val extension = fileName.substringAfterLast(".")
-                    val name = fileName.substringBeforeLast(".")
-                    "$name-$index.$extension"
-                } else {
-                    fileName
+            val adjustedResults =
+                results.mapIndexed { index, result ->
+                    val fileName = result.fileName
+                    val adjustedFileName =
+                        if (results.any { it != result && it.fileName == fileName }) {
+                            val extension = fileName.substringAfterLast(".")
+                            val name = fileName.substringBeforeLast(".")
+                            "$name-$index.$extension"
+                        } else {
+                            fileName
+                        }
+                    ExportResult(blob = result.blob, fileName = adjustedFileName, notifications = result.notifications)
                 }
-                ExportResult(blob = result.blob, fileName = adjustedFileName, notifications = result.notifications)
-            }
 
             props.onFinished.invoke(adjustedResults, format)
         }.onFailure { t ->
@@ -429,25 +467,31 @@ private fun process(
     }
 }
 
-private fun ChildrenBuilder.multipleModeWarning(projects: List<Project>, outputFormat: Format) {
-    val shouldWarn = useMemo(projects, outputFormat) {
-        projects.size > 1 && projects.first().format.multipleFile && outputFormat.multipleFile.not()
-    }
+private fun ChildrenBuilder.multipleModeWarning(
+    projects: List<Project>,
+    outputFormat: Format,
+) {
+    val shouldWarn =
+        useMemo(projects, outputFormat) {
+            projects.size > 1 && projects.first().format.multipleFile && outputFormat.multipleFile.not()
+        }
     val (closed, setClosed) = useState(false)
     warningDialog(
         id = "isMultipleModeForSingleFileFormat",
-        state = DialogWarningState(
-            isShowing = shouldWarn && !closed,
-            title = string(Strings.MultipleModeForMultipleFileFormatWarningTitle),
-            message = string(Strings.MultipleModeForMultipleFileFormatWarningDescription),
-        ),
+        state =
+            DialogWarningState(
+                isShowing = shouldWarn && !closed,
+                title = string(Strings.MultipleModeForMultipleFileFormatWarningTitle),
+                message = string(Strings.MultipleModeForMultipleFileFormatWarningDescription),
+            ),
         close = { setClosed(true) },
     )
 }
 
-private val json = Json {
-    ignoreUnknownKeys = true
-}
+private val json =
+    Json {
+        ignoreUnknownKeys = true
+    }
 
 external interface ConfigurationEditorProps : Props {
     var projects: List<Project>
@@ -486,11 +530,12 @@ data class LyricsMappingState(
 ) : SubState() {
     override val isReady: Boolean get() = if (isOn) request.isValid else true
 
-    fun updatePresetName() = when {
-        presetName == null -> this
-        LyricsMappingRequest.findPreset(presetName) == request -> this
-        else -> copy(presetName = null)
-    }
+    fun updatePresetName() =
+        when {
+            presetName == null -> this
+            LyricsMappingRequest.findPreset(presetName) == request -> this
+            else -> copy(presetName = null)
+        }
 }
 
 @Serializable
@@ -504,21 +549,23 @@ data class PhonemesConversionState(
     override val isReady: Boolean get() = if (isAvailable && isOn && useMapping) mappingRequest.isValid else true
 
     val resolvedMappingRequest: PhonemesMappingRequest?
-        get() = if (isOn) {
-            if (useMapping) {
-                mappingRequest
+        get() =
+            if (isOn) {
+                if (useMapping) {
+                    mappingRequest
+                } else {
+                    PhonemesMappingRequest("")
+                }
             } else {
-                PhonemesMappingRequest("")
+                null
             }
-        } else {
-            null
-        }
 
-    fun updatePresetName() = when {
-        mappingPresetName == null -> this
-        PhonemesMappingRequest.findPreset(mappingPresetName) == mappingRequest -> this
-        else -> copy(mappingPresetName = null)
-    }
+    fun updatePresetName() =
+        when {
+            mappingPresetName == null -> this
+            PhonemesMappingRequest.findPreset(mappingPresetName) == mappingRequest -> this
+            else -> copy(mappingPresetName = null)
+        }
 }
 
 @Serializable
@@ -526,7 +573,6 @@ data class SlightRestsFillingState(
     val isOn: Boolean,
     val excludedMaxLengthDenominator: Int,
 ) : SubState() {
-
     val excludedMaxLength: Long
         get() = (TICKS_IN_FULL_NOTE / excludedMaxLengthDenominator).toLong()
 }
@@ -554,10 +600,13 @@ data class ProjectSplitState(
     val maxTrackCountInput: String,
 ) : SubState() {
     override val isReady: Boolean
-        get() = if (isOn) {
-            val maxTrackCount = maxTrackCountInput.toIntOrNull()
-            maxTrackCount != null && maxTrackCount > 0
-        } else true
+        get() =
+            if (isOn) {
+                val maxTrackCount = maxTrackCountInput.toIntOrNull()
+                maxTrackCount != null && maxTrackCount > 0
+            } else {
+                true
+            }
 }
 
 @Serializable

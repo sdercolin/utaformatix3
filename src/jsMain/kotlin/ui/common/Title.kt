@@ -8,11 +8,13 @@ import react.ChildrenBuilder
 import ui.strings.Strings
 import ui.strings.string
 
-fun ChildrenBuilder.title(titleKey: Strings) = Typography {
-    style = jso {
-        marginTop = 45.px
-        marginBottom = 20.px
+fun ChildrenBuilder.title(titleKey: Strings) =
+    Typography {
+        style =
+            jso {
+                marginTop = 45.px
+                marginBottom = 20.px
+            }
+        variant = TypographyVariant.h3
+        +string(titleKey)
     }
-    variant = TypographyVariant.h3
-    +string(titleKey)
-}

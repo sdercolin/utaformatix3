@@ -15,28 +15,31 @@ data class Project(
     val importWarnings: List<ImportWarning>,
     val japaneseLyricsType: JapaneseLyricsType = JapaneseLyricsType.Unknown,
 ) {
-
     fun lyricsTypeAnalysed() =
         copy(
-            japaneseLyricsType = analyseJapaneseLyricsTypeForProject(this)
-                .takeIf { format.possibleLyricsTypes.contains(it) }
-                ?: JapaneseLyricsType.Unknown,
+            japaneseLyricsType =
+                analyseJapaneseLyricsTypeForProject(this)
+                    .takeIf { format.possibleLyricsTypes.contains(it) }
+                    ?: JapaneseLyricsType.Unknown,
         )
 
     fun withoutEmptyTracks() =
         copy(
-            tracks = tracks.filter { it.notes.isNotEmpty() }
-                .mapIndexed { index, track -> track.copy(id = index) },
+            tracks =
+                tracks
+                    .filter { it.notes.isNotEmpty() }
+                    .mapIndexed { index, track -> track.copy(id = index) },
         ).takeIf { it.tracks.isNotEmpty() }
 
     val hasXSampaData get() = tracks.any { track -> track.notes.any { it.phoneme != null } }
 
-    fun requireValid() = this.also {
-        tracks.forEachIndexed { index, track ->
-            val firstNote = track.notes.firstOrNull() ?: return@forEachIndexed
-            if (firstNote.tickOn < 0L) {
-                throw IllegalNotePositionException(firstNote, index)
+    fun requireValid() =
+        this.also {
+            tracks.forEachIndexed { index, track ->
+                val firstNote = track.notes.firstOrNull() ?: return@forEachIndexed
+                if (firstNote.tickOn < 0L) {
+                    throw IllegalNotePositionException(firstNote, index)
+                }
             }
         }
-    }
 }

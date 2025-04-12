@@ -23,6 +23,7 @@ fun List<Pair<Long, Double?>>.resampled(
  * A shorthand for pitch represented in dot.
  * Its interpolateMethod simply copy the value from prev, or next if prev not exists.
  */
-fun List<Pair<Long, Double?>>.dotResampled(interval: Long) = resampled(interval) { prev, next, _ ->
-    prev?.second ?: next?.second
-}
+fun List<Pair<Long, Double?>>.dotResampled(interval: Long) =
+    resampled(interval) { prev, next, _ ->
+        prev?.second ?: next?.second
+    }
