@@ -127,10 +127,8 @@ fun pitchFromUtauMode2Track(
         val noteStartInMillis = tickTimeTransformer.tickToMilliSec(note.tickOn)
         if (notePitch?.start != null) {
             var posInMillis = noteStartInMillis + notePitch.start
-            var tickPos =
-                tickTimeTransformer
-                    .milliSecToTick(posInMillis)
-                    .coerceAtLeast(lastKeyPos + SAFE_SAMPLING_INTERVAL_TICK)
+            var tickPos = tickTimeTransformer.milliSecToTick(posInMillis)
+                .coerceAtLeast(lastKeyPos + SAFE_SAMPLING_INTERVAL_TICK)
             lastKeyPos = tickPos
             val startShift =
                 if (note.tickOn == lastNote?.tickOff) {
@@ -146,10 +144,8 @@ fun pitchFromUtauMode2Track(
                 val shift = notePitch.shifts.getOrNull(index) ?: 0.0
                 val curveType = notePitch.curveTypes.getOrNull(index) ?: ""
                 posInMillis += width
-                tickPos =
-                    tickTimeTransformer
-                        .milliSecToTick(posInMillis)
-                        .coerceAtLeast(lastKeyPos + SAFE_SAMPLING_INTERVAL_TICK)
+                tickPos = tickTimeTransformer.milliSecToTick(posInMillis)
+                    .coerceAtLeast(lastKeyPos + SAFE_SAMPLING_INTERVAL_TICK)
                 lastKeyPos = tickPos
                 val thisPoint = tickPos to (shift / 10)
                 val lastPoint = points.last()
