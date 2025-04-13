@@ -28,7 +28,7 @@ jobs:
             -   name: Build master branch
                 run: |
                     mkdir -p build/out
-                    ./gradlew build
+                    ./gradlew jsBrowserDistribution
                     mv build/dist/js/productionExecutable/* build/out
 
             -   name: Check out develop branch
@@ -41,7 +41,7 @@ jobs:
             -   name: Build develop branch
                 run: |
                     cd beta
-                    ./gradlew build
+                    ./gradlew jsBrowserDistribution
                     mkdir ../build/out/beta
                     mv build/dist/js/productionExecutable/* ../build/out/beta
 
