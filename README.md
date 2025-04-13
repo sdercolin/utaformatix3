@@ -70,7 +70,7 @@ branch.
 
 #### Adding a format support
 
-Please check [Format.kt](src/jsMain/kotlin/model/Format.kt) and its usages.
+Please check [Format.kt](core/src/main/kotlin/core/model/Format.kt) and its usages.
 
 #### Adding a Language
 
