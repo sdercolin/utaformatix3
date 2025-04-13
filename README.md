@@ -59,9 +59,9 @@ General Nuisance](https://github.com/GeneralNuisance0), [sevenc-nanashi](https:/
 
 1. Install [IntelliJ IDEA](https://www.jetbrains.com/idea/)
 2. Clone and import as a Gradle project
-3. Configure IDEA's Gradle settings with `JDK 17` and `Use Gradle Wrapper`
-4. Run by `./gradlew jsRun` or Gradle Task `other/jsRun`
-5. Optionally, run by `./gradlew jsRun --continuous` with live reloading enabled
+3. Configure IDEA's Gradle settings with `JDK 21` and `Use Gradle Wrapper`
+4. Run by `./gradlew jsBrowserDevelopmentRun` or Gradle Task `other/jsBrowserDevelopmentRun`
+5. Optionally, run by `./gradlew jsBrowserDevelopmentRun --continuous` with live reloading enabled
 
 ## Contribution
 
