@@ -66,11 +66,12 @@ private fun ChildrenBuilder.buildPhonemesConversionDetail(
     state: PhonemesConversionState,
     editState: (PhonemesConversionState.() -> PhonemesConversionState) -> Unit,
 ) {
-    val presetOptions = PhonemesMappingRequest.Presets
-        .filter { preset ->
-            props.sourceFormat in preset.sourceFormats + Format.UfData &&
-                props.targetFormat in preset.targetFormats + Format.UfData
-        }
+    val presetOptions =
+        PhonemesMappingRequest.Presets
+            .filter { preset ->
+                props.sourceFormat in preset.sourceFormats + Format.UfData &&
+                    props.targetFormat in preset.targetFormats + Format.UfData
+            }
     div {
         css {
             margin = Margin(horizontal = 40.px, vertical = 0.px)
