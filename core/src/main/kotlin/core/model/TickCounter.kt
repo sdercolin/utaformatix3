@@ -4,7 +4,6 @@ class TickCounter(
     private val tickRate: Double = 1.0,
     private val ticksInFullNote: Long = TICKS_IN_FULL_NOTE.toLong(),
 ) {
-
     var tick = 0L
         private set
 
@@ -21,7 +20,11 @@ class TickCounter(
 
     val ticksInMeasure get() = ticksInFullNote * numerator / denominator
 
-    fun goToTick(newTick: Long, newNumerator: Int? = null, newDenominator: Int? = null) {
+    fun goToTick(
+        newTick: Long,
+        newNumerator: Int? = null,
+        newDenominator: Int? = null,
+    ) {
         val normalizedNewTick = newTick / tickRate
         val tickDiff = normalizedNewTick - tick
         val measureDiff = tickDiff / ticksInMeasure
@@ -34,7 +37,11 @@ class TickCounter(
     fun goToMeasure(timeSignature: TimeSignature) =
         goToMeasure(timeSignature.measurePosition, timeSignature.numerator, timeSignature.denominator)
 
-    fun goToMeasure(newMeasure: Int, newNumerator: Int? = null, newDenominator: Int? = null) {
+    fun goToMeasure(
+        newMeasure: Int,
+        newNumerator: Int? = null,
+        newDenominator: Int? = null,
+    ) {
         val measureDiff = newMeasure - measure
         val tickDiff = measureDiff * ticksInMeasure
         tick += tickDiff

@@ -6,15 +6,15 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class TickTimeTransformerTest {
-
     // when bpm = 125.0, 1 tick = 1 milli-second
-    private val transformer = TickTimeTransformer(
-        listOf(
-            Tempo(0, 125.0),
-            Tempo(10000, 250.0),
-            Tempo(20000, 125.0),
-        ),
-    )
+    private val transformer =
+        TickTimeTransformer(
+            listOf(
+                Tempo(0, 125.0),
+                Tempo(10000, 250.0),
+                Tempo(20000, 125.0),
+            ),
+        )
 
     @Test
     fun testTickToSec() {

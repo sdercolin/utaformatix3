@@ -46,19 +46,20 @@ external interface PhonemesConversionProps : SubProps<PhonemesConversionState> {
     var targetFormat: Format
 }
 
-val PhonemesConversionBlock = subFC<PhonemesConversionProps, PhonemesConversionState> { props, state, editState ->
-    FormGroup {
-        div {
-            configurationSwitch(
-                isOn = state.isOn,
-                onSwitched = { editState { copy(isOn = it) } },
-                labelStrings = Strings.PhonemesConversion,
-            )
+val PhonemesConversionBlock =
+    subFC<PhonemesConversionProps, PhonemesConversionState> { props, state, editState ->
+        FormGroup {
+            div {
+                configurationSwitch(
+                    isOn = state.isOn,
+                    onSwitched = { editState { copy(isOn = it) } },
+                    labelStrings = Strings.PhonemesConversion,
+                )
+            }
         }
-    }
 
-    if (state.isOn) buildPhonemesConversionDetail(props, state, editState)
-}
+        if (state.isOn) buildPhonemesConversionDetail(props, state, editState)
+    }
 
 private fun ChildrenBuilder.buildPhonemesConversionDetail(
     props: PhonemesConversionProps,
@@ -74,17 +75,19 @@ private fun ChildrenBuilder.buildPhonemesConversionDetail(
             elevation = 0
             div {
                 css {
-                    margin = Margin(
-                        horizontal = 24.px,
-                        top = 16.px,
-                        bottom = 24.px,
-                    )
+                    margin =
+                        Margin(
+                            horizontal = 24.px,
+                            top = 16.px,
+                            bottom = 24.px,
+                        )
                 }
                 div {
-                    style = jso {
-                        paddingTop = 16.px
-                        paddingBottom = 8.px
-                    }
+                    style =
+                        jso {
+                            paddingTop = 16.px
+                            paddingBottom = 8.px
+                        }
                     configurationSwitch(
                         isOn = state.useMapping,
                         onSwitched = {
@@ -96,26 +99,29 @@ private fun ChildrenBuilder.buildPhonemesConversionDetail(
                     )
                     Tooltip {
                         val text = string(Strings.PhonemesConversionEnableMappingDescription)
-                        title = div.create {
-                            css { whiteSpace = WhiteSpace.preLine }
-                            +text
-                        }
+                        title =
+                            div.create {
+                                css { whiteSpace = WhiteSpace.preLine }
+                                +text
+                            }
                         placement = TooltipPlacement.right
                         disableInteractive = false
                         HelpOutline {
-                            style = jso {
-                                verticalAlign = VerticalAlign.middle
-                            }
+                            style =
+                                jso {
+                                    verticalAlign = VerticalAlign.middle
+                                }
                         }
                     }
                 }
                 FormGroup {
                     div {
-                        style = jso {
-                            display = Display.flex
-                            flexDirection = FlexDirection.row
-                            alignItems = AlignItems.flexEnd
-                        }
+                        style =
+                            jso {
+                                display = Display.flex
+                                flexDirection = FlexDirection.row
+                                alignItems = AlignItems.flexEnd
+                            }
                         FormControl {
                             margin = FormControlMargin.normal
                             variant = FormControlVariant.standard
@@ -147,8 +153,7 @@ private fun ChildrenBuilder.buildPhonemesConversionDetail(
                                     .filter { preset ->
                                         props.sourceFormat in preset.sourceFormats + Format.UfData &&
                                             props.targetFormat in preset.targetFormats + Format.UfData
-                                    }
-                                    .forEach { preset ->
+                                    }.forEach { preset ->
                                         MenuItem {
                                             value = preset.name
                                             +(preset.name)
@@ -157,10 +162,11 @@ private fun ChildrenBuilder.buildPhonemesConversionDetail(
                             }
                         }
                         Button {
-                            style = jso {
-                                marginLeft = 24.px
-                                marginBottom = 12.px
-                            }
+                            style =
+                                jso {
+                                    marginLeft = 24.px
+                                    marginBottom = 12.px
+                                }
                             disabled = state.useMapping.not()
                             variant = ButtonVariant.outlined
                             color = ButtonColor.secondary
@@ -181,17 +187,20 @@ private fun ChildrenBuilder.buildPhonemesConversionDetail(
                         TextField {
                             disabled = state.useMapping.not()
                             multiline = true
-                            style = jso {
-                                marginTop = 8.px
-                                marginBottom = 16.px
-                                width = 25.em
-                            }
-                            (this.unsafeCast<StandardTextFieldProps>()).InputProps = jso {
-                                style = jso {
-                                    paddingTop = 12.px
-                                    paddingBottom = 12.px
+                            style =
+                                jso {
+                                    marginTop = 8.px
+                                    marginBottom = 16.px
+                                    width = 25.em
                                 }
-                            }
+                            (this.unsafeCast<StandardTextFieldProps>()).InputProps =
+                                jso {
+                                    style =
+                                        jso {
+                                            paddingTop = 12.px
+                                            paddingBottom = 12.px
+                                        }
+                                }
                             minRows = 10
                             maxRows = 10
                             placeholder = string(Strings.PhonemesMappingMapPlaceholder)

@@ -41,8 +41,10 @@ import org.w3c.files.File
 import kotlin.math.max
 
 object Vsqx {
-
-    suspend fun parse(file: File, params: ImportParams): Project {
+    suspend fun parse(
+        file: File,
+        params: ImportParams,
+    ): Project {
         val text = file.readText()
         return when {
             text.contains("xmlns=\"http://www.yamaha.co.jp/vocaloid/schema/vsq3/\"") ->
@@ -53,7 +55,12 @@ object Vsqx {
         }
     }
 
-    private fun parse(file: File, textRead: String, tagNames: TagNames, params: ImportParams): Project {
+    private fun parse(
+        file: File,
+        textRead: String,
+        tagNames: TagNames,
+        params: ImportParams,
+    ): Project {
         val warnings = mutableListOf<ImportWarning>()
         val projectName = file.nameWithoutExtension
         val parser = DOMParser()
@@ -64,17 +71,19 @@ object Vsqx {
         val masterTrack = root.getSingleElementByTagName(tagNames.masterTrack)
 
         val preMeasureNode = masterTrack.getSingleElementByTagName(tagNames.preMeasure)
-        val measurePrefix = try {
-            preMeasureNode.innerValue.toInt()
-        } catch (t: Throwable) {
-            throw IllegalFileException.XmlElementValueIllegal(tagNames.preMeasure)
-        }
+        val measurePrefix =
+            try {
+                preMeasureNode.innerValue.toInt()
+            } catch (t: Throwable) {
+                throw IllegalFileException.XmlElementValueIllegal(tagNames.preMeasure)
+            }
 
         val (tickPrefix, timeSignatures) = parseTimeSignatures(masterTrack, tagNames, measurePrefix, warnings)
         val tempos = parseTempos(masterTrack, tagNames, tickPrefix, warnings)
-        val tracks = root.getElementListByTagName(tagNames.vsTrack).mapIndexed { index, element ->
-            parseTrack(element, index, tagNames, tickPrefix, params)
-        }
+        val tracks =
+            root.getElementListByTagName(tagNames.vsTrack).mapIndexed { index, element ->
+                parseTrack(element, index, tagNames, tickPrefix, params)
+            }
 
         return Project(
             format = format,
@@ -94,36 +103,42 @@ object Vsqx {
         measurePrefix: Int,
         warnings: MutableList<ImportWarning>,
     ): Pair<Long, List<TimeSignature>> {
-        val rawTimeSignatures = masterTrack.getElementListByTagName(tagNames.timeSig, allowEmpty = false)
-            .mapNotNull {
-                val posMes = it.getSingleElementByTagNameOrNull(tagNames.posMes)?.innerValueOrNull?.toIntOrNull()
-                    ?: return@mapNotNull null
-                val nume = it.getSingleElementByTagNameOrNull(tagNames.nume)?.innerValueOrNull?.toIntOrNull()
-                    ?: return@mapNotNull null
-                val denomi = it.getSingleElementByTagNameOrNull(tagNames.denomi)?.innerValueOrNull?.toIntOrNull()
-                    ?: return@mapNotNull null
-                TimeSignature(
-                    measurePosition = posMes,
-                    numerator = nume,
-                    denominator = denomi,
-                )
-            }
-            .ifEmpty {
-                warnings.add(ImportWarning.TimeSignatureNotFound)
-                listOf(TimeSignature.default)
-            }
+        val rawTimeSignatures =
+            masterTrack
+                .getElementListByTagName(tagNames.timeSig, allowEmpty = false)
+                .mapNotNull {
+                    val posMes =
+                        it.getSingleElementByTagNameOrNull(tagNames.posMes)?.innerValueOrNull?.toIntOrNull()
+                            ?: return@mapNotNull null
+                    val nume =
+                        it.getSingleElementByTagNameOrNull(tagNames.nume)?.innerValueOrNull?.toIntOrNull()
+                            ?: return@mapNotNull null
+                    val denomi =
+                        it.getSingleElementByTagNameOrNull(tagNames.denomi)?.innerValueOrNull?.toIntOrNull()
+                            ?: return@mapNotNull null
+                    TimeSignature(
+                        measurePosition = posMes,
+                        numerator = nume,
+                        denominator = denomi,
+                    )
+                }.ifEmpty {
+                    warnings.add(ImportWarning.TimeSignatureNotFound)
+                    listOf(TimeSignature.default)
+                }
 
         // Calculate before time signatures are cleaned up
         val tickPrefix = getTickPrefix(rawTimeSignatures, measurePrefix)
 
-        val timeSignatures = rawTimeSignatures
-            .map { it.copy(measurePosition = it.measurePosition - measurePrefix) }
-            .toMutableList()
+        val timeSignatures =
+            rawTimeSignatures
+                .map { it.copy(measurePosition = it.measurePosition - measurePrefix) }
+                .toMutableList()
 
         // Delete all time signatures inside prefix, add apply the last as the first
-        val firstTimeSignatureIndex = timeSignatures
-            .last { it.measurePosition <= 0 }
-            .let { timeSignatures.indexOf(it) }
+        val firstTimeSignatureIndex =
+            timeSignatures
+                .last { it.measurePosition <= 0 }
+                .let { timeSignatures.indexOf(it) }
         repeat(firstTimeSignatureIndex) {
             val removed = timeSignatures.removeAt(0)
             warnings.add(ImportWarning.TimeSignatureIgnoredInPreMeasure(removed))
@@ -132,7 +147,10 @@ object Vsqx {
         return tickPrefix to timeSignatures.toList()
     }
 
-    private fun getTickPrefix(timeSignatures: List<TimeSignature>, measurePrefix: Int): Long {
+    private fun getTickPrefix(
+        timeSignatures: List<TimeSignature>,
+        measurePrefix: Int,
+    ): Long {
         val counter = TickCounter()
         timeSignatures
             .filter { it.measurePosition < measurePrefix }
@@ -147,30 +165,34 @@ object Vsqx {
         tickPrefix: Long,
         warnings: MutableList<ImportWarning>,
     ): List<Tempo> {
-        val tempos = masterTrack.getElementListByTagName(tagNames.tempo, allowEmpty = false)
-            .mapNotNull {
-                val posTick =
-                    it.getSingleElementByTagNameOrNull(tagNames.posTick)?.innerValueOrNull?.toLongOrNull()
-                        ?: return@mapNotNull null
-                val bpm =
-                    it.getSingleElementByTagNameOrNull(tagNames.bpm)?.innerValueOrNull?.toDoubleOrNull()
-                        ?.let { bpm -> bpm / BPM_RATE }
-                        ?: return@mapNotNull null
-                Tempo(
-                    tickPosition = posTick - tickPrefix,
-                    bpm = bpm,
-                )
-            }
-            .ifEmpty {
-                warnings.add(ImportWarning.TempoNotFound)
-                listOf(Tempo.default)
-            }
-            .toMutableList()
+        val tempos =
+            masterTrack
+                .getElementListByTagName(tagNames.tempo, allowEmpty = false)
+                .mapNotNull {
+                    val posTick =
+                        it.getSingleElementByTagNameOrNull(tagNames.posTick)?.innerValueOrNull?.toLongOrNull()
+                            ?: return@mapNotNull null
+                    val bpm =
+                        it
+                            .getSingleElementByTagNameOrNull(tagNames.bpm)
+                            ?.innerValueOrNull
+                            ?.toDoubleOrNull()
+                            ?.let { bpm -> bpm / BPM_RATE }
+                            ?: return@mapNotNull null
+                    Tempo(
+                        tickPosition = posTick - tickPrefix,
+                        bpm = bpm,
+                    )
+                }.ifEmpty {
+                    warnings.add(ImportWarning.TempoNotFound)
+                    listOf(Tempo.default)
+                }.toMutableList()
 
         // Delete all tempo tags inside prefix, add apply the last as the first
-        val firstTempoIndex = tempos
-            .last { it.tickPosition <= 0 }
-            .let { tempos.indexOf(it) }
+        val firstTempoIndex =
+            tempos
+                .last { it.tickPosition <= 0 }
+                .let { tempos.indexOf(it) }
         repeat(firstTempoIndex) {
             val removed = tempos.removeAt(0)
             warnings.add(ImportWarning.TempoIgnoredInPreMeasure(removed))
@@ -186,61 +208,73 @@ object Vsqx {
         tickPrefix: Long,
         params: ImportParams,
     ): Track {
-        val trackName = trackNode.getSingleElementByTagNameOrNull(tagNames.trackName)?.innerValueOrNull
-            ?: "Track ${id + 1}"
+        val trackName =
+            trackNode.getSingleElementByTagNameOrNull(tagNames.trackName)?.innerValueOrNull
+                ?: "Track ${id + 1}"
         val partNodes = trackNode.getElementListByTagName(tagNames.musicalPart)
-        val notes = partNodes
-            .flatMap { partNode ->
-                val tickOffset =
-                    partNode.getSingleElementByTagName(tagNames.posTick).innerValue.toLong() - tickPrefix
-                partNode.getElementListByTagName(tagNames.note).map { tickOffset to it }
-            }
-            .mapIndexed { index, (tickOffset, noteNode) ->
-                val key = noteNode.getSingleElementByTagName(tagNames.noteNum).innerValue.toInt()
-                val tickOn = noteNode.getSingleElementByTagName(tagNames.posTick).innerValue.toLong()
-                val length = noteNode.getSingleElementByTagName(tagNames.duration).innerValue.toLong()
-                val lyric =
-                    noteNode.getSingleElementByTagNameOrNull(tagNames.lyric)?.innerValueOrNull ?: params.defaultLyric
-                val xSampa = noteNode.getSingleElementByTagNameOrNull(tagNames.xSampa)?.innerValueOrNull
-                Note(
-                    id = index,
-                    key = key,
-                    tickOn = tickOn + tickOffset,
-                    tickOff = tickOn + tickOffset + length,
-                    lyric = lyric,
-                    phoneme = xSampa,
-                )
-            }
-        val pitch = if (params.simpleImport) null else {
-            val pitchByParts = partNodes
-                .map { partNode ->
+        val notes =
+            partNodes
+                .flatMap { partNode ->
                     val tickOffset =
                         partNode.getSingleElementByTagName(tagNames.posTick).innerValue.toLong() - tickPrefix
-                    val controlNodes = partNode.getElementListByTagName(tagNames.mCtrl)
-                    val pbs = controlNodes.filter {
-                        it.getSingleElementByTagName(tagNames.attr).getAttribute(tagNames.id) == tagNames.pbsName
-                    }.map {
-                        VocaloidPartPitchData.Event(
-                            pos = it.getSingleElementByTagName(tagNames.posTick).innerValue.toLong(),
-                            value = it.getSingleElementByTagName(tagNames.attr).innerValue.toInt(),
-                        )
-                    }
-                    val pit = controlNodes.filter {
-                        it.getSingleElementByTagName(tagNames.attr).getAttribute(tagNames.id) == tagNames.pitName
-                    }.map {
-                        VocaloidPartPitchData.Event(
-                            pos = it.getSingleElementByTagName(tagNames.posTick).innerValue.toLong(),
-                            value = it.getSingleElementByTagName(tagNames.attr).innerValue.toInt(),
-                        )
-                    }
-                    VocaloidPartPitchData(
-                        startPos = tickOffset,
-                        pit = pit,
-                        pbs = pbs,
+                    partNode.getElementListByTagName(tagNames.note).map { tickOffset to it }
+                }.mapIndexed { index, (tickOffset, noteNode) ->
+                    val key = noteNode.getSingleElementByTagName(tagNames.noteNum).innerValue.toInt()
+                    val tickOn = noteNode.getSingleElementByTagName(tagNames.posTick).innerValue.toLong()
+                    val length = noteNode.getSingleElementByTagName(tagNames.duration).innerValue.toLong()
+                    val lyric =
+                        noteNode.getSingleElementByTagNameOrNull(tagNames.lyric)?.innerValueOrNull
+                            ?: params.defaultLyric
+                    val xSampa = noteNode.getSingleElementByTagNameOrNull(tagNames.xSampa)?.innerValueOrNull
+                    Note(
+                        id = index,
+                        key = key,
+                        tickOn = tickOn + tickOffset,
+                        tickOff = tickOn + tickOffset + length,
+                        lyric = lyric,
+                        phoneme = xSampa,
                     )
                 }
-            pitchFromVocaloidParts(pitchByParts)
-        }
+        val pitch =
+            if (params.simpleImport) {
+                null
+            } else {
+                val pitchByParts =
+                    partNodes
+                        .map { partNode ->
+                            val tickOffset =
+                                partNode.getSingleElementByTagName(tagNames.posTick).innerValue.toLong() - tickPrefix
+                            val controlNodes = partNode.getElementListByTagName(tagNames.mCtrl)
+                            val pbs =
+                                controlNodes
+                                    .filter {
+                                        it.getSingleElementByTagName(tagNames.attr).getAttribute(tagNames.id) ==
+                                            tagNames.pbsName
+                                    }.map {
+                                        VocaloidPartPitchData.Event(
+                                            pos = it.getSingleElementByTagName(tagNames.posTick).innerValue.toLong(),
+                                            value = it.getSingleElementByTagName(tagNames.attr).innerValue.toInt(),
+                                        )
+                                    }
+                            val pit =
+                                controlNodes
+                                    .filter {
+                                        it.getSingleElementByTagName(tagNames.attr).getAttribute(tagNames.id) ==
+                                            tagNames.pitName
+                                    }.map {
+                                        VocaloidPartPitchData.Event(
+                                            pos = it.getSingleElementByTagName(tagNames.posTick).innerValue.toLong(),
+                                            value = it.getSingleElementByTagName(tagNames.attr).innerValue.toInt(),
+                                        )
+                                    }
+                            VocaloidPartPitchData(
+                                startPos = tickOffset,
+                                pit = pit,
+                                pbs = pbs,
+                            )
+                        }
+                pitchFromVocaloidParts(pitchByParts)
+            }
         return Track(
             id = id,
             name = trackName,
@@ -249,7 +283,10 @@ object Vsqx {
         ).validateNotes()
     }
 
-    fun generate(project: Project, features: List<FeatureConfig>): ExportResult {
+    fun generate(
+        project: Project,
+        features: List<FeatureConfig>,
+    ): ExportResult {
         val document = generateContent(project, features)
         val serializer = XMLSerializer()
         val content = serializer.serializeToString(document).cleanEmptyXmlns()
@@ -267,7 +304,10 @@ object Vsqx {
 
     private fun String.cleanEmptyXmlns() = replace(" xmlns=\"\"", "")
 
-    private fun generateContent(project: Project, features: List<FeatureConfig>): Document {
+    private fun generateContent(
+        project: Project,
+        features: List<FeatureConfig>,
+    ): Document {
         val text = core.external.Resources.vsqxTemplate
         val tagNames = TagNames.Vsq4
         val parser = DOMParser()
@@ -316,8 +356,11 @@ object Vsqx {
         previous.setSingleChildValue(tagNames.bpm, (models.first().bpm * BPM_RATE).toInt())
         models.drop(1).forEach {
             val model =
-                if (it.tickPosition == 0L) it
-                else it.copy(tickPosition = it.tickPosition + tickPrefix)
+                if (it.tickPosition == 0L) {
+                    it
+                } else {
+                    it.copy(tickPosition = it.tickPosition + tickPrefix)
+                }
 
             val new = empty.clone()
             new.setSingleChildValue(tagNames.posTick, model.tickPosition)
@@ -339,8 +382,11 @@ object Vsqx {
         previous.setSingleChildValue(tagNames.denomi, models.first().denominator)
         models.drop(1).forEach {
             val model =
-                if (it.measurePosition == 0) it
-                else it.copy(measurePosition = it.measurePosition + measurePrefix)
+                if (it.measurePosition == 0) {
+                    it
+                } else {
+                    it.copy(measurePosition = it.measurePosition + measurePrefix)
+                }
 
             val new = empty.clone()
             new.setSingleChildValue(tagNames.posMes, model.measurePosition)
@@ -433,8 +479,10 @@ object Vsqx {
         }
         var currentElement = emptyControl
         val eventsWithName =
-            pitchRawData.pbs.map { it to tagNames.pbsName } + pitchRawData.pit.map { it to tagNames.pitName }
-                .sortedBy { it.first.pos }
+            pitchRawData.pbs.map { it to tagNames.pbsName } +
+                pitchRawData.pit
+                    .map { it to tagNames.pitName }
+                    .sortedBy { it.first.pos }
         for (eventWithName in eventsWithName) {
             val newControlNode = emptyControl.clone()
             newControlNode.setSingleChildValue(tagNames.posTick, eventWithName.first.pos)
@@ -496,7 +544,7 @@ object Vsqx {
             attr = "v",
             pbsName = "S",
             pitName = "P",
-        )
+        ),
     }
 
     private val format = Format.Vsqx

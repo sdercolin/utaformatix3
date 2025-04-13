@@ -42,40 +42,43 @@ external interface ProjectZoomProps : SubProps<ProjectZoomState> {
     var projects: List<Project>
 }
 
-val ProjectZoomBlock = subFC<ProjectZoomProps, ProjectZoomState> { props, state, editState ->
-    FormGroup {
-        div {
-            configurationSwitch(
-                isOn = state.isOn,
-                onSwitched = { editState { copy(isOn = it) } },
-                labelStrings = Strings.ProjectZoom,
-            )
-            Tooltip {
-                title = ReactNode(string(Strings.ProjectZoomDescription))
-                placement = TooltipPlacement.right
-                disableInteractive = false
-                HelpOutline {
-                    style = jso {
-                        verticalAlign = VerticalAlign.middle
-                    }
-                }
-            }
-            if (props.projects.any { it.needWarningZoom(state.factorValue) }) {
+val ProjectZoomBlock =
+    subFC<ProjectZoomProps, ProjectZoomState> { props, state, editState ->
+        FormGroup {
+            div {
+                configurationSwitch(
+                    isOn = state.isOn,
+                    onSwitched = { editState { copy(isOn = it) } },
+                    labelStrings = Strings.ProjectZoom,
+                )
                 Tooltip {
-                    title = ReactNode(string(Strings.ProjectZoomWarning))
+                    title = ReactNode(string(Strings.ProjectZoomDescription))
                     placement = TooltipPlacement.right
                     disableInteractive = false
-                    ErrorOutline {
-                        style = jso {
-                            verticalAlign = VerticalAlign.middle
+                    HelpOutline {
+                        style =
+                            jso {
+                                verticalAlign = VerticalAlign.middle
+                            }
+                    }
+                }
+                if (props.projects.any { it.needWarningZoom(state.factorValue) }) {
+                    Tooltip {
+                        title = ReactNode(string(Strings.ProjectZoomWarning))
+                        placement = TooltipPlacement.right
+                        disableInteractive = false
+                        ErrorOutline {
+                            style =
+                                jso {
+                                    verticalAlign = VerticalAlign.middle
+                                }
                         }
                     }
                 }
             }
         }
+        if (state.isOn) buildProjectZoomDetail(state, editState)
     }
-    if (state.isOn) buildProjectZoomDetail(state, editState)
-}
 
 private fun ChildrenBuilder.buildProjectZoomDetail(
     state: ProjectZoomState,
@@ -89,15 +92,17 @@ private fun ChildrenBuilder.buildProjectZoomDetail(
         Paper {
             elevation = 0
             Box {
-                style = jso {
-                    margin = Margin(
-                        left = 24.px,
-                        right = 48.px,
-                        top = 16.px,
-                        bottom = 16.px,
-                    )
-                    paddingBottom = 8.px
-                }
+                style =
+                    jso {
+                        margin =
+                            Margin(
+                                left = 24.px,
+                                right = 48.px,
+                                top = 16.px,
+                                bottom = 16.px,
+                            )
+                        paddingBottom = 8.px
+                    }
                 sx { minWidth = 15.em }
                 FormControl {
                     FormLabel {

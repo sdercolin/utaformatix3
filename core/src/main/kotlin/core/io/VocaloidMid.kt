@@ -11,14 +11,15 @@ import core.model.contains
 import org.w3c.files.File
 
 object VocaloidMid {
+    suspend fun parse(
+        file: File,
+        params: ImportParams,
+    ): Project = VsqLike.parse(file, format, params)
 
-    suspend fun parse(file: File, params: ImportParams): Project {
-        return VsqLike.parse(file, format, params)
-    }
-
-    fun generate(project: Project, features: List<FeatureConfig>): ExportResult {
-        return VsqLike.generate(project, features, format)
-    }
+    fun generate(
+        project: Project,
+        features: List<FeatureConfig>,
+    ): ExportResult = VsqLike.generate(project, features, format)
 
     private val format = Format.VocaloidMid
 }

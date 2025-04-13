@@ -17,49 +17,50 @@ import ui.strings.changeLanguage
 
 typealias MyLanguage = Language
 
-val LanguageSelector = scopedFC<LanguageSelectorProps> { props, scope ->
-    var anchorElement: Element? by useState()
+val LanguageSelector =
+    scopedFC<LanguageSelectorProps> { props, scope ->
+        var anchorElement: Element? by useState()
 
-    fun openMenu(currentTarget: HTMLButtonElement) {
-        anchorElement = currentTarget
-    }
-
-    fun closeMenu() {
-        anchorElement = null
-    }
-
-    fun selectLanguage(language: MyLanguage) {
-        scope.launch {
-            changeLanguage(language.code)
-            props.onChangeLanguage(language)
+        fun openMenu(currentTarget: HTMLButtonElement) {
+            anchorElement = currentTarget
         }
-    }
 
-    div {
-        Button {
-            color = ButtonColor.inherit
-            onClick = { event ->
-                openMenu(event.currentTarget)
+        fun closeMenu() {
+            anchorElement = null
+        }
+
+        fun selectLanguage(language: MyLanguage) {
+            scope.launch {
+                changeLanguage(language.code)
+                props.onChangeLanguage(language)
             }
-            Language()
         }
 
-        Menu {
-            anchorEl = anchorElement?.let { { _ -> it } }
-            open = anchorElement != null
-            onClose = { closeMenu() }
-            MyLanguage.values().forEach { language ->
-                MenuItem {
-                    onClick = {
-                        selectLanguage(language)
-                        closeMenu()
+        div {
+            Button {
+                color = ButtonColor.inherit
+                onClick = { event ->
+                    openMenu(event.currentTarget)
+                }
+                Language()
+            }
+
+            Menu {
+                anchorEl = anchorElement?.let { { _ -> it } }
+                open = anchorElement != null
+                onClose = { closeMenu() }
+                MyLanguage.values().forEach { language ->
+                    MenuItem {
+                        onClick = {
+                            selectLanguage(language)
+                            closeMenu()
+                        }
+                        +language.displayName
                     }
-                    +language.displayName
                 }
             }
         }
     }
-}
 
 external interface LanguageSelectorProps : Props {
     var onChangeLanguage: (Language) -> Unit

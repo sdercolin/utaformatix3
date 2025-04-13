@@ -1,7 +1,6 @@
 package ui
 
 object Resources {
-
     val vocaloidMidIcon: String
         get() = core.external.require("./images/vocaloid1.png").default as String
 

@@ -47,98 +47,110 @@ import ui.external.react.FileDrop
 import ui.strings.Strings
 import ui.strings.string
 
-val Importer = scopedFC<ImporterProps> { props, scope ->
-    var loadingProgress by useState(ProgressProps.Initial)
-    var params by useState { loadImportParamsFromCookies() ?: ImportParams() }
-    var snackbarError by useState(SnackbarErrorState())
-    var dialogError by useState(DialogErrorState())
+val Importer =
+    scopedFC<ImporterProps> { props, scope ->
+        var loadingProgress by useState(ProgressProps.Initial)
+        var params by useState { loadImportParamsFromCookies() ?: ImportParams() }
+        var snackbarError by useState(SnackbarErrorState())
+        var dialogError by useState(DialogErrorState())
 
-    suspend fun checkFilesToImport(files: List<File>, multipleMode: Boolean) {
-        val onError = { t: Throwable ->
-            console.log(t)
-            if (t is UnsupportedFileFormatError) {
-                val message = when (t) {
-                    is UnsupportedLegacyPpsfError -> string(Strings.UnsupportedLegacyPpsfError)
-                    else -> t.message ?: t.toString()
+        suspend fun checkFilesToImport(
+            files: List<File>,
+            multipleMode: Boolean,
+        ) {
+            val onError = { t: Throwable ->
+                console.log(t)
+                if (t is UnsupportedFileFormatError) {
+                    val message =
+                        when (t) {
+                            is UnsupportedLegacyPpsfError -> string(Strings.UnsupportedLegacyPpsfError)
+                            else -> t.message ?: t.toString()
+                        }
+                    snackbarError = SnackbarErrorState(true, message)
+                } else {
+                    dialogError =
+                        DialogErrorState(
+                            isShowing = true,
+                            title = string(Strings.ImportErrorDialogTitle),
+                            message = t.stackTraceToString(),
+                        )
                 }
-                snackbarError = SnackbarErrorState(true, message)
-            } else {
-                dialogError = DialogErrorState(
-                    isShowing = true,
-                    title = string(Strings.ImportErrorDialogTitle),
-                    message = t.stackTraceToString(),
-                )
+            }
+
+            val fileFormat =
+                runCatchingCancellable { getFileFormat(files, props) }
+                    .onFailure(onError)
+                    .getOrElse { return }
+
+            when {
+                fileFormat == null -> {
+                    snackbarError = SnackbarErrorState(true, string(Strings.UnsupportedFileTypeImportError))
+                }
+                !fileFormat.multipleFile && !multipleMode && files.count() > 1 -> {
+                    snackbarError =
+                        SnackbarErrorState(
+                            true,
+                            string(Strings.MultipleFileImportError, "format" to fileFormat.name),
+                        )
+                }
+                else ->
+                    import(
+                        scope,
+                        files,
+                        fileFormat,
+                        setProgress = { loadingProgress = it },
+                        onError,
+                        props,
+                        params,
+                    )
             }
         }
 
-        val fileFormat = runCatchingCancellable { getFileFormat(files, props) }
-            .onFailure(onError)
-            .getOrElse { return }
-
-        when {
-            fileFormat == null -> {
-                snackbarError = SnackbarErrorState(true, string(Strings.UnsupportedFileTypeImportError))
-            }
-            !fileFormat.multipleFile && !multipleMode && files.count() > 1 -> {
-                snackbarError = SnackbarErrorState(
-                    true,
-                    string(Strings.MultipleFileImportError, "format" to fileFormat.name),
-                )
-            }
-            else -> import(
-                scope,
-                files,
-                fileFormat,
-                setProgress = { loadingProgress = it },
-                onError,
-                props,
-                params,
-            )
+        fun closeMessageBar() {
+            snackbarError = snackbarError.copy(isShowing = false)
         }
-    }
 
-    fun closeMessageBar() {
-        snackbarError = snackbarError.copy(isShowing = false)
-    }
-
-    fun closeErrorDialog() {
-        dialogError = dialogError.copy(isShowing = false)
-    }
-
-    title(Strings.ImportProjectCaption)
-
-    div {
-        css {
-            marginTop = 40.px
+        fun closeErrorDialog() {
+            dialogError = dialogError.copy(isShowing = false)
         }
-        onClick = {
-            scope.launch {
-                val accept = props.formats.joinToString(",") { it.extension }
-                val files = waitFileSelection(accept = accept, multiple = true)
-                checkFilesToImport(files, params.multipleMode)
+
+        title(Strings.ImportProjectCaption)
+
+        div {
+            css {
+                marginTop = 40.px
             }
+            onClick = {
+                scope.launch {
+                    val accept = props.formats.joinToString(",") { it.extension }
+                    val files = waitFileSelection(accept = accept, multiple = true)
+                    checkFilesToImport(files, params.multipleMode)
+                }
+            }
+            buildFileDrop(scope) { checkFilesToImport(it, params.multipleMode) }
         }
-        buildFileDrop(scope) { checkFilesToImport(it, params.multipleMode) }
+
+        buildConfigurations(params) { params = it }
+
+        messageBar(
+            isShowing = snackbarError.isShowing,
+            message = snackbarError.message,
+            close = { closeMessageBar() },
+            color = AlertColor.error,
+        )
+
+        errorDialog(
+            state = dialogError,
+            close = { closeErrorDialog() },
+        )
+
+        progress(loadingProgress)
     }
 
-    buildConfigurations(params) { params = it }
-
-    messageBar(
-        isShowing = snackbarError.isShowing,
-        message = snackbarError.message,
-        close = { closeMessageBar() },
-        color = AlertColor.error,
-    )
-
-    errorDialog(
-        state = dialogError,
-        close = { closeErrorDialog() },
-    )
-
-    progress(loadingProgress)
-}
-
-private fun ChildrenBuilder.buildFileDrop(scope: CoroutineScope, onFiles: suspend (List<File>) -> Unit) {
+private fun ChildrenBuilder.buildFileDrop(
+    scope: CoroutineScope,
+    onFiles: suspend (List<File>) -> Unit,
+) {
     FileDrop {
         onDrop = { files, _ ->
             scope.launch { onFiles(files.toList()) }
@@ -159,20 +171,24 @@ private fun ChildrenBuilder.buildFileDrop(scope: CoroutineScope, onFiles: suspen
     }
 }
 
-private fun ChildrenBuilder.buildConfigurations(params: ImportParams, onNewParams: (ImportParams) -> Unit) {
+private fun ChildrenBuilder.buildConfigurations(
+    params: ImportParams,
+    onNewParams: (ImportParams) -> Unit,
+) {
     FormGroup {
         row = true
         div {
             FormControlLabel {
                 label = ReactNode(string(Strings.UseSimpleImport))
-                control = Switch.create {
-                    color = SwitchColor.secondary
-                    checked = params.simpleImport
-                    onChange = { event, _ ->
-                        val checked = event.target.checked
-                        onNewParams(params.copy(simpleImport = checked))
+                control =
+                    Switch.create {
+                        color = SwitchColor.secondary
+                        checked = params.simpleImport
+                        onChange = { event, _ ->
+                            val checked = event.target.checked
+                            onNewParams(params.copy(simpleImport = checked))
+                        }
                     }
-                }
                 labelPlacement = LabelPlacement.end
             }
             Tooltip {
@@ -181,9 +197,10 @@ private fun ChildrenBuilder.buildConfigurations(params: ImportParams, onNewParam
                 disableInteractive = false
 
                 HelpOutline {
-                    style = jso {
-                        verticalAlign = VerticalAlign.middle
-                    }
+                    style =
+                        jso {
+                            verticalAlign = VerticalAlign.middle
+                        }
                 }
             }
         }
@@ -191,14 +208,15 @@ private fun ChildrenBuilder.buildConfigurations(params: ImportParams, onNewParam
             css { marginLeft = 48.px }
             FormControlLabel {
                 label = ReactNode(string(Strings.UseMultipleMode))
-                control = Switch.create {
-                    color = SwitchColor.secondary
-                    checked = params.multipleMode
-                    onChange = { event, _ ->
-                        val checked = event.target.checked
-                        onNewParams(params.copy(multipleMode = checked))
+                control =
+                    Switch.create {
+                        color = SwitchColor.secondary
+                        checked = params.multipleMode
+                        onChange = { event, _ ->
+                            val checked = event.target.checked
+                            onNewParams(params.copy(multipleMode = checked))
+                        }
                     }
-                }
                 labelPlacement = LabelPlacement.end
             }
             Tooltip {
@@ -207,9 +225,10 @@ private fun ChildrenBuilder.buildConfigurations(params: ImportParams, onNewParam
                 disableInteractive = false
 
                 HelpOutline {
-                    style = jso {
-                        verticalAlign = VerticalAlign.middle
-                    }
+                    style =
+                        jso {
+                            verticalAlign = VerticalAlign.middle
+                        }
                 }
             }
         }
@@ -229,24 +248,26 @@ private fun import(
         runCatchingCancellable {
             delay(100)
             val parseFunction = format.parser
-            val projects = if (params.multipleMode) {
-                val total = files.count()
-                console.log("Importing $total files...")
-                val projects = files.mapIndexed { index, file ->
-                    setProgress(ProgressProps(isShowing = true, total = total, current = index + 1))
-                    val project = parseFunction(listOf(file), params).lyricsTypeAnalysed().requireValid()
-                    console.log("Imported ${index + 1} of $total files")
-                    project
+            val projects =
+                if (params.multipleMode) {
+                    val total = files.count()
+                    console.log("Importing $total files...")
+                    val projects =
+                        files.mapIndexed { index, file ->
+                            setProgress(ProgressProps(isShowing = true, total = total, current = index + 1))
+                            val project = parseFunction(listOf(file), params).lyricsTypeAnalysed().requireValid()
+                            console.log("Imported ${index + 1} of $total files")
+                            project
+                        }
+                    console.log("A batch of $total projects are imported successfully.")
+                    projects
+                } else {
+                    setProgress(ProgressProps(isShowing = true))
+                    val project = parseFunction(files, params).lyricsTypeAnalysed().requireValid()
+                    console.log("Project is imported successfully.")
+                    console.log(project)
+                    listOf(project)
                 }
-                console.log("A batch of $total projects are imported successfully.")
-                projects
-            } else {
-                setProgress(ProgressProps(isShowing = true))
-                val project = parseFunction(files, params).lyricsTypeAnalysed().requireValid()
-                console.log("Project is imported successfully.")
-                console.log(project)
-                listOf(project)
-            }
             saveImportParamsToCookies(params)
             props.onImported.invoke(projects)
         }.onFailure { t ->
@@ -256,21 +277,26 @@ private fun import(
     }
 }
 
-private suspend fun getFileFormat(files: List<File>, props: ImporterProps): Format? {
+private suspend fun getFileFormat(
+    files: List<File>,
+    props: ImporterProps,
+): Format? {
     val extensions = files.map { it.extensionName }.distinct()
     if (extensions.count() > 1) return null
 
     return props.formats.find { it.match(files) }
 }
 
-private fun loadImportParamsFromCookies() = Cookies.get(ImportParamsCookieName)
-    ?.takeIf { it.isNotBlank() }
-    ?.let(ImportParamsJson::parse)
+private fun loadImportParamsFromCookies() =
+    Cookies
+        .get(IMPORT_PARAMS_COOKIE_NAME)
+        ?.takeIf { it.isNotBlank() }
+        ?.let(ImportParamsJson::parse)
 
 private fun saveImportParamsToCookies(params: ImportParams) =
-    Cookies.set(ImportParamsCookieName, ImportParamsJson.generate(params))
+    Cookies.set(IMPORT_PARAMS_COOKIE_NAME, ImportParamsJson.generate(params))
 
-private const val ImportParamsCookieName = "import_params"
+private const val IMPORT_PARAMS_COOKIE_NAME = "import_params"
 
 external interface ImporterProps : Props {
     var formats: List<Format>

@@ -18,54 +18,78 @@ import kotlinx.serialization.json.JsonElement
 import org.w3c.files.File
 
 object Ppsf {
-    suspend fun parse(file: File, params: ImportParams): core.model.Project {
+    suspend fun parse(
+        file: File,
+        params: ImportParams,
+    ): core.model.Project {
         val content = readContent(file)
         val warnings = mutableListOf<ImportWarning>()
 
-        val name = content.ppsf.project.name?.takeIf { it.isNotBlank() } ?: file.nameWithoutExtension
+        val name =
+            content.ppsf.project.name
+                ?.takeIf { it.isNotBlank() } ?: file.nameWithoutExtension
 
-        val timeSignatures = content.ppsf.project.meter.let { meter ->
-            val first = TimeSignature(
-                measurePosition = 0,
-                numerator = meter.const.nume,
-                denominator = meter.const.denomi,
-            )
-            if (!meter.useSequence) listOf(first)
-            else {
-                val sequence = meter.sequence.orEmpty().map { event ->
-                    TimeSignature(
-                        measurePosition = event.measure,
-                        numerator = event.nume,
-                        denominator = event.denomi,
-                    )
-                }
-                if (sequence.none { it.measurePosition == 0 }) listOf(first) + sequence
-                else sequence
+        val timeSignatures =
+            content.ppsf.project.meter
+                .let { meter ->
+                    val first =
+                        TimeSignature(
+                            measurePosition = 0,
+                            numerator = meter.const.nume,
+                            denominator = meter.const.denomi,
+                        )
+                    if (!meter.useSequence) {
+                        listOf(first)
+                    } else {
+                        val sequence =
+                            meter.sequence.orEmpty().map { event ->
+                                TimeSignature(
+                                    measurePosition = event.measure,
+                                    numerator = event.nume,
+                                    denominator = event.denomi,
+                                )
+                            }
+                        if (sequence.none { it.measurePosition == 0 }) {
+                            listOf(first) + sequence
+                        } else {
+                            sequence
+                        }
+                    }
+                }.takeIf { it.isNotEmpty() } ?: listOf(TimeSignature.default).also {
+                warnings.add(ImportWarning.TimeSignatureNotFound)
             }
-        }.takeIf { it.isNotEmpty() } ?: listOf(TimeSignature.default).also {
-            warnings.add(ImportWarning.TimeSignatureNotFound)
-        }
 
-        val tempos = content.ppsf.project.tempo.let { tempos: Tempo ->
-            val first = Tempo(
-                tickPosition = 0,
-                bpm = tempos.const.toDouble() / BPM_RATE,
-            )
-            if (!tempos.useSequence) listOf(first) else {
-                val sequence = tempos.sequence.orEmpty().map { event ->
-                    Tempo(
-                        tickPosition = event.tick.toLong(),
-                        bpm = event.value.toDouble() / BPM_RATE,
-                    )
-                }
-                if (sequence.none { it.tickPosition == 0L }) listOf(first) + sequence
-                else sequence
+        val tempos =
+            content.ppsf.project.tempo
+                .let { tempos: Tempo ->
+                    val first =
+                        Tempo(
+                            tickPosition = 0,
+                            bpm = tempos.const.toDouble() / BPM_RATE,
+                        )
+                    if (!tempos.useSequence) {
+                        listOf(first)
+                    } else {
+                        val sequence =
+                            tempos.sequence.orEmpty().map { event ->
+                                Tempo(
+                                    tickPosition = event.tick.toLong(),
+                                    bpm = event.value.toDouble() / BPM_RATE,
+                                )
+                            }
+                        if (sequence.none { it.tickPosition == 0L }) {
+                            listOf(first) + sequence
+                        } else {
+                            sequence
+                        }
+                    }
+                }.takeIf { it.isNotEmpty() } ?: listOf(core.model.Tempo.default).also {
+                warnings.add(ImportWarning.TempoNotFound)
             }
-        }.takeIf { it.isNotEmpty() } ?: listOf(core.model.Tempo.default).also {
-            warnings.add(ImportWarning.TempoNotFound)
-        }
 
-        val tracks = content.ppsf.project.dvlTrack.mapIndexed { i, track -> parseTrack(i, track, params.defaultLyric) }
+        val tracks =
+            content.ppsf.project.dvlTrack
+                .mapIndexed { i, track -> parseTrack(i, track, params.defaultLyric) }
 
         return core.model.Project(
             format = format,
@@ -79,41 +103,49 @@ object Ppsf {
         )
     }
 
-    private fun parseTrack(index: Int, dvlTrack: DvlTrack, defaultLyric: String): core.model.Track {
+    private fun parseTrack(
+        index: Int,
+        dvlTrack: DvlTrack,
+        defaultLyric: String,
+    ): core.model.Track {
         val name = dvlTrack.name ?: "Track ${index + 1}"
-        val notes = dvlTrack.events.filter { it.enabled != false }.map {
-            core.model.Note(
-                id = 0,
-                key = it.noteNumber,
-                lyric = it.lyric?.takeUnless { lyric -> lyric.isBlank() } ?: defaultLyric,
-                tickOn = it.pos,
-                tickOff = it.pos + it.length,
-            )
-        }
-        return core.model.Track(
-            id = index,
-            name = name,
-            notes = notes,
-        ).validateNotes()
+        val notes =
+            dvlTrack.events.filter { it.enabled != false }.map {
+                core.model.Note(
+                    id = 0,
+                    key = it.noteNumber,
+                    lyric = it.lyric?.takeUnless { lyric -> lyric.isBlank() } ?: defaultLyric,
+                    tickOn = it.pos,
+                    tickOff = it.pos + it.length,
+                )
+            }
+        return core.model
+            .Track(
+                id = index,
+                name = name,
+                notes = notes,
+            ).validateNotes()
     }
 
     private suspend fun readContent(file: File): Project {
         val binary = file.readBinary()
-        val zip = runCatching { JsZip().loadAsync(binary).await() }.getOrElse {
-            throw UnsupportedLegacyPpsfError()
-        }
-        val vprEntry = zip.file(jsonPath)
+        val zip =
+            runCatching { JsZip().loadAsync(binary).await() }.getOrElse {
+                throw UnsupportedLegacyPpsfError()
+            }
+        val vprEntry = zip.file(JSON_PATH)
         val text = requireNotNull(vprEntry).async("string").await() as String
         return jsonSerializer.decodeFromString(Project.serializer(), text)
     }
 
-    private val jsonSerializer = Json {
-        isLenient = true
-        ignoreUnknownKeys = true
-    }
+    private val jsonSerializer =
+        Json {
+            isLenient = true
+            ignoreUnknownKeys = true
+        }
 
     private const val BPM_RATE = 10000.0
-    private const val jsonPath = "ppsf.json"
+    private const val JSON_PATH = "ppsf.json"
 
     @Serializable
     private data class Project(

@@ -9,10 +9,15 @@ import core.model.Pitch
 import core.util.runIf
 
 fun Double.loggedFrequencyToKey() = KEY_CENTER_C + (this - LOG_FRQ_CENTER_C) / LOG_FRQ_DIFF_ONE_KEY
+
 fun Double.keyToLoggedFrequency() = (this - KEY_CENTER_C) * LOG_FRQ_DIFF_ONE_KEY + LOG_FRQ_CENTER_C
 
 fun Pitch.getAbsoluteData(notes: List<Note>): List<Pair<Long, Double?>>? = convertRelativity(notes, toAbsolute = true)
-fun Pitch.getRelativeData(notes: List<Note>, borderAppendRadius: Long = 0L): List<Pair<Long, Double>>? =
+
+fun Pitch.getRelativeData(
+    notes: List<Note>,
+    borderAppendRadius: Long = 0L,
+): List<Pair<Long, Double>>? =
     convertRelativity(notes, toAbsolute = false, borderAppendRadius = borderAppendRadius)
         ?.mapNotNull { pair -> pair.second?.let { pair.first to it } }
 
@@ -30,21 +35,27 @@ private fun Pitch.convertRelativity(
             var index = 0
             var currentNoteKey = notes.first().key
             var nextBorder = borders.firstOrNull() ?: Long.MAX_VALUE
-            data.map { (pos, value) ->
-                while (pos >= nextBorder) {
-                    index++
-                    nextBorder = borders.getOrNull(index) ?: Long.MAX_VALUE
-                    currentNoteKey = notes[index].key
+            data
+                .map { (pos, value) ->
+                    while (pos >= nextBorder) {
+                        index++
+                        nextBorder = borders.getOrNull(index) ?: Long.MAX_VALUE
+                        currentNoteKey = notes[index].key
+                    }
+                    val convertedValue =
+                        if (value != null) {
+                            if (isAbsolute) {
+                                value - currentNoteKey
+                            } else {
+                                value.takeUnless { it == 0.0 }?.let { it + currentNoteKey }
+                            }
+                        } else {
+                            0.0
+                        }
+                    pos to convertedValue
+                }.runIf(!toAbsolute) {
+                    appendPointsAtBorders(notes, radius = borderAppendRadius)
                 }
-                val convertedValue =
-                    if (value != null) {
-                        if (isAbsolute) value - currentNoteKey
-                        else value.takeUnless { it == 0.0 }?.let { it + currentNoteKey }
-                    } else 0.0
-                pos to convertedValue
-            }.runIf(!toAbsolute) {
-                appendPointsAtBorders(notes, radius = borderAppendRadius)
-            }
         }
     }
 
@@ -72,7 +83,8 @@ private fun List<Pair<Long, Double?>>.appendPointsAtBorders(
 ): List<Pair<Long, Double?>> {
     if (radius <= 0) return this
     val result = this.toMutableList()
-    notes.zipWithNext()
+    notes
+        .zipWithNext()
         .forEach { (lastNote, thisNote) ->
             if (thisNote.tickOn - lastNote.tickOff > radius) return@forEach
             val firstPointAtThisNoteIndex =
@@ -80,7 +92,9 @@ private fun List<Pair<Long, Double?>>.appendPointsAtBorders(
             val firstPointAtThisNote = result[firstPointAtThisNoteIndex]
             if (firstPointAtThisNote.first == thisNote.tickOn ||
                 firstPointAtThisNote.first - thisNote.tickOn > radius
-            ) return@forEach
+            ) {
+                return@forEach
+            }
             val postValue = firstPointAtThisNote.second ?: return@forEach
             val newPointTick = thisNote.tickOn - radius
             val newPoint = newPointTick to postValue
@@ -97,20 +111,24 @@ private fun List<Pair<Long, Double?>>.appendPointsAtBorders(
  * But it will be processed to [(0,0), (1,2), (2,4), (3,6)] in those cases
  * Therefore we have to append points to make it like [(0,0), (2,0), (3,6)]
  */
-fun appendPitchPointsForInterpolation(points: List<Pair<Long, Double>>, intervalTick: Long) =
-    listOfNotNull(points.firstOrNull()) +
-        points.zipWithNext()
-            .flatMap { (lastPoint, thisPoint) ->
-                val tickDiff = thisPoint.first - lastPoint.first
-                val newPoint = when {
+fun appendPitchPointsForInterpolation(
+    points: List<Pair<Long, Double>>,
+    intervalTick: Long,
+) = listOfNotNull(points.firstOrNull()) +
+    points
+        .zipWithNext()
+        .flatMap { (lastPoint, thisPoint) ->
+            val tickDiff = thisPoint.first - lastPoint.first
+            val newPoint =
+                when {
                     tickDiff < intervalTick -> null
                     tickDiff < 2 * intervalTick ->
                         ((thisPoint.first + lastPoint.first) / 2) to lastPoint.second
                     else ->
                         thisPoint.first - intervalTick to lastPoint.second
                 }
-                listOfNotNull(newPoint, thisPoint)
-            }
+            listOfNotNull(newPoint, thisPoint)
+        }
 
 /**
  * Reduce a series of adjacent points with same value to two points

@@ -1,25 +1,24 @@
 plugins {
-    kotlin("multiplatform") version "1.8.22"
-    kotlin("plugin.serialization") version "1.8.22"
-    id("org.jlleitschuh.gradle.ktlint") version "10.3.0"
+    kotlin("multiplatform") version "2.1.20"
+    kotlin("plugin.serialization") version "2.1.20"
+    id("org.jlleitschuh.gradle.ktlint") version "12.2.0"
 }
 
 group = "com.sdercolin.utaformatix"
 
 repositories {
+    mavenLocal()
     mavenCentral()
 }
 
 allprojects {
     apply(plugin = "org.jlleitschuh.gradle.ktlint")
     configure<org.jlleitschuh.gradle.ktlint.KtlintExtension> {
-        version.set("0.45.2")
-        enableExperimentalRules.set(true)
+        version.set("1.5.0")
     }
 }
 
-fun kotlinw(target: String): String =
-    "org.jetbrains.kotlin-wrappers:kotlin-$target"
+fun kotlinw(target: String): String = "org.jetbrains.kotlin-wrappers:kotlin-$target"
 
 kotlin {
     js {
@@ -39,6 +38,7 @@ kotlin {
         val jsMain by getting {
             dependencies {
                 implementation(project(":core"))
+                implementation("com.sdercolin.utaformatix:utaformatix-data:1.1.0")
 
                 // Kotlin
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core-js:1.6.4")

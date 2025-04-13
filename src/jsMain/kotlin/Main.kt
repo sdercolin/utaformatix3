@@ -6,7 +6,7 @@ import ui.strings.Language
 import ui.strings.initializeI18n
 
 const val APP_NAME = "UtaFormatix"
-const val APP_VERSION = "3.22.1"
+const val APP_VERSION = "3.23"
 
 suspend fun main() {
     initializeI18n(Language.English)

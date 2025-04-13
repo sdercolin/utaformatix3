@@ -22,22 +22,33 @@ import org.w3c.files.BlobPropertyBag
 import org.w3c.files.File
 
 object StandardMid {
-
-    suspend fun parse(file: File, params: ImportParams): Project {
+    suspend fun parse(
+        file: File,
+        params: ImportParams,
+    ): Project {
         val midi = Mid.parseMidi(file)
         val timeDivision = midi.header.ticksPerBeat as Int
         val midiTracks = midi.tracks as Array<Array<dynamic>>
 
         val warnings = mutableListOf<ImportWarning>()
-        val (tempos, timeSignatures, tickPrefix) = Mid.parseMasterTrack(
-            timeDivision,
-            midiTracks.first(),
-            measurePrefix = 0,
-            warnings,
-        )
+        val (tempos, timeSignatures, tickPrefix) =
+            Mid.parseMasterTrack(
+                timeDivision,
+                midiTracks.first(),
+                measurePrefix = 0,
+                warnings,
+            )
 
-        val tracks = midiTracks.drop(1).mapIndexed { index, midiTrack ->
-            parseTrack(index, timeDivision, tickPrefix, midiTrack, params.defaultLyric)
+        val tracks =
+            midiTracks
+                .mapIndexed { index, midiTrack ->
+                    parseTrack(index, timeDivision, tickPrefix, midiTrack, params.defaultLyric)
+                }.toMutableList()
+
+        // Some MIDIs uses their first track only for metadata.
+        // If the first track is empty, we remove it (No one wants an empty track).
+        if (tracks[0].notes.isEmpty()) {
+            tracks.removeAt(0)
         }
 
         return Project(
@@ -129,9 +140,10 @@ object StandardMid {
     }
 
     fun generate(project: Project): ExportResult {
-        val content = Mid.generateContent(project) { track, tickPrefix, _ ->
-            generateTrack(track, tickPrefix)
-        }
+        val content =
+            Mid.generateContent(project) { track, tickPrefix, _ ->
+                generateTrack(track, tickPrefix)
+            }
         val blob = Blob(arrayOf(content), BlobPropertyBag("application/octet-stream"))
         val name = format.getFileName(project.name)
         return ExportResult(
@@ -158,7 +170,11 @@ object StandardMid {
             tickPosition = note.tickOn
 
             // write lyric event first
-            val lyric = note.lyric.ifBlank { DEFAULT_LYRIC }.encode("UTF-8").toList()
+            val lyric =
+                note.lyric
+                    .ifBlank { DEFAULT_LYRIC }
+                    .encode("UTF-8")
+                    .toList()
             bytes.addIntVariableLengthBigEndian(delta.toInt())
             bytes.addAll(MidiUtil.MetaType.Lyric.eventHeaderBytes)
             bytes.addBlock(lyric, Mid.IS_LITTLE_ENDIAN, lengthInVariableLength = true)

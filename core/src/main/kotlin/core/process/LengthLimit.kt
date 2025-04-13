@@ -22,9 +22,10 @@ fun Project.lengthLimited(maxLength: Long): Project {
 }
 
 private fun Track.lengthLimited(maxLength: Long): Track {
-    val notes = this.notes
-        .filter { it.tickOff <= maxLength }
-        .mapIndexed { index, note -> note.copy(id = index) }
+    val notes =
+        this.notes
+            .filter { it.tickOff <= maxLength }
+            .mapIndexed { index, note -> note.copy(id = index) }
     val pitch = this.pitch?.copy(data = this.pitch.data.filter { it.first <= maxLength })
 
     return copy(

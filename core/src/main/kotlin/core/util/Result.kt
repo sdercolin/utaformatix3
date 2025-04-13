@@ -2,8 +2,8 @@ package core.util
 
 import kotlinx.coroutines.CancellationException
 
-inline fun <T, R> T.runCatchingCancellable(block: T.() -> R): Result<R> {
-    return try {
+inline fun <T, R> T.runCatchingCancellable(block: T.() -> R): Result<R> =
+    try {
         Result.success(block())
     } catch (e: Throwable) {
         if (e is CancellationException) {
@@ -11,4 +11,3 @@ inline fun <T, R> T.runCatchingCancellable(block: T.() -> R): Result<R> {
         }
         Result.failure(e)
     }
-}

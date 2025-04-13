@@ -11,7 +11,11 @@ package core.process
 // As UtaFormatix use Pair<Long, Double> to describe pitch point, so...
 private typealias Point = Pair<Long, Double>
 
-private fun perpendicularDistance(pt: Point, lineStart: Point, lineEnd: Point): Double {
+private fun perpendicularDistance(
+    pt: Point,
+    lineStart: Point,
+    lineEnd: Point,
+): Double {
     var dx = (lineEnd.first - lineStart.first).toDouble()
     var dy = lineEnd.second - lineStart.second
 
@@ -40,7 +44,10 @@ private fun perpendicularDistance(pt: Point, lineStart: Point, lineEnd: Point): 
  * @param pointList Points that form the shape, connected by lines.
  * @param epsilon Defines how much the algorithm should simplify. Bigger value leads to more point to drop.
  */
-fun simplifyShape(pointList: List<Point>, epsilon: Double): List<Point> {
+fun simplifyShape(
+    pointList: List<Point>,
+    epsilon: Double,
+): List<Point> {
     if (pointList.size < 2) return pointList
 
     // Find the point with the maximum distance from line between start and end
@@ -75,7 +82,10 @@ fun simplifyShape(pointList: List<Point>, epsilon: Double): List<Point> {
  * Note that this function will simplify with a small epsilon anyway even your input count is satisfied.
  * Using [simplifyShape], which implements The RDP(Ramer–Douglas–Peucker) algorithm.
  * */
-fun simplifyShapeTo(pointList: List<Point>, maxPointCount: Long): List<Point> {
+fun simplifyShapeTo(
+    pointList: List<Point>,
+    maxPointCount: Long,
+): List<Point> {
     /* As sometimes we will have pit data that is less than 50 points, but way too dense for mode2 ust
        So we commented this check here to make sure data will be simplified least with epsilon = step. */
     val step = 0.05

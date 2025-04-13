@@ -21,16 +21,22 @@ fun ChildrenBuilder.warningDialog(
     state: DialogWarningState,
     close: () -> Unit,
 ) {
-    val ignoredIds = useMemo(id) {
-        window.localStorage.getItem("ignoredWarnings")?.split(",")?.toSet() ?: emptySet()
-    }
-    val ignored = useMemo(id) {
-        ignoredIds.contains(id)
-    }
-    val closeAndIgnore = useCallback(id) { warningId: String ->
-        window.localStorage.setItem("ignoredWarnings", (ignoredIds + warningId).joinToString(","))
-        close()
-    }
+    val ignoredIds =
+        useMemo(id) {
+            window.localStorage
+                .getItem("ignoredWarnings")
+                ?.split(",")
+                ?.toSet() ?: emptySet()
+        }
+    val ignored =
+        useMemo(id) {
+            ignoredIds.contains(id)
+        }
+    val closeAndIgnore =
+        useCallback(id) { warningId: String ->
+            window.localStorage.setItem("ignoredWarnings", (ignoredIds + warningId).joinToString(","))
+            close()
+        }
     if (!ignored) {
         Dialog {
             open = state.isShowing

@@ -36,38 +36,41 @@ import ui.common.title
 import ui.strings.Strings
 import ui.strings.string
 
-val Exporter = scopedFC<ExporterProps> { props, scope ->
-    var progress by useState(ProgressProps.Initial)
-    var dialogError by useState(DialogErrorState())
-    title(Strings.ExporterTitleSuccess)
-    buildExportInfo(props)
-    buildButtons(props, scope, setProgress = { progress = it }, onDialogError = { dialogError = it })
-    progress(progress)
-    errorDialog(
-        state = dialogError,
-        close = { dialogError = dialogError.copy(isShowing = false) },
-    )
-}
+val Exporter =
+    scopedFC<ExporterProps> { props, scope ->
+        var progress by useState(ProgressProps.Initial)
+        var dialogError by useState(DialogErrorState())
+        title(Strings.ExporterTitleSuccess)
+        buildExportInfo(props)
+        buildButtons(props, scope, setProgress = { progress = it }, onDialogError = { dialogError = it })
+        progress(progress)
+        errorDialog(
+            state = dialogError,
+            close = { dialogError = dialogError.copy(isShowing = false) },
+        )
+    }
 
 private const val MAX_NOTIFICATIONS = 20
 
 private fun ChildrenBuilder.buildExportInfo(props: ExporterProps) {
-    val notifications = props.results.flatMap { result ->
-        result.notifications.map { result.fileName to it }
-    }
+    val notifications =
+        props.results.flatMap { result ->
+            result.notifications.map { result.fileName to it }
+        }
     if (notifications.isEmpty()) return
 
     Alert {
         severity = AlertColor.warning
-        notifications.take(MAX_NOTIFICATIONS).map {
-            if (props.results.size > 1) {
-                val (fileName, notification) = it
-                "($fileName) ${notification.text}"
-            } else {
-                it.second.text
-            }
-        }
-            .forEach {
+        notifications
+            .take(MAX_NOTIFICATIONS)
+            .map {
+                if (props.results.size > 1) {
+                    val (fileName, notification) = it
+                    "($fileName) ${notification.text}"
+                } else {
+                    it.second.text
+                }
+            }.forEach {
                 div { +it }
             }
         if (notifications.size > MAX_NOTIFICATIONS) {
@@ -148,16 +151,17 @@ private fun download(
 }
 
 private val ExportNotification.text: String
-    get() = string(
-        when (this) {
-            ExportNotification.PhonemeResetRequiredVSQ -> Strings.ExportNotificationPhonemeResetRequiredVSQ
-            ExportNotification.PhonemeResetRequiredV4 -> Strings.ExportNotificationPhonemeResetRequiredV4
-            ExportNotification.PhonemeResetRequiredV5 -> Strings.ExportNotificationPhonemeResetRequiredV5
-            ExportNotification.TimeSignatureIgnored -> Strings.ExportNotificationTimeSignatureIgnored
-            ExportNotification.PitchDataExported -> Strings.ExportNotificationPitchDataExported
-            ExportNotification.DataOverLengthLimitIgnored -> Strings.ExportNotificationDataOverLengthLimitIgnored
-        },
-    )
+    get() =
+        string(
+            when (this) {
+                ExportNotification.PhonemeResetRequiredVSQ -> Strings.ExportNotificationPhonemeResetRequiredVSQ
+                ExportNotification.PhonemeResetRequiredV4 -> Strings.ExportNotificationPhonemeResetRequiredV4
+                ExportNotification.PhonemeResetRequiredV5 -> Strings.ExportNotificationPhonemeResetRequiredV5
+                ExportNotification.TimeSignatureIgnored -> Strings.ExportNotificationTimeSignatureIgnored
+                ExportNotification.PitchDataExported -> Strings.ExportNotificationPitchDataExported
+                ExportNotification.DataOverLengthLimitIgnored -> Strings.ExportNotificationDataOverLengthLimitIgnored
+            },
+        )
 
 external interface ExporterProps : Props {
     var format: Format

@@ -6,8 +6,14 @@ import kotlin.js.Promise
 @JsNonModule
 external class JsZip {
     fun loadAsync(data: dynamic): Promise<JsZip>
+
     fun file(name: String): JsZipObject?
-    fun file(name: String, data: dynamic): JsZip
+
+    fun file(
+        name: String,
+        data: dynamic,
+    ): JsZip
+
     fun generateAsync(option: JsZipOption): Promise<dynamic>
 }
 

@@ -56,12 +56,13 @@ fun List<Pair<Long, Double>>.interpolateCosineEaseOut(samplingIntervalTick: Long
 private fun List<Pair<Long, Double>>.interpolate(
     samplingIntervalTick: Long,
     mapping: (start: Pair<Long, Double>, end: Pair<Long, Double>, input: List<Long>) -> List<Pair<Long, Double>>,
-) = this.takeIf { it.isNotEmpty() }
+) = this
+    .takeIf { it.isNotEmpty() }
     ?.zipWithNext()
     ?.flatMap { (start, end) ->
-        val indexes = ((start.first + 1) until end.first)
-            .filter { (it - start.first) % samplingIntervalTick == 0L }
+        val indexes =
+            ((start.first + 1) until end.first)
+                .filter { (it - start.first) % samplingIntervalTick == 0L }
         val points = mapping(start, end, indexes)
         listOf(start) + points
-    }
-    ?.plus(this.last())
+    }?.plus(this.last())

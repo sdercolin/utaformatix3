@@ -5,8 +5,9 @@ import org.khronos.webgl.Int32Array
 import org.khronos.webgl.Uint8Array
 import org.khronos.webgl.get
 
-class ArrayBufferReader(private val buffer: ArrayBuffer) {
-
+class ArrayBufferReader(
+    private val buffer: ArrayBuffer,
+) {
     var index = 0
         private set
 
@@ -14,11 +15,10 @@ class ArrayBufferReader(private val buffer: ArrayBuffer) {
         index += length
     }
 
-    fun readInt(): Int {
-        return Int32Array(buffer.slice(index, index + 4))[0].also {
+    fun readInt(): Int =
+        Int32Array(buffer.slice(index, index + 4))[0].also {
             index += 4
         }
-    }
 
     fun readBytes(): Uint8Array {
         val length = readInt()

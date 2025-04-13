@@ -20,13 +20,13 @@ import org.khronos.webgl.Uint8Array
 import org.w3c.files.File
 
 object Mid {
-
     suspend fun parseMidi(file: File): dynamic {
         val bytes = file.readAsArrayBuffer()
         val midiParser = core.external.require("midi-file")
         try {
             return midiParser.parseMidi(Uint8Array(bytes))
-        } catch (e: dynamic) { // parseMidi throws a string, not an Error
+        } catch (e: dynamic) {
+            // parseMidi throws a string, not an Error
             throw IllegalFileException.IllegalMidiFile()
         }
     }
@@ -82,14 +82,16 @@ object Mid {
         // Calculate before time signatures are cleaned up
         val tickPrefix = getTickPrefix(rawTimeSignatures, measurePrefix)
 
-        val timeSignatures = rawTimeSignatures
-            .map { it.copy(measurePosition = it.measurePosition - measurePrefix) }
-            .toMutableList()
+        val timeSignatures =
+            rawTimeSignatures
+                .map { it.copy(measurePosition = it.measurePosition - measurePrefix) }
+                .toMutableList()
 
         // Delete all time signatures inside prefix, add apply the last as the first
-        val firstTimeSignatureIndex = timeSignatures
-            .last { it.measurePosition <= 0 }
-            .let { timeSignatures.indexOf(it) }
+        val firstTimeSignatureIndex =
+            timeSignatures
+                .last { it.measurePosition <= 0 }
+                .let { timeSignatures.indexOf(it) }
         repeat(firstTimeSignatureIndex) {
             val removed = timeSignatures.removeAt(0)
             warnings.add(ImportWarning.TimeSignatureIgnoredInPreMeasure(removed))
@@ -97,12 +99,14 @@ object Mid {
         timeSignatures[0] = timeSignatures[0].copy(measurePosition = 0)
 
         // Delete all tempo tags inside prefix, add apply the last as the first
-        val tempos = rawTempos
-            .map { it.copy(tickPosition = it.tickPosition - tickPrefix) }
-            .toMutableList()
-        val firstTempoIndex = tempos
-            .last { it.tickPosition <= 0 }
-            .let { tempos.indexOf(it) }
+        val tempos =
+            rawTempos
+                .map { it.copy(tickPosition = it.tickPosition - tickPrefix) }
+                .toMutableList()
+        val firstTempoIndex =
+            tempos
+                .last { it.tickPosition <= 0 }
+                .let { tempos.indexOf(it) }
         repeat(firstTempoIndex) {
             val removed = tempos.removeAt(0)
             warnings.add(ImportWarning.TempoIgnoredInPreMeasure(removed))
@@ -116,7 +120,10 @@ object Mid {
         )
     }
 
-    private fun getTickPrefix(timeSignatures: List<TimeSignature>, measurePrefix: Int): Long {
+    private fun getTickPrefix(
+        timeSignatures: List<TimeSignature>,
+        measurePrefix: Int,
+    ): Long {
         val counter = TickCounter()
         timeSignatures
             .filter { it.measurePosition < measurePrefix }
@@ -125,14 +132,16 @@ object Mid {
         return counter.tick
     }
 
-    fun extractVsqTextsFromMetaEvents(midiTracks: Array<Array<dynamic>>): List<String> {
-        return midiTracks.drop(1)
+    fun extractVsqTextsFromMetaEvents(midiTracks: Array<Array<dynamic>>): List<String> =
+        midiTracks
+            .drop(1)
             .map { track ->
                 track
                     .fold("") { accumulator, element ->
                         val metaType = element.type as String
-                        if (metaType != "text") accumulator
-                        else {
+                        if (metaType != "text") {
+                            accumulator
+                        } else {
                             var text = element.text as String
                             text = text.asByteTypedArray().decode("SJIS")
                             text = text.drop(3)
@@ -141,13 +150,11 @@ object Mid {
                         }
                     }
             }
-    }
 
     fun generateContent(
         project: Project,
         generateTrackBytes: (track: Track, tickPrefix: Int, measurePrefix: Int) -> List<Byte>,
-    ):
-        Uint8Array {
+    ): Uint8Array {
         val bytes = mutableListOf<Byte>()
         bytes.addAll(headerLabel)
         bytes.addInt(6, IS_LITTLE_ENDIAN)
@@ -177,7 +184,10 @@ object Mid {
         return Uint8Array(bytes.toTypedArray())
     }
 
-    private fun generateMasterTrack(project: Project, tickPrefix: Int): List<Byte> {
+    private fun generateMasterTrack(
+        project: Project,
+        tickPrefix: Int,
+    ): List<Byte> {
         val bytes = mutableListOf<Byte>()
         bytes.add(0x00)
         bytes.addAll(MidiUtil.MetaType.TrackName.eventHeaderBytes)
@@ -196,12 +206,13 @@ object Mid {
             tickEventPairs.add(counter.outputTick + tickPrefix to it)
         }
         tickEventPairs.sortBy { it.first }
-        val deltaEventPairs = listOf(0L to tickEventPairs.first().second) +
-            tickEventPairs
-                .zipWithNext()
-                .map { (previous, current) ->
-                    (current.first - previous.first) to current.second
-                }
+        val deltaEventPairs =
+            listOf(0L to tickEventPairs.first().second) +
+                tickEventPairs
+                    .zipWithNext()
+                    .map { (previous, current) ->
+                        (current.first - previous.first) to current.second
+                    }
         for ((delta, event) in deltaEventPairs) {
             bytes.addIntVariableLengthBigEndian(delta.toInt())
             when (event) {
@@ -215,10 +226,11 @@ object Mid {
                 }
                 is Tempo -> {
                     bytes.addAll(MidiUtil.MetaType.Tempo.eventHeaderBytes)
-                    val tempoBytes = mutableListOf<Byte>().let {
-                        it.addInt(MidiUtil.convertBpmToMidiTempo(event.bpm), IS_LITTLE_ENDIAN)
-                        it.takeLast(3)
-                    }
+                    val tempoBytes =
+                        mutableListOf<Byte>().let {
+                            it.addInt(MidiUtil.convertBpmToMidiTempo(event.bpm), IS_LITTLE_ENDIAN)
+                            it.takeLast(3)
+                        }
                     bytes.addBlock(tempoBytes.takeLast(3), IS_LITTLE_ENDIAN, lengthInVariableLength = true)
                 }
                 else -> throw IllegalStateException()

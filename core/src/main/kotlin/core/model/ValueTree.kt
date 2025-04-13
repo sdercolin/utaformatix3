@@ -3,13 +3,9 @@ package core.model
 import core.external.ValueTree
 import org.khronos.webgl.Uint8Array
 
-fun createValueTree(): ValueTree {
-    return js("{type: '', attributes: {}, children: []}").unsafeCast<ValueTree>()
-}
+fun createValueTree(): ValueTree = js("{type: '', attributes: {}, children: []}").unsafeCast<ValueTree>()
 
-fun baseVariantType(): dynamic {
-    return js("({type: '', value: undefined})")
-}
+fun baseVariantType(): dynamic = js("({type: '', value: undefined})")
 
 fun String.toVariantType(): dynamic {
     val value = baseVariantType()

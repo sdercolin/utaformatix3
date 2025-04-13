@@ -26,30 +26,38 @@ object S5p {
     private const val TICK_RATE = 1470000L
     private const val DEFAULT_INTERVAL = 5512500L
 
-    suspend fun parse(file: File, params: ImportParams): core.model.Project {
-        val text = file.readText().let {
-            val index = it.lastIndexOf('}')
-            it.take(index + 1)
-        }
+    suspend fun parse(
+        file: File,
+        params: ImportParams,
+    ): core.model.Project {
+        val text =
+            file.readText().let {
+                val index = it.lastIndexOf('}')
+                it.take(index + 1)
+            }
         val project = jsonSerializer.decodeFromString(Project.serializer(), text)
         val warnings = mutableListOf<ImportWarning>()
-        val timeSignatures = project.meter.map {
-            TimeSignature(
-                measurePosition = it.measure,
-                numerator = it.beatPerMeasure,
-                denominator = it.beatGranularity,
-            )
-        }.takeIf { it.isNotEmpty() } ?: listOf(TimeSignature.default).also {
-            warnings.add(ImportWarning.TimeSignatureNotFound)
-        }
-        val tempos = project.tempo.map {
-            core.model.Tempo(
-                tickPosition = it.position / TICK_RATE,
-                bpm = it.beatPerMinute,
-            )
-        }.takeIf { it.isNotEmpty() } ?: listOf(core.model.Tempo.default).also {
-            warnings.add(ImportWarning.TempoNotFound)
-        }
+        val timeSignatures =
+            project.meter
+                .map {
+                    TimeSignature(
+                        measurePosition = it.measure,
+                        numerator = it.beatPerMeasure,
+                        denominator = it.beatGranularity,
+                    )
+                }.takeIf { it.isNotEmpty() } ?: listOf(TimeSignature.default).also {
+                warnings.add(ImportWarning.TimeSignatureNotFound)
+            }
+        val tempos =
+            project.tempo
+                .map {
+                    core.model.Tempo(
+                        tickPosition = it.position / TICK_RATE,
+                        bpm = it.beatPerMinute,
+                    )
+                }.takeIf { it.isNotEmpty() } ?: listOf(core.model.Tempo.default).also {
+                warnings.add(ImportWarning.TempoNotFound)
+            }
         val tracks = parseTracks(project, params)
         return core.model.Project(
             format = format,
@@ -63,34 +71,48 @@ object S5p {
         )
     }
 
-    private fun parseTracks(project: Project, params: ImportParams): List<core.model.Track> =
+    private fun parseTracks(
+        project: Project,
+        params: ImportParams,
+    ): List<core.model.Track> =
         project.tracks.mapIndexed { index, track ->
-            core.model.Track(
-                id = index,
-                name = track.name ?: "Track ${index + 1}",
-                notes = parseNotes(track, params.defaultLyric),
-                pitch = if (params.simpleImport) null else parsePitch(track),
-            ).validateNotes()
+            core.model
+                .Track(
+                    id = index,
+                    name = track.name ?: "Track ${index + 1}",
+                    notes = parseNotes(track, params.defaultLyric),
+                    pitch = if (params.simpleImport) null else parsePitch(track),
+                ).validateNotes()
         }
 
     private fun parsePitch(track: Track): Pitch? {
         val pitchDelta = track.parameters?.pitchDelta ?: return Pitch(emptyList(), isAbsolute = false)
-        val convertedPoints = pitchDelta.asSequence()
-            .chunked(2)
-            .mapNotNull {
-                val rawTick = it.getOrNull(0) ?: return@mapNotNull null
-                val centValue = it.getOrNull(1) ?: return@mapNotNull null
+        val convertedPoints =
+            pitchDelta
+                .asSequence()
+                .chunked(2)
+                .mapNotNull {
+                    val rawTick = it.getOrNull(0) ?: return@mapNotNull null
+                    val centValue = it.getOrNull(1) ?: return@mapNotNull null
 
-                val tick = rawTick * (track.parameters?.interval!!.toDouble().div(TICK_RATE))
-                val value = centValue / 100
+                    val tick =
+                        rawTick * (
+                            track.parameters
+                                ?.interval!!
+                                .toDouble()
+                                .div(TICK_RATE)
+                        )
+                    val value = centValue / 100
 
-                tick.roundToLong() to value
-            }
-            .toList()
+                    tick.roundToLong() to value
+                }.toList()
         return Pitch(convertedPoints, isAbsolute = false).takeIf { it.data.isNotEmpty() }
     }
 
-    private fun parseNotes(track: Track, defaultLyric: String): List<core.model.Note> =
+    private fun parseNotes(
+        track: Track,
+        defaultLyric: String,
+    ): List<core.model.Note> =
         track.notes.filterNotNull().map { note ->
             val tickOn = note.onset / TICK_RATE
             core.model.Note(
@@ -102,7 +124,10 @@ object S5p {
             )
         }
 
-    fun generate(project: core.model.Project, features: List<FeatureConfig>): ExportResult {
+    fun generate(
+        project: core.model.Project,
+        features: List<FeatureConfig>,
+    ): ExportResult {
         val jsonText = generateContent(project, features)
         val blob = Blob(arrayOf(jsonText), BlobPropertyBag("application/octet-stream"))
         val name = format.getFileName(project.name)
@@ -115,47 +140,58 @@ object S5p {
         )
     }
 
-    private fun generateContent(project: core.model.Project, features: List<FeatureConfig>): String {
+    private fun generateContent(
+        project: core.model.Project,
+        features: List<FeatureConfig>,
+    ): String {
         val template = core.external.Resources.s5pTemplate
         val s5p = jsonSerializer.decodeFromString(Project.serializer(), template)
-        s5p.meter = project.timeSignatures.map {
-            Meter(
-                measure = it.measurePosition,
-                beatPerMeasure = it.numerator,
-                beatGranularity = it.denominator,
-            )
-        }
-        s5p.tempo = project.tempos.map {
-            Tempo(
-                position = it.tickPosition * TICK_RATE,
-                beatPerMinute = it.bpm,
-            )
-        }
+        s5p.meter =
+            project.timeSignatures.map {
+                Meter(
+                    measure = it.measurePosition,
+                    beatPerMeasure = it.numerator,
+                    beatGranularity = it.denominator,
+                )
+            }
+        s5p.tempo =
+            project.tempos.map {
+                Tempo(
+                    position = it.tickPosition * TICK_RATE,
+                    beatPerMinute = it.bpm,
+                )
+            }
         val emptyTrack = s5p.tracks.first()
-        s5p.tracks = project.tracks.map {
-            generateTrack(it, emptyTrack, features)
-        }
+        s5p.tracks =
+            project.tracks.map {
+                generateTrack(it, emptyTrack, features)
+            }
         return jsonSerializer.encodeToString(Project.serializer(), s5p)
     }
 
-    private fun generateTrack(track: core.model.Track, emptyTrack: Track, features: List<FeatureConfig>): Track {
-        return emptyTrack.copy(
+    private fun generateTrack(
+        track: core.model.Track,
+        emptyTrack: Track,
+        features: List<FeatureConfig>,
+    ): Track =
+        emptyTrack.copy(
             name = track.name,
             displayOrder = track.id,
-            notes = track.notes.map {
-                Note(
-                    onset = it.tickOn * TICK_RATE,
-                    duration = it.length * TICK_RATE,
-                    lyric = it.lyric,
-                    pitch = it.key,
-                )
-            },
-            parameters = emptyTrack.parameters!!.copy(
-                interval = DEFAULT_INTERVAL,
-                pitchDelta = generatePitchData(track, features, DEFAULT_INTERVAL),
-            ),
+            notes =
+                track.notes.map {
+                    Note(
+                        onset = it.tickOn * TICK_RATE,
+                        duration = it.length * TICK_RATE,
+                        lyric = it.lyric,
+                        pitch = it.key,
+                    )
+                },
+            parameters =
+                emptyTrack.parameters!!.copy(
+                    interval = DEFAULT_INTERVAL,
+                    pitchDelta = generatePitchData(track, features, DEFAULT_INTERVAL),
+                ),
         )
-    }
 
     private fun generatePitchData(
         track: core.model.Track,
@@ -163,16 +199,19 @@ object S5p {
         interval: Long,
     ): List<Double> {
         if (!features.contains(Feature.ConvertPitch)) return emptyList()
-        val data = track.pitch?.getRelativeData(track.notes)
-            ?.map { (it.first / (interval.toDouble().div(TICK_RATE)) to (it.second * 100)) }
-            ?: return emptyList()
+        val data =
+            track.pitch
+                ?.getRelativeData(track.notes)
+                ?.map { (it.first / (interval.toDouble().div(TICK_RATE)) to (it.second * 100)) }
+                ?: return emptyList()
         return data.flatMap { listOf(it.first, it.second) }
     }
 
-    private val jsonSerializer = Json {
-        isLenient = true
-        ignoreUnknownKeys = true
-    }
+    private val jsonSerializer =
+        Json {
+            isLenient = true
+            ignoreUnknownKeys = true
+        }
 
     @Serializable
     private data class Project(
