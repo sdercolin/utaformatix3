@@ -78,7 +78,7 @@ enum class Format(
             core.io.Ccs.generate(project, features)
         },
         possibleLyricsTypes = listOf(KanaCv),
-        availableFeaturesForGeneration = listOf(ConvertPitch),
+        availableFeaturesForGeneration = listOf(ConvertPitch, ConvertPhonemes),
     ),
     Svp(
         "svp",
