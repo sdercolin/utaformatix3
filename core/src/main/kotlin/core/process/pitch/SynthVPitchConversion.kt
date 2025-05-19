@@ -4,7 +4,6 @@ import core.model.DEFAULT_BPM
 import core.model.Tempo
 import core.process.interpolateCosineEaseInOut
 import core.process.interpolateLinear
-import core.util.runIf
 
 private const val SAMPLING_INTERVAL_TICK = 4L
 private const val SVP_VIBRATO_DEFAULT_START_SEC = 0.25
@@ -92,28 +91,48 @@ private fun List<Pair<Long, Double>>.appendVibrato(
     vibratoEnv: Map<Long, Double>,
 ): List<Pair<Long, Double>> {
     val transformer = TickTimeTransformer(tempos)
+    val pitchPoints = this
 
-    return notes
-        .fold<SvpNoteWithVibrato, List<Pair<LongRange, SvpNoteWithVibrato?>>>(listOf()) { acc, note ->
-            val lastNoteEndTick = acc.lastOrNull()?.first?.last ?: 0L
-            if (lastNoteEndTick < note.noteStartTick) {
-                acc + ((lastNoteEndTick until note.noteStartTick) to null) +
-                    ((note.noteStartTick until note.noteEndTick) to note)
-            } else {
-                acc + ((note.noteStartTick until note.noteEndTick) to note)
-            }
-        }.let { it + ((it.lastOrNull()?.first?.last ?: 0L) until Long.MAX_VALUE to null) }
-        .flatMap { (range, note) ->
-            this
-                .filter { (tick, _) -> tick in range }
-                .appendVibratoInNote(
+    // Build a list of ranges paired with the corresponding note (or null for gaps)
+    val rangesList = mutableListOf<Pair<LongRange, SvpNoteWithVibrato?>>()
+    var lastTick = 0L
+    for (note in notes) {
+        if (lastTick < note.noteStartTick) {
+            rangesList.add((lastTick until note.noteStartTick) to null)
+        }
+        rangesList.add((note.noteStartTick until note.noteEndTick) to note)
+        lastTick = note.noteEndTick
+    }
+    // Extend to cover any remaining pitch points
+    rangesList.add((lastTick until Long.MAX_VALUE) to null)
+
+    // Merge pitch points with the computed ranges using a single pass over the sorted pitch points
+    val result = mutableListOf<Pair<Long, Double>>()
+    var pitchIndex = 0
+    for ((range, note) in rangesList) {
+        // Advance the index to the first point in or beyond the range
+        while (pitchIndex < pitchPoints.size && pitchPoints[pitchIndex].first < range.first) {
+            pitchIndex++
+        }
+        val startIndex = pitchIndex
+        // Find all points that fall within the range
+        while (pitchIndex < pitchPoints.size && pitchPoints[pitchIndex].first in range) {
+            pitchIndex++
+        }
+        if (startIndex < pitchIndex) {
+            val subset = pitchPoints.subList(startIndex, pitchIndex)
+            result.addAll(
+                subset.appendVibratoInNote(
                     note,
                     vibratoDefaultParameters,
                     transformer,
                     tempos,
                     vibratoEnv,
-                )
+                ),
+            )
         }
+    }
+    return result
 }
 
 private fun List<Pair<Long, Double>>.appendVibratoInNote(
@@ -123,15 +142,16 @@ private fun List<Pair<Long, Double>>.appendVibratoInNote(
     tempos: List<Tempo>,
     vibratoEnv: Map<Long, Double>,
 ): List<Pair<Long, Double>> {
-    // Note with minus position is skipped, but with raise an error after import, see Project.requireValid()
+    // Skip if note is null or invalid.
     note?.takeIf { it.noteStartTick >= 0L } ?: return this
 
-    val noteStart = tickTimeTransformer.tickToSec(note.noteStartTick)
-    val noteEnd = tickTimeTransformer.tickToSec(note.noteEndTick)
+    val noteStartSec = tickTimeTransformer.tickToSec(note.noteStartTick)
+    val noteEndSec = tickTimeTransformer.tickToSec(note.noteEndTick)
 
-    val vibratoStart =
-        (note.vibratoStart ?: defaultParameters?.vibratoStart ?: SVP_VIBRATO_DEFAULT_START_SEC) + noteStart
-    val vibratoStartTick = tickTimeTransformer.secToTick(vibratoStart)
+    // Determine when vibrato should start (in seconds) and convert back to tick.
+    val vibratoStartSec =
+        (note.vibratoStart ?: defaultParameters?.vibratoStart ?: SVP_VIBRATO_DEFAULT_START_SEC) + noteStartSec
+    val vibratoStartTick = tickTimeTransformer.secToTick(vibratoStartSec)
     val easeInLength = note.easeInLength ?: defaultParameters?.easeInLength ?: SVP_VIBRATO_DEFAULT_EASE_IN_SEC
     val easeOutLength = note.easeOutLength ?: defaultParameters?.easeOutLength ?: SVP_VIBRATO_DEFAULT_EASE_OUT_SEC
     val depth = (note.depth ?: defaultParameters?.depth ?: SVP_VIBRATO_DEFAULT_DEPTH_SEMITONE) * 0.5
@@ -139,46 +159,53 @@ private fun List<Pair<Long, Double>>.appendVibratoInNote(
     val phase = note.phase ?: SVP_VIBRATO_DEFAULT_PHASE_RAD
     val frequency = note.frequency ?: defaultParameters?.frequency ?: SVP_VIBRATO_DEFAULT_FREQUENCY_HZ
 
-    val secPerTick =
-        (tempos.lastOrNull { it.tickPosition <= note.noteStartTick }?.bpm ?: DEFAULT_BPM).bpmToSecPerTick()
+    val secPerTick = (tempos.lastOrNull { it.tickPosition <= note.noteStartTick }?.bpm ?: DEFAULT_BPM).bpmToSecPerTick()
 
-    val vibrato = { tick: Long ->
+    // Define the vibrato function to compute the vibrato offset for a given tick.
+    fun vibrato(tick: Long): Double {
         val sec = tickTimeTransformer.tickToSec(tick)
-        if (sec < vibratoStart) {
-            0.0
-        } else {
-            val easeInFactor =
-                ((sec - vibratoStart) / easeInLength)
-                    .coerceIn(0.0..1.0)
-                    .takeIf { !it.isNaN() } ?: 1.0
-            val easeOutFactor =
-                ((noteEnd - sec) / easeOutLength)
-                    .coerceIn(0.0..1.0)
-                    .takeIf { !it.isNaN() } ?: 1.0
-            val rad = 2 * kotlin.math.PI * frequency * secPerTick * (tick - vibratoStartTick) + phase
-            val envelope = vibratoEnv[tick] ?: 1.0
-            envelope * depth * easeInFactor * easeOutFactor * kotlin.math.sin(rad)
-        }
+        if (sec < vibratoStartSec) return 0.0
+        val easeInFactor = ((sec - vibratoStartSec) / easeInLength).coerceIn(0.0, 1.0)
+        val easeOutFactor = ((noteEndSec - sec) / easeOutLength).coerceIn(0.0, 1.0)
+        val rad = 2 * kotlin.math.PI * frequency * secPerTick * (tick - vibratoStartTick) + phase
+        val envelope = vibratoEnv[tick] ?: 1.0
+        return envelope * depth * easeInFactor * easeOutFactor * kotlin.math.sin(rad)
     }
 
-    return this
-        .asSequence()
-        .ifEmpty { sequenceOf(note.noteStartTick to 0.0, note.noteEndTick to 0.0) }
-        .runIf({ last().first != note.noteEndTick }) {
-            this + (note.noteEndTick to last().second)
-        }.fold(listOf<Pair<Long, Double>>()) { acc, inputPoint ->
-            val lastPoint = acc.lastOrNull()
-            val newPoint = inputPoint.let { it.first to (it.second + vibrato(it.first)) }
-            if (lastPoint == null) {
-                acc + newPoint
-            } else {
-                val interpolatedIndexes =
-                    ((lastPoint.first + 1) until inputPoint.first)
-                        .filter { (it - lastPoint.first) % SAMPLING_INTERVAL_TICK == 0L }
-                val interpolatedPoints = interpolatedIndexes.map { it to (lastPoint.second + vibrato(it)) }
-                acc + interpolatedPoints + newPoint
+    // Prepare the base pitch points. If the list is empty, create default points for the note.
+    val basePoints: List<Pair<Long, Double>> =
+        this.ifEmpty {
+            listOf(note.noteStartTick to 0.0, note.noteEndTick to 0.0)
+        }
+
+    // Ensure we have a point at the note's end tick.
+    val points: List<Pair<Long, Double>> =
+        if (basePoints.last().first != note.noteEndTick) {
+            basePoints + listOf(note.noteEndTick to basePoints.last().second)
+        } else {
+            basePoints
+        }
+
+    // Use a mutable list to accumulate the result without repeatedly concatenating lists.
+    val result = mutableListOf<Pair<Long, Double>>()
+    var prev: Pair<Long, Double>? = null
+    for (point in points) {
+        if (prev == null) {
+            // Add the first point with its vibrato adjustment.
+            result.add(point.first to (point.second + vibrato(point.first)))
+        } else {
+            // For points between the previous and current, interpolate at fixed SAMPLING_INTERVAL_TICK steps.
+            var tick = prev.first + SAMPLING_INTERVAL_TICK
+            while (tick < point.first) {
+                result.add(tick to (prev.second + vibrato(tick)))
+                tick += SAMPLING_INTERVAL_TICK
             }
-        }.toList()
+            // Add the current point.
+            result.add(point.first to (point.second + vibrato(point.first)))
+        }
+        prev = point
+    }
+    return result
 }
 
 private fun List<Pair<Long, Double>>.removeRedundantPoints() =

@@ -66,6 +66,12 @@ private fun ChildrenBuilder.buildPhonemesConversionDetail(
     state: PhonemesConversionState,
     editState: (PhonemesConversionState.() -> PhonemesConversionState) -> Unit,
 ) {
+    val presetOptions =
+        PhonemesMappingRequest.Presets
+            .filter { preset ->
+                props.sourceFormat in preset.sourceFormats + Format.UfData &&
+                    props.targetFormat in preset.targetFormats + Format.UfData
+            }
     div {
         css {
             margin = Margin(horizontal = 40.px, vertical = 0.px)
@@ -142,23 +148,34 @@ private fun ChildrenBuilder.buildPhonemesConversionDetail(
                                 (this.unsafeCast<BaseTextFieldProps>()).variant = FormControlVariant.standard
                                 (this.unsafeCast<StandardTextFieldProps>()).onChange = { event ->
                                     val value = event.target.asDynamic().value as String
-                                    editState {
-                                        copy(
-                                            mappingPresetName = value,
-                                            mappingRequest = PhonemesMappingRequest.getPreset(value),
-                                        )
-                                    }
-                                }
-                                PhonemesMappingRequest.Presets
-                                    .filter { preset ->
-                                        props.sourceFormat in preset.sourceFormats + Format.UfData &&
-                                            props.targetFormat in preset.targetFormats + Format.UfData
-                                    }.forEach { preset ->
-                                        MenuItem {
-                                            value = preset.name
-                                            +(preset.name)
+                                    if (value.isNotEmpty()) {
+                                        editState {
+                                            copy(
+                                                mappingPresetName = value,
+                                                mappingRequest = PhonemesMappingRequest.getPreset(value),
+                                            )
+                                        }
+                                    } else {
+                                        editState {
+                                            copy(
+                                                mappingPresetName = null,
+                                            )
                                         }
                                     }
+                                }
+                                presetOptions.forEach { preset ->
+                                    MenuItem {
+                                        value = preset.name
+                                        +(preset.name)
+                                    }
+                                }
+                                if (presetOptions.isEmpty()) {
+                                    MenuItem {
+                                        value = ""
+                                        disabled = true
+                                        +string(Strings.PhonemesMappingPresetNoOption)
+                                    }
+                                }
                             }
                         }
                         Button {

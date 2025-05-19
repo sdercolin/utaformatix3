@@ -222,7 +222,20 @@ object Ccs {
                     val pitchOctave = element.getRequiredAttributeAsInteger("PitchOctave") - OCTAVE_OFFSET
                     val key = pitchStep + pitchOctave * KEY_IN_OCTAVE
                     val lyric = element.getRequiredAttribute("Lyric")
-                    Note(noteIndex, key, lyric, tickOn, tickOff)
+                    val phoneme =
+                        if (element.hasAttribute("Phonetic")) {
+                            element.getRequiredAttribute("Phonetic").replace(",", " ")
+                        } else {
+                            null
+                        }
+                    Note(
+                        id = noteIndex,
+                        key = key,
+                        lyric = lyric,
+                        tickOn = tickOn,
+                        tickOff = tickOff,
+                        phoneme = phoneme,
+                    )
                 }
 
         val pitch =
@@ -399,6 +412,9 @@ object Ccs {
             newNote.setAttribute("PitchOctave", (it.key / KEY_IN_OCTAVE + OCTAVE_OFFSET).toString())
             newNote.setAttribute("Duration", (it.length * TICK_RATE).toLong().toString())
             newNote.setAttribute("Lyric", it.lyric)
+            if (!it.phoneme.isNullOrBlank()) {
+                newNote.setAttribute("Phonetic", it.phoneme.replace(" ", ","))
+            }
             score.appendChild(newNote)
         }
     }

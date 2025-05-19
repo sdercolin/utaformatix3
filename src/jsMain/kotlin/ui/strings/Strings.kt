@@ -350,6 +350,13 @@ enum class Strings(
         ru = "Пресет",
         fr = "Préréglage",
     ),
+    PhonemesMappingPresetNoOption(
+        en = "No available preset",
+        ja = "使えるプリセットがありません",
+        zhCN = "没有可用的预设",
+        ru = "Нет доступных пресетов",
+        fr = "Aucun préréglage disponible",
+    ),
     PhonemesMappingPresetClear(
         en = "Clear",
         ja = "クリア",
