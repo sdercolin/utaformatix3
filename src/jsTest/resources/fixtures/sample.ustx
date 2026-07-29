@@ -1,0 +1,75 @@
+name: Sample Project
+comment: ''
+output_dir: Vocal
+cache_dir: UCache
+ustx_version: '0.9.1'
+resolution: 480
+bpm: 120
+beat_per_bar: 4
+beat_unit: 4
+time_signatures:
+  - bar_position: 0
+    beat_per_bar: 4
+    beat_unit: 4
+tempos:
+  - position: 0
+    bpm: 120
+  - position: 960
+    bpm: 140
+expressions: {}
+tracks:
+- phonemizer: OpenUtau.Api.DefaultPhonemizer
+  mute: false
+  solo: false
+  volume: 0
+  track_name: Vocal
+voice_parts:
+- name: Part 1
+  comment: ''
+  track_no: 0
+  position: 0
+  notes:
+  - position: 0
+    duration: 480
+    tone: 60
+    lyric: あ
+    pitch:
+      data:
+      - {x: -40, y: 0, shape: io}
+      - {x: 40, y: 0, shape: io}
+      snap_first: true
+    vibrato: {length: 0, period: 175, depth: 25, in: 10, out: 10, shift: 0, drift: 0}
+  - position: 480
+    duration: 480
+    tone: 62
+    lyric: い
+    pitch:
+      data:
+      - {x: -40, y: 0, shape: io}
+      - {x: 40, y: 0, shape: io}
+      snap_first: true
+    vibrato: {length: 0, period: 175, depth: 25, in: 10, out: 10, shift: 0, drift: 0}
+  - position: 960
+    duration: 480
+    tone: 64
+    lyric: う
+    pitch:
+      data:
+      - {x: -40, y: 0, shape: io}
+      - {x: 40, y: 0, shape: io}
+      snap_first: true
+    vibrato: {length: 75, period: 175, depth: 25, in: 10, out: 10, shift: 0, drift: 0}
+  - position: 1440
+    duration: 480
+    tone: 65
+    lyric: え
+    pitch:
+      data:
+      - {x: -40, y: 0, shape: io}
+      - {x: 40, y: 0, shape: io}
+      snap_first: true
+    vibrato: {length: 0, period: 175, depth: 25, in: 10, out: 10, shift: 0, drift: 0}
+  curves:
+  - xs: [0, 120, 240, 360, 480]
+    ys: [0, 20, 40, 20, 0]
+    abbr: pitd

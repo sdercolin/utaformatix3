@@ -1,0 +1,32 @@
+[#VERSION]
+UST Version1.2
+[#SETTING]
+Tempo=120.00
+ProjectName=Sample Project
+Mode2=True
+[#0000]
+Length=480
+Lyric=あ
+NoteNum=60
+PBS=-40;0
+PBW=80
+PBY=0
+[#0001]
+Length=480
+Lyric=R
+NoteNum=60
+[#0002]
+Length=480
+Lyric=い
+NoteNum=62
+PBS=-40;0
+PBW=40,40
+PBY=10,0
+PBM=,s
+VBR=65,180,35,20,20,0,0
+Tempo=140.00
+[#0003]
+Length=480
+Lyric=う
+NoteNum=64
+[#TRACKEND]
