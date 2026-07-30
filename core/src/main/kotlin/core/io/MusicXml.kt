@@ -33,6 +33,7 @@ import kotlinx.dom.appendText
 import org.w3c.dom.Document
 import org.w3c.dom.Element
 import org.w3c.dom.XMLDocument
+import org.w3c.dom.get
 import org.w3c.dom.parsing.DOMParser
 import org.w3c.dom.parsing.XMLSerializer
 import org.w3c.files.Blob
@@ -119,17 +120,45 @@ object MusicXml {
                     }
                     ?: currentTimeSignature
 
-            measureNode
-                .getElementListByTagName("sound")
-                .firstOrNull { it.hasAttribute("tempo") }
-                ?.let { soundNode ->
+            // walk the measure's children in document order so that every tempo change is
+            // collected at its actual position, not only the first one at the measure start
+            var offsetInDivisions = 0L
+
+            fun addTempoFrom(soundNode: Element) {
+                val bpm = soundNode.getAttribute("tempo")?.toDoubleOrNull() ?: return
+                val tempo =
                     Tempo(
-                        tickPosition = tickPosition,
-                        bpm = soundNode.getAttribute("tempo")!!.toDouble(),
+                        tickPosition = tickPosition + (offsetInDivisions * importTickRate).toLong(),
+                        bpm = bpm,
                     )
-                }?.also {
-                    tempos.add(index to it)
+                val last = tempos.lastOrNull()?.second
+                when {
+                    last?.tickPosition == tempo.tickPosition && last.bpm == tempo.bpm -> Unit // duplicate
+                    last?.tickPosition == tempo.tickPosition -> tempos[tempos.lastIndex] = index to tempo
+                    else -> tempos.add(index to tempo)
                 }
+            }
+
+            fun durationOf(node: Element) =
+                node
+                    .getSingleElementByTagNameOrNull("duration")
+                    ?.innerValueOrNull
+                    ?.toLongOrNull() ?: 0L
+
+            val children = measureNode.children
+            for (childIndex in 0 until children.length) {
+                val child = children[childIndex] ?: continue
+                when (child.tagName) {
+                    "sound" -> addTempoFrom(child)
+                    "direction" -> child.getElementListByTagName("sound").forEach { addTempoFrom(it) }
+                    "note" ->
+                        if (child.getSingleElementByTagNameOrNull("chord") == null) {
+                            offsetInDivisions += durationOf(child)
+                        }
+                    "forward" -> offsetInDivisions += durationOf(child)
+                    "backup" -> offsetInDivisions -= durationOf(child)
+                }
+            }
 
             tickPosition += timeSignature.ticksInMeasure
             measureBorders.add(tickPosition)
