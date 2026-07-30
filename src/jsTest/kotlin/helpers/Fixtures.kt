@@ -1,10 +1,16 @@
 package helpers
 
+import core.external.JsZip
+import core.external.JsZipOption
 import core.external.require
 import core.io.UfData
 import core.model.FeatureConfig
 import core.model.Project
+import kotlinx.browser.window
 import kotlinx.coroutines.await
+import org.khronos.webgl.ArrayBuffer
+import org.khronos.webgl.Uint8Array
+import org.khronos.webgl.get
 import org.w3c.files.Blob
 import org.w3c.files.File
 import kotlin.js.Promise
@@ -20,6 +26,59 @@ fun fixtureText(name: String): String = require("./fixtures/$name").default as S
 fun fixtureFile(name: String): File = File(arrayOf(fixtureText(name)), name)
 
 suspend fun Blob.readText(): String = asDynamic().text().unsafeCast<Promise<String>>().await()
+
+fun Blob.toFile(name: String): File = File(arrayOf(this), name)
+
+/** Reads the blob's binary content as a base64 string, used to snapshot binary outputs. */
+suspend fun Blob.readBase64(): String {
+    val buffer = asDynamic().arrayBuffer().unsafeCast<Promise<ArrayBuffer>>().await()
+    val bytes = Uint8Array(buffer)
+    val builder = StringBuilder()
+    for (i in 0 until bytes.length) {
+        builder.append(Char(bytes[i].toInt() and 0xFF))
+    }
+    return window.btoa(builder.toString())
+}
+
+/**
+ * Reads a zip blob and renders all entries as text, sorted by entry name,
+ * so that zipped outputs can be snapshot without depending on zip metadata (e.g. file dates).
+ */
+suspend fun Blob.readZipEntryTexts(): String {
+    val zip = JsZip().loadAsync(this).await()
+    val names = js("Object").keys(zip.asDynamic().files).unsafeCast<Array<String>>().sorted()
+    val builder = StringBuilder()
+    for (name in names) {
+        val content = zip.file(name)?.async("string")?.await() as? String ?: ""
+        builder.append("===== $name =====\n$content\n")
+    }
+    return builder.toString()
+}
+
+/** Reads the text content of the first entry (by name order) of a zip blob. */
+suspend fun Blob.readFirstZipEntryText(): String {
+    val zip = JsZip().loadAsync(this).await()
+    val name =
+        js("Object")
+            .keys(zip.asDynamic().files)
+            .unsafeCast<Array<String>>()
+            .sorted()
+            .first()
+    return zip.file(name)?.async("string")?.await() as String
+}
+
+/** Builds an in-memory zip file with a single entry, e.g. to feed zip-based parsers. */
+suspend fun zippedFile(
+    fileName: String,
+    entryName: String,
+    entryContent: String,
+): File {
+    val zip = JsZip()
+    zip.file(entryName, entryContent)
+    val option = JsZipOption().also { it.type = "blob" }
+    val blob = zip.generateAsync(option).await() as Blob
+    return blob.toFile(fileName)
+}
 
 /** Serializes a parsed project to UfData JSON, used as the canonical snapshot form. */
 suspend fun Project.toUfDataJson(): String =
