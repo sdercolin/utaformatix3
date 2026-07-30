@@ -1,0 +1,923 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><vsq4 xmlns="http://www.yamaha.co.jp/vocaloid/schema/vsq4/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.yamaha.co.jp/vocaloid/schema/vsq4/ vsq4.xsd">
+    <vender><![CDATA[Yamaha corporation]]></vender>
+    <version><![CDATA[4.0.0.3]]></version>
+    <vVoiceTable>
+        <vVoice>
+            <bs>0</bs>
+            <pc>0</pc>
+            <id><![CDATA[BCXDC6CZLSZHZCB4]]></id>
+            <name><![CDATA[VY2V3]]></name>
+            <vPrm>
+                <bre>0</bre>
+                <bri>0</bri>
+                <cle>0</cle>
+                <gen>0</gen>
+                <ope>0</ope>
+            </vPrm>
+        </vVoice>
+    </vVoiceTable>
+    <mixer>
+        <masterUnit>
+            <oDev>0</oDev>
+            <rLvl>0</rLvl>
+            <vol>0</vol>
+        </masterUnit>
+        <vsUnit>
+            <tNo>0</tNo>
+            <iGin>0</iGin>
+            <sLvl>-898</sLvl>
+            <sEnable>0</sEnable>
+            <m>0</m>
+            <s>0</s>
+            <pan>64</pan>
+            <vol>0</vol>
+        </vsUnit>
+        <monoUnit>
+            <iGin>0</iGin>
+            <sLvl>-898</sLvl>
+            <sEnable>0</sEnable>
+            <m>0</m>
+            <s>0</s>
+            <pan>64</pan>
+            <vol>0</vol>
+        </monoUnit>
+        <stUnit>
+            <iGin>0</iGin>
+            <m>0</m>
+            <s>0</s>
+            <vol>-129</vol>
+        </stUnit>
+    </mixer>
+    <masterTrack>
+        <seqName><![CDATA[Untitled0]]></seqName>
+        <comment><![CDATA[New VSQ File]]></comment>
+        <resolution>480</resolution>
+        <preMeasure>1</preMeasure>
+        <timeSig>
+            <m>0</m>
+            <nu>4</nu>
+            <de>4</de>
+        </timeSig>
+        <tempo>
+            <t>0</t>
+            <v>12000</v>
+        </tempo><tempo>
+            <t>2880</t>
+            <v>14000</v>
+        </tempo>
+    </masterTrack>
+    <vsTrack>
+        <tNo>0</tNo>
+        <name><![CDATA[Vocal]]></name>
+        <comment><![CDATA[Track]]></comment>
+        <vsPart>
+            <t>1920</t>
+            <playTime>1920</playTime>
+            <name><![CDATA[NewPart]]></name>
+            <comment><![CDATA[New Musical Part]]></comment>
+            <sPlug>
+                <id><![CDATA[ACA9C502-A04B-42b5-B2EB-5CEA36D16FCE]]></id>
+                <name><![CDATA[VOCALOID2 Compatible Style]]></name>
+                <version><![CDATA[3.0.0.1]]></version>
+            </sPlug>
+            <pStyle>
+                <v id="accent">50</v>
+                <v id="bendDep">8</v>
+                <v id="bendLen">0</v>
+                <v id="decay">50</v>
+                <v id="fallPort">0</v>
+                <v id="opening">127</v>
+                <v id="risePort">0</v>
+            </pStyle>
+            <singer>
+                <t>0</t>
+                <bs>0</bs>
+                <pc>0</pc>
+            </singer>
+            <cc>
+                <t>240</t>
+                <v id="P">2048</v>
+            </cc><cc>
+                <t>244</t>
+                <v id="P">2052</v>
+            </cc><cc>
+                <t>248</t>
+                <v id="P">2066</v>
+            </cc><cc>
+                <t>252</t>
+                <v id="P">2089</v>
+            </cc><cc>
+                <t>256</t>
+                <v id="P">2118</v>
+            </cc><cc>
+                <t>260</t>
+                <v id="P">2154</v>
+            </cc><cc>
+                <t>264</t>
+                <v id="P">2192</v>
+            </cc><cc>
+                <t>268</t>
+                <v id="P">2232</v>
+            </cc><cc>
+                <t>272</t>
+                <v id="P">2271</v>
+            </cc><cc>
+                <t>276</t>
+                <v id="P">2306</v>
+            </cc><cc>
+                <t>280</t>
+                <v id="P">2334</v>
+            </cc><cc>
+                <t>284</t>
+                <v id="P">2352</v>
+            </cc><cc>
+                <t>288</t>
+                <v id="P">2358</v>
+            </cc><cc>
+                <t>292</t>
+                <v id="P">2338</v>
+            </cc><cc>
+                <t>296</t>
+                <v id="P">2301</v>
+            </cc><cc>
+                <t>300</t>
+                <v id="P">2247</v>
+            </cc><cc>
+                <t>304</t>
+                <v id="P">2174</v>
+            </cc><cc>
+                <t>308</t>
+                <v id="P">2084</v>
+            </cc><cc>
+                <t>312</t>
+                <v id="P">1977</v>
+            </cc><cc>
+                <t>316</t>
+                <v id="P">1855</v>
+            </cc><cc>
+                <t>320</t>
+                <v id="P">1720</v>
+            </cc><cc>
+                <t>324</t>
+                <v id="P">1574</v>
+            </cc><cc>
+                <t>328</t>
+                <v id="P">1421</v>
+            </cc><cc>
+                <t>332</t>
+                <v id="P">1263</v>
+            </cc><cc>
+                <t>336</t>
+                <v id="P">1103</v>
+            </cc><cc>
+                <t>340</t>
+                <v id="P">945</v>
+            </cc><cc>
+                <t>344</t>
+                <v id="P">792</v>
+            </cc><cc>
+                <t>348</t>
+                <v id="P">646</v>
+            </cc><cc>
+                <t>352</t>
+                <v id="P">512</v>
+            </cc><cc>
+                <t>356</t>
+                <v id="P">391</v>
+            </cc><cc>
+                <t>360</t>
+                <v id="P">285</v>
+            </cc><cc>
+                <t>364</t>
+                <v id="P">196</v>
+            </cc><cc>
+                <t>368</t>
+                <v id="P">125</v>
+            </cc><cc>
+                <t>372</t>
+                <v id="P">72</v>
+            </cc><cc>
+                <t>376</t>
+                <v id="P">38</v>
+            </cc><cc>
+                <t>380</t>
+                <v id="P">22</v>
+            </cc><cc>
+                <t>384</t>
+                <v id="P">23</v>
+            </cc><cc>
+                <t>388</t>
+                <v id="P">39</v>
+            </cc><cc>
+                <t>392</t>
+                <v id="P">68</v>
+            </cc><cc>
+                <t>396</t>
+                <v id="P">108</v>
+            </cc><cc>
+                <t>400</t>
+                <v id="P">156</v>
+            </cc><cc>
+                <t>404</t>
+                <v id="P">210</v>
+            </cc><cc>
+                <t>408</t>
+                <v id="P">265</v>
+            </cc><cc>
+                <t>412</t>
+                <v id="P">320</v>
+            </cc><cc>
+                <t>416</t>
+                <v id="P">372</v>
+            </cc><cc>
+                <t>420</t>
+                <v id="P">417</v>
+            </cc><cc>
+                <t>424</t>
+                <v id="P">454</v>
+            </cc><cc>
+                <t>428</t>
+                <v id="P">481</v>
+            </cc><cc>
+                <t>432</t>
+                <v id="P">496</v>
+            </cc><cc>
+                <t>436</t>
+                <v id="P">493</v>
+            </cc><cc>
+                <t>440</t>
+                <v id="P">476</v>
+            </cc><cc>
+                <t>444</t>
+                <v id="P">447</v>
+            </cc><cc>
+                <t>448</t>
+                <v id="P">407</v>
+            </cc><cc>
+                <t>452</t>
+                <v id="P">359</v>
+            </cc><cc>
+                <t>456</t>
+                <v id="P">305</v>
+            </cc><cc>
+                <t>460</t>
+                <v id="P">248</v>
+            </cc><cc>
+                <t>464</t>
+                <v id="P">189</v>
+            </cc><cc>
+                <t>468</t>
+                <v id="P">133</v>
+            </cc><cc>
+                <t>472</t>
+                <v id="P">81</v>
+            </cc><cc>
+                <t>476</t>
+                <v id="P">36</v>
+            </cc><cc>
+                <t>480</t>
+                <v id="P">1</v>
+            </cc><cc>
+                <t>480</t>
+                <v id="P">0</v>
+            </cc><cc>
+                <t>484</t>
+                <v id="P">-1</v>
+            </cc><cc>
+                <t>488</t>
+                <v id="P">-3</v>
+            </cc><cc>
+                <t>492</t>
+                <v id="P">-8</v>
+            </cc><cc>
+                <t>496</t>
+                <v id="P">-13</v>
+            </cc><cc>
+                <t>500</t>
+                <v id="P">-21</v>
+            </cc><cc>
+                <t>504</t>
+                <v id="P">-30</v>
+            </cc><cc>
+                <t>508</t>
+                <v id="P">-41</v>
+            </cc><cc>
+                <t>512</t>
+                <v id="P">-53</v>
+            </cc><cc>
+                <t>516</t>
+                <v id="P">-67</v>
+            </cc><cc>
+                <t>520</t>
+                <v id="P">-82</v>
+            </cc><cc>
+                <t>524</t>
+                <v id="P">-99</v>
+            </cc><cc>
+                <t>528</t>
+                <v id="P">-117</v>
+            </cc><cc>
+                <t>532</t>
+                <v id="P">-137</v>
+            </cc><cc>
+                <t>536</t>
+                <v id="P">-158</v>
+            </cc><cc>
+                <t>540</t>
+                <v id="P">-180</v>
+            </cc><cc>
+                <t>544</t>
+                <v id="P">-203</v>
+            </cc><cc>
+                <t>548</t>
+                <v id="P">-228</v>
+            </cc><cc>
+                <t>552</t>
+                <v id="P">-253</v>
+            </cc><cc>
+                <t>556</t>
+                <v id="P">-280</v>
+            </cc><cc>
+                <t>560</t>
+                <v id="P">-307</v>
+            </cc><cc>
+                <t>564</t>
+                <v id="P">-335</v>
+            </cc><cc>
+                <t>568</t>
+                <v id="P">-364</v>
+            </cc><cc>
+                <t>572</t>
+                <v id="P">-394</v>
+            </cc><cc>
+                <t>576</t>
+                <v id="P">-424</v>
+            </cc><cc>
+                <t>580</t>
+                <v id="P">-455</v>
+            </cc><cc>
+                <t>584</t>
+                <v id="P">-487</v>
+            </cc><cc>
+                <t>588</t>
+                <v id="P">-518</v>
+            </cc><cc>
+                <t>592</t>
+                <v id="P">-550</v>
+            </cc><cc>
+                <t>596</t>
+                <v id="P">-582</v>
+            </cc><cc>
+                <t>600</t>
+                <v id="P">-614</v>
+            </cc><cc>
+                <t>604</t>
+                <v id="P">-646</v>
+            </cc><cc>
+                <t>608</t>
+                <v id="P">-679</v>
+            </cc><cc>
+                <t>612</t>
+                <v id="P">-710</v>
+            </cc><cc>
+                <t>616</t>
+                <v id="P">-742</v>
+            </cc><cc>
+                <t>620</t>
+                <v id="P">-773</v>
+            </cc><cc>
+                <t>624</t>
+                <v id="P">-804</v>
+            </cc><cc>
+                <t>628</t>
+                <v id="P">-834</v>
+            </cc><cc>
+                <t>632</t>
+                <v id="P">-864</v>
+            </cc><cc>
+                <t>636</t>
+                <v id="P">-893</v>
+            </cc><cc>
+                <t>640</t>
+                <v id="P">-921</v>
+            </cc><cc>
+                <t>644</t>
+                <v id="P">-949</v>
+            </cc><cc>
+                <t>648</t>
+                <v id="P">-975</v>
+            </cc><cc>
+                <t>652</t>
+                <v id="P">-1001</v>
+            </cc><cc>
+                <t>656</t>
+                <v id="P">-1025</v>
+            </cc><cc>
+                <t>660</t>
+                <v id="P">-1049</v>
+            </cc><cc>
+                <t>664</t>
+                <v id="P">-1071</v>
+            </cc><cc>
+                <t>668</t>
+                <v id="P">-1092</v>
+            </cc><cc>
+                <t>672</t>
+                <v id="P">-1111</v>
+            </cc><cc>
+                <t>676</t>
+                <v id="P">-1130</v>
+            </cc><cc>
+                <t>680</t>
+                <v id="P">-1146</v>
+            </cc><cc>
+                <t>684</t>
+                <v id="P">-1162</v>
+            </cc><cc>
+                <t>688</t>
+                <v id="P">-1176</v>
+            </cc><cc>
+                <t>692</t>
+                <v id="P">-1188</v>
+            </cc><cc>
+                <t>696</t>
+                <v id="P">-1199</v>
+            </cc><cc>
+                <t>700</t>
+                <v id="P">-1208</v>
+            </cc><cc>
+                <t>704</t>
+                <v id="P">-1215</v>
+            </cc><cc>
+                <t>708</t>
+                <v id="P">-1221</v>
+            </cc><cc>
+                <t>712</t>
+                <v id="P">-1225</v>
+            </cc><cc>
+                <t>716</t>
+                <v id="P">-1228</v>
+            </cc><cc>
+                <t>720</t>
+                <v id="P">-1229</v>
+            </cc><cc>
+                <t>724</t>
+                <v id="P">-1222</v>
+            </cc><cc>
+                <t>728</t>
+                <v id="P">-1201</v>
+            </cc><cc>
+                <t>732</t>
+                <v id="P">-1168</v>
+            </cc><cc>
+                <t>736</t>
+                <v id="P">-1122</v>
+            </cc><cc>
+                <t>740</t>
+                <v id="P">-1067</v>
+            </cc><cc>
+                <t>744</t>
+                <v id="P">-1004</v>
+            </cc><cc>
+                <t>748</t>
+                <v id="P">-935</v>
+            </cc><cc>
+                <t>752</t>
+                <v id="P">-864</v>
+            </cc><cc>
+                <t>756</t>
+                <v id="P">-792</v>
+            </cc><cc>
+                <t>760</t>
+                <v id="P">-723</v>
+            </cc><cc>
+                <t>764</t>
+                <v id="P">-660</v>
+            </cc><cc>
+                <t>768</t>
+                <v id="P">-606</v>
+            </cc><cc>
+                <t>772</t>
+                <v id="P">-573</v>
+            </cc><cc>
+                <t>776</t>
+                <v id="P">-554</v>
+            </cc><cc>
+                <t>780</t>
+                <v id="P">-550</v>
+            </cc><cc>
+                <t>784</t>
+                <v id="P">-560</v>
+            </cc><cc>
+                <t>788</t>
+                <v id="P">-585</v>
+            </cc><cc>
+                <t>792</t>
+                <v id="P">-624</v>
+            </cc><cc>
+                <t>796</t>
+                <v id="P">-676</v>
+            </cc><cc>
+                <t>800</t>
+                <v id="P">-737</v>
+            </cc><cc>
+                <t>804</t>
+                <v id="P">-808</v>
+            </cc><cc>
+                <t>808</t>
+                <v id="P">-884</v>
+            </cc><cc>
+                <t>812</t>
+                <v id="P">-963</v>
+            </cc><cc>
+                <t>816</t>
+                <v id="P">-1041</v>
+            </cc><cc>
+                <t>820</t>
+                <v id="P">-1117</v>
+            </cc><cc>
+                <t>824</t>
+                <v id="P">-1187</v>
+            </cc><cc>
+                <t>828</t>
+                <v id="P">-1248</v>
+            </cc><cc>
+                <t>832</t>
+                <v id="P">-1297</v>
+            </cc><cc>
+                <t>836</t>
+                <v id="P">-1333</v>
+            </cc><cc>
+                <t>840</t>
+                <v id="P">-1353</v>
+            </cc><cc>
+                <t>844</t>
+                <v id="P">-1357</v>
+            </cc><cc>
+                <t>848</t>
+                <v id="P">-1342</v>
+            </cc><cc>
+                <t>852</t>
+                <v id="P">-1310</v>
+            </cc><cc>
+                <t>856</t>
+                <v id="P">-1259</v>
+            </cc><cc>
+                <t>860</t>
+                <v id="P">-1192</v>
+            </cc><cc>
+                <t>864</t>
+                <v id="P">-1109</v>
+            </cc><cc>
+                <t>868</t>
+                <v id="P">-1012</v>
+            </cc><cc>
+                <t>872</t>
+                <v id="P">-903</v>
+            </cc><cc>
+                <t>876</t>
+                <v id="P">-786</v>
+            </cc><cc>
+                <t>880</t>
+                <v id="P">-663</v>
+            </cc><cc>
+                <t>884</t>
+                <v id="P">-536</v>
+            </cc><cc>
+                <t>888</t>
+                <v id="P">-410</v>
+            </cc><cc>
+                <t>892</t>
+                <v id="P">-287</v>
+            </cc><cc>
+                <t>896</t>
+                <v id="P">-171</v>
+            </cc><cc>
+                <t>900</t>
+                <v id="P">-63</v>
+            </cc><cc>
+                <t>904</t>
+                <v id="P">33</v>
+            </cc><cc>
+                <t>908</t>
+                <v id="P">116</v>
+            </cc><cc>
+                <t>912</t>
+                <v id="P">184</v>
+            </cc><cc>
+                <t>916</t>
+                <v id="P">228</v>
+            </cc><cc>
+                <t>920</t>
+                <v id="P">256</v>
+            </cc><cc>
+                <t>924</t>
+                <v id="P">268</v>
+            </cc><cc>
+                <t>928</t>
+                <v id="P">266</v>
+            </cc><cc>
+                <t>932</t>
+                <v id="P">250</v>
+            </cc><cc>
+                <t>936</t>
+                <v id="P">225</v>
+            </cc><cc>
+                <t>940</t>
+                <v id="P">192</v>
+            </cc><cc>
+                <t>944</t>
+                <v id="P">153</v>
+            </cc><cc>
+                <t>948</t>
+                <v id="P">113</v>
+            </cc><cc>
+                <t>952</t>
+                <v id="P">72</v>
+            </cc><cc>
+                <t>956</t>
+                <v id="P">33</v>
+            </cc><cc>
+                <t>960</t>
+                <v id="P">-1</v>
+            </cc><cc>
+                <t>960</t>
+                <v id="P">0</v>
+            </cc><cc>
+                <t>1188</t>
+                <v id="P">4</v>
+            </cc><cc>
+                <t>1192</t>
+                <v id="P">15</v>
+            </cc><cc>
+                <t>1196</t>
+                <v id="P">32</v>
+            </cc><cc>
+                <t>1200</t>
+                <v id="P">56</v>
+            </cc><cc>
+                <t>1204</t>
+                <v id="P">84</v>
+            </cc><cc>
+                <t>1208</t>
+                <v id="P">117</v>
+            </cc><cc>
+                <t>1212</t>
+                <v id="P">153</v>
+            </cc><cc>
+                <t>1216</t>
+                <v id="P">192</v>
+            </cc><cc>
+                <t>1220</t>
+                <v id="P">232</v>
+            </cc><cc>
+                <t>1224</t>
+                <v id="P">272</v>
+            </cc><cc>
+                <t>1228</t>
+                <v id="P">311</v>
+            </cc><cc>
+                <t>1232</t>
+                <v id="P">348</v>
+            </cc><cc>
+                <t>1236</t>
+                <v id="P">380</v>
+            </cc><cc>
+                <t>1240</t>
+                <v id="P">408</v>
+            </cc><cc>
+                <t>1244</t>
+                <v id="P">429</v>
+            </cc><cc>
+                <t>1248</t>
+                <v id="P">443</v>
+            </cc><cc>
+                <t>1252</t>
+                <v id="P">450</v>
+            </cc><cc>
+                <t>1256</t>
+                <v id="P">446</v>
+            </cc><cc>
+                <t>1260</t>
+                <v id="P">434</v>
+            </cc><cc>
+                <t>1264</t>
+                <v id="P">411</v>
+            </cc><cc>
+                <t>1268</t>
+                <v id="P">378</v>
+            </cc><cc>
+                <t>1272</t>
+                <v id="P">334</v>
+            </cc><cc>
+                <t>1276</t>
+                <v id="P">273</v>
+            </cc><cc>
+                <t>1280</t>
+                <v id="P">205</v>
+            </cc><cc>
+                <t>1284</t>
+                <v id="P">132</v>
+            </cc><cc>
+                <t>1288</t>
+                <v id="P">54</v>
+            </cc><cc>
+                <t>1292</t>
+                <v id="P">-27</v>
+            </cc><cc>
+                <t>1296</t>
+                <v id="P">-108</v>
+            </cc><cc>
+                <t>1300</t>
+                <v id="P">-190</v>
+            </cc><cc>
+                <t>1304</t>
+                <v id="P">-269</v>
+            </cc><cc>
+                <t>1308</t>
+                <v id="P">-345</v>
+            </cc><cc>
+                <t>1312</t>
+                <v id="P">-415</v>
+            </cc><cc>
+                <t>1316</t>
+                <v id="P">-480</v>
+            </cc><cc>
+                <t>1320</t>
+                <v id="P">-536</v>
+            </cc><cc>
+                <t>1324</t>
+                <v id="P">-584</v>
+            </cc><cc>
+                <t>1328</t>
+                <v id="P">-622</v>
+            </cc><cc>
+                <t>1332</t>
+                <v id="P">-650</v>
+            </cc><cc>
+                <t>1336</t>
+                <v id="P">-667</v>
+            </cc><cc>
+                <t>1340</t>
+                <v id="P">-673</v>
+            </cc><cc>
+                <t>1344</t>
+                <v id="P">-669</v>
+            </cc><cc>
+                <t>1348</t>
+                <v id="P">-653</v>
+            </cc><cc>
+                <t>1352</t>
+                <v id="P">-628</v>
+            </cc><cc>
+                <t>1356</t>
+                <v id="P">-580</v>
+            </cc><cc>
+                <t>1360</t>
+                <v id="P">-527</v>
+            </cc><cc>
+                <t>1364</t>
+                <v id="P">-469</v>
+            </cc><cc>
+                <t>1368</t>
+                <v id="P">-408</v>
+            </cc><cc>
+                <t>1372</t>
+                <v id="P">-346</v>
+            </cc><cc>
+                <t>1376</t>
+                <v id="P">-284</v>
+            </cc><cc>
+                <t>1380</t>
+                <v id="P">-224</v>
+            </cc><cc>
+                <t>1384</t>
+                <v id="P">-167</v>
+            </cc><cc>
+                <t>1388</t>
+                <v id="P">-113</v>
+            </cc><cc>
+                <t>1392</t>
+                <v id="P">-65</v>
+            </cc><cc>
+                <t>1396</t>
+                <v id="P">-22</v>
+            </cc><cc>
+                <t>1400</t>
+                <v id="P">14</v>
+            </cc><cc>
+                <t>1404</t>
+                <v id="P">43</v>
+            </cc><cc>
+                <t>1408</t>
+                <v id="P">65</v>
+            </cc><cc>
+                <t>1412</t>
+                <v id="P">79</v>
+            </cc><cc>
+                <t>1416</t>
+                <v id="P">86</v>
+            </cc><cc>
+                <t>1420</t>
+                <v id="P">86</v>
+            </cc><cc>
+                <t>1424</t>
+                <v id="P">80</v>
+            </cc><cc>
+                <t>1428</t>
+                <v id="P">67</v>
+            </cc><cc>
+                <t>1432</t>
+                <v id="P">49</v>
+            </cc><cc>
+                <t>1436</t>
+                <v id="P">26</v>
+            </cc><cc>
+                <t>1440</t>
+                <v id="P">0</v>
+            </cc>
+            <note>
+                <t>0</t>
+                <dur>480</dur>
+                <n>60</n>
+                <v>64</v>
+                <y><![CDATA[do]]></y>
+                <p><![CDATA[a]]></p>
+                <nStyle>
+                    <v id="accent">50</v>
+                    <v id="bendDep">0</v>
+                    <v id="bendLen">0</v>
+                    <v id="decay">50</v>
+                    <v id="fallPort">0</v>
+                    <v id="opening">127</v>
+                    <v id="risePort">0</v>
+                    <v id="vibLen">0</v>
+                    <v id="vibType">0</v>
+                </nStyle>
+            </note><note>
+                <t>480</t>
+                <dur>480</dur>
+                <n>62</n>
+                <v>64</v>
+                <y><![CDATA[re]]></y>
+                <p><![CDATA[a]]></p>
+                <nStyle>
+                    <v id="accent">50</v>
+                    <v id="bendDep">0</v>
+                    <v id="bendLen">0</v>
+                    <v id="decay">50</v>
+                    <v id="fallPort">0</v>
+                    <v id="opening">127</v>
+                    <v id="risePort">0</v>
+                    <v id="vibLen">0</v>
+                    <v id="vibType">0</v>
+                </nStyle>
+            </note><note>
+                <t>960</t>
+                <dur>480</dur>
+                <n>64</n>
+                <v>64</v>
+                <y><![CDATA[mi]]></y>
+                <p><![CDATA[a]]></p>
+                <nStyle>
+                    <v id="accent">50</v>
+                    <v id="bendDep">0</v>
+                    <v id="bendLen">0</v>
+                    <v id="decay">50</v>
+                    <v id="fallPort">0</v>
+                    <v id="opening">127</v>
+                    <v id="risePort">0</v>
+                    <v id="vibLen">0</v>
+                    <v id="vibType">0</v>
+                </nStyle>
+            </note><note>
+                <t>1440</t>
+                <dur>480</dur>
+                <n>65</n>
+                <v>64</v>
+                <y><![CDATA[fa]]></y>
+                <p><![CDATA[a]]></p>
+                <nStyle>
+                    <v id="accent">50</v>
+                    <v id="bendDep">0</v>
+                    <v id="bendLen">0</v>
+                    <v id="decay">50</v>
+                    <v id="fallPort">0</v>
+                    <v id="opening">127</v>
+                    <v id="risePort">0</v>
+                    <v id="vibLen">0</v>
+                    <v id="vibType">0</v>
+                </nStyle>
+            </note>
+            <plane>0</plane>
+        </vsPart>
+    </vsTrack>
+    <monoTrack>
+    </monoTrack>
+    <stTrack>
+    </stTrack>
+    <aux>
+        <id><![CDATA[AUX_VST_HOST_CHUNK_INFO]]></id>
+        <content><![CDATA[VlNDSwAAAAADAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=]]></content>
+    </aux>
+</vsq4>

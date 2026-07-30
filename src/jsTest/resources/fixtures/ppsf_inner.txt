@@ -1,0 +1,65 @@
+{
+  "ppsf": {
+    "app_ver": "3.0.0.0",
+    "ppsf_ver": "3.0",
+    "project": {
+      "name": "Sample Project",
+      "sampling_rate": 44100,
+      "meter": {
+        "const": {
+          "denomi": 4,
+          "nume": 4
+        },
+        "use_sequence": false
+      },
+      "tempo": {
+        "const": 1200000,
+        "use_sequence": true,
+        "sequence": [
+          {
+            "tick": 0,
+            "value": 1200000,
+            "curve_type": 0
+          },
+          {
+            "tick": 960,
+            "value": 1400000,
+            "curve_type": 0
+          }
+        ]
+      },
+      "dvl_track": [
+        {
+          "name": "Vocal",
+          "enabled": true,
+          "events": [
+            {
+              "pos": 0,
+              "length": 480,
+              "note_number": 60,
+              "lyric": "あ",
+              "symbols": "a",
+              "enabled": true
+            },
+            {
+              "pos": 480,
+              "length": 480,
+              "note_number": 62,
+              "lyric": "い",
+              "symbols": "i",
+              "enabled": true
+            },
+            {
+              "pos": 1440,
+              "length": 480,
+              "note_number": 64,
+              "lyric": "う",
+              "symbols": "u",
+              "enabled": true
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
