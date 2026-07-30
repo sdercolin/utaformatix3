@@ -56,23 +56,17 @@ fun pitchFromVocaloidParts(dataByParts: List<VocaloidPartPitchData>): Pitch? {
             }
             pitMultipliedByPbs.mapKeys { it.key + part.startPos }
         }
-    val pitchRawData =
-        pitchRawDataByPart
-            .map { it.toList() }
-            .fold(listOf<Pair<Long, Int>>()) { accumulator, element ->
-                val firstPos = element.firstOrNull()?.first
-                if (firstPos == null) {
-                    accumulator
-                } else {
-                    val firstInvalidIndexInPrevious =
-                        accumulator.indexOfFirst { it.first >= firstPos }.takeIf { it >= 0 }
-                    if (firstInvalidIndexInPrevious == null) {
-                        accumulator + element
-                    } else {
-                        accumulator.take(firstInvalidIndexInPrevious) + element
-                    }
-                }
-            }
+    val pitchRawData = mutableListOf<Pair<Long, Int>>()
+    for (partData in pitchRawDataByPart) {
+        val element = partData.toList()
+        val firstPos = element.firstOrNull()?.first ?: continue
+        // a later part overrides the tail of the previously merged data from its first position on
+        val firstInvalidIndexInPrevious = pitchRawData.indexOfFirst { it.first >= firstPos }
+        if (firstInvalidIndexInPrevious >= 0) {
+            pitchRawData.subList(firstInvalidIndexInPrevious, pitchRawData.size).clear()
+        }
+        pitchRawData.addAll(element)
+    }
     val data =
         pitchRawData.map { (pos, value) ->
             pos to value.toDouble() / PITCH_MAX_VALUE

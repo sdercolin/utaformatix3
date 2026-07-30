@@ -50,12 +50,21 @@ fun pitchToUtauMode1Track(
     notes: List<Note>,
 ): UtauMode1TrackPitchData? {
     pitch ?: return null
+    val absoluteData = pitch.getAbsoluteData(notes)
+    // data is sorted by tick and notes do not overlap, so a single pass distributes
+    // the points to the notes
+    var pointIndex = 0
     return UtauMode1TrackPitchData(
         notes.map { note ->
+            val dataInNote =
+                absoluteData?.let { data ->
+                    while (pointIndex < data.size && data[pointIndex].first < note.tickOn) pointIndex++
+                    val startIndex = pointIndex
+                    while (pointIndex < data.size && data[pointIndex].first < note.tickOff) pointIndex++
+                    data.subList(startIndex, pointIndex)
+                }
             UtauMode1NotePitchData(
-                pitch
-                    .getAbsoluteData(notes)
-                    ?.filter { it.first >= note.tickOn && it.first < note.tickOff }
+                dataInNote
                     ?.dotResampled(Ust.MODE1_PITCH_SAMPLING_INTERVAL_TICK)
                     ?.map { Pair(it.first, it.second ?: note.key.toDouble()) }
                     ?.map { (it.second - note.key) * 100 },
