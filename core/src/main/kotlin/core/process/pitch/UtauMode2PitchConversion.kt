@@ -214,16 +214,16 @@ private fun List<Pair<Long, Double>>.appendEndPoint(thisNote: Note): List<Pair<L
 }
 
 private fun List<Pair<Long, Double>>.shape() =
-    this
-        .sortedBy { it.first }
-        .fold(listOf<Pair<Long, Double>>()) { acc, point ->
-            val lastPoint = acc.lastOrNull()
+    buildList<Pair<Long, Double>> {
+        this@shape.sortedBy { it.first }.forEach { point ->
+            val lastPoint = lastOrNull()
             if (lastPoint != null && lastPoint.first == point.first) {
-                acc.dropLast(1) + (lastPoint.first to ((lastPoint.second + point.second) / 2))
+                set(lastIndex, lastPoint.first to ((lastPoint.second + point.second) / 2))
             } else {
-                acc + point
+                add(point)
             }
         }
+    }
 
 private fun interpolate(
     lastPoint: Pair<Long, Double>,
