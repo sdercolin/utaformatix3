@@ -771,6 +771,13 @@ enum class Strings(
         ru = "Проект для VoiSona",
         fr = "Projet pour VoiSona",
     ),
+    TlpFormatDescription(
+        en = "Project for TuneLab",
+        ja = "TuneLab プロジェクト",
+        zhCN = "TuneLab 工程",
+        ru = "Проект для TuneLab",
+        fr = "Projet pour TuneLab",
+    ),
     ExportButton(
         en = "Export",
         ja = "エクスポート",
