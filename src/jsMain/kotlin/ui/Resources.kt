@@ -41,5 +41,5 @@ object Resources {
         get() = core.external.require("./images/voisona.png").default as String
 
     val tlpIcon: String
-        get() = core.external.require("./images/ufdata.png").default as String
+        get() = core.external.require("./images/tunelab.png").default as String
 }
