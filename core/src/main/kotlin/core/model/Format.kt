@@ -204,7 +204,7 @@ enum class Format(
             core.io.Tlp.generate(project, features)
         },
         possibleLyricsTypes = listOf(RomajiCv, RomajiVcv, KanaCv, KanaVcv),
-        availableFeaturesForGeneration = listOf(ConvertPitch, ConvertPhonemes),
+        availableFeaturesForGeneration = listOf(ConvertPhonemes),
         alias = "TuneLab",
     ),
     ;
