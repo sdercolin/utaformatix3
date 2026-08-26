@@ -195,6 +195,18 @@ enum class Format(
         possibleLyricsTypes = listOf(RomajiCv, RomajiVcv, KanaCv, KanaVcv),
         availableFeaturesForGeneration = listOf(ConvertPitch, ConvertPhonemes),
     ),
+    Tlp(
+        "tlp",
+        parser = { files, params ->
+            core.io.Tlp.parse(files.first(), params)
+        },
+        generator = { project, features ->
+            core.io.Tlp.generate(project, features)
+        },
+        possibleLyricsTypes = listOf(RomajiCv, RomajiVcv, KanaCv, KanaVcv),
+        availableFeaturesForGeneration = listOf(ConvertPhonemes),
+        alias = "TuneLab",
+    ),
     ;
 
     private val allExtensions get() = listOf(extension) + otherExtensions
@@ -231,6 +243,7 @@ enum class Format(
                     StandardMid,
                     Tssln,
                     UfData,
+                    Tlp,
                 )
 
         val exportable: List<Format>
@@ -250,6 +263,7 @@ enum class Format(
                     StandardMid,
                     Tssln,
                     UfData,
+                    Tlp,
                 )
 
         val vocaloidFormats: List<Format>
