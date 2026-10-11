@@ -11,10 +11,10 @@ and [React](https://github.com/facebook/react).
 
 - Supported importing
   formats: `.vsqx(3/4)`, `.vpr`, `.vsq`, `.mid(VOCALOID)`, `.mid(standard)`, `.ust`, `.ustx`, `.ccs`,`.xml(MusicXML)`
-  , `.musicxml`, `.svp`, `.s5p`, `.dv`, `.ppsf(NT)`, `.tssln`, `.ufdata`
+  , `.musicxml`, `.svp`, `.s5p`, `.dv`, `.ppsf(NT)`, `.tssln`, `.vfp`, `.ufdata`
 - Supported exporting
   formats: `.vsqx(4)`, `.vpr`, `.vsq`, `.mid(VOCALOID)`, `.mid(standard)`, `.ust`, `.ustx`, `.ccs`, `.xml(MusicXML)`
-  , `.svp`, `.s5p`, `.dv`, `.tssln`, `.ufdata`
+  , `.svp`, `.s5p`, `.dv`, `.tssln`, `.vfp`, `.ufdata`
 - Keep information including: tracks, notes, tempo labels, time signatures
 - Detect and convert Japanese lyrics types
     - between CV and VCV
@@ -37,6 +37,11 @@ and [React](https://github.com/facebook/react).
 | SVP                  | ✓            | ✓              | ✓            |
 | S5P                  | ✓            |                | ✓            |
 | DV                   | ✓            | ✓              | ✓            |
+| VFP                  | ✓            |                | ✓            |
+
+VFP pronunciations are derived from Japanese kana and Korean hangul lyrics. Hangul is spelled as it
+is written, without the Korean phonology VOX Factory applies first; lyrics in other languages keep
+the editor's default syllable, since it reads those from a pronunciation dictionary of its own.
 
 ## Open format published (.ufdata)
 
