@@ -5,6 +5,9 @@ config.module.rules.push({
     test: /\.vprjson$/i,
     loader: 'raw-loader'
 }, {
+    test: /\.vfpjson$/i,
+    loader: 'raw-loader'
+}, {
     test: /\.svp$/i,
     loader: 'raw-loader'
 }, {

@@ -778,6 +778,13 @@ enum class Strings(
         ru = "Проект для TuneLab",
         fr = "Projet pour TuneLab",
     ),
+    VfpFormatDescription(
+        en = "Project for VOX Factory",
+        ja = "VOX Factory プロジェクト",
+        zhCN = "VOX Factory 工程",
+        ru = "Проект для VOX Factory",
+        fr = "Projet pour VOX Factory",
+    ),
     ExportButton(
         en = "Export",
         ja = "エクスポート",
@@ -840,6 +847,13 @@ enum class Strings(
         zhCN = "未能将节拍记号导出到目标格式。",
         ru = "Не удалось преобразовать временные сигнатуры в целевой формат.",
         fr = "Impossible de convertir les signatures rythmiques au format cible.",
+    ),
+    ExportNotificationTempoIgnored(
+        en = "Only the first tempo was kept, because the target format holds a single tempo.",
+        ja = "出力先の形式はテンポを1つしか保持できないため、最初のテンポのみが出力されました。",
+        zhCN = "目标格式仅支持单一曲速，因此只导出了第一个曲速。",
+        ru = "Был сохранён только первый темп, так как целевой формат поддерживает лишь один темп.",
+        fr = "Seul le premier tempo a été conservé, car le format cible n'en accepte qu'un seul.",
     ),
     ExportNotificationPitchDataExported(
         en =
