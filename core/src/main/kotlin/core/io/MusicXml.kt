@@ -250,10 +250,10 @@ object MusicXml {
                 tickPosition += duration
                 notes.add(note)
 
-                when (noteNode.getSingleElementByTagNameOrNull("tie")?.getAttribute("type")) {
-                    "start" -> isInsideNote = true
-                    "stop" -> isInsideNote = false
-                    else -> Unit
+                val tieTypes = noteNode.getElementListByTagName("tie").map { it.getAttribute("type") }
+                when {
+                    "start" in tieTypes -> isInsideNote = true
+                    "stop" in tieTypes -> isInsideNote = false
                 }
             }
         }
