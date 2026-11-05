@@ -63,4 +63,34 @@ class UstxTest {
     // newer OpenUtau writes it as a string (issue #191)
     @Test
     fun testParseStringVersion() = parse("'0.9.1'")
+
+    @Test
+    fun testParseWithoutOptionalFields() =
+        GlobalScope.promise {
+            val content =
+                """
+                name: New Project
+                ustx_version: '0.9.1'
+                tracks:
+                - track_name: Track 1
+                voice_parts:
+                - name: New Part
+                  track_no: 0
+                  position: 0
+                  notes:
+                  - position: 0
+                    duration: 480
+                    tone: 60
+                    lyric: あ
+                    pitch:
+                      data:
+                      - {x: -40, y: 0, shape: io}
+                      snap_first: true
+                    vibrato: {length: 0, period: 175, depth: 25, in: 10, out: 10, shift: 0, drift: 0}
+                """.trimIndent()
+            val file = File(arrayOf(content), "test.ustx")
+            val project = Ustx.parse(file, ImportParams())
+            assertEquals(1, project.tracks.size)
+            assertEquals("あ", project.tracks.first().notes.first().lyric)
+        }
 }

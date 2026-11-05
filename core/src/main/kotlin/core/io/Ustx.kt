@@ -380,9 +380,9 @@ object Ustx {
     @Serializable
     private data class Project(
         val name: String,
-        val comment: String,
-        @SerialName("output_dir") val outputDir: String,
-        @SerialName("cache_dir") val cacheDir: String,
+        val comment: String? = null,
+        @SerialName("output_dir") val outputDir: String? = null,
+        @SerialName("cache_dir") val cacheDir: String? = null,
         @SerialName("ustx_version")
         @Serializable(with = VersionSerializer::class)
         val ustxVersion: String,
@@ -392,7 +392,7 @@ object Ustx {
         val resolution: Int? = null,
         @SerialName("time_signatures") val timeSignatures: List<TimeSignature>? = null,
         val tempos: List<Tempo>? = null,
-        val expressions: Map<String, Expression>,
+        val expressions: Map<String, Expression>? = null,
         val tracks: List<Track>,
         @SerialName("voice_parts") val voiceParts: List<VoicePart>,
     )
@@ -412,7 +412,7 @@ object Ustx {
 
     @Serializable
     private data class Track(
-        val phonemizer: String,
+        val phonemizer: String? = null,
         val mute: Boolean = false,
         val solo: Boolean = false,
         val volume: Double = 0.0,
@@ -422,7 +422,7 @@ object Ustx {
     @Serializable
     private data class VoicePart(
         val name: String,
-        val comment: String,
+        val comment: String? = null,
         @SerialName("track_no") val trackNo: Int,
         val position: Long,
         val notes: List<Note>,
