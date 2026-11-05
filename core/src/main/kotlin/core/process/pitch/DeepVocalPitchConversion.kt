@@ -80,12 +80,17 @@ private fun List<Pair<Long, Double?>>.mergeSameTickPoints() =
         .takeIf { points -> points.any { it.second != null } }
 
 private fun List<Pair<Long, Double?>>.mergeSameValuePoints() =
-    asSequence()
-        .sortedBy { it.first }
-        .fold(listOf<Pair<Long, Double?>>()) { acc, point ->
-            val lastValue = acc.lastOrNull()?.second
-            if (point.second != lastValue) acc + point else acc
-        }
+    buildList<Pair<Long, Double?>> {
+        var lastValue: Double? = null
+        this@mergeSameValuePoints
+            .sortedBy { it.first }
+            .forEach { point ->
+                if (point.second != lastValue) {
+                    add(point)
+                    lastValue = point.second
+                }
+            }
+    }
 
 private fun List<Pair<Long, Double?>>.applyDefaultPitch(
     notes: List<DvNoteWithPitch>,
@@ -107,22 +112,22 @@ private fun List<Pair<Long, Double?>>.applyDefaultPitch(
             null
         }
 
-    return (this + appendingLastPoint)
-        .filterNotNull()
-        .fold(listOf()) { acc, point ->
-            val lastPoint = acc.lastOrNull()
-            val startTick = lastPoint?.first ?: 0
-            val endTick = point.first
+    return buildList<Pair<Long, Double?>> {
+        (this@applyDefaultPitch + appendingLastPoint)
+            .filterNotNull()
+            .forEach { point ->
+                val lastPoint = lastOrNull()
+                val startTick = lastPoint?.first ?: 0
+                val endTick = point.first
 
-            if (lastPoint?.second == null) {
-                val interpolatedPoints =
-                    (startTick until endTick step SAMPLING_INTERVAL_TICK)
-                        .map { it to ((base[it] ?: 0.0) + (bendDiff[it] ?: 0.0) + (vibratoDiff[it] ?: 0.0)) }
-                acc + interpolatedPoints + point
-            } else {
-                acc + point
+                if (lastPoint?.second == null) {
+                    (startTick until endTick step SAMPLING_INTERVAL_TICK).forEach {
+                        add(it to ((base[it] ?: 0.0) + (bendDiff[it] ?: 0.0) + (vibratoDiff[it] ?: 0.0)))
+                    }
+                }
+                add(point)
             }
-        }
+    }
 }
 
 private fun getBasePitch(

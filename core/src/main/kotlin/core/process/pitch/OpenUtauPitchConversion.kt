@@ -137,7 +137,7 @@ fun pitchFromUstxPart(
         // Merge points from all notes in the section
         val pointsInSection =
             pointsByNote
-                .reduce { acc, list -> acc + list }
+                .flatten()
                 .groupBy { it.first }
                 .filter { it.key in sectionBorder..nextSectionBorder }
                 .map { (tick, points) ->
@@ -284,13 +284,17 @@ private fun List<Pair<Long, Double>>.resampled(
                 mergedTick to points.map { it.second }.average()
             }
         }.sortedBy { it.first }
-        .fold(listOf()) { acc, point ->
-            val lastPoint = acc.lastOrNull()
-            if (lastPoint == null) {
-                listOf(point)
-            } else {
-                val interpolated = listOf(lastPoint, point).interpolateLinear(interval).orEmpty()
-                acc + interpolated.drop(1)
+        .let { points ->
+            buildList<Pair<Long, Double>> {
+                points.forEach { point ->
+                    val lastPoint = lastOrNull()
+                    if (lastPoint == null) {
+                        add(point)
+                    } else {
+                        val interpolated = listOf(lastPoint, point).interpolateLinear(interval).orEmpty()
+                        addAll(interpolated.drop(1))
+                    }
+                }
             }
         }
 

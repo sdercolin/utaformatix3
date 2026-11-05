@@ -18,9 +18,19 @@ import core.process.pitch.pitchFromUstxPart
 import core.process.pitch.reduceRepeatedPitchPointsFromUstxTrack
 import core.process.pitch.toOpenUtauPitchData
 import core.util.readText
+import kotlinx.serialization.KSerializer
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.descriptors.PrimitiveKind
+import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
+import kotlinx.serialization.descriptors.SerialDescriptor
+import kotlinx.serialization.encoding.Decoder
+import kotlinx.serialization.encoding.Encoder
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonDecoder
+import kotlinx.serialization.json.JsonEncoder
+import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.jsonPrimitive
 import org.w3c.files.Blob
 import org.w3c.files.BlobPropertyBag
 import org.w3c.files.File
@@ -343,20 +353,46 @@ object Ustx {
             ignoreUnknownKeys = true
         }
 
+    /**
+     * `ustx_version` is written as a number (e.g. 0.6) by older OpenUtau versions
+     * and as a string (e.g. "0.9.1") by newer ones; accept both, and keep the
+     * numeric form on output so exported files match the template.
+     */
+    private object VersionSerializer : KSerializer<String> {
+        override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("UstxVersion", PrimitiveKind.STRING)
+
+        override fun deserialize(decoder: Decoder): String =
+            (decoder as JsonDecoder).decodeJsonElement().jsonPrimitive.content
+
+        override fun serialize(
+            encoder: Encoder,
+            value: String,
+        ) {
+            val doubleValue = value.toDoubleOrNull()
+            if (doubleValue != null) {
+                (encoder as JsonEncoder).encodeJsonElement(JsonPrimitive(doubleValue))
+            } else {
+                encoder.encodeString(value)
+            }
+        }
+    }
+
     @Serializable
     private data class Project(
         val name: String,
-        val comment: String,
-        @SerialName("output_dir") val outputDir: String,
-        @SerialName("cache_dir") val cacheDir: String,
-        @SerialName("ustx_version") val ustxVersion: Double,
+        val comment: String? = null,
+        @SerialName("output_dir") val outputDir: String? = null,
+        @SerialName("cache_dir") val cacheDir: String? = null,
+        @SerialName("ustx_version")
+        @Serializable(with = VersionSerializer::class)
+        val ustxVersion: String,
         val bpm: Double? = null,
         @SerialName("beat_per_bar") val beatPerBar: Int? = null,
         @SerialName("beat_unit") val beatUnit: Int? = null,
         val resolution: Int? = null,
         @SerialName("time_signatures") val timeSignatures: List<TimeSignature>? = null,
         val tempos: List<Tempo>? = null,
-        val expressions: Map<String, Expression>,
+        val expressions: Map<String, Expression>? = null,
         val tracks: List<Track>,
         @SerialName("voice_parts") val voiceParts: List<VoicePart>,
     )
@@ -376,7 +412,7 @@ object Ustx {
 
     @Serializable
     private data class Track(
-        val phonemizer: String,
+        val phonemizer: String? = null,
         val mute: Boolean = false,
         val solo: Boolean = false,
         val volume: Double = 0.0,
@@ -386,7 +422,7 @@ object Ustx {
     @Serializable
     private data class VoicePart(
         val name: String,
-        val comment: String,
+        val comment: String? = null,
         @SerialName("track_no") val trackNo: Int,
         val position: Long,
         val notes: List<Note>,

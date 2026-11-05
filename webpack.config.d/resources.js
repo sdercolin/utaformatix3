@@ -20,6 +20,12 @@ config.module.rules.push({
     test: /\.ustx/i,
     loader: 'raw-loader'
 }, {
+    test: /\.ust$/i,
+    loader: 'raw-loader'
+}, {
+    test: /\.ufdata$/i,
+    loader: 'raw-loader'
+}, {
     test: /\.txt/i,
     loader: 'raw-loader'
 }, {

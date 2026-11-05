@@ -88,7 +88,7 @@ private fun List<Pair<Long, Double?>>.appendPointsAtBorders(
         .forEach { (lastNote, thisNote) ->
             if (thisNote.tickOn - lastNote.tickOff > radius) return@forEach
             val firstPointAtThisNoteIndex =
-                result.indexOfFirst { it.first >= thisNote.tickOn }.takeIf { it >= 0 } ?: return@forEach
+                result.firstIndexAtOrAfter(thisNote.tickOn).takeIf { it < result.size } ?: return@forEach
             val firstPointAtThisNote = result[firstPointAtThisNoteIndex]
             if (firstPointAtThisNote.first == thisNote.tickOn ||
                 firstPointAtThisNote.first - thisNote.tickOn > radius
@@ -98,10 +98,25 @@ private fun List<Pair<Long, Double?>>.appendPointsAtBorders(
             val postValue = firstPointAtThisNote.second ?: return@forEach
             val newPointTick = thisNote.tickOn - radius
             val newPoint = newPointTick to postValue
-            result.add(firstPointAtThisNoteIndex, newPoint)
-            result.removeAll { it.first in newPointTick until thisNote.tickOn && it != newPoint }
+            // replace the points in [newPointTick, thisNote.tickOn) with the new point,
+            // keeping any existing point identical to it
+            val replaced = result.subList(result.firstIndexAtOrAfter(newPointTick), firstPointAtThisNoteIndex)
+            val spared = replaced.filter { it == newPoint }
+            replaced.clear()
+            replaced.addAll(spared + newPoint)
         }
     return result
+}
+
+// the receiver is sorted by tick; binary search for the first index at or after the given tick
+private fun List<Pair<Long, Double?>>.firstIndexAtOrAfter(tick: Long): Int {
+    var low = 0
+    var high = size
+    while (low < high) {
+        val mid = (low + high) / 2
+        if (this[mid].first >= tick) high = mid else low = mid + 1
+    }
+    return low
 }
 
 /**

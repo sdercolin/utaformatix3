@@ -8,6 +8,7 @@ import core.model.Format.Ppsf
 import core.model.Format.S5p
 import core.model.Format.StandardMid
 import core.model.Format.Svp
+import core.model.Format.Tlp
 import core.model.Format.Tssln
 import core.model.Format.UfData
 import core.model.Format.Ust
@@ -189,6 +190,7 @@ private val Format.description: String?
             StandardMid -> Strings.StandardMidDescription
             UfData -> Strings.UfDataFormatDescription
             Tssln -> Strings.VoiSonaFormatDescription
+            Tlp -> Strings.TlpFormatDescription
         }?.let { string(it) }
 
 private val Format.iconPath: String?
@@ -209,6 +211,7 @@ private val Format.iconPath: String?
             StandardMid -> Resources.standardMidiIcon
             UfData -> Resources.ufdataIcon
             Tssln -> Resources.tsslnIcon
+            Tlp -> Resources.tlpIcon
         }
 
 external interface OutputFormatSelectorProps : Props {

@@ -101,6 +101,9 @@ val copyJsResourcesForTests by tasks.register<Copy>("copyJsResourcesForTests") {
     from("src/jsMain/resources") {
         include("**/*.*")
     }
+    from("src/jsTest/resources") {
+        include("**/*.*")
+    }
     into("build/js/packages/utaformatix-test/kotlin")
     mustRunAfter("jsTestTestDevelopmentExecutableCompileSync")
 }

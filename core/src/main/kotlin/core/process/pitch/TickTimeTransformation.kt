@@ -17,28 +17,58 @@ class TickTimeTransformer(
     // a piecewise linear transformation from tick to sec
     // simplify the calculation here for every usage to reduce cost
     private val segments =
-        (tempos.zipWithNext() + (tempos.last() to null))
-            .fold(listOf<Segment>()) { acc, (thisTempo, nextTempo) ->
+        buildList<Segment> {
+            (tempos.zipWithNext() + (tempos.last() to null)).forEach { (thisTempo, nextTempo) ->
                 val range = thisTempo.tickPosition until (nextTempo?.tickPosition ?: Long.MAX_VALUE)
                 val rate = thisTempo.bpm.bpmToSecPerTick()
-                val thisResult =
-                    if (acc.isEmpty()) {
+                val segment =
+                    if (isEmpty()) {
                         Segment(range, 0.0, rate)
                     } else {
-                        val lastParams = acc.last()
+                        val lastParams = last()
                         val offset =
                             lastParams.offset +
                                 (lastParams.range.last + 1 - lastParams.range.first) * lastParams.secPerTick
                         Segment(range, offset, rate)
                     }
-                acc + thisResult
+                add(segment)
             }
+        }
 
-    fun tickToSec(tick: Long) =
-        segments
-            .firstOrNull { tick in it.range }
-            .let { it ?: segments.first() }
-            .let { it.offset + (tick - it.range.first) * it.secPerTick }
+    // segments are contiguous and sorted; binary search for the last one starting at or before the key
+    private fun segmentAtTick(tick: Long): Segment {
+        var low = 0
+        var high = segments.lastIndex
+        var index = 0
+        while (low <= high) {
+            val mid = (low + high) / 2
+            if (segments[mid].range.first <= tick) {
+                index = mid
+                low = mid + 1
+            } else {
+                high = mid - 1
+            }
+        }
+        return segments[index]
+    }
+
+    private fun segmentAtSec(sec: Double): Segment {
+        var low = 0
+        var high = segments.lastIndex
+        var index = 0
+        while (low <= high) {
+            val mid = (low + high) / 2
+            if (segments[mid].offset <= sec) {
+                index = mid
+                low = mid + 1
+            } else {
+                high = mid - 1
+            }
+        }
+        return segments[index]
+    }
+
+    fun tickToSec(tick: Long) = segmentAtTick(tick).let { it.offset + (tick - it.range.first) * it.secPerTick }
 
     fun tickToMilliSec(tick: Long) = tickToSec(tick) * 1000
 
@@ -52,11 +82,7 @@ class TickTimeTransformer(
         tickEnd: Long,
     ) = tickDistanceToSec(tickStart, tickEnd) * 1000
 
-    fun secToTick(sec: Double) =
-        segments
-            .lastOrNull { it.offset <= sec }
-            .let { it ?: segments.first() }
-            .let { ((sec - it.offset) / it.secPerTick).toLong() + it.range.first }
+    fun secToTick(sec: Double) = segmentAtSec(sec).let { ((sec - it.offset) / it.secPerTick).toLong() + it.range.first }
 
     fun milliSecToTick(milliSec: Double) = secToTick(milliSec / 1000.0)
 }

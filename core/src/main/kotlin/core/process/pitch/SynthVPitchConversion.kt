@@ -50,11 +50,12 @@ fun processSvpInputPitchData(
         notesWithVibrato,
         vibratoDefaultParameters,
         tempos,
-        vibratoEnvPoints
-            .merge()
-            .interpolate(vibratoEnvMode)
-            .orEmpty()
-            .extendEveryTick(),
+        VibratoEnvelope(
+            vibratoEnvPoints
+                .merge()
+                .interpolate(vibratoEnvMode)
+                .orEmpty(),
+        ),
     ).removeRedundantPoints()
 
 private fun List<Pair<Long, Double>>.merge() =
@@ -71,24 +72,41 @@ private fun List<Pair<Long, Double>>.interpolate(mode: String?) =
         else -> this.interpolateCosineEaseInOut(SAMPLING_INTERVAL_TICK)
     }
 
-private fun List<Pair<Long, Double>>.extendEveryTick() =
-    fold(listOf<Pair<Long, Double>>()) { acc, point ->
-        val lastPoint = acc.lastOrNull()
-        if (lastPoint == null || lastPoint.second == 1.0) {
-            acc + point
-        } else {
-            val inserted =
-                (lastPoint.first until point.first)
-                    .map { it to lastPoint.second }
-            acc + inserted + point
+/**
+ * Step-function lookup over sorted envelope points.
+ * Value at a tick is the value of the last point at or before it; outside the
+ * covered range (and beyond the last point) the neutral value 1.0 is returned.
+ */
+private class VibratoEnvelope(
+    private val points: List<Pair<Long, Double>>,
+) {
+    fun valueAt(tick: Long): Double {
+        if (points.isEmpty() || tick < points.first().first) return 1.0
+        var low = 0
+        var high = points.lastIndex
+        var index = 0
+        while (low <= high) {
+            val mid = (low + high) / 2
+            if (points[mid].first <= tick) {
+                index = mid
+                low = mid + 1
+            } else {
+                high = mid - 1
+            }
         }
-    }.toMap()
+        return if (index == points.lastIndex && points[index].first != tick) {
+            1.0
+        } else {
+            points[index].second
+        }
+    }
+}
 
 private fun List<Pair<Long, Double>>.appendVibrato(
     notes: List<SvpNoteWithVibrato>,
     vibratoDefaultParameters: SvpDefaultVibratoParameters?,
     tempos: List<Tempo>,
-    vibratoEnv: Map<Long, Double>,
+    vibratoEnv: VibratoEnvelope,
 ): List<Pair<Long, Double>> {
     val transformer = TickTimeTransformer(tempos)
     val pitchPoints = this
@@ -140,7 +158,7 @@ private fun List<Pair<Long, Double>>.appendVibratoInNote(
     defaultParameters: SvpDefaultVibratoParameters?,
     tickTimeTransformer: TickTimeTransformer,
     tempos: List<Tempo>,
-    vibratoEnv: Map<Long, Double>,
+    vibratoEnv: VibratoEnvelope,
 ): List<Pair<Long, Double>> {
     // Skip if note is null or invalid.
     note?.takeIf { it.noteStartTick >= 0L } ?: return this
@@ -168,7 +186,7 @@ private fun List<Pair<Long, Double>>.appendVibratoInNote(
         val easeInFactor = ((sec - vibratoStartSec) / easeInLength).coerceIn(0.0, 1.0)
         val easeOutFactor = ((noteEndSec - sec) / easeOutLength).coerceIn(0.0, 1.0)
         val rad = 2 * kotlin.math.PI * frequency * secPerTick * (tick - vibratoStartTick) + phase
-        val envelope = vibratoEnv[tick] ?: 1.0
+        val envelope = vibratoEnv.valueAt(tick)
         return envelope * depth * easeInFactor * easeOutFactor * kotlin.math.sin(rad)
     }
 
@@ -209,9 +227,14 @@ private fun List<Pair<Long, Double>>.appendVibratoInNote(
 }
 
 private fun List<Pair<Long, Double>>.removeRedundantPoints() =
-    fold(listOf<Pair<Long, Double>>()) { acc, point ->
-        val previousValue = acc.lastOrNull()?.second
-        if (point.second != previousValue) acc + point else acc
+    buildList {
+        var previousValue: Double? = null
+        for (point in this@removeRedundantPoints) {
+            if (point.second != previousValue) {
+                add(point)
+                previousValue = point.second
+            }
+        }
     }
 
 fun List<Pair<Long, Double>>.appendPitchPointsForSvpOutput() =
