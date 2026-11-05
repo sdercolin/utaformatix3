@@ -1,5 +1,12 @@
 # UtaFormatix - Release Notes
 
+#### 3.25 (2026.11.5)
+- Add TuneLab file (.tlp) support (thanks @Krono159)
+- Fix USTX import failing on files without some optional fields (e.g. phonemizer)
+- Fix USTX import for files written by newer OpenUtau versions
+- Fix tempo changes in the middle of a measure being lost on MusicXML import
+- Speed up pitch conversion, especially for UTAU and VOCALOID formats
+
 #### 3.24 (2025.5.19)
 - Add phoneme support for CCS
 - Optimize (speedup) pitch import from SVP
