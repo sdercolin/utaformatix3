@@ -91,6 +91,7 @@ class UstxTest {
             val file = File(arrayOf(content), "test.ustx")
             val project = Ustx.parse(file, ImportParams())
             assertEquals(1, project.tracks.size)
-            assertEquals("あ", project.tracks.first().notes.first().lyric)
+            val notes = project.tracks.first().notes
+            assertEquals("あ", notes.first().lyric)
         }
 }
