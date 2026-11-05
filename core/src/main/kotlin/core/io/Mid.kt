@@ -88,10 +88,10 @@ object Mid {
                 .toMutableList()
 
         // Delete all time signatures inside prefix, add apply the last as the first
-        val firstTimeSignatureIndex =
-            timeSignatures
-                .last { it.measurePosition <= 0 }
-                .let { timeSignatures.indexOf(it) }
+        val firstTimeSignatureIndex = timeSignatures.indexOfLast { it.measurePosition <= 0 }
+        if (firstTimeSignatureIndex < 0) {
+            timeSignatures.add(0, TimeSignature.default)
+        }
         repeat(firstTimeSignatureIndex) {
             val removed = timeSignatures.removeAt(0)
             warnings.add(ImportWarning.TimeSignatureIgnoredInPreMeasure(removed))
@@ -103,10 +103,10 @@ object Mid {
             rawTempos
                 .map { it.copy(tickPosition = it.tickPosition - tickPrefix) }
                 .toMutableList()
-        val firstTempoIndex =
-            tempos
-                .last { it.tickPosition <= 0 }
-                .let { tempos.indexOf(it) }
+        val firstTempoIndex = tempos.indexOfLast { it.tickPosition <= 0 }
+        if (firstTempoIndex < 0) {
+            tempos.add(0, Tempo.default)
+        }
         repeat(firstTempoIndex) {
             val removed = tempos.removeAt(0)
             warnings.add(ImportWarning.TempoIgnoredInPreMeasure(removed))
