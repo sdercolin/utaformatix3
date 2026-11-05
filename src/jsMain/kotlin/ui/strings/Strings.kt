@@ -583,11 +583,11 @@ enum class Strings(
         fr = "https://gist.githubusercontent.com/Exorcism0666/29e1c09eb471bccc270cc0a02992a0b1/raw",
     ),
     ReleaseNotesUrl(
-        en = "https://gist.githubusercontent.com/sdercolin/512db280480072f22cf1d462401eb1a0/raw",
-        ja = "https://gist.githubusercontent.com/sdercolin/512db280480072f22cf1d462401eb1a0/raw",
-        zhCN = "https://gist.githubusercontent.com/sdercolin/512db280480072f22cf1d462401eb1a0/raw",
-        ru = "https://gist.githubusercontent.com/sdercolin/512db280480072f22cf1d462401eb1a0/raw",
-        fr = "https://gist.githubusercontent.com/sdercolin/512db280480072f22cf1d462401eb1a0/raw",
+        en = "release-notes.md",
+        ja = "release-notes.md",
+        zhCN = "release-notes.md",
+        ru = "release-notes.md",
+        fr = "release-notes.md",
     ),
     GoogleAnalyticsUsageInfoUrl(
         en = "https://gist.githubusercontent.com/sdercolin/b5d4cf81434ea381d8836e0015681029/raw",
