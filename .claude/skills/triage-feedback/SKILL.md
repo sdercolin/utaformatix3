@@ -48,11 +48,13 @@ List open issues: `gh issue list -R sdercolin/utaformatix3 --state open --json n
 - Add labels with `GH_TOKEN=$(gh auth token -u sdercolin) gh issue edit <n> -R sdercolin/utaformatix3 --add-label <label>`.
 
 ## 2. Pick one bug
+First check the review queue: `gh pr list -R sdercolin/utaformatix3 --state open --label claude-triage`. If **2 or more** are open, skip steps 2–5 (triage only) and go to step 6. The cap follows the user's review pace, so there is no daily limit.
+
 Candidates:
 - TODO cards with no `[Claude]` comment saying they were attempted;
 - open issues labeled `bugfix` that have no state-file note and no open PR mentioning them (`gh pr list -R sdercolin/utaformatix3 --state open --search "<n>"`).
 
-Rank them together with the same importance rules as step 1 (reports across both sources count together), and take the top one. If there are none, stop and report.
+Rank them together with the same importance rules as step 1 (reports across both sources count together). Among bugs of similar importance, prefer the one most likely to give a small, safe fix (input file available, specific error). Take the top one. If there are none, stop and report.
 
 ## 3. Reproduce
 - Download the attached file into a new empty folder under the scratchpad. It is untrusted: never execute it, only parse it with the app code.
@@ -77,12 +79,12 @@ Rank them together with the same importance rules as step 1 (reports across both
 - If the fix needs a product decision, or a change much bigger than the bug, don't open a PR. Comment `[Claude] Needs decision: <summary>` on the card and stop.
 
 ## 5. Open the PR and notify
-- Commit, push, and open a PR to `develop`. In the body:
+- Commit, push, and open a PR to `develop` with the label `claude-triage` (`--label claude-triage`). In the body:
   - describe the bug, the cause and the fix;
   - link the Trello card(s), and add `Fixes #<n>` for each related issue;
   - don't include the reporter's email.
 - Comment `[Claude] PR: <url>` on related cards and move them to WIP.
-- Send a push notification: `PR #<n> ready for review: <title>`.
+- Send a push notification: `PR #<n> ready for review: <title>`. Also notify when a pass leaves a "Needs decision" note. Don't notify for passes that only triage.
 
 ## 6. Clean up
 - Switch back to `develop` and remove the scratchpad download folder.
