@@ -45,6 +45,12 @@ description: Release a new UtaFormatix version. Bumps APP_VERSION, writes releas
    - Watch the deploy: `gh run list --workflow deploy.yml --branch master --limit 1`, then `gh run watch <id>`.
    - Report the release URL and the deploy result.
 
+6. **Update the Trello board.**
+   - Board: `UtaFormatix feedback` (https://trello.com/b/ylRy2Vft). User feedback lands in **Unchecked**, and the other lists are **TODO**, **WIP**, **Fixed** and **Dropped**.
+   - Use `~/.claude/scripts/trello.sh METHOD /path [name=value ...]`. It reads `TRELLO_KEY` and `TRELLO_TOKEN` from `~/.zshrc`. If the script is missing, ask the user instead of calling the API another way.
+   - Cards don't link to PRs. Find the ones this release fixes by matching each fix against the cards in Unchecked, TODO and WIP (error message, format, symptom). Show the matches to the user and wait for approval.
+   - Move each approved card to **Fixed** (`PUT /cards/<id> idList=<Fixed list id>`), and comment `Fixed in <version> (#<PR>): <one-line summary>` (`POST /cards/<id>/actions/comments text=...`).
+
 ## Hotfix
 For an urgent fix that must skip unreleased changes on develop:
 - Branch `hotfix/<version>` from `origin/master`, apply the fix, bump the version and add the notes, then open a PR to `master`.
