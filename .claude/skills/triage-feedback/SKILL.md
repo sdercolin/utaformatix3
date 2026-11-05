@@ -16,7 +16,7 @@ One pass = triage, then at most **one** fix attempt. Keep the report at the end 
   - Dropped `63904ca33bdcf901f1acbdf6`
 - GitHub writes need the `sdercolin` account. Prefix those `gh` commands with `GH_TOKEN=$(gh auth token -u sdercolin)` instead of switching the global account. `git push` to `origin` already works over SSH.
 - Never merge PRs, never contact reporters, never put reporter emails in commits, PRs or comments.
-- Never decide product scope: only archive clearly invalid feature requests (see step 1); valid ones stay in Unchecked for the user.
+- Never decide product scope: only archive clearly invalid feature requests (see step 1). Valid ones get a proposal and wait for the user's approval before any work.
 - Comments written by this skill start with `[Claude]`, so later passes can recognize them.
 - GitHub issues on `sdercolin/utaformatix3` are public:
   - Only add labels (`bugfix`, `feature`, `enhancement`, `need help`, `duplicate`), and link fixes with `Fixes #<n>` in the PR body.
@@ -37,13 +37,20 @@ For each card:
     - it already exists (check `core/model/Format.kt` and the app features);
     - it's too vague to act on (no format or behavior named);
     - it's unrelated to converting singing voice projects.
-  - Leave valid ones in Unchecked for the user to decide; never move them to TODO.
+  - For valid ones, comment a proposal and leave the card in Unchecked; never move it to TODO yourself. Write the proposal as `[Claude] Proposal:` followed by:
+    - what it would do;
+    - the approach (files, formats involved);
+    - a rough size (S/M/L);
+    - open questions for the user.
+    The user approves by moving the card to TODO, or rejects it by moving it to Dropped. Skip cards that already have a proposal.
 
 ## 1b. Triage new GitHub issues
 List open issues: `gh issue list -R sdercolin/utaformatix3 --state open --json number,title,body,labels,createdAt`. An issue is new if it has no labels and isn't in the state file. For each new issue:
 - **Bug with enough to reproduce** (an attached file, or clear steps) → label `bugfix`.
 - **Bug without enough information** → label `need help`.
 - **Feature request** → label `feature` or `enhancement`. Never decide whether to do it.
+  - Put a proposal (same content as for Trello) in the pass report, and record `proposed` for it in the state file so it isn't proposed again.
+  - The user approves by adding the `approved` label, or rejects it with `wontfix`.
 - **Same bug as a Trello card or another issue** → label `duplicate` only if it duplicates another issue. If it matches a Trello card, comment `[Claude] Also reported in #<n>` on the card instead.
 - Add labels with `GH_TOKEN=$(gh auth token -u sdercolin) gh issue edit <n> -R sdercolin/utaformatix3 --add-label <label>`.
 
@@ -52,7 +59,8 @@ First check the review queue: `gh pr list -R sdercolin/utaformatix3 --state open
 
 Candidates:
 - TODO cards with no `[Claude]` comment saying they were attempted;
-- open issues labeled `bugfix` that have no state-file note and no open PR mentioning them (`gh pr list -R sdercolin/utaformatix3 --state open --search "<n>"`).
+- open issues labeled `bugfix` that have no state-file note and no open PR mentioning them (`gh pr list -R sdercolin/utaformatix3 --state open --search "<n>"`);
+- approved feature requests: feature cards the user moved to TODO, and issues labeled `approved` (same checks as above). Implement them as described in the proposal, plus the user's answers to its open questions. If the answers are missing, comment or record `Needs decision`, and notify.
 
 Rank them together with the same importance rules as step 1 (reports across both sources count together). Among bugs of similar importance, prefer the one most likely to give a small, safe fix (input file available, specific error). Take the top one. If there are none, stop and report.
 
