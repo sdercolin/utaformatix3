@@ -1,6 +1,6 @@
 ---
 name: release
-description: Release a new UtaFormatix version. Bumps APP_VERSION, writes release notes, merges develop into master, and tags a GitHub release. Use when the user asks to release, ship, or publish a new version (including hotfixes).
+description: Release a new UtaFormatix version. Bumps APP_VERSION, writes release notes, merges develop into master, tags a GitHub release, updates the Trello board and prepares reporter emails. Use when the user asks to release, ship, or publish a new version (including hotfixes).
 ---
 
 # Release UtaFormatix
@@ -44,6 +44,22 @@ description: Release a new UtaFormatix version. Bumps APP_VERSION, writes releas
    - Create the release: `gh release create v<version> --target master --title "<version>" --notes "<notes>"`.
    - Watch the deploy: `gh run list --workflow deploy.yml --branch master --limit 1`, then `gh run watch <id>`.
    - Report the release URL and the deploy result.
+
+6. **Update the Trello board.**
+   - Board: `UtaFormatix feedback` (https://trello.com/b/ylRy2Vft). User feedback lands in **Unchecked**, and the other lists are **TODO**, **WIP**, **Fixed** and **Dropped**.
+   - Use `~/.claude/scripts/trello.sh METHOD /path [name=value ...]`. It reads `TRELLO_KEY` and `TRELLO_TOKEN` from `~/.zshrc`. If the script is missing, ask the user instead of calling the API another way.
+   - Find the cards this release fixes:
+     - cards in WIP whose `[Claude] PR: <url>` comment (from the triage-feedback loop) points to a PR in this release;
+     - for other fixes, match them against the cards in Unchecked, TODO and WIP (error message, format, symptom).
+     Show the matches to the user and wait for approval.
+   - Move each approved card to **Fixed** (`PUT /cards/<id> idList=<Fixed list id>`), and comment `Fixed in <version> (#<PR>): <one-line summary>` (`POST /cards/<id>/actions/comments text=...`).
+
+7. **Prepare reporter emails.** Reporters submitted through the feedback form, and their email is in the card description (`Reporter: <email>`).
+   - Group the cards moved to Fixed by fix. For each group, write one short email in English:
+     - subject: `UtaFormatix <version>: your bug report is fixed`;
+     - body: what was fixed (one line, in user terms), that it's live at https://sdercolin.github.io/utaformatix3/, and thanks.
+   - Write the emails and their BCC address lists to a local file in the scratchpad, not the repo, and give the user its path. Never put the addresses in commits, PRs, Trello comments or chat output.
+   - The user sends them from their personal Gmail, with every address in **BCC**. Never send them yourself; the connected Gmail is a different account.
 
 ## Hotfix
 For an urgent fix that must skip unreleased changes on develop:
