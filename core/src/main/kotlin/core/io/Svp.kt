@@ -37,12 +37,7 @@ object Svp {
         file: File,
         params: ImportParams,
     ): core.model.Project {
-        val rawProjects =
-            file
-                .readText()
-                .split("\u0000")
-                .map { it.trim('\u0000') }
-                .filter { it.isNotBlank() }
+        val rawProjects = splitJsonObjects(file.readText())
         val projects = rawProjects.map { jsonSerializer.decodeFromString(Project.serializer(), it) }
         val project = projects.maxBy { it.version ?: 0 }
         val warnings = mutableListOf<ImportWarning>()
@@ -348,6 +343,36 @@ object Svp {
     }
 
     private const val TICK_RATE = 1470000L
+
+    private fun splitJsonObjects(text: String): List<String> {
+        val objects = mutableListOf<String>()
+        var depth = 0
+        var start = -1
+        var inString = false
+        var escaped = false
+        text.forEachIndexed { index, char ->
+            if (inString) {
+                when {
+                    escaped -> escaped = false
+                    char == '\\' -> escaped = true
+                    char == '"' -> inString = false
+                }
+                return@forEachIndexed
+            }
+            when (char) {
+                '"' -> inString = true
+                '{' -> {
+                    if (depth == 0) start = index
+                    depth++
+                }
+                '}' -> {
+                    depth--
+                    if (depth == 0) objects.add(text.substring(start, index + 1))
+                }
+            }
+        }
+        return objects
+    }
 
     private val jsonSerializer =
         Json {
