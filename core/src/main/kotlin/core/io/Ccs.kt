@@ -71,6 +71,8 @@ object Ccs {
                 .getElementListByTagName("Group")
                 .filter { it.getAttribute("Category") == "SingerSong" }
 
+        val measurePrefix = if (unitNodes.any { it.hasNotesInFirstMeasure() }) 0 else FIXED_MEASURE_PREFIX
+
         val results =
             unitNodes.mapIndexed { index, unitNode ->
                 val groupId = unitNode.getAttribute("Group")
@@ -79,7 +81,7 @@ object Ccs {
                         groupNodes.find { it.getAttribute("Id") == id }
                     }
                 val trackName = group?.getAttribute("Name")
-                parseTrack(index, unitNode, trackName, params)
+                parseTrack(index, unitNode, trackName, params, measurePrefix)
             }
 
         val tracks = results.map { it.track }
@@ -94,7 +96,7 @@ object Ccs {
             tracks = tracks,
             timeSignatures = timeSignatures,
             tempos = tempos,
-            measurePrefix = FIXED_MEASURE_PREFIX,
+            measurePrefix = measurePrefix,
             importWarnings = warnings,
         )
     }
@@ -164,28 +166,11 @@ object Ccs {
         unitNode: Element,
         name: String?,
         params: ImportParams,
+        measurePrefix: Int,
     ): TrackParseResult {
-        val timeNodes =
-            unitNode
-                .getSingleElementByTagNameOrNull("Song")
-                ?.getSingleElementByTagNameOrNull("Beat")
-                ?.getElementListByTagName("Time")
-                .orEmpty()
-
-        val tickCounter = TickCounter(TICK_RATE)
-        var timeSignatures = listOf<TimeSignature>()
-        for (timeNode in timeNodes) {
-            val tick = timeNode.getAttribute("Clock")?.toLongOrNull() ?: continue
-            val numerator = timeNode.getAttribute("Beats")?.toIntOrNull() ?: continue
-            val denominator = timeNode.getAttribute("BeatType")?.toIntOrNull() ?: continue
-
-            tickCounter.goToTick(tick, numerator, denominator)
-            timeSignatures = timeSignatures + TimeSignature(tickCounter.measure, numerator, denominator)
-        }
-
-        val tickPrefix = getTickPrefix(timeSignatures, FIXED_MEASURE_PREFIX)
-
-        timeSignatures = timeSignatures.map { it.copy(measurePosition = it.measurePosition - FIXED_MEASURE_PREFIX) }
+        val timeSignatures = parseTimeSignatures(unitNode)
+        val tickPrefix = getTickPrefix(timeSignatures, measurePrefix)
+        val shiftedTimeSignatures = timeSignatures.map { it.copy(measurePosition = it.measurePosition - measurePrefix) }
 
         val tempos =
             unitNode
@@ -256,7 +241,7 @@ object Ccs {
         val trackName = name ?: "Track ${index + 1}"
         val track = Track(index, trackName, notes, pitch).validateNotes()
 
-        return TrackParseResult(track, tempos, timeSignatures)
+        return TrackParseResult(track, tempos, shiftedTimeSignatures)
     }
 
     private fun parsePitchData(dataElement: Element): CevioTrackPitchData.Event? {
@@ -264,6 +249,36 @@ object Ccs {
         val repeat = dataElement.getAttribute("Repeat")?.toLongOrNull()
         val value = dataElement.innerValueOrNull?.toDoubleOrNull() ?: return null
         return CevioTrackPitchData.Event(index, repeat, value)
+    }
+
+    private fun parseTimeSignatures(unitNode: Element): List<TimeSignature> {
+        val timeNodes =
+            unitNode
+                .getSingleElementByTagNameOrNull("Song")
+                ?.getSingleElementByTagNameOrNull("Beat")
+                ?.getElementListByTagName("Time")
+                .orEmpty()
+
+        val tickCounter = TickCounter(TICK_RATE)
+        val timeSignatures = mutableListOf<TimeSignature>()
+        for (timeNode in timeNodes) {
+            val tick = timeNode.getAttribute("Clock")?.toLongOrNull() ?: continue
+            val numerator = timeNode.getAttribute("Beats")?.toIntOrNull() ?: continue
+            val denominator = timeNode.getAttribute("BeatType")?.toIntOrNull() ?: continue
+
+            tickCounter.goToTick(tick, numerator, denominator)
+            timeSignatures.add(TimeSignature(tickCounter.measure, numerator, denominator))
+        }
+        return timeSignatures
+    }
+
+    private fun Element.hasNotesInFirstMeasure(): Boolean {
+        val tickPrefix = getTickPrefix(parseTimeSignatures(this), FIXED_MEASURE_PREFIX)
+        return getSingleElementByTagNameOrNull("Song")
+            ?.getSingleElementByTagNameOrNull("Score")
+            ?.getElementListByTagName("Note")
+            .orEmpty()
+            .any { (it.getRequiredAttributeAsLong("Clock") / TICK_RATE).toLong() < tickPrefix }
     }
 
     private fun getTickPrefix(
