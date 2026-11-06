@@ -207,3 +207,8 @@ val kanaToRomaji =
 
 val kanas = kanaToRomaji.map { it.first }
 val romajis = kanaToRomaji.map { it.second }
+
+/** Reversed so that, as with a search from the front, the first spelling of a kana wins. */
+private val romajiByKana = kanaToRomaji.reversed().toMap()
+
+fun String.toRomaji() = romajiByKana[this] ?: this

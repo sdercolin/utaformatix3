@@ -184,6 +184,19 @@ enum class Format(
         possibleLyricsTypes = listOf(KanaCv, RomajiCv),
         availableFeaturesForGeneration = listOf(ConvertPhonemes),
     ),
+    Vfp(
+        "vfp",
+        parser = { files, params ->
+            core.io.Vfp.parse(files.first(), params)
+        },
+        generator = { project, features ->
+            core.io.Vfp.generate(project, features)
+        },
+        possibleLyricsTypes = listOf(KanaCv, RomajiCv),
+        suggestedLyricType = KanaCv,
+        availableFeaturesForGeneration = listOf(ConvertPitch),
+        alias = "Vfp (VOX Factory)",
+    ),
     UfData(
         "ufdata",
         parser = { files, params ->
@@ -242,6 +255,7 @@ enum class Format(
                     Ppsf,
                     StandardMid,
                     Tssln,
+                    Vfp,
                     UfData,
                     Tlp,
                 )
@@ -262,6 +276,7 @@ enum class Format(
                     Dv,
                     StandardMid,
                     Tssln,
+                    Vfp,
                     UfData,
                     Tlp,
                 )

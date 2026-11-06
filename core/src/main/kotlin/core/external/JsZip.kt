@@ -14,6 +14,8 @@ external class JsZip {
         data: dynamic,
     ): JsZip
 
+    fun folder(name: String): JsZip
+
     fun generateAsync(option: JsZipOption): Promise<dynamic>
 }
 
