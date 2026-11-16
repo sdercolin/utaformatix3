@@ -183,8 +183,8 @@ private fun List<Pair<Long, Double>>.appendVibratoInNote(
     fun vibrato(tick: Long): Double {
         val sec = tickTimeTransformer.tickToSec(tick)
         if (sec < vibratoStartSec) return 0.0
-        val easeInFactor = ((sec - vibratoStartSec) / easeInLength).coerceIn(0.0, 1.0)
-        val easeOutFactor = ((noteEndSec - sec) / easeOutLength).coerceIn(0.0, 1.0)
+        val easeInFactor = easeFactor(sec - vibratoStartSec, easeInLength)
+        val easeOutFactor = easeFactor(noteEndSec - sec, easeOutLength)
         val rad = 2 * kotlin.math.PI * frequency * secPerTick * (tick - vibratoStartTick) + phase
         val envelope = vibratoEnv.valueAt(tick)
         return envelope * depth * easeInFactor * easeOutFactor * kotlin.math.sin(rad)
@@ -225,6 +225,11 @@ private fun List<Pair<Long, Double>>.appendVibratoInNote(
     }
     return result
 }
+
+private fun easeFactor(
+    elapsed: Double,
+    length: Double,
+): Double = if (length > 0) (elapsed / length).coerceIn(0.0, 1.0) else 1.0
 
 private fun List<Pair<Long, Double>>.removeRedundantPoints() =
     buildList {
