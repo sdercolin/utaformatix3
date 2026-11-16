@@ -81,7 +81,7 @@ object Vpr {
     ): core.model.Track {
         val notes =
             track.parts
-                .flatMap { part -> part.notes.map { part.pos to it } }
+                .flatMap { part -> part.notes.filter { it.pos >= 0 }.map { part.pos to it } }
                 .mapIndexed { index, (tickOffset, note) ->
                     core.model.Note(
                         id = index,
