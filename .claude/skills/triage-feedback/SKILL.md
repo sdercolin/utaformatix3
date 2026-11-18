@@ -20,7 +20,7 @@ One pass = triage, then at most **one** fix attempt. Keep the report at the end 
 - Comments written by this skill start with `[Claude]`, so later passes can recognize them.
 - GitHub issues on `sdercolin/utaformatix3` are public:
   - Only add labels (`bugfix`, `feature`, `enhancement`, `need help`, `duplicate`), and link fixes with `Fixes #<n>` in the PR body.
-  - Never close or edit issues. The only comments allowed are questions to the reporter when the issue lacks the information needed to reproduce or decide (a file, the formats or versions, steps). Start them with `[Claude]`, ask only what's needed, be polite, and ask at most once per issue.
+  - Never close or edit issues. The only comments allowed are questions to the reporter when the issue lacks the information needed to reproduce or decide (a file, the formats or versions, steps). Start them with `[Claude]`, ask only what's needed, be polite, and ask at most once per issue. Only ask on issues opened in the last 3 months; for older ones, just label and record the note.
   - Other notes (needs decision, bad input, waiting for a reply) go into the local state file `~/.claude/state/utaformatix-triage.json` as `{"issues": {"<n>": "<date> <note>"}}`. Record `asked: <what>` after posting questions.
   - On later passes, check issues with an `asked:` note for a reply from the reporter. If one came, remove the note and triage the issue again.
 
