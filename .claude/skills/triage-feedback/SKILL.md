@@ -50,7 +50,7 @@ List open issues: `gh issue list -R sdercolin/utaformatix3 --state open --json n
 - **Bug without enough information** → label `need help`.
 - **Feature request** → label `feature` or `enhancement`. Never decide whether to do it.
   - Put a proposal (same content as for Trello) in the pass report, and record `proposed` for it in the state file so it isn't proposed again.
-  - The user approves by adding the `approved` label, or rejects it with `wontfix`.
+  - The user approves by adding the `approved` label, or rejects it with `wontfix`. When the user dismisses one in chat instead, label it `need help`, never `wontfix`, and record `dismissed` in the state file.
 - **Same bug as a Trello card or another issue** → label `duplicate` only if it duplicates another issue. If it matches a Trello card, comment `[Claude] Also reported in #<n>` on the card instead.
 - Add labels with `GH_TOKEN=$(gh auth token -u sdercolin) gh issue edit <n> -R sdercolin/utaformatix3 --add-label <label>`.
 
