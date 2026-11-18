@@ -19,8 +19,13 @@ import core.model.Format.Vsq
 import core.model.Format.Vsqx
 import core.model.ImportWarning
 import core.model.Project
+import csstype.AutoRepeat
+import csstype.Display
 import csstype.FontWeight
+import csstype.fr
+import csstype.minmax
 import csstype.px
+import csstype.repeat
 import emotion.react.css
 import kotlinx.browser.window
 import kotlinx.js.jso
@@ -33,6 +38,7 @@ import mui.material.ListItemButton
 import mui.material.ListItemText
 import mui.material.Typography
 import mui.material.styles.TypographyVariant
+import mui.system.sx
 import react.ChildrenBuilder
 import react.FC
 import react.Props
@@ -83,6 +89,10 @@ private fun ChildrenBuilder.buildImportWarnings(props: OutputFormatSelectorProps
 
 private fun ChildrenBuilder.buildFormatList(props: OutputFormatSelectorProps) {
     mui.material.List {
+        sx {
+            display = Display.grid
+            gridTemplateColumns = repeat(AutoRepeat.autoFill, minmax(480.px, 1.fr))
+        }
         for (format in props.formats) {
             ListItem {
                 ListItemButton {
