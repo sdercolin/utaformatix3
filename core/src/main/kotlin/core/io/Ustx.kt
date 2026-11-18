@@ -330,12 +330,17 @@ object Ustx {
                 if (index == 0) datum.copy(y = firstPitchPointValue) else datum.copy()
             }
         val pitch = template.pitch.copy(data = pitchPoints)
+        val synthVPhonemes =
+            thisNote.lyric
+                .takeIf { thisNote.phoneme != null && it.startsWith(".") }
+                ?.drop(1)
+                ?.trim()
+                ?.takeIf { it.isNotEmpty() }
         val lyric =
-            buildString {
-                append(thisNote.lyric)
-                if (thisNote.phoneme?.isNotBlank() == true) {
-                    append(" [${thisNote.phoneme}]")
-                }
+            when {
+                synthVPhonemes != null -> "[${thisNote.phoneme?.takeIf { it.isNotBlank() } ?: synthVPhonemes}]"
+                thisNote.phoneme?.isNotBlank() == true -> "${thisNote.lyric} [${thisNote.phoneme}]"
+                else -> thisNote.lyric
             }
         return Note(
             position = thisNote.tickOn,

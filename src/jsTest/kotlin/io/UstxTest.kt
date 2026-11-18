@@ -1,7 +1,11 @@
 package io
 
+import core.io.Svp
 import core.io.Ustx
 import core.model.ImportParams
+import core.process.phonemes.PhonemesMappingRequest
+import core.process.phonemes.mapPhonemes
+import helpers.readText
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.promise
@@ -93,5 +97,65 @@ class UstxTest {
             assertEquals(1, project.tracks.size)
             val notes = project.tracks.first().notes
             assertEquals("あ", notes.first().lyric)
+        }
+
+    private fun svpNote(
+        onset: Long,
+        lyrics: String,
+        phonemes: String,
+    ) = """{"onset": $onset, "duration": 705600000, "lyrics": "$lyrics", "phonemes": "$phonemes", "pitch": 60}"""
+
+    private val svpWithPhoneticHints =
+        """
+        {
+          "version": 153,
+          "time": {
+            "meter": [{"index": 0, "numerator": 4, "denominator": 4}],
+            "tempo": [{"position": 0, "bpm": 120.0}]
+          },
+          "library": [],
+          "tracks": [{
+            "name": "Track",
+            "dispOrder": 0,
+            "mainGroup": {
+              "name": "main",
+              "uuid": "00000000-0000-0000-0000-000000000000",
+              "parameters": {"pitchDelta": {"mode": "cubic", "points": []}},
+              "notes": [
+                ${svpNote(0, "butter", "b ah t er")},
+                ${svpNote(705600000, "+", "")},
+                ${svpNote(1411200000, ".b ah t er", "")},
+                ${svpNote(2116800000, "+", "")},
+                ${svpNote(2822400000, "la", "")}
+              ]
+            },
+            "mainRef": {"groupID": "00000000-0000-0000-0000-000000000000", "blickOffset": 0, "pitchOffset": 0},
+            "groups": []
+          }]
+        }
+        """.trimIndent()
+
+    private suspend fun exportedLyricsFromSvp(request: PhonemesMappingRequest?): List<String> {
+        val project = Svp.parse(File(arrayOf(svpWithPhoneticHints), "test.svp"), ImportParams())
+        val text = Ustx.generate(project.mapPhonemes(request), listOf()).blob.readText()
+        return Regex("lyric: (.*)").findAll(text).map { it.groupValues[1].trim('\'', '"') }.toList()
+    }
+
+    @Test
+    fun testGenerateSynthVPhoneticHintsWithPhonemesConversion() =
+        GlobalScope.promise {
+            assertEquals(
+                listOf("butter [b ah t er]", "+", "[b ah t er]", "+", "la"),
+                exportedLyricsFromSvp(PhonemesMappingRequest("")),
+            )
+        }
+
+    @Test
+    fun testGenerateSynthVPhoneticHintsWithoutPhonemesConversion() =
+        GlobalScope.promise {
+            assertEquals(
+                listOf("butter", "+", ".b ah t er", "+", "la"),
+                exportedLyricsFromSvp(null),
+            )
         }
 }
