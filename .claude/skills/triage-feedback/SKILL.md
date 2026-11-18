@@ -60,7 +60,7 @@ First check the review queue: `gh pr list -R sdercolin/utaformatix3 --state open
 Candidates:
 - TODO cards with no `[Claude]` comment saying they were attempted;
 - open issues labeled `bugfix` that have no state-file note and no open PR mentioning them (`gh pr list -R sdercolin/utaformatix3 --state open --search "<n>"`);
-- approved feature requests: feature cards the user moved to TODO, and issues labeled `approved` (same checks as above). Implement them as described in the proposal, plus the user's answers to its open questions. If the answers are missing, comment or record `Needs decision`, and notify.
+- approved feature requests: feature cards the user moved to TODO, and issues labeled `approved` (same checks as above, except that a state-file note starting with `approved:` doesn't exclude them; it holds the user's answers). Implement them as described in the proposal, plus the user's answers to its open questions. If the answers are missing, comment or record `Needs decision`, and notify.
 
 Rank them together with the same importance rules as step 1 (reports across both sources count together). Among bugs of similar importance, prefer the one most likely to give a small, safe fix (input file available, specific error). Take the top one. If there are none, stop and report.
 
