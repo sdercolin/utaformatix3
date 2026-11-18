@@ -190,9 +190,10 @@ object MusicXml {
         partNode.getElementListByTagName("measure").forEachIndexed { index, measureNode ->
             var tickPosition = masterTrackResult.measureBorders[index]
             measureNode.getElementListByTagName("note").forEach { noteNode ->
+                val durationNode = noteNode.getSingleElementByTagNameOrNull("duration")
+                if (durationNode != null && durationNode.innerValueOrNull.isNullOrBlank()) return@forEach
                 val duration =
-                    noteNode
-                        .getSingleElementByTagNameOrNull("duration")
+                    durationNode
                         ?.innerValue
                         ?.toLongOrNull()
                         ?.times(importTickRate)
