@@ -84,6 +84,13 @@ Rank them together with the same importance rules as step 1 (reports across both
 ## 4. Fix
 - Make the smallest fix in `core/`. Follow the repo's existing style and the user's comment rules.
 - Run `JAVA_HOME=$(/usr/libexec/java_home -v 21) ./gradlew ktlintCheck jsTest -x kotlinStoreYarnLock`. All of it must pass.
+- Don't break what already works. The tests don't cover every path that works today, so passing them isn't enough:
+  - Limit the fix to the input that fails: guard it on the condition that caused the failure, and don't change behavior for inputs that already convert.
+  - Never update existing snapshot or golden files in `src/jsTest/resources/fixtures`. If one would need to change, the fix changes working output: stop with `Needs decision`.
+  - Copy the reporter's file into the local corpus `~/.claude/state/utaformatix-corpus/` as `<Format>_<cardOrIssue>.<ext>` (`<Format>` is the `Format` enum name). It stays local; never commit it.
+  - Commit, then run `.claude/skills/triage-feedback/regression/regression.sh origin/develop`. It converts every fixture and every corpus file through import and all exports, with and without pitch, on `develop` and on the branch, and lists every result that changed.
+  - Only the reporter's file may change. Any other change: find out why. If it isn't clearly the same bug, revert to a narrower fix or stop with `Needs decision`.
+  - Put the result (paths compared, what changed) in the PR body.
 - If the fix needs a product decision, or a change much bigger than the bug, don't open a PR. Comment `[Claude] Needs decision: <summary>` on the card and stop.
 
 ## 5. Open the PR and notify
