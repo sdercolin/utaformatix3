@@ -20,8 +20,9 @@ One pass = triage, then at most **one** fix attempt. Keep the report at the end 
 - Comments written by this skill start with `[Claude]`, so later passes can recognize them.
 - GitHub issues on `sdercolin/utaformatix3` are public:
   - Only add labels (`bugfix`, `feature`, `enhancement`, `need help`, `duplicate`), and link fixes with `Fixes #<n>` in the PR body.
-  - Never comment on, close or edit issues.
-  - Notes that would be comments (could not reproduce, bad input, needs decision) go into the local state file `~/.claude/state/utaformatix-triage.json` as `{"issues": {"<n>": "<date> <note>"}}`.
+  - Never close or edit issues. The only comments allowed are questions to the reporter when the issue lacks the information needed to reproduce or decide (a file, the formats or versions, steps). Start them with `[Claude]`, ask only what's needed, be polite, and ask at most once per issue.
+  - Other notes (needs decision, bad input, waiting for a reply) go into the local state file `~/.claude/state/utaformatix-triage.json` as `{"issues": {"<n>": "<date> <note>"}}`. Record `asked: <what>` after posting questions.
+  - On later passes, check issues with an `asked:` note for a reply from the reporter. If one came, remove the note and triage the issue again.
 
 ## 1. Triage new cards in Unchecked
 For each card:
@@ -30,7 +31,7 @@ For each card:
   - how common the format is;
   - a crash on import or export ranks above wrong output.
   - If it duplicates a card already in TODO or WIP, comment `[Claude] Same as <card link>` and move it next to that card.
-- **Bug report without a file, or with no usable description:** archive it (`PUT /cards/<id> closed=true`).
+- **Bug report without a file, or without enough information to act on:** comment `[Claude] Dropped: <what's missing>` and move it to Dropped. Trello reporters can't be asked, so don't wait.
 - **Already fixed in a released version:** move it to Fixed with a comment `[Claude] Fixed in <version> (#<PR>)`.
 - **Suggestions:**
   - Archive invalid ones, with a comment `[Claude] Archived: <reason>`. A suggestion is invalid if:
@@ -47,7 +48,7 @@ For each card:
 ## 1b. Triage new GitHub issues
 List open issues: `gh issue list -R sdercolin/utaformatix3 --state open --json number,title,body,labels,createdAt`. An issue is new if it has no labels and isn't in the state file. For each new issue:
 - **Bug with enough to reproduce** (an attached file, or clear steps) → label `bugfix`.
-- **Bug without enough information** → label `need help`.
+- **Bug without enough information** → label `need help` and post questions for what's missing (see Tools and rules).
 - **Feature request** → label `feature` or `enhancement`. Never decide whether to do it.
   - Put a proposal (same content as for Trello) in the pass report, and record `proposed` for it in the state file so it isn't proposed again.
   - The user approves by adding the `approved` label, or rejects it with `wontfix`. When the user dismisses one in chat instead, label it `need help`, never `wontfix`, and record `dismissed` in the state file.
@@ -71,7 +72,7 @@ Rank them together with the same importance rules as step 1 (reports across both
     - call `download_file_content` to get it as base64, then decode it into the folder.
     - The upload folder is in the owner's personal Drive and shared with the connected account. If a file returns "not found", treat it as unavailable; it may be one that's not visible yet.
   - GitHub issue attachments (`github.com/user-attachments/...` links) can be downloaded with `curl -sL`.
-- Wherever a step below says to comment on or move the card, for a GitHub issue write the note to the state file instead; don't touch the issue.
+- Wherever a step below says to comment on or move the card, for a GitHub issue write the note to the state file instead. The exception is missing information: then post questions on the issue (see Tools and rules).
 - Branch `fix/<short-name>` from `origin/develop`. Write a failing test in `src/jsTest/kotlin/io/` that reproduces the bug. If the input is small, copy a minimized version into `src/jsTest/resources`; never commit a user's full project.
 - Before fixing, check whether the input is valid. It's **bad input** if:
   - the file is corrupted or truncated;
@@ -79,7 +80,9 @@ Rank them together with the same importance rules as step 1 (reports across both
   - it isn't the format the reporter claims;
   - it's malformed in a way the original editor wouldn't produce or open either.
   For bad input, don't fix the parser. Comment `[Claude] Bad input: <evidence>` on the card and move it to Dropped. If the error message the user saw was misleading, add `Error message could be clearer: <suggestion>` to the comment, so the user can decide whether that's worth a change.
-- If you can't reproduce it within a reasonable effort (file unavailable, or no failure), comment `[Claude] Could not reproduce: <reason>` on the card, leave it in TODO, and stop.
+- If you can't reproduce it within a reasonable effort (file unavailable, or no failure):
+  - Trello card: comment `[Claude] Could not reproduce: <reason>`, move it to Dropped, and stop.
+  - GitHub issue: post questions that would let you reproduce it (e.g. the exact file, the editor version, the steps), record `asked:`, and stop.
 
 ## 4. Fix
 - Make the smallest fix in `core/`. Follow the repo's existing style and the user's comment rules.
