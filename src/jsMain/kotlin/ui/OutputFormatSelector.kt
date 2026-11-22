@@ -13,6 +13,7 @@ import core.model.Format.Tssln
 import core.model.Format.UfData
 import core.model.Format.Ust
 import core.model.Format.Ustx
+import core.model.Format.Vfp
 import core.model.Format.VocaloidMid
 import core.model.Format.Vpr
 import core.model.Format.Vsq
@@ -200,6 +201,7 @@ private val Format.description: String?
             StandardMid -> Strings.StandardMidDescription
             UfData -> Strings.UfDataFormatDescription
             Tssln -> Strings.VoiSonaFormatDescription
+            Vfp -> Strings.VfpFormatDescription
             Tlp -> Strings.TlpFormatDescription
         }?.let { string(it) }
 
@@ -221,6 +223,7 @@ private val Format.iconPath: String?
             StandardMid -> Resources.standardMidiIcon
             UfData -> Resources.ufdataIcon
             Tssln -> Resources.tsslnIcon
+            Vfp -> Resources.vfpIcon
             Tlp -> Resources.tlpIcon
         }
 

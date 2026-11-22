@@ -42,4 +42,6 @@ object Resources {
 
     val tlpIcon: String
         get() = core.external.require("./images/tunelab.png").default as String
+    val vfpIcon: String
+        get() = core.external.require("./images/voxfactory.png").default as String
 }

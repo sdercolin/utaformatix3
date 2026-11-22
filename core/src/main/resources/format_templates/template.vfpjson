@@ -1,0 +1,140 @@
+{
+  "version": "0.17.0",
+  "projectName": "Untitled Project",
+  "tempo": 120,
+  "timeSignature": [
+    4,
+    4
+  ],
+  "loop": [
+    0,
+    16
+  ],
+  "master": {
+    "volume": 1,
+    "pan": 0
+  },
+  "trackBank": {
+    "se1k4k5apni-tr0": {
+      "type": "vocal",
+      "name": "Vocal Track",
+      "instrument": null,
+      "h": 3,
+      "color": "#7878f1",
+      "volume": 1,
+      "pan": 0,
+      "solo": false,
+      "mute": false,
+      "arm": false,
+      "clipBank": {},
+      "clipOrder": [],
+      "devicePreset": "leadVocal",
+      "deviceBank": {
+        "se1k4k5apni-de0": {
+          "type": "audioEffect",
+          "name": "simpleCompressor",
+          "state": {
+            "on": true,
+            "preset": "normal"
+          },
+          "params": {
+            "mix": 0.5,
+            "threshold": -21,
+            "knee": 0,
+            "ratio": 8,
+            "attack": 0.005,
+            "release": 0.05,
+            "makeupGain": 4.5
+          }
+        },
+        "se1k4k5apni-de1": {
+          "type": "audioEffect",
+          "name": "simpleDeEsser",
+          "state": {
+            "on": true,
+            "preset": "normal"
+          },
+          "params": {
+            "frequency": 4120,
+            "threshold": -28,
+            "ratio": 16,
+            "amount": 1,
+            "splitMode": true
+          }
+        },
+        "se1k4k5apni-de2": {
+          "type": "audioEffect",
+          "name": "simpleEQ",
+          "state": {
+            "on": true,
+            "preset": "lead"
+          },
+          "params": {
+            "scale": 1,
+            "highpassFreq": 70,
+            "highpassQ": 1,
+            "lowBandFreq": 600,
+            "lowBandGain": -3,
+            "lowBandQ": 1,
+            "lowMidBandFreq": 500,
+            "lowMidBandGain": 0,
+            "lowMidBandQ": 1,
+            "midBandFreq": 750,
+            "midBandGain": -3,
+            "midBandQ": 1,
+            "highMidBandFreq": 1500,
+            "highMidBandGain": 0,
+            "highMidBandQ": 1,
+            "highBandFreq": 10000,
+            "highBandGain": 1.5,
+            "highBandQ": 0.3,
+            "lowpassFreq": 20000,
+            "lowpassQ": 1
+          }
+        },
+        "se1k4k5apni-de3": {
+          "type": "audioEffect",
+          "name": "simpleConvolver",
+          "state": {
+            "on": true,
+            "preset": "stPatricksChurch2"
+          },
+          "params": {
+            "mix": 0.25,
+            "preDelay": 0.01,
+            "impulseResponseKey": "reverbjs_StPatricksChurchPatringtonPosition2"
+          }
+        }
+      },
+      "deviceOrder": [
+        "se1k4k5apni-de0",
+        "se1k4k5apni-de1",
+        "se1k4k5apni-de2",
+        "se1k4k5apni-de3"
+      ],
+      "audioViewProperty": {
+        "view": "waveform",
+        "colormap": "Heated Metal",
+        "window": "Hann",
+        "windowSize": 1024,
+        "hopSize": 256,
+        "fMin": 27.5,
+        "fMax": null,
+        "levelMin": null,
+        "levelMax": null,
+        "levelScale": "dB",
+        "numBins": 230,
+        "binsPerOctave": 24
+      }
+    }
+  },
+  "trackOrder": [
+    "se1k4k5apni-tr0"
+  ],
+  "selectedTrackBank": [
+    "se1k4k5apni-tr0"
+  ],
+  "selectedClipBank": [],
+  "selectedNoteBank": [],
+  "audioDataBank": {}
+}

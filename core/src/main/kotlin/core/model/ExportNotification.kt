@@ -11,6 +11,8 @@ sealed class ExportNotification {
 
     object TimeSignatureIgnored : ExportNotification()
 
+    object TempoIgnored : ExportNotification()
+
     object PitchDataExported : ExportNotification()
 
     object DataOverLengthLimitIgnored : ExportNotification()

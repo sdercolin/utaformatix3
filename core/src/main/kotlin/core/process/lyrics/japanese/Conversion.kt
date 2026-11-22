@@ -130,12 +130,6 @@ private fun convertVowelConnections(
     }
 }
 
-private fun String.toRomaji() =
-    kanaToRomaji
-        .find { it.first == this }
-        ?.second
-        ?: this
-
 private fun String.toKana() =
     kanaToRomaji
         .find { it.second == this }
