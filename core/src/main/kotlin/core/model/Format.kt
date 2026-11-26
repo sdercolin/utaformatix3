@@ -50,10 +50,11 @@ enum class Format(
         parser = { files, params ->
             core.io.Vprx.parse(files.first(), params)
         },
-        generator = { _, _ ->
-            throw NotImplementedError()
+        generator = { project, features ->
+            core.io.VprxWriter.generate(project, features)
         },
         possibleLyricsTypes = listOf(RomajiCv, KanaCv),
+        availableFeaturesForGeneration = listOf(ConvertPitch, ConvertPhonemes),
     ),
     Ust(
         "ust",
@@ -262,6 +263,7 @@ enum class Format(
                 listOf(
                     Vsqx,
                     Vpr,
+                    Vprx,
                     Vsq,
                     VocaloidMid,
                     Ust,

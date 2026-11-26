@@ -209,7 +209,7 @@ private val Format.iconPath: String?
         when (this) {
             VocaloidMid -> Resources.vocaloidMidIcon
             Vsqx -> Resources.vsqxIcon
-            Vpr -> Resources.vprIcon
+            Vpr, Vprx -> Resources.vprIcon
             Ust -> Resources.ustIcon
             Ustx -> Resources.ustxIcon
             Ccs -> Resources.ccsIcon
@@ -218,7 +218,7 @@ private val Format.iconPath: String?
             MusicXml -> Resources.ccsIcon
             Dv -> Resources.dvIcon
             Vsq -> Resources.vsqIcon
-            Ppsf, Vprx -> null
+            Ppsf -> null
             StandardMid -> Resources.standardMidiIcon
             UfData -> Resources.ufdataIcon
             Tssln -> Resources.tsslnIcon

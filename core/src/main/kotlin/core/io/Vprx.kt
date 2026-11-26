@@ -13,7 +13,7 @@ import core.model.Track
 import core.process.pitch.getAbsoluteData
 import core.process.validateNotes
 import core.util.nameWithoutExtension
-import core.util.readBinary
+import core.util.readAsArrayBuffer
 import kotlinx.coroutines.await
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
@@ -25,10 +25,20 @@ object Vprx {
     suspend fun parse(
         file: File,
         params: ImportParams,
-    ): Project {
-        val zip = JsZip().loadAsync(file.readBinary()).await()
+    ): Project = parseSequence(file, params, readSequence(file))
+
+    internal suspend fun readSequence(file: File): String {
+        val zip = JsZip().loadAsync(file.readAsArrayBuffer()).await()
         val entry = requireNotNull(zip.file("Project/sequence.json") ?: zip.file("Project\\sequence.json"))
-        val content = json.decodeFromString(Sequence.serializer(), entry.async("string").await() as String)
+        return entry.async("string").await() as String
+    }
+
+    internal fun parseSequence(
+        file: File,
+        params: ImportParams,
+        text: String,
+    ): Project {
+        val content = json.decodeFromString(Sequence.serializer(), text)
         val warnings = mutableListOf<ImportWarning>()
         val master = content.masterTrack
         val timeSignatures =
@@ -156,7 +166,7 @@ object Vprx {
     }
 
     private val json = Json { ignoreUnknownKeys = true }
-    private const val AUDIO_TRACK_TYPE = 1
+    internal const val AUDIO_TRACK_TYPE = 1
 
     @Serializable
     private data class Sequence(

@@ -139,6 +139,12 @@ fun generateVpr(
 ): Promise<ExportResult> = generate(project, params, Format.Vpr)
 
 @JsExport
+fun generateVprx(
+    project: ProjectContainer,
+    params: ConversionParams,
+): Promise<ExportResult> = generate(project, params, Format.Vprx)
+
+@JsExport
 fun generateUstZip(
     project: ProjectContainer,
     params: ConversionParams,

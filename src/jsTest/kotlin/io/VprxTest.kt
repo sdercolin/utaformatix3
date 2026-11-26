@@ -48,7 +48,7 @@ class VprxTest {
             val note = track.notes.single()
 
             assertEquals(Format.Vprx, project.format)
-            assertFalse(format in Format.exportable)
+            assertTrue(format in Format.exportable)
             assertEquals("Test project", project.name)
             assertEquals(174.0, project.tempos.single().bpm)
             assertEquals(3, project.timeSignatures.single().numerator)
