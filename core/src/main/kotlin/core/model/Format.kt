@@ -45,6 +45,16 @@ enum class Format(
         possibleLyricsTypes = listOf(RomajiCv, KanaCv),
         availableFeaturesForGeneration = listOf(ConvertPitch, ConvertPhonemes),
     ),
+    Vprx(
+        "vprx",
+        parser = { files, params ->
+            core.io.Vprx.parse(files.first(), params)
+        },
+        generator = { _, _ ->
+            throw NotImplementedError()
+        },
+        possibleLyricsTypes = listOf(RomajiCv, KanaCv),
+    ),
     Ust(
         "ust",
         multipleFile = true,
@@ -230,6 +240,7 @@ enum class Format(
                 listOf(
                     Vsqx,
                     Vpr,
+                    Vprx,
                     Vsq,
                     VocaloidMid,
                     Ust,
@@ -267,6 +278,6 @@ enum class Format(
                 )
 
         val vocaloidFormats: List<Format>
-            get() = listOf(Vsq, Vsqx, VocaloidMid, Vpr)
+            get() = listOf(Vsq, Vsqx, VocaloidMid, Vpr, Vprx)
     }
 }

@@ -10,12 +10,13 @@ and [React](https://github.com/facebook/react).
 ## Features
 
 - Supported importing
-  formats: `.vsqx(3/4)`, `.vpr`, `.vsq`, `.mid(VOCALOID)`, `.mid(standard)`, `.ust`, `.ustx`, `.ccs`,`.xml(MusicXML)`
+  formats: `.vsqx(3/4)`, `.vpr`, `.vprx`, `.vsq`, `.mid(VOCALOID)`, `.mid(standard)`, `.ust`, `.ustx`, `.ccs`,`.xml(MusicXML)`
   , `.musicxml`, `.svp`, `.s5p`, `.dv`, `.ppsf(NT)`, `.tssln`, `.ufdata`
 - Supported exporting
   formats: `.vsqx(4)`, `.vpr`, `.vsq`, `.mid(VOCALOID)`, `.mid(standard)`, `.ust`, `.ustx`, `.ccs`, `.xml(MusicXML)`
   , `.svp`, `.s5p`, `.dv`, `.tssln`, `.ufdata`
 - Keep information including: tracks, notes, tempo labels, time signatures
+- VPRX import includes vocal tracks and saved pitch curves. Backing audio is skipped.
 - Detect and convert Japanese lyrics types
     - between CV and VCV
     - between Kana and Romaji
@@ -30,6 +31,7 @@ and [React](https://github.com/facebook/react).
 | Format               | Pitch import | Vibrato import | Pitch export |
 |----------------------|--------------|----------------|--------------|
 | VSQ/VSQX/VPR/MID(V1) | ✓            |                | ✓            |
+| VPRX                 | ✓            |                |              |
 | UST(mode2)           | ✓            | ✓              | ✓            |
 | UST(mode1)           | ✓            | N/A            | ✓            |
 | USTX                 | ✓            | ✓              | ✓            |

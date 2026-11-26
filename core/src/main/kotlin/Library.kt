@@ -33,6 +33,12 @@ fun parseVpr(
 ): Promise<ProjectContainer> = parse(listOf(file), params, Format.Vpr)
 
 @JsExport
+fun parseVprx(
+    file: File,
+    params: ImportParams,
+): Promise<ProjectContainer> = parse(listOf(file), params, Format.Vprx)
+
+@JsExport
 fun parseUst(
     files: Array<File>,
     params: ImportParams,

@@ -59,6 +59,29 @@ private fun Pitch.convertRelativity(
         }
     }
 
+internal fun Pitch.getRelativeDataWithNoteBoundaries(notes: List<Note>): List<Pair<Long, Double>>? {
+    if (!isAbsolute) return getRelativeData(notes)
+    return copy(data = data.withNoteBoundaryPoints(notes.getBorders())).getRelativeData(notes)
+}
+
+private fun List<Pair<Long, Double?>>.withNoteBoundaryPoints(borders: List<Long>): List<Pair<Long, Double?>> {
+    val extra = mutableMapOf<Long, Double>()
+    for (border in borders) {
+        // A relative curve needs a sample on each side before the reference note changes.
+        for (tick in (border - 1)..border) {
+            val index = firstIndexAtOrAfter(tick)
+            val nextPoint = getOrNull(index) ?: continue
+            if (nextPoint.first == tick) continue
+            val previousPoint = getOrNull(index - 1) ?: continue
+            val previous = previousPoint.second ?: continue
+            val next = nextPoint.second ?: continue
+            val fraction = (tick - previousPoint.first).toDouble() / (nextPoint.first - previousPoint.first)
+            extra[tick] = previous + (next - previous) * fraction
+        }
+    }
+    return if (extra.isEmpty()) this else (this + extra.toList()).sortedBy { it.first }
+}
+
 private fun List<Note>.getBorders(): List<Long> {
     val borders = mutableListOf<Long>()
     var pos = -1L
