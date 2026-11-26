@@ -15,6 +15,7 @@ import core.model.Format.Ust
 import core.model.Format.Ustx
 import core.model.Format.VocaloidMid
 import core.model.Format.Vpr
+import core.model.Format.Vprx
 import core.model.Format.Vsq
 import core.model.Format.Vsqx
 import core.model.ImportWarning
@@ -196,7 +197,7 @@ private val Format.description: String?
             MusicXml -> Strings.MusicXmlFormatDescription
             Dv -> Strings.DvFormatDescription
             Vsq -> Strings.VsqFormatDescription
-            Ppsf -> null
+            Ppsf, Vprx -> null
             StandardMid -> Strings.StandardMidDescription
             UfData -> Strings.UfDataFormatDescription
             Tssln -> Strings.VoiSonaFormatDescription
@@ -208,7 +209,7 @@ private val Format.iconPath: String?
         when (this) {
             VocaloidMid -> Resources.vocaloidMidIcon
             Vsqx -> Resources.vsqxIcon
-            Vpr -> Resources.vprIcon
+            Vpr, Vprx -> Resources.vprIcon
             Ust -> Resources.ustIcon
             Ustx -> Resources.ustxIcon
             Ccs -> Resources.ccsIcon

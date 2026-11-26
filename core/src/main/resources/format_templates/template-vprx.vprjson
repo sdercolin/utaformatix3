@@ -1,0 +1,90 @@
+{
+  "version": { "major": 7, "minor": 0, "revision": 0 },
+  "title": "",
+  "masterTrack": {
+    "samplingRate": 44100,
+    "mainTuning": 440.0,
+    "measureOffset": 0,
+    "loop": { "isEnabled": false, "begin": 0, "end": 0 },
+    "tempo": {
+      "isFolded": false,
+      "height": 0.0,
+      "global": { "isEnabled": false, "value": 12000 },
+      "ara": { "isEnabled": false },
+      "events": []
+    },
+    "timeSig": { "isFolded": false, "events": [] },
+    "volume": { "isFolded": false, "height": 0.0, "events": [{ "pos": 0, "value": 0 }] },
+    "isAllAudioEffectsBypassed": false
+  },
+  "voices": [
+    {
+      "compID": "BXHPECHANDRW3XEL",
+      "name": "asa",
+      "version": { "major": 7, "minor": 0, "revision": 0 }
+    }
+  ],
+  "tracks": [
+    {
+      "type": 2,
+      "color": 0,
+      "busNo": 0,
+      "isTrackOn": true,
+      "isFolded": false,
+      "height": 0.0,
+      "volume": { "isFolded": true, "height": 0.0, "events": [{ "pos": 0, "value": 0 }] },
+      "panpot": { "isFolded": true, "height": 0.0, "events": [{ "pos": 0, "value": 0 }] },
+      "isMuted": false,
+      "soloState": 0,
+      "lastScrollPositionNoteNumber": 60,
+      "styleName": "asa Default (V7)",
+      "stylePresetID": "c3b82ad4-5260-45bb-9b9b-d8f849765584",
+      "voice": { "compID": "BXHPECHANDRW3XEL", "langIDs": [{ "langID": 0 }, { "langID": 1 }, { "langID": 4 }] },
+      "voiceTypeID": "3A3C2BE2-F46D-4DC0-AE00-944F027475F8",
+      "takeNumber": 0,
+      "isAllAudioEffectsBypassed": false,
+      "midiEffects": [],
+      "parts": [
+        {
+          "isMuted": false,
+          "pos": 0,
+          "duration": 0,
+          "notes": [
+            {
+              "isMuted": false,
+              "langID": 0,
+              "isProtected": false,
+              "pos": 0,
+              "duration": 0,
+              "number": 60,
+              "lyric": "",
+              "velocity": 64,
+              "exp": { "accent": 50, "decay": 50, "bendDepth": 0, "bendLength": 0, "opening": 127 },
+              "aiExp": {
+                "pitchFine": 0.5,
+                "pitchDriftStart": 0.5,
+                "pitchDriftEnd": 0.5,
+                "pitchScalingCenter": 0.5,
+                "pitchScalingOrigin": 0.5,
+                "pitchTransitionStart": 0.5,
+                "pitchTransitionEnd": 0.5,
+                "amplitudeWhole": 0.5,
+                "amplitudeStart": 0.5,
+                "amplitudeEnd": 0.5,
+                "vibratoLeadingDepth": 0.5,
+                "vibratoFollowingDepth": 0.5
+              },
+              "singingSkill": { "duration": 0, "weight": { "pre": 64, "post": 64 } },
+              "vibrato": {
+                "type": 0,
+                "aiCurveModel": 0,
+                "depths": [{ "pos": 0, "value": 64 }],
+                "rates": [{ "pos": 0, "value": 64 }]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

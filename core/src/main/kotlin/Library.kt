@@ -33,6 +33,12 @@ fun parseVpr(
 ): Promise<ProjectContainer> = parse(listOf(file), params, Format.Vpr)
 
 @JsExport
+fun parseVprx(
+    file: File,
+    params: ImportParams,
+): Promise<ProjectContainer> = parse(listOf(file), params, Format.Vprx)
+
+@JsExport
 fun parseUst(
     files: Array<File>,
     params: ImportParams,
@@ -131,6 +137,12 @@ fun generateVpr(
     project: ProjectContainer,
     params: ConversionParams,
 ): Promise<ExportResult> = generate(project, params, Format.Vpr)
+
+@JsExport
+fun generateVprx(
+    project: ProjectContainer,
+    params: ConversionParams,
+): Promise<ExportResult> = generate(project, params, Format.Vprx)
 
 @JsExport
 fun generateUstZip(

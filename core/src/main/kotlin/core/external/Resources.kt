@@ -7,6 +7,9 @@ object Resources {
     val vprTemplate: String
         get() = require("./format_templates/template.vprjson").default as String
 
+    val vprxTemplate: String
+        get() = require("./format_templates/template-vprx.vprjson").default as String
+
     val ccsTemplate: String
         get() = require("./format_templates/template.ccs").default as String
 

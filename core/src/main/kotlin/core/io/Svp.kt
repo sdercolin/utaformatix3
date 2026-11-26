@@ -17,6 +17,7 @@ import core.process.pitch.SvpDefaultVibratoParameters
 import core.process.pitch.SvpNoteWithVibrato
 import core.process.pitch.appendPitchPointsForSvpOutput
 import core.process.pitch.getRelativeData
+import core.process.pitch.getRelativeDataWithNoteBoundaries
 import core.process.pitch.processSvpInputPitchData
 import core.process.validateNotes
 import core.util.encode
@@ -279,6 +280,7 @@ object Svp {
                 )
             }
         val trackChunks = project.tracks.chunked(maxTrackCount)
+        val preserveAbsoluteNoteBoundaries = project.format == Format.Vprx
         return trackChunks.map { tracks ->
             val svp = jsonSerializer.decodeFromString(Project.serializer(), template)
             val emptyTrack = svp.tracksSorted.first()
@@ -286,7 +288,7 @@ object Svp {
             svp.time.tempo = tempo
             svp.tracks =
                 tracks.map {
-                    generateTrack(it, emptyTrack, features)
+                    generateTrack(it, emptyTrack, features, preserveAbsoluteNoteBoundaries)
                 }
             jsonSerializer.encodeToString(Project.serializer(), svp)
         }
@@ -296,8 +298,10 @@ object Svp {
         track: core.model.Track,
         emptyTrack: Track,
         features: List<FeatureConfig>,
+        preserveAbsoluteNoteBoundaries: Boolean,
     ): Track {
         val uuid = generateUUID()
+        val pitch = generatePitchData(track, features, preserveAbsoluteNoteBoundaries)
         return emptyTrack.copy(
             name = track.name,
             mainGroup =
@@ -316,8 +320,7 @@ object Svp {
                         },
                     parameters =
                         emptyTrack.mainGroup!!.parameters!!.copy(
-                            pitchDelta =
-                                generatePitchData(track, features) ?: emptyTrack.mainGroup!!.parameters!!.pitchDelta,
+                            pitchDelta = pitch ?: emptyTrack.mainGroup!!.parameters!!.pitchDelta,
                         ),
                 ),
             mainRef =
@@ -331,11 +334,18 @@ object Svp {
     private fun generatePitchData(
         track: core.model.Track,
         features: List<FeatureConfig>,
+        preserveAbsoluteNoteBoundaries: Boolean,
     ): PitchDelta? {
         if (!features.contains(Feature.ConvertPitch)) return null
+        val pitch = track.pitch ?: return null
+        val relative =
+            if (preserveAbsoluteNoteBoundaries) {
+                pitch.getRelativeDataWithNoteBoundaries(track.notes)
+            } else {
+                pitch.getRelativeData(track.notes)
+            }
         val data =
-            track.pitch
-                ?.getRelativeData(track.notes)
+            relative
                 ?.appendPitchPointsForSvpOutput()
                 ?.map { (it.first * TICK_RATE) to (it.second * 100) }
                 ?: return null
